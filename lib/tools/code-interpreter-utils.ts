@@ -45,7 +45,7 @@ export async function executeCode(
   stderr: string
   error: string | null
 }> {
-  console.log(`[${userID}] Executing code: code.substring(0, 50)`)
+  console.log(`[${userID}] Executing code: ${code}`)
   const sbx = await createOrConnectCodeInterpreter(userID)
 
   try {
