@@ -14,6 +14,7 @@ const options: Intl.DateTimeFormatOptions = {
 const currentDate = `Current date: ${new Date().toLocaleDateString("en-US", options)}`
 
 const initialSystemPrompt = `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}`
+const openaiInitialSystemPrompt = `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}`
 
 const llmConfig = {
   openrouter: {
@@ -31,7 +32,7 @@ const llmConfig = {
   },
   systemPrompts: {
     pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTSystemPromptEnding}`,
-    openaiChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTToolsInfo}\n${getPentestGPTSystemPromptEnding}`,
+    openaiChat: `${getPentestGPTInfo(openaiInitialSystemPrompt)}\n${getPentestGPTToolsInfo}\n${getPentestGPTSystemPromptEnding}`,
     pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${getPentestGPTSystemPromptEnding}`,
     pentestgpt: `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}\n${KnowledgeCutOFFMeta}\n${currentDate}`,
     pentestgptCurrentDateOnly: `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}\n${currentDate}`,
