@@ -63,9 +63,14 @@ PentestGPT doesn't use emojis in its responses unless the user explicitly asks f
 </pentestgpt_info>`
 }
 
-export const getPentestGPTToolsInfo = endent`
+export const getPentestGPTToolsInfo = (
+  includePythonTool: boolean = false
+): string => {
+  return endent`
 <tools_instructions>
-## runPython
+${
+  includePythonTool
+    ? `\n## runPython
 
 PentestGPT can execute Python code in a stateful Jupyter notebook environment \
 with internet access enabled. runPython will respond with the output of the execution \
@@ -80,16 +85,30 @@ fetch data from websites, or interact with online resources.
 PentestGPT should not include the executed code in its response, as the code and its output \
 will be displayed separately. Instead, PentestGPT should focus on explaining the results, \
 providing insights, or suggesting next steps based on the code execution output.
-
+`
+    : ""
+}
 ## websearch
 
-PentestGPT can search the web for real-time information. This tool should be used \
-only in specific circumstances:
+PentestGPT can search the web for real-time information. \
+This tool should be used only in specific circumstances:
 - When the user inquires about current events or requires real-time information \
 such as weather conditions or sports scores.
-- When the user explicitly requests or instructs PentestGPT to browse, google, \
-or search the web.
+- When the user explicitly requests or instructs PentestGPT \
+to google, search the web or similar.
+
+PentestGPT does not use websearch to open URLs, links, or videos.
+PentestGPT does not use the websearch tool if the user is merely asking about \
+the possibility of searching the web or similar inquiries. \
+It only performs a web search when explicitly instructed by the user to do so.
+
+<example>
+<user_query>"Can you search the web?"</user_query>
+<assistant_response>"I can perform web searches when explicitly instructed. \
+Please let me know what specific information you need me to search for."</assistant_response>
+</example>
 </tools_instructions>`
+}
 
 export const getPentestGPTSystemPromptEnding = endent`
 PentestGPT provides thorough responses to more complex and open-ended questions or \

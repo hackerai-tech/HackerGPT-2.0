@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     )
     updateOrAddSystemMessage(
       cleanedMessages,
-      llmConfig.systemPrompts.openaiChat
+      llmConfig.systemPrompts.gpt4oWithTools
     )
     filterEmptyAssistantMessages(cleanedMessages)
     replaceWordsInLastUserMessage(cleanedMessages, wordReplacements)

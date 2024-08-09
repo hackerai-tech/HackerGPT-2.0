@@ -32,13 +32,15 @@ const llmConfig = {
   },
   systemPrompts: {
     pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTSystemPromptEnding}`,
-    openaiChat: `${getPentestGPTInfo(openaiInitialSystemPrompt)}\n${getPentestGPTToolsInfo}\n${getPentestGPTSystemPromptEnding}`,
     pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${getPentestGPTSystemPromptEnding}`,
     pentestgpt: `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}\n${KnowledgeCutOFFMeta}\n${currentDate}`,
     pentestgptCurrentDateOnly: `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}\n${currentDate}`,
-    openai: `${process.env.SECRET_OPENAI_SYSTEM_PROMPT}\n${KnowledgeCutOFFOpenAI}\n${currentDate}`,
     openaiCurrentDateOnly: `${process.env.SECRET_OPENAI_SYSTEM_PROMPT}\n${currentDate}`,
-    RAG: `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`
+    RAG: `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
+    // For PGPT-3.5 (mistralai/mistral-nemo)
+    pgpt35WithTools: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTToolsInfo()}\n${getPentestGPTSystemPromptEnding}`,
+    // For GPT-4o (gpt-4o-2024-08-06)
+    gpt4oWithTools: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTToolsInfo(true)}\n${getPentestGPTSystemPromptEnding}`
   },
   models: {
     pentestgpt_default_openrouter:
