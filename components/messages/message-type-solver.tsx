@@ -48,7 +48,7 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
       <MessageCodeInterpreter
         content={message.content}
         messageId={message.id}
-        isAssistant={message.role === 'assistant'}
+        isAssistant={message.role === "assistant"}
       />
     )
   }
