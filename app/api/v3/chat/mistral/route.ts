@@ -194,7 +194,7 @@ export async function POST(request: Request) {
       // Send custom data to the client
       const data = new StreamData()
       data.append({ ragUsed, ragId })
-      console.log(cleanedMessages)
+
       const result = await streamText({
         model: provider(selectedModel),
         messages: toVercelChatMessages(cleanedMessages),
