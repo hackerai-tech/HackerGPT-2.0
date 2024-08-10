@@ -13,6 +13,7 @@ import { MessageTooLong } from "./message-too-long"
 interface MessageCodeInterpreterProps {
   content: string
   messageId?: string
+  isAssistant: boolean
 }
 
 type InterpreterStatus = "idle" | "running" | "finished" | "error"
@@ -26,7 +27,8 @@ interface ParsedContent {
 
 export const MessageCodeInterpreter: React.FC<MessageCodeInterpreterProps> = ({
   content,
-  messageId
+  messageId,
+  isAssistant
 }) => {
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(true)
   const [interpreterStatus, setInterpreterStatus] =
@@ -84,7 +86,7 @@ export const MessageCodeInterpreter: React.FC<MessageCodeInterpreterProps> = ({
   return (
     <div>
       {otherContent && (
-        <MessageMarkdown content={otherContent} isAssistant={true} />
+        <MessageMarkdown content={otherContent} isAssistant={isAssistant} />
       )}
       {hasCodeOutput && (
         <div className={`mb-2 overflow-hidden ${otherContent && "mt-2"}`}>
