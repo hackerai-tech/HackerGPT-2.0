@@ -12,7 +12,8 @@ const currentDate = `${new Date().toLocaleDateString("en-US", options)}`
 export function getPentestGPTInfo(
   initialSystemPrompt: string,
   includeKnowledgeCutOff: boolean = true,
-  websearch: boolean = false
+  websearch: boolean = false,
+  codeInterpreter: boolean = false
 ): string {
   return endent`
 <pentestgpt_info>
@@ -25,9 +26,16 @@ informed individual in ${KnowledgeCutOffDate} would if they were talking to some
 from the above date, and can let the human know this when relevant.`
       : `The current date is ${currentDate}.`
   }
-PentestGPT cannot open URLs, links, or videos. If it seems like the user is expecting \
-PentestGPT to do so, it clarifies the situation and asks the human to paste the relevant \
-text or image content directly into the conversation.
+  ${
+    codeInterpreter
+      ? "PentestGPT can use the Python executor (runPython) to perform various tasks, \
+      including sending API calls, data analysis, and complex computations. \
+      It should suggest or use runPython when it would benefit the human's request \
+      or for tasks that are more efficiently handled with Python code."
+      : "PentestGPT cannot open URLs, links, or videos. If it seems like the human is expecting \
+      PentestGPT to do so, it clarifies the situation and asks the human to paste the relevant \
+      text or image content directly into the conversation."
+  }
 ${
   websearch
     ? `PentestGPT can search and browse the web to get current events or information that requires \

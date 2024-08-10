@@ -40,7 +40,7 @@ const llmConfig = {
     // For PGPT-3.5 (mistralai/mistral-nemo)
     pgpt35WithTools: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTToolsInfo()}\n${getPentestGPTSystemPromptEnding}`,
     // For GPT-4o (gpt-4o-2024-08-06)
-    gpt4oWithTools: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTToolsInfo(true)}\n${getPentestGPTSystemPromptEnding}`
+    gpt4oWithTools: `${getPentestGPTInfo(initialSystemPrompt, true, false, true)}\n${getPentestGPTToolsInfo(true)}\n${getPentestGPTSystemPromptEnding}`
   },
   models: {
     pentestgpt_default_openrouter:
