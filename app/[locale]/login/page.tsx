@@ -27,6 +27,7 @@ const errorMessages: Record<string, string> = {
   "9": "Your password must include at least one special character (e.g., !@#$%^&*()).",
   "10": "Password reset email sent. Check your email to continue.",
   "11": "The email address is not in a valid format.",
+  auth: "Authentication failed. Please try again or contact support if the issue persists.",
   default: "An unexpected error occurred."
 }
 
@@ -36,12 +37,15 @@ export default async function Login({
   searchParams: { message: string }
 }) {
   let errorKey = "default"
+
   try {
     errorKey = decodeURIComponent(searchParams.message)
   } catch (e) {
     console.error("Failed to decode message:", e)
   }
+
   const errorMessage = errorMessages[errorKey] || errorMessages["default"]
+
   const cookieStore = cookies()
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
