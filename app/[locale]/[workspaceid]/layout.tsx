@@ -72,24 +72,34 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   const fetchWorkspaceData = async (workspaceId: string) => {
     setLoading(true)
 
-    const workspace = await getWorkspaceById(workspaceId)
-    setSelectedWorkspace(workspace)
+    try {
+      const workspace = await getWorkspaceById(workspaceId)
 
-    const chats = await getChatsByWorkspaceId(workspaceId)
-    setChats(chats)
+      if (!workspace) {
+        router.push("/")
+        return
+      }
+      setSelectedWorkspace(workspace)
 
-    const fileData = await getFileWorkspacesByWorkspaceId(workspaceId)
-    setFiles(fileData.files)
+      const chats = await getChatsByWorkspaceId(workspaceId)
+      setChats(chats)
 
-    setChatSettings({
-      model: "mistral-medium" as LLMID,
-      contextLength: workspace?.default_context_length || 4096,
-      includeProfileContext: workspace?.include_profile_context || true,
-      embeddingsProvider:
-        (workspace?.embeddings_provider as "openai" | "local") || "openai"
-    })
+      const fileData = await getFileWorkspacesByWorkspaceId(workspaceId)
+      setFiles(fileData.files)
 
-    setLoading(false)
+      setChatSettings({
+        model: "mistral-medium" as LLMID,
+        contextLength: workspace?.default_context_length || 4096,
+        includeProfileContext: workspace?.include_profile_context || true,
+        embeddingsProvider:
+          (workspace?.embeddings_provider as "openai" | "local") || "openai"
+      })
+    } catch (error) {
+      console.error("Error fetching workspace data:", error)
+      router.push("/")
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (loading) {

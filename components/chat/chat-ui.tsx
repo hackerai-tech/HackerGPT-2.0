@@ -9,7 +9,7 @@ import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { LLMID, MessageImage } from "@/types"
 import { IconPlayerTrackNext } from "@tabler/icons-react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { FC, useContext, useEffect, useState } from "react"
 import { Button } from "../ui/button"
 import { ChatHelp } from "./chat-help"
@@ -26,6 +26,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   useHotkey("o", () => handleNewChat())
 
   const params = useParams()
+  const router = useRouter()
 
   const {
     setChatMessages,
@@ -117,6 +118,13 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
 
     const chatFiles = await getChatFilesByChatId(params.chatid as string)
 
+    if (!chatFiles) {
+      // Chat not found, redirect to the workspace chat page
+      const workspaceId = params.workspaceid as string
+      router.push(`/${workspaceId}/chat`)
+      return
+    }
+
     setChatFiles(
       chatFiles.files.map(file => ({
         id: file.id,
@@ -139,16 +147,29 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   }
 
   const fetchChat = async () => {
-    const chat = await getChatById(params.chatid as string)
-    if (!chat) return
+    try {
+      const chat = await getChatById(params.chatid as string)
+      if (!chat) {
+        // Chat not found, redirect to the workspace chat page
+        const workspaceId = params.workspaceid as string
+        router.push(`/${workspaceId}/chat`)
+        return
+      }
 
-    setSelectedChat(chat)
-    setChatSettings({
-      model: chat.model as LLMID,
-      contextLength: chat.context_length,
-      includeProfileContext: chat.include_profile_context,
-      embeddingsProvider: chat.embeddings_provider as "openai" | "local"
-    })
+      setSelectedChat(chat)
+      setChatSettings({
+        model: chat.model as LLMID,
+        contextLength: chat.context_length,
+        includeProfileContext: chat.include_profile_context,
+        embeddingsProvider: chat.embeddings_provider as "openai" | "local"
+      })
+    } catch (error) {
+      console.error("Error fetching chat:", error)
+      // Handle the error, e.g., show an error message to the user
+      // and redirect to the workspace chat page
+      const workspaceId = params.workspaceid as string
+      router.push(`/${workspaceId}/chat`)
+    }
   }
 
   if (loading) {

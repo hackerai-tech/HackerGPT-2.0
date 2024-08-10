@@ -14,8 +14,13 @@ export const getChatFilesByChatId = async (chatId: string) => {
     .eq("id", chatId)
     .single()
 
-  if (!chatFiles) {
-    throw new Error(error.message)
+  if (error) {
+    if (error.code === "PGRST116") {
+      // No rows returned, chat not found
+      return null
+    }
+    // For other types of errors, we still throw
+    throw new Error(`Error fetching chat files: ${error.message}`)
   }
 
   return chatFiles
