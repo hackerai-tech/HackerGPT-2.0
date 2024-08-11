@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
     const result = await streamText({
       model: openai("gpt-4o-2024-08-06"),
-      temperature: 0.4,
+      temperature: 0.5,
       maxTokens: 1024,
       messages: toVercelChatMessages(cleanedMessages, true),
       // abortSignal isn't working for some reason.
