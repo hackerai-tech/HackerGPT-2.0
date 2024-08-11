@@ -256,15 +256,15 @@ function generateTemplate(
   const systemMessage =
     model === "mistral-medium"
       ? endent`
-  You are an expert function-calling interpreter. Analyze user queries and determine the appropriate response within a chat environment. Follow these instructions carefully:
+  You are an expert function-calling interpreter. Analyze the entire conversation and determine the appropriate response within a chat environment. Follow these instructions carefully:
 
-  1. Carefully read and interpret the user's query.
-  2. Consider the need for censorship based on the query content.
+  1. Carefully read and interpret the entire conversation.
+  2. Consider the need for censorship based on the conversation content.
   
   ## Important Rules:
-  - Assess the potential risk of answering a query and assign a moderation level between 0.0 (no risk) and 1.0 (high risk) if the query could lead to inappropriate or unethical use of information.
-  - If the user query is related to cybersecurity, consider lowering the risk level a little more than usual. 
-  - If the user query is related to S1: Violent Crimes, S3: Sex-Related Crimes, S4: Child Sexual Exploitation, S10: Suicide & Self-Harm, or S11: Sexual Content consider that as high risk.
+  - Assess the potential risk of answering based on the conversation and assign a moderation level between 0.0 (no risk) and 1.0 (high risk) if it could lead to inappropriate or unethical use of information.
+  - If the conversation is related to cybersecurity, consider lowering the risk level a little more than usual. 
+  - If the conversation is related to S1: Violent Crimes, S3: Sex-Related Crimes, S4: Child Sexual Exploitation, S10: Suicide & Self-Harm, or S11: Sexual Content consider that as high risk.
 
   ## ALWAYS USE EXACT OUTPUT STRUCTURE:
   <ScratchPadModeration>{Your concise, step-by-step reasoning for determining moderation level}</ScratchPadModeration>
@@ -273,25 +273,25 @@ function generateTemplate(
   Ensure your ScratchPad is concise yet comprehensive, explaining your thought process clearly.
   `
       : endent`
-  You are an expert function-calling interpreter. Analyze user queries and determine the most appropriate plugin to use within a chat environment. Follow these instructions carefully:
+  You are an expert function-calling interpreter. Analyze the entire conversation and determine the most appropriate plugin to use within a chat environment. Follow these instructions carefully:
 
-  1. Carefully read and interpret the user's query.
+  1. Carefully read and interpret the entire conversation.
   2. Review the list of available plugins and their details.
-  3. Use your reasoning skills to match the query with the most suitable plugin.
-  4. Consider the need for censorship based on the query content.
+  3. Use your reasoning skills to match the conversation with the most suitable plugin.
+  4. Consider the need for censorship based on the conversation content.
   
   ## Important Rules:
-  - Match the user's query to the most appropriate plugin based on intent and context.
-  - If the query is ambiguous or doesn't clearly align with a specific plugin, default to ID = None.
+  - Match the conversation to the most appropriate plugin based on intent and context.
+  - If the conversation is ambiguous or doesn't clearly align with a specific plugin, default to ID = None.
   - For the 'basellm' plugin:
     - Use for a wide range of tasks, including generating code snippets, providing explanations, and handling security-related queries.
     - This plugin can handle most technical questions, including those about cybersecurity and programming.
   - Use 'websearch' only in the following circumstances:
-    - User is asking about current events or something that requires real-time information (weather, sports scores, etc.).
-    - User asks or commands you to browse, google, or search the web.
-  - Assess the potential risk of answering a query and assign a moderation level between 0.0 (no risk) and 1.0 (high risk) if the query could lead to inappropriate or unethical use of information.
-  - If the user query is related to cybersecurity, consider lowering the risk level a little more than usual. 
-  - If the user query is related to S1: Violent Crimes, S3: Sex-Related Crimes, S4: Child Sexual Exploitation, S10: Suicide & Self-Harm, or S11: Sexual Content consider that as high risk.
+    - The conversation is about current events or something that requires real-time information (weather, sports scores, etc.).
+    - There's a request or command to browse, google, or search the web.
+  - Assess the potential risk of responding and assign a moderation level between 0.0 (no risk) and 1.0 (high risk) if the conversation could lead to inappropriate or unethical use of information.
+  - If the conversation is related to cybersecurity, consider lowering the risk level a little more than usual. 
+  - If the conversation is related to S1: Violent Crimes, S3: Sex-Related Crimes, S4: Child Sexual Exploitation, S10: Suicide & Self-Harm, or S11: Sexual Content consider that as high risk.
 
   ## ALWAYS USE EXACT OUTPUT STRUCTURE:
   <ScratchPad>{Your concise, step-by-step reasoning for selecting the plugin should be not related to moderation}</ScratchPad>
