@@ -11,7 +11,7 @@ import {
 } from "@/lib/build-prompt"
 import { handleErrorResponse } from "@/lib/models/llm/api-error"
 import llmConfig from "@/lib/models/llm/llm-config"
-import { getSelectedModel } from "@/lib/models/notdiamond"
+// import { getSelectedModel } from "@/lib/models/notdiamond"
 import { generateStandaloneQuestion } from "@/lib/models/question-generator"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
     updateOrAddSystemMessage(
       cleanedMessages,
       selectedModel === "mistralai/mistral-nemo" ||
-        detectedModerationLevel === 0 ||
+        (detectedModerationLevel === 0 && !isPentestGPTPro) ||
         (detectedModerationLevel >= 0.0 &&
           detectedModerationLevel <= 0.2 &&
           !isPentestGPTPro)
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
     }
 
     if (
-      detectedModerationLevel === 0 ||
+      (detectedModerationLevel === 0 && !isPentestGPTPro) ||
       (detectedModerationLevel >= 0.0 &&
         detectedModerationLevel <= 0.2 &&
         !isPentestGPTPro)
@@ -182,9 +182,9 @@ export async function POST(request: Request) {
       filterEmptyAssistantMessages(cleanedMessages)
     }
 
-    if (isPentestGPTPro && !ragUsed) {
-      selectedModel = await getSelectedModel(cleanedMessages, "pentestgpt4")
-    }
+    // if (isPentestGPTPro && !ragUsed) {
+    //   selectedModel = await getSelectedModel(cleanedMessages, "pentestgpt4")
+    // }
 
     try {
       let provider
