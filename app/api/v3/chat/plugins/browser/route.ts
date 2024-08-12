@@ -178,7 +178,9 @@ async function browsePage(url: string): Promise<string> {
       method: "GET",
       headers: {
         Authorization: `Bearer ${jinaToken}`,
-        "X-Return-Format": "text"
+        "X-Return-Format": "text",
+        "X-Timeout": "15",
+        "X-With-Generated-Alt": "true"
       }
     })
 
@@ -191,7 +193,6 @@ async function browsePage(url: string): Promise<string> {
     if (!content) {
       return `No content could be retrieved from the URL: ${url}. The webpage might be empty, unavailable, or there could be an issue with the content retrieval process.`
     }
-
 
     return content
   } catch (error) {
