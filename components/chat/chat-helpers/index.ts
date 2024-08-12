@@ -501,7 +501,7 @@ export const processResponse = async (
 
               fullText += webSearchResult.fullText
               break
-            case "runPython":
+            case "python":
               setToolInUse(PluginID.CODE_INTERPRETER)
               toolCallId = streamPart.value.toolCallId
               updatedPlugin = PluginID.CODE_INTERPRETER

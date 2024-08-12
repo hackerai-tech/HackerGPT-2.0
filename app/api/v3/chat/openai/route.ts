@@ -86,7 +86,7 @@ export async function POST(request: Request) {
           description: "Search the web for latest information",
           parameters: z.object({ search: z.boolean() })
         },
-        runPython: tool({
+        python: tool({
           description: "Runs Python code.",
           parameters: z.object({
             code: z

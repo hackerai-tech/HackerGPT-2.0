@@ -178,7 +178,6 @@ async function browsePage(url: string): Promise<string> {
       method: "GET",
       headers: {
         Authorization: `Bearer ${jinaToken}`,
-        "X-Return-Format": "text",
         "X-Timeout": "15",
         "X-With-Generated-Alt": "true"
       }

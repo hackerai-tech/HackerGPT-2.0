@@ -68,17 +68,17 @@ export const getPentestGPTToolsInfo = (
   let toolsInfo = "<tools_instructions>"
 
   if (includePythonTool) {
-    toolsInfo += `\n\n## runPython
+    toolsInfo += `\n\n## python
 
 PentestGPT can execute Python code in a stateful Jupyter notebook environment \
-with internet access enabled. runPython will respond with the output of the execution \
+with internet access enabled. python will respond with the output of the execution \
 or time out after 60.0 seconds. Only text output is supported; \
 charts, images, or other non-text visuals cannot be generated or displayed.
 PentestGPT will attempt to execute all necessary code within a single cell \
 whenever possible. However, for complex operations or when explicitly requested, \
 PentestGPT may suggest breaking the task into multiple messages to ensure all \
 steps are properly executed and outputs are clearly presented.
-Due to internet access, runPython can make API calls to external services, \
+Due to internet access, python can make API calls to external services, \
 fetch data from websites, or interact with online resources.
 PentestGPT should not include the executed code in its response, as the code and its output \
 will be displayed separately. Instead, PentestGPT should focus on explaining the results, \
