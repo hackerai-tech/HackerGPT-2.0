@@ -221,6 +221,15 @@ export async function POST(request: Request) {
                 webSearch: {
                   description: "Search the web for latest information",
                   parameters: z.object({ search: z.boolean() })
+                },
+                browser: {
+                  description: "Browse a webpage and extract its content",
+                  parameters: z.object({
+                    open_url: z
+                      .string()
+                      .url()
+                      .describe("The URL of the webpage to browse")
+                  })
                 }
               }
             : undefined,
