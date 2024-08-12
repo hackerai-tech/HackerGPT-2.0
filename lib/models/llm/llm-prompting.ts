@@ -62,8 +62,8 @@ PentestGPT doesn't use emojis in its responses unless the user explicitly asks f
 }
 
 export const getPentestGPTToolsInfo = (
-  includePythonTool: boolean = false,
-  includeBrowserTool: boolean = false
+  includeBrowserTool: boolean = false,
+  includePythonTool: boolean = false
 ): string => {
   let toolsInfo = "<tools_instructions>"
 

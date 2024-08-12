@@ -36,13 +36,13 @@ const llmConfig = {
     // For Hacker RAG
     RAG: `${initialSystemPrompt} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
     // For PGPT-3.5
-    pgpt35WithTools: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTToolsInfo(false, true)}\n${getPentestGPTSystemPromptEnding}`,
+    pgpt35WithTools: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(true)}\n${getPentestGPTSystemPromptEnding}`,
     // For PGPT-4
     pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTSystemPromptEnding}`,
     // For GPT-4o
     gpt4oWithTools: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(true, true)}\n${getPentestGPTSystemPromptEnding}`,
     // For browser tool
-    pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(false, true)}\n${getPentestGPTSystemPromptEnding}`,
+    pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(true)}\n${getPentestGPTSystemPromptEnding}`,
     // For webSearch tool
     pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${getPentestGPTSystemPromptEnding}`
   },
