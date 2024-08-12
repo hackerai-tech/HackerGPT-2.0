@@ -180,13 +180,13 @@ async function browsePage(url: string): Promise<string> {
     })
 
     if (!content.data || !content.data.content) {
-      throw new Error("No content returned from Firecrawl")
+      return `No content could be retrieved from the URL: ${url}. The webpage might be empty, unavailable, or there could be an issue with the content retrieval process.`
     }
 
     return content.data.content
   } catch (error) {
     console.error("Error browsing URL:", error)
-    let errorMessage = "Failed to browse the URL."
+    let errorMessage = `Failed to browse the URL: ${url}.`
     if (error instanceof Error) {
       errorMessage += ` Error: ${error.message}`
     }
