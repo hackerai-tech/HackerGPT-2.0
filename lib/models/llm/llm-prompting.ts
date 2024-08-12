@@ -97,8 +97,7 @@ suggest using the browser tool to fetch the most up-to-date information, then \
 analyze and summarize the content for the user.
 
 Use 'browser' in the following circumstances:
-- User explicitly asks to browse or provide links to references
-- Information from a specific webpage is required for the task`
+- User explicitly asks you to browse or provide links to references`
   }
 
   toolsInfo += `\n\n## websearch
