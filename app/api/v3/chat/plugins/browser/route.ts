@@ -13,7 +13,6 @@ import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 import { PGPT4 } from "@/lib/models/llm/hackerai-llm-list"
 import { createOpenAI as createOpenRouterClient } from "@ai-sdk/openai"
 import { streamText } from "ai"
-import FirecrawlApp from "@mendable/firecrawl-js"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -87,6 +86,11 @@ export async function POST(request: Request) {
     filterEmptyAssistantMessages(cleanedMessages)
 
     const browserResult = await browsePage(open_url)
+
+    // Check if browserResult contains an error message
+    if (browserResult.startsWith("Failed to browse the URL:")) {
+      throw new Error(browserResult)
+    }
 
     const lastUserMessage =
       cleanedMessages.findLast(msg => msg.role === "user")?.content ||
@@ -162,28 +166,34 @@ async function getProviderConfig(chatSettings: any, profile: any) {
 }
 
 async function browsePage(url: string): Promise<string> {
-  const firecrawl = new FirecrawlApp({
-    apiKey: process.env.FIRECRAWL_API_KEY
-  })
+  const jinaUrl = `https://r.jina.ai/${url}`
+  const jinaToken = process.env.JINA_API_TOKEN
 
-  const defaultOptions = {
-    onlyMainContent: false,
-    includeHtml: false,
-    includeRawHtml: false,
-    screenshot: false,
-    waitFor: 0
+  if (!jinaToken) {
+    throw new Error("JINA_API_TOKEN is not set in the environment variables")
   }
 
   try {
-    const content = await firecrawl.scrapeUrl(url, {
-      pageOptions: defaultOptions
+    const response = await fetch(jinaUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${jinaToken}`,
+        "X-Return-Format": "text"
+      }
     })
 
-    if (!content.data || !content.data.content) {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const content = await response.text()
+
+    if (!content) {
       return `No content could be retrieved from the URL: ${url}. The webpage might be empty, unavailable, or there could be an issue with the content retrieval process.`
     }
 
-    return content.data.content
+
+    return content
   } catch (error) {
     console.error("Error browsing URL:", error)
     let errorMessage = `Failed to browse the URL: ${url}.`
