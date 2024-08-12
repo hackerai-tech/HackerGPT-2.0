@@ -51,8 +51,6 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    const userID = profile.user_id
-
     const cleanedMessages = await buildFinalMessages(
       payload,
       profile,
@@ -103,7 +101,7 @@ export async function POST(request: Request) {
             }
 
             hasExecutedCode = true
-            const execOutput = await executeCode(userID, code)
+            const execOutput = await executeCode(profile.user_id, code)
             const { results, error: runtimeError } = execOutput
 
             return {
