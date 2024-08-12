@@ -71,10 +71,10 @@ export async function POST(request: Request) {
     if (
       detectedModerationLevel === 1 ||
       (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1) ||
-      (detectedModerationLevel >= 0.9 && detectedModerationLevel < 1)
+      (detectedModerationLevel >= 0.8 && detectedModerationLevel < 1)
     ) {
       filterEmptyAssistantMessages(cleanedMessages)
-    } else if (detectedModerationLevel > 0.1 && detectedModerationLevel < 0.9) {
+    } else if (detectedModerationLevel > 0.3 && detectedModerationLevel < 0.8) {
       handleAssistantMessages(cleanedMessages)
     } else {
       filterEmptyAssistantMessages(cleanedMessages)

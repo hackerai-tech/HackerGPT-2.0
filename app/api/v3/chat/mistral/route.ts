@@ -11,7 +11,6 @@ import {
 } from "@/lib/build-prompt"
 import { handleErrorResponse } from "@/lib/models/llm/api-error"
 import llmConfig from "@/lib/models/llm/llm-config"
-// import { getSelectedModel } from "@/lib/models/notdiamond"
 import { generateStandaloneQuestion } from "@/lib/models/question-generator"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
@@ -166,25 +165,21 @@ export async function POST(request: Request) {
     if (
       (detectedModerationLevel === 0 && !isPentestGPTPro) ||
       (detectedModerationLevel >= 0.0 &&
-        detectedModerationLevel <= 0.2 &&
+        detectedModerationLevel <= 0.3 &&
         !isPentestGPTPro)
     ) {
       selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(cleanedMessages)
     } else if (
       detectedModerationLevel === 1 ||
-      (detectedModerationLevel >= 0.9 && detectedModerationLevel < 1)
+      (detectedModerationLevel >= 0.8 && detectedModerationLevel < 1)
     ) {
       filterEmptyAssistantMessages(cleanedMessages)
-    } else if (detectedModerationLevel > 0.2 && detectedModerationLevel < 0.9) {
+    } else if (detectedModerationLevel > 0.3 && detectedModerationLevel < 0.8) {
       handleAssistantMessages(cleanedMessages)
     } else {
       filterEmptyAssistantMessages(cleanedMessages)
     }
-
-    // if (isPentestGPTPro && !ragUsed) {
-    //   selectedModel = await getSelectedModel(cleanedMessages, "pentestgpt4")
-    // }
 
     try {
       let provider
