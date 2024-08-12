@@ -254,7 +254,7 @@ function generateTemplate(
   pluginsInfo: string
 ) {
   const systemMessage =
-    model === "mistral-medium"
+    model === "mistral-medium" || model === "mistral-large"
       ? endent`
   You are an expert function-calling interpreter. Analyze the entire conversation and determine the appropriate response within a chat environment. Follow these instructions carefully:
 
@@ -303,7 +303,7 @@ function generateTemplate(
   `
 
   const userMessage =
-    model === "mistral-medium"
+    model === "mistral-medium" || model === "mistral-large"
       ? endent`# User Query:
   """${lastUserMessage}"""
   `
