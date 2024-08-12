@@ -4,8 +4,6 @@ import {
   getPentestGPTToolsInfo
 } from "./llm-prompting"
 
-const KnowledgeCutOFFOpenAI = "Knowledge cutoff: 2023-10"
-const KnowledgeCutOFFMeta = "Knowledge cutoff: 2023-12"
 const options: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "long",
@@ -14,7 +12,7 @@ const options: Intl.DateTimeFormatOptions = {
 const currentDate = `Current date: ${new Date().toLocaleDateString("en-US", options)}`
 
 const initialSystemPrompt = `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}`
-const openaiInitialSystemPrompt = `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}`
+const openaiInitialSystemPrompt = `${process.env.SECRET_OPENAI_SYSTEM_PROMPT}`
 
 const llmConfig = {
   openrouter: {
@@ -31,21 +29,26 @@ const llmConfig = {
     apiKey: process.env.OPENAI_API_KEY
   },
   systemPrompts: {
-    pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTSystemPromptEnding}`,
-    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${getPentestGPTSystemPromptEnding}`,
-    pentestgpt: `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}\n${KnowledgeCutOFFMeta}\n${currentDate}`,
-    pentestgptCurrentDateOnly: `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}\n${currentDate}`,
-    openaiCurrentDateOnly: `${process.env.SECRET_OPENAI_SYSTEM_PROMPT}\n${currentDate}`,
-    RAG: `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
-    // For PGPT-3.5 (mistralai/mistral-nemo)
+    // For question generator
+    pentestgptCurrentDateOnly: `${initialSystemPrompt}\n${currentDate}`,
+    // For transforming user query into tool command
+    openaiCurrentDateOnly: `${openaiInitialSystemPrompt}\n${currentDate}`,
+    // For Hacker RAG
+    RAG: `${initialSystemPrompt} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
+    // For PGPT-3.5
     pgpt35WithTools: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTToolsInfo()}\n${getPentestGPTSystemPromptEnding}`,
-    // For GPT-4o (gpt-4o-2024-08-06)
-    gpt4oWithTools: `${getPentestGPTInfo(initialSystemPrompt, true, false, true)}\n${getPentestGPTToolsInfo(true)}\n${getPentestGPTSystemPromptEnding}`
+    // For PGPT-4
+    pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTSystemPromptEnding}`,
+    // For GPT-4o
+    gpt4oWithTools: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(true, true)}\n${getPentestGPTSystemPromptEnding}`,
+    // For browser tool
+    pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(false, true)}\n${getPentestGPTSystemPromptEnding}`,
+    // For webSearch tool
+    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${getPentestGPTSystemPromptEnding}`
   },
   models: {
     pentestgpt_default_openrouter:
       process.env.OPENROUTER_PENTESTGPT_DEFUALT_MODEL,
-    pentestgpt_RAG_openrouter: process.env.OPENROUTER_PENTESTGPT_RAG_MODEL,
     pentestgpt_standalone_question_openrouter:
       process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
     pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL

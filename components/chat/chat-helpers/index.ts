@@ -429,6 +429,44 @@ export const processResponse = async (
             ragUsed = Boolean(dataValue.ragUsed)
             ragId = dataValue.ragId !== null ? String(dataValue.ragId) : null
           }
+        } else if (streamPart.type === "tool_call") {
+          if (
+            streamPart.value.toolName === "browser" &&
+            streamPart.value.args.open_url
+          ) {
+            const urlToOpen = streamPart.value.args.open_url
+
+            const browserRequestBody = {
+              ...requestBody,
+              open_url: urlToOpen
+            }
+
+            const browserResponse = await fetchChatResponse(
+              "/api/v3/chat/plugins/browser",
+              browserRequestBody,
+              true,
+              controller,
+              setIsGenerating,
+              setChatMessages,
+              alertDispatch
+            )
+
+            const browserResult = await processResponse(
+              browserResponse,
+              lastChatMessage,
+              controller,
+              setFirstTokenReceived,
+              setChatMessages,
+              setToolInUse,
+              requestBody,
+              setIsGenerating,
+              alertDispatch,
+              updatedPlugin
+            )
+
+            fullText += browserResult.fullText
+            break
+          }
           // Handle tool calls and plugin-specific actions
         } else if (streamPart.type === "tool_call_streaming_start") {
           const { toolName } = streamPart.value
@@ -467,6 +505,10 @@ export const processResponse = async (
               setToolInUse(PluginID.CODE_INTERPRETER)
               toolCallId = streamPart.value.toolCallId
               updatedPlugin = PluginID.CODE_INTERPRETER
+              break
+            case "browser":
+              setToolInUse(PluginID.BROWSER)
+              updatedPlugin = PluginID.BROWSER
               break
           }
         } else if (streamPart.type === "finish_message") {

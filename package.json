@@ -35,6 +35,7 @@
     "@langchain/openai": "^0.2.5",
     "@livekit/components-react": "^2.4.1",
     "@livekit/components-styles": "^1.0.12",
+    "@mendable/firecrawl-js": "^0.0.36",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",

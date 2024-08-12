@@ -111,7 +111,16 @@ export async function POST(request: Request) {
               runtimeError
             }
           }
-        })
+        }),
+        browser: {
+          description: "Browse a webpage and extract its content",
+          parameters: z.object({
+            open_url: z
+              .string()
+              .url()
+              .describe("The URL of the webpage to browse")
+          })
+        }
       },
       toolChoice: "auto"
     })
