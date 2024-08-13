@@ -6,7 +6,6 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import {
   buildFinalMessages,
   filterEmptyAssistantMessages,
-  // handleAssistantMessages,
   toVercelChatMessages
 } from "@/lib/build-prompt"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
@@ -37,17 +36,9 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   const json = await request.json()
-  const {
-    payload,
-    chatImages,
-    selectedPlugin,
-    // detectedModerationLevel,
-    open_url
-  } = json as {
+  const { payload, chatImages, open_url } = json as {
     payload: any
     chatImages: any
-    selectedPlugin: any
-    // detectedModerationLevel: number
     open_url: string
   }
 
@@ -66,36 +57,16 @@ export async function POST(request: Request) {
       payload,
       profile,
       chatImages,
-      selectedPlugin
+      null
     )) as any[]
-    const systemMessageContent = llmConfig.systemPrompts.pentestGPTBrowser
-
-    updateOrAddSystemMessage(cleanedMessages, systemMessageContent)
-
-    // if (
-    //   detectedModerationLevel === 1 ||
-    //   (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1) ||
-    //   (detectedModerationLevel >= 0.9 && detectedModerationLevel < 1)
-    // ) {
-    //   filterEmptyAssistantMessages(cleanedMessages)
-    // } else if (detectedModerationLevel > 0.1 && detectedModerationLevel < 0.9) {
-    //   handleAssistantMessages(cleanedMessages)
-    // } else {
-    //   filterEmptyAssistantMessages(cleanedMessages)
-    // }
+    updateOrAddSystemMessage(
+      cleanedMessages,
+      llmConfig.systemPrompts.pentestGPTBrowser
+    )
     filterEmptyAssistantMessages(cleanedMessages)
 
     const browserResult = await browsePage(open_url)
-
-    // Check if browserResult contains an error message
-    if (browserResult.startsWith("Failed to browse the URL:")) {
-      throw new Error(browserResult)
-    }
-
-    const lastUserMessage =
-      cleanedMessages.findLast(msg => msg.role === "user")?.content ||
-      "Unknown query"
-
+    const lastUserMessage = getLastUserMessage(cleanedMessages)
     const browserPrompt = createBrowserPrompt(browserResult, lastUserMessage)
 
     const openrouter = createOpenRouterClient({
@@ -104,12 +75,10 @@ export async function POST(request: Request) {
       headers: providerHeaders
     })
 
-    const slicedCleanedMessages = cleanedMessages.slice(0, -1)
-
     const result = await streamText({
       model: openrouter(selectedModel),
       messages: [
-        ...toVercelChatMessages(slicedCleanedMessages),
+        ...toVercelChatMessages(cleanedMessages.slice(0, -1)),
         { role: "user", content: browserPrompt }
       ],
       temperature: 0.5,
@@ -165,11 +134,18 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   }
 }
 
+function getLastUserMessage(messages: any[]): string {
+  return (
+    messages.findLast(msg => msg.role === "user")?.content || "Unknown query"
+  )
+}
+
 async function browsePage(url: string): Promise<string> {
   const jinaUrl = `https://r.jina.ai/${url}`
   const jinaToken = process.env.JINA_API_TOKEN
 
   if (!jinaToken) {
+    console.error("JINA_API_TOKEN is not set in the environment variables")
     throw new Error("JINA_API_TOKEN is not set in the environment variables")
   }
 
@@ -184,23 +160,21 @@ async function browsePage(url: string): Promise<string> {
     })
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      console.error(`Error fetching URL: ${url}. Status: ${response.status}`)
+      return `No content could be retrieved from the URL: ${url}. The webpage might be empty, unavailable, or there could be an issue with the content retrieval process.`
     }
 
     const content = await response.text()
 
     if (!content) {
+      console.error(`Empty content received from URL: ${url}`)
       return `No content could be retrieved from the URL: ${url}. The webpage might be empty, unavailable, or there could be an issue with the content retrieval process.`
     }
 
     return content
   } catch (error) {
-    console.error("Error browsing URL:", error)
-    let errorMessage = `Failed to browse the URL: ${url}.`
-    if (error instanceof Error) {
-      errorMessage += ` Error: ${error.message}`
-    }
-    return errorMessage
+    console.error("Error browsing URL:", url, error)
+    return `No content could be retrieved from the URL: ${url}. The webpage might be empty, unavailable, or there could be an issue with the content retrieval process.`
   }
 }
 
