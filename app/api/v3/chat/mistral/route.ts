@@ -15,7 +15,7 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
-import { jsonSchema } from 'ai'
+import { jsonSchema } from "ai"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
       selectedModel === "mistralai/mistral-nemo" ||
         (detectedModerationLevel === 0 && !isPentestGPTPro) ||
         (detectedModerationLevel >= 0.0 &&
-          detectedModerationLevel <= 0.2 &&
+          detectedModerationLevel <= 0.3 &&
           !isPentestGPTPro)
         ? llmConfig.systemPrompts.pgpt35WithTools
         : llmConfig.systemPrompts.pentestGPTChat
@@ -202,38 +202,38 @@ export async function POST(request: Request) {
         abortSignal: request.signal,
         experimental_toolCallStreaming: true,
         tools:
-        selectedModel === "mistralai/mistral-nemo" ||
-        selectedModel === "openai/gpt-4o-mini"
-          ? {
-              webSearch: {
-                description: "Search the web for latest information",
-                parameters: jsonSchema({
-                  type: "object",
-                  properties: {
-                    search: {
-                      type: "boolean",
-                      description: "Whether to perform a web search"
-                    }
-                  },
-                  required: ["search"]
-                })
-              },
-              browser: {
-                description: "Browse a webpage and extract its content",
-                parameters: jsonSchema({
-                  type: "object",
-                  properties: {
-                    open_url: {
-                      type: "string",
-                      format: "uri",
-                      description: "The URL of the webpage to browse"
-                    }
-                  },
-                  required: ["open_url"]
-                })
+          selectedModel === "mistralai/mistral-nemo" ||
+          selectedModel === "openai/gpt-4o-mini"
+            ? {
+                webSearch: {
+                  description: "Search the web for latest information",
+                  parameters: jsonSchema({
+                    type: "object",
+                    properties: {
+                      search: {
+                        type: "boolean",
+                        description: "Whether to perform a web search"
+                      }
+                    },
+                    required: ["search"]
+                  })
+                },
+                browser: {
+                  description: "Browse a webpage and extract its content",
+                  parameters: jsonSchema({
+                    type: "object",
+                    properties: {
+                      open_url: {
+                        type: "string",
+                        format: "uri",
+                        description: "The URL of the webpage to browse"
+                      }
+                    },
+                    required: ["open_url"]
+                  })
+                }
               }
-            }
-          : undefined,
+            : undefined,
         onFinish: () => {
           data.close()
         }
