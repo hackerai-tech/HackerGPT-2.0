@@ -191,7 +191,7 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
-      let hasExecutedCode = false
+      // let hasExecutedCode = false
 
       const result = await streamText({
         model: provider(selectedModel),
