@@ -161,7 +161,7 @@ async function browsePage(url: string): Promise<string> {
 
     if (!response.ok) {
       console.error(`Error fetching URL: ${url}. Status: ${response.status}`)
-      return `No content could be retrieved from the URL: ${url}. The webpage might be empty, unavailable, or there could be an issue with the content retrieval process.`
+      return `No content could be retrieved from the URL: ${url}. The webpage might be empty, unavailable, or there could be an issue with the content retrieval process. HTTP status: ${response.status}`
     }
 
     const content = await response.text()
