@@ -231,33 +231,38 @@ export async function POST(request: Request) {
                     },
                     required: ["open_url"]
                   })
-                },
-                python: tool({
-                  description: "Runs Python code.",
-                  parameters: z.object({
-                    code: z
-                      .string()
-                      .describe("The python code to execute in a single cell.")
-                  }),
-                  async execute({ code }) {
-                    if (hasExecutedCode) {
-                      return {
-                        results:
-                          "Code execution skipped. Only one code cell can be executed per request.",
-                        runtimeError: null
-                      }
-                    }
+                }
+                // python: {
+                //   description: "Runs Python code.",
+                //   parameters: jsonSchema({
+                //     type: "object",
+                //     properties: {
+                //       code: {
+                //         type: "string",
+                //         description: "The python code to execute in a single cell."
+                //       }
+                //     },
+                //     required: ["code"]
+                //   }),
+                //   execute: async ({ code }) => {
+                //     if (hasExecutedCode) {
+                //       return {
+                //         results:
+                //           "Code execution skipped. Only one code cell can be executed per request.",
+                //         runtimeError: null
+                //       }
+                //     }
 
-                    hasExecutedCode = true
-                    const execOutput = await executeCode(profile.user_id, code)
-                    const { results, error: runtimeError } = execOutput
+                //     hasExecutedCode = true
+                //     const execOutput = await executeCode(profile.user_id, code)
+                //     const { results, error: runtimeError } = execOutput
 
-                    return {
-                      results,
-                      runtimeError
-                    }
-                  }
-                })
+                //     return {
+                //       results,
+                //       runtimeError
+                //     }
+                //   }
+                // }
               }
             : undefined,
         onFinish: () => {
