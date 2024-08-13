@@ -79,7 +79,7 @@
     "gpt-tokenizer": "^2.2.1",
     "i18next": "^23.12.2",
     "i18next-resources-to-backend": "^1.2.1",
-    "langchain": "^0.2.11",
+    "langchain": "^0.1.35",
     "livekit-client": "^2.4.1",
     "livekit-server-sdk": "^2.6.0",
     "lucide-react": "^0.424.0",
