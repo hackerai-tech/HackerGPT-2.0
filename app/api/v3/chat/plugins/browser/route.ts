@@ -155,7 +155,8 @@ async function browsePage(url: string): Promise<string> {
       headers: {
         Authorization: `Bearer ${jinaToken}`,
         "X-Timeout": "15",
-        "X-With-Generated-Alt": "true"
+        "X-With-Generated-Alt": "true",
+        "X-No-Cache": "true"
       }
     })
 

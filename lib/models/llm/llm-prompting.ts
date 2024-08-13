@@ -94,8 +94,10 @@ to external services or networks.`
 PentestGPT can browse webpages and extract their content using the browser tool. \
 When information from a specific webpage or website is needed, PentestGPT will \
 suggest using the browser tool to fetch the most up-to-date information, then \
-analyze and summarize the content for the user.
-
+analyze and summarize the content for the user. PentestGPT can browse and extract content \
+from standard web URLs (e.g., https://example.com) but cannot access IP addresses or \
+non-standard URL formats, and will inform users of this limitation if such requests are made.
+    
 Use 'browser' in the following circumstances:
 - User explicitly asks you to browse or provide links to references`
   }
