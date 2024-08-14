@@ -378,107 +378,125 @@ export const processResponse = async (
           streamPart.type === "tool_result" &&
           streamPart.value.toolCallId === toolCallId
 
-        if (
-          streamPart.type === "text" ||
-          runtPythonCheck ||
-          pythonResultCheck
-        ) {
-          setFirstTokenReceived(true)
-          let streamText = ""
+        switch (streamPart.type) {
+          case "text":
+          case "tool_call_delta":
+          case "tool_result":
+            if (
+              streamPart.type === "text" ||
+              runtPythonCheck ||
+              pythonResultCheck
+            ) {
+              setFirstTokenReceived(true)
+              let streamText = ""
 
-          if (streamPart.type === "text") {
-            streamText = streamPart.value
-          } else if (runtPythonCheck) {
-            streamText = streamPart.value.argsTextDelta
-          } else if (pythonResultCheck) {
-            const { result } = streamPart.value
-            const { results, runtimeError } = result
+              if (streamPart.type === "text") {
+                streamText = streamPart.value
+              } else if (runtPythonCheck) {
+                streamText = streamPart.value.argsTextDelta
+              } else if (pythonResultCheck) {
+                const { result } = streamPart.value
+                const { results, runtimeError } = result
 
-            if (results) {
-              streamText = `<results>${results}</results>`
-            }
-            if (runtimeError) {
-              streamText = `<runtimeError>${runtimeError}</runtimeError>`
-            }
-          }
-
-          fullText += streamText
-          setChatMessages(prev =>
-            prev.map(chatMessage => {
-              if (chatMessage.message.id === lastChatMessage.message.id) {
-                return {
-                  ...chatMessage,
-                  message: {
-                    ...chatMessage.message,
-                    content: chatMessage.message.content + streamText
-                  }
+                if (results) {
+                  streamText = `<results>${results}</results>`
+                }
+                if (runtimeError) {
+                  streamText = `<runtimeError>${runtimeError}</runtimeError>`
                 }
               }
-              return chatMessage
-            })
-          )
-          // Handle custom stream data
-        } else if (streamPart.type === "data") {
-          const [dataValue] = streamPart.value
-          // Process RAG data if present
-          if (
-            dataValue &&
-            typeof dataValue === "object" &&
-            "ragUsed" in dataValue
-          ) {
-            ragUsed = Boolean(dataValue.ragUsed)
-            ragId = dataValue.ragId !== null ? String(dataValue.ragId) : null
-          }
-        } else if (streamPart.type === "tool_call") {
-          if (
-            streamPart.value.toolName === "browser" &&
-            streamPart.value.args.open_url
-          ) {
-            const urlToOpen = streamPart.value.args.open_url
 
-            const browserRequestBody = {
-              ...requestBody,
-              open_url: urlToOpen
+              fullText += streamText
+              setChatMessages(prev =>
+                prev.map(chatMessage => {
+                  if (chatMessage.message.id === lastChatMessage.message.id) {
+                    return {
+                      ...chatMessage,
+                      message: {
+                        ...chatMessage.message,
+                        content: chatMessage.message.content + streamText
+                      }
+                    }
+                  }
+                  return chatMessage
+                })
+              )
             }
-
-            const browserResponse = await fetchChatResponse(
-              "/api/v3/chat/plugins/browser",
-              browserRequestBody,
-              true,
-              controller,
-              setIsGenerating,
-              setChatMessages,
-              alertDispatch
-            )
-
-            const browserResult = await processResponse(
-              browserResponse,
-              lastChatMessage,
-              controller,
-              setFirstTokenReceived,
-              setChatMessages,
-              setToolInUse,
-              requestBody,
-              setIsGenerating,
-              alertDispatch,
-              updatedPlugin
-            )
-
-            fullText += browserResult.fullText
             break
-          }
-          // Handle tool calls and plugin-specific actions
-        } else if (streamPart.type === "tool_call_streaming_start") {
-          const { toolName } = streamPart.value
 
-          switch (toolName) {
-            case "webSearch":
-              setToolInUse(PluginID.WEB_SEARCH)
-              updatedPlugin = PluginID.WEB_SEARCH
+          // Process RAG data if present
+          case "data":
+            const [dataValue] = streamPart.value
+            if (
+              dataValue &&
+              typeof dataValue === "object" &&
+              "ragUsed" in dataValue
+            ) {
+              ragUsed = Boolean(dataValue.ragUsed)
+              ragId = dataValue.ragId !== null ? String(dataValue.ragId) : null
+            }
+            break
 
-              const webSearchResponse = await fetchChatResponse(
-                "/api/v3/chat/plugins/web-search",
-                requestBody,
+          case "tool_call_streaming_start":
+            const { toolName } = streamPart.value
+
+            switch (toolName) {
+              case "webSearch":
+                setToolInUse(PluginID.WEB_SEARCH)
+                updatedPlugin = PluginID.WEB_SEARCH
+
+                const webSearchResponse = await fetchChatResponse(
+                  "/api/v3/chat/plugins/web-search",
+                  requestBody,
+                  true,
+                  controller,
+                  setIsGenerating,
+                  setChatMessages,
+                  alertDispatch
+                )
+
+                const webSearchResult = await processResponse(
+                  webSearchResponse,
+                  lastChatMessage,
+                  controller,
+                  setFirstTokenReceived,
+                  setChatMessages,
+                  setToolInUse,
+                  requestBody,
+                  setIsGenerating,
+                  alertDispatch,
+                  updatedPlugin
+                )
+
+                fullText += webSearchResult.fullText
+                break
+              case "python":
+                setToolInUse(PluginID.CODE_INTERPRETER)
+                toolCallId = streamPart.value.toolCallId
+                updatedPlugin = PluginID.CODE_INTERPRETER
+                break
+              case "browser":
+                setToolInUse(PluginID.BROWSER)
+                updatedPlugin = PluginID.BROWSER
+                break
+            }
+            break
+
+          case "tool_call":
+            if (
+              streamPart.value.toolName === "browser" &&
+              streamPart.value.args.open_url
+            ) {
+              const urlToOpen = streamPart.value.args.open_url
+
+              const browserRequestBody = {
+                ...requestBody,
+                open_url: urlToOpen
+              }
+
+              const browserResponse = await fetchChatResponse(
+                "/api/v3/chat/plugins/browser",
+                browserRequestBody,
                 true,
                 controller,
                 setIsGenerating,
@@ -486,8 +504,8 @@ export const processResponse = async (
                 alertDispatch
               )
 
-              const webSearchResult = await processResponse(
-                webSearchResponse,
+              const browserResult = await processResponse(
+                browserResponse,
                 lastChatMessage,
                 controller,
                 setFirstTokenReceived,
@@ -499,20 +517,14 @@ export const processResponse = async (
                 updatedPlugin
               )
 
-              fullText += webSearchResult.fullText
+              fullText += browserResult.fullText
               break
-            case "python":
-              setToolInUse(PluginID.CODE_INTERPRETER)
-              toolCallId = streamPart.value.toolCallId
-              updatedPlugin = PluginID.CODE_INTERPRETER
-              break
-            case "browser":
-              setToolInUse(PluginID.BROWSER)
-              updatedPlugin = PluginID.BROWSER
-              break
-          }
-        } else if (streamPart.type === "finish_message") {
-          finishReason = streamPart.value.finishReason
+            }
+            break
+
+          case "finish_message":
+            finishReason = streamPart.value.finishReason
+            break
         }
 
         if (controller.signal.aborted) {
