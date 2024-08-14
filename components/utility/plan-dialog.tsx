@@ -126,7 +126,7 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                       <b>Access to advanced features</b>
                     </ProsStatement>
                     <Description>
-                      Vision, web browsing and file uploads
+                      Vision, web browsing and code interpreter
                     </Description>
                     <ProsStatement>
                       <b>Access to advanced tools</b>
@@ -201,7 +201,7 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                       PortScanner, and more
                     </ProsStatement>
                     <ProsStatement>
-                      Access to vision, web browsing, and file uploads
+                      Access to vision, web browsing, and code interpreter
                     </ProsStatement>
                   </div>
                 </div>
