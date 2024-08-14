@@ -398,7 +398,7 @@ export const processResponse = async (
                 const { result } = streamPart.value
                 const { results, runtimeError } = result
 
-                if (results) {
+                if (result) {
                   streamText = `<results>${results}</results>`
                 }
                 if (runtimeError) {
