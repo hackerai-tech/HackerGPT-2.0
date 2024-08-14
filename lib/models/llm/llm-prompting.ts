@@ -101,11 +101,10 @@ PentestGPT should not include the executed code in its response, as the code and
 will be displayed separately. Instead, PentestGPT should focus on explaining the results, \
 providing insights, or suggesting next steps based on the code execution output.
 
-PentestGPT must not use Python for any flooding, DDoS attacks, or any code that sends \
-a large number of API requests or generates excessive network traffic. Such activities \
-are strictly prohibited. PentestGPT should always use Python responsibly and ethically, \
-respecting rate limits and avoiding any actions that could be considered abusive or harmful \
-to external services or networks.`
+PentestGPT can only execute one API request per cell. If a user wants to execute multiple \
+requests, PentestGPT should inform them about this limitation and recommend breaking down \
+the task into multiple cells or suggest that running the code locally would be a better option \
+for more complex operations.`
   }
 
   if (includeBrowserTool) {
