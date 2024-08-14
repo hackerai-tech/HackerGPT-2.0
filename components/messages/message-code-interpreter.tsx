@@ -155,23 +155,12 @@ const parseCodeInterpreterContent = (
     error: null
   }
 
-  // Parse JSON for code
-  const jsonRegex = /\{.*?\}/g
-  const jsonMatches = content.match(jsonRegex)
+  // Parse for code
+  const codeRegex = /\{"code":\s*"((?:\\.|[^"\\])*?)"\}/
+  const codeMatch = content.match(codeRegex)
 
-  if (jsonMatches) {
-    for (const match of jsonMatches) {
-      try {
-        const parsed = JSON.parse(match)
-        if (parsed.code) {
-          newContent.code = parsed.code
-          setInterpreterStatus("running")
-          break // We only need the first valid code block
-        }
-      } catch (e) {
-        console.error("Error parsing JSON:", e)
-      }
-    }
+  if (codeMatch) {
+    newContent.code = codeMatch[1].replace(/\\n/g, "\n").replace(/\\"/g, '"')
   }
 
   // Parse results and errors
@@ -189,13 +178,13 @@ const parseCodeInterpreterContent = (
     newContent.error = errorMatch[1]
   }
 
-  // Remove XML-like tags and JSON objects from other content
+  // Remove XML-like tags and code block from other content
   newContent.otherContent = content
     .replace(
       /<\/?(?:results|runtimeError)>.*?<\/(?:results|runtimeError)>/gs,
       ""
     )
-    .replace(/\{.*?\}/g, "")
+    .replace(/\{"code":\s*"((?:\\.|[^"\\])*?)"\}/, "")
     .trim()
 
   if (
