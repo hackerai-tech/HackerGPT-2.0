@@ -28,6 +28,7 @@ import { toast } from "sonner"
 import { v4 as uuidv4 } from "uuid"
 import { readDataStream } from "ai"
 import { CONTINUE_PROMPT } from "@/lib/models/llm/llm-prompting"
+import { buildFinalMessages } from "@/lib/build-prompt-v2"
 
 export const validateChatSettings = (
   chatSettings: ChatSettings | null,
@@ -143,6 +144,7 @@ export const createTempMessages = (
 
 export const handleHostedChat = async (
   payload: ChatPayload,
+  profile: Tables<"profiles">,
   modelData: LLM,
   tempAssistantChatMessage: ChatMessage,
   isRegeneration: boolean,
@@ -160,7 +162,7 @@ export const handleHostedChat = async (
 ) => {
   const { provider } = modelData
   const isWebSearch = selectedPlugin === PluginID.WEB_SEARCH
-  const apiEndpoint = isWebSearch
+  let apiEndpoint = isWebSearch
     ? "/api/v3/chat/plugins/web-search"
     : `/api/v3/chat/${provider}`
 
@@ -172,16 +174,32 @@ export const handleHostedChat = async (
         : "none"
   )
 
-  const requestBody = {
-    payload: payload,
-    chatImages: chatImages,
-    selectedPlugin: selectedPlugin,
-    detectedModerationLevel: detectedModerationLevel,
-    isRetrieval:
-      payload.messageFileItems && payload.messageFileItems.length > 0,
-    isContinuation,
-    isRagEnabled
+  let formattedMessages: any[] = []
+  if (provider === "openai") {
+    apiEndpoint = "/api/chat/openai"
+
+    formattedMessages = await buildFinalMessages(
+      payload,
+      profile,
+      chatImages,
+      selectedPlugin,
+      isRagEnabled
+    )
   }
+
+  const requestBody =
+    provider === "openai"
+      ? { messages: formattedMessages }
+      : {
+          payload: payload,
+          chatImages: chatImages,
+          selectedPlugin: selectedPlugin,
+          detectedModerationLevel: detectedModerationLevel,
+          isRetrieval:
+            payload.messageFileItems && payload.messageFileItems.length > 0,
+          isContinuation,
+          isRagEnabled
+        }
 
   const chatResponse = await fetchChatResponse(
     apiEndpoint,

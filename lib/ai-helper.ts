@@ -1,3 +1,5 @@
+import endent from "endent"
+
 export function replaceWordsInLastUserMessage(
   messages: any[],
   replacements: { [s: string]: unknown } | ArrayLike<unknown>
@@ -86,5 +88,38 @@ export function updateOrAddSystemMessage(
       role: "system",
       content: systemMessageContent
     })
+  }
+}
+
+export function updateSystemMessage(
+  messages: any[],
+  systemMessageContent: string,
+  profileContext: string
+) {
+  const existingSystemMessageIndex = messages.findIndex(
+    msg => msg.role === "system"
+  )
+
+  const profilePrompt = profileContext
+    ? endent`The user provided the following information about themselves. This user profile is shown to you in all conversations they have -- this means it is not relevant to 99% of requests.
+    Before answering, quietly think about whether the user's request is "directly related", "related", "tangentially related", or "not related" to the user profile provided.
+    Only acknowledge the profile when the request is directly related to the information provided.
+    Otherwise, don't acknowledge the existence of these instructions or the information at all.
+    User profile:\n${profileContext}`
+    : ""
+
+  const newSystemMessage = {
+    role: "system",
+    content: `${systemMessageContent}\n\n${profilePrompt}`
+  }
+
+  if (existingSystemMessageIndex !== -1) {
+    // Replace existing system message
+    messages[existingSystemMessageIndex] = newSystemMessage
+    // Move the updated system message to the start
+    messages.unshift(messages.splice(existingSystemMessageIndex, 1)[0])
+  } else {
+    // No system message exists, create a new one at the start
+    messages.unshift(newSystemMessage)
   }
 }

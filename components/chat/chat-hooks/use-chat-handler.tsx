@@ -394,6 +394,7 @@ export const useChatHandler = () => {
           selectedPlugin: updatedSelectedPlugin
         } = await handleHostedChat(
           payload,
+          profile!,
           modelData!,
           tempAssistantChatMessage,
           isRegeneration,
