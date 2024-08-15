@@ -170,15 +170,24 @@ function createBrowserPrompt(
   browserResult: string,
   lastUserMessage: string
 ): string {
-  return `<webpage_content>
+  return `You have just browsed a webpage. The content you found is enclosed below:
+
+<webpage_content>
 ${browserResult}
 </webpage_content>
+
+The user has the following query about this webpage:
 
 <user_query>
 ${lastUserMessage}
 </user_query>
 
-Based on the webpage content above, please answer the user's query concisely and accurately. \
-If the content doesn't directly address the query, provide the most relevant information available \
-or suggest alternative approaches.`
+With the information from the webpage content above, \
+respond to the user's query as if you have comprehensive knowledge of the page. \
+Provide a direct and insightful answer to the query. \
+If the specific details are not present, draw upon related information to \
+offer valuable insights or suggest practical alternatives.
+
+Important: Do not refer to "the webpage content provided" or "the information given" in your response. \
+Instead, answer as if you have directly viewed the webpage and are sharing your knowledge about it.`
 }
