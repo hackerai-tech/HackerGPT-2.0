@@ -217,7 +217,7 @@ export async function handleCvemapRequest(
         let cvemapData = await cvemapResponse.text()
         cvemapData = processCvemapData(cvemapData)
 
-        if (!cvemapData || cvemapData.length === 0) {
+        if (!cvemapData || cvemapData.length < 20) {
           sendMessage(
             "🔍 The search is complete. No CVE entries were found based on your parameters.",
             true
