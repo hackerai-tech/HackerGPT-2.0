@@ -163,8 +163,8 @@ export const handleHostedChat = async (
   const { provider } = modelData
   const isWebSearch = selectedPlugin === PluginID.WEB_SEARCH
   let apiEndpoint = isWebSearch
-    ? "/api/v3/chat/plugins/web-search"
-    : `/api/v3/chat/${provider}`
+    ? "/api/chat/plugins/web-search"
+    : `/api/chat/${provider}`
 
   setToolInUse(
     isRagEnabled && provider !== "openai"
@@ -174,32 +174,27 @@ export const handleHostedChat = async (
         : "none"
   )
 
-  let formattedMessages: any[] = []
-  if (provider === "openai") {
-    apiEndpoint = "/api/chat/openai"
-
-    formattedMessages = await buildFinalMessages(
+  const formattedMessages = await buildFinalMessages(
       payload,
       profile,
       chatImages,
       selectedPlugin,
       isRagEnabled
-    )
-  }
+  )
+  const chatSettings = payload.chatSettings
 
   const requestBody =
-    provider === "openai"
-      ? { messages: formattedMessages }
-      : {
-          payload: payload,
-          chatImages: chatImages,
-          selectedPlugin: selectedPlugin,
-          detectedModerationLevel: detectedModerationLevel,
-          isRetrieval:
-            payload.messageFileItems && payload.messageFileItems.length > 0,
-          isContinuation,
-          isRagEnabled
-        }
+  provider === "openai" || isWebSearch
+    ? { messages: formattedMessages, chatSettings, detectedModerationLevel }
+    : {
+        messages: formattedMessages,
+        chatSettings: chatSettings,
+        detectedModerationLevel: detectedModerationLevel,
+        isRetrieval:
+          payload.messageFileItems && payload.messageFileItems.length > 0,
+        isContinuation,
+        isRagEnabled
+      }
 
   const chatResponse = await fetchChatResponse(
     apiEndpoint,
@@ -464,7 +459,7 @@ export const processResponse = async (
                 updatedPlugin = PluginID.WEB_SEARCH
 
                 const webSearchResponse = await fetchChatResponse(
-                  "/api/v3/chat/plugins/web-search",
+                  "/api/chat/plugins/web-search",
                   requestBody,
                   true,
                   controller,
@@ -513,7 +508,7 @@ export const processResponse = async (
               }
 
               const browserResponse = await fetchChatResponse(
-                "/api/v3/chat/plugins/browser",
+                "/api/chat/plugins/browser",
                 browserRequestBody,
                 true,
                 controller,
