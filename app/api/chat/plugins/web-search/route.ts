@@ -36,11 +36,8 @@ export const preferredRegion = [
 ]
 
 export async function POST(request: Request) {
-  const {
-    messages,
-    chatSettings,
-    detectedModerationLevel
-  } = await request.json()
+  const { messages, chatSettings, detectedModerationLevel } =
+    await request.json()
 
   try {
     const profile = await getAIProfile()
@@ -52,7 +49,10 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    updateOrAddSystemMessage(messages, llmConfig.systemPrompts.pentestGPTWebSearch)
+    updateOrAddSystemMessage(
+      messages,
+      llmConfig.systemPrompts.pentestGPTWebSearch
+    )
 
     if (
       detectedModerationLevel === 1 ||
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       apiKey: llmConfig.openrouter.apiKey,
       headers: providerHeaders
     })
-    
+
     const result = await streamText({
       model: openrouter(selectedModel),
       messages: toVercelChatMessages(messages),

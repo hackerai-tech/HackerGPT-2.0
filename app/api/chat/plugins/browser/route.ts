@@ -34,11 +34,7 @@ export const preferredRegion = [
 ]
 
 export async function POST(request: Request) {
-  const {
-    messages,
-    chatSettings,
-    open_url
-  } = await request.json()
+  const { messages, chatSettings, open_url } = await request.json()
 
   try {
     const profile = await getAIProfile()

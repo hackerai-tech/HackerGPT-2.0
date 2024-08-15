@@ -175,26 +175,26 @@ export const handleHostedChat = async (
   )
 
   const formattedMessages = await buildFinalMessages(
-      payload,
-      profile,
-      chatImages,
-      selectedPlugin,
-      isRagEnabled
+    payload,
+    profile,
+    chatImages,
+    selectedPlugin,
+    isRagEnabled
   )
   const chatSettings = payload.chatSettings
 
   const requestBody =
-  provider === "openai" || isWebSearch
-    ? { messages: formattedMessages, chatSettings, detectedModerationLevel }
-    : {
-        messages: formattedMessages,
-        chatSettings: chatSettings,
-        detectedModerationLevel: detectedModerationLevel,
-        isRetrieval:
-          payload.messageFileItems && payload.messageFileItems.length > 0,
-        isContinuation,
-        isRagEnabled
-      }
+    provider === "openai" || isWebSearch
+      ? { messages: formattedMessages, chatSettings, detectedModerationLevel }
+      : {
+          messages: formattedMessages,
+          chatSettings: chatSettings,
+          detectedModerationLevel: detectedModerationLevel,
+          isRetrieval:
+            payload.messageFileItems && payload.messageFileItems.length > 0,
+          isContinuation,
+          isRagEnabled
+        }
 
   const chatResponse = await fetchChatResponse(
     apiEndpoint,
