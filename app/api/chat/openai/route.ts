@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     let hasExecutedCode = false
 
     const result = await streamText({
-      model: openai("gpt-4o-2024-08-06"),
+      model: openai("openai/gpt-4o"),
       temperature: 0.5,
       maxTokens: 1024,
       messages: toVercelChatMessages(messages, true),
