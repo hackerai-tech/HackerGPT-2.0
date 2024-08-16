@@ -36,7 +36,7 @@ const llmConfig = {
     // For Hacker RAG
     RAG: `${initialSystemPrompt} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
     // For PGPT-3.5
-    pgpt35WithTools: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${getPentestGPTToolsInfo(true)}\n${getPentestGPTSystemPromptEnding}`,
+    pgpt35WithTools: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${getPentestGPTToolsInfo(true, true)}\n${getPentestGPTSystemPromptEnding}`,
     // For PGPT-4
     pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTSystemPromptEnding}`,
     // For GPT-4o

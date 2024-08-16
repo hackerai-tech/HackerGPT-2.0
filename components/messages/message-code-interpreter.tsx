@@ -39,10 +39,9 @@ export const MessageCodeInterpreter: React.FC<MessageCodeInterpreterProps> = ({
     [content]
   )
 
-  const hasValidPackages = packages && packages.some(pkg => pkg.trim() !== '')
-  
-  const hasCodeOutput =
-    code || hasValidPackages || results.length > 0 || error
+  const hasValidPackages = packages && packages.some(pkg => pkg.trim() !== "")
+
+  const hasCodeOutput = code || hasValidPackages || results.length > 0 || error
 
   // Set status to "running" if there's code but no results or error yet
   useEffect(() => {

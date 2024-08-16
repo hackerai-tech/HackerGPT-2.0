@@ -15,6 +15,7 @@ import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { jsonSchema } from "ai"
+import { executeCode } from "@/lib/tools/code-interpreter-utils"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -173,6 +174,8 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
+      let hasExecutedCode = false
+
       const result = await streamText({
         model: provider(selectedModel),
         messages: toVercelChatMessages(messages),
@@ -212,6 +215,49 @@ export async function POST(request: Request) {
                     },
                     required: ["open_url"]
                   })
+                },
+                python: {
+                  description:
+                    "Runs Python code. Only one execution is allowed per request.",
+                  parameters: jsonSchema({
+                    type: "object",
+                    properties: {
+                      packages: {
+                        type: "array",
+                        items: { type: "string" },
+                        description:
+                          "List of third-party packages to install using pip before running the code."
+                      },
+                      code: {
+                        type: "string",
+                        description:
+                          "The Python code to execute in a single cell."
+                      }
+                    },
+                    required: ["packages", "code"]
+                  }),
+                  async execute({ packages, code }) {
+                    if (hasExecutedCode) {
+                      return {
+                        results:
+                          "Code execution skipped. Only one code cell can be executed per request.",
+                        runtimeError: null
+                      }
+                    }
+
+                    hasExecutedCode = true
+                    const execOutput = await executeCode(
+                      profile.user_id,
+                      code,
+                      packages || []
+                    )
+                    const { results, error: runtimeError } = execOutput
+
+                    return {
+                      results,
+                      runtimeError
+                    }
+                  }
                 }
               }
             : undefined,

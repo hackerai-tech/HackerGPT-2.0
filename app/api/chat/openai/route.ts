@@ -87,7 +87,8 @@ export async function POST(request: Request) {
           })
         },
         python: tool({
-          description: "Runs Python code.",
+          description:
+            "Runs Python code. Only one execution is allowed per request.",
           parameters: z.object({
             packages: z
               .array(z.string())
