@@ -198,7 +198,9 @@ export async function POST(request: Request) {
                   })
                 },
                 browser: {
-                  description: "Browse a webpage and extract its content",
+                  description:
+                    "Browse a webpage and extract its text content. \
+                For HTML retrieval or more complex web scraping don't use this tool.",
                   parameters: jsonSchema({
                     type: "object",
                     properties: {

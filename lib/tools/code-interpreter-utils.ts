@@ -15,6 +15,7 @@ export async function createOrConnectCodeInterpreter(userID: string) {
   if (!sandboxInfo) {
     // Vercel's AI SDK has a bug that it doesn't throw an error in the tool `execute` call so we want to be explicit
     try {
+      // const sbx = await CodeInterpreter.create(template, {
       const sbx = await CodeInterpreter.create({
         metadata: {
           template,
@@ -38,7 +39,8 @@ export async function createOrConnectCodeInterpreter(userID: string) {
 
 export async function executeCode(
   userID: string,
-  code: string
+  code: string,
+  packages: string[]
 ): Promise<{
   results: string | null
   stdout: string
@@ -49,6 +51,21 @@ export async function executeCode(
   const sbx = await createOrConnectCodeInterpreter(userID)
 
   try {
+    if (packages && packages.length > 0) {
+      console.log(`[${userID}] Installing packages: ${packages.join(" ")}`)
+      const installCommand = `!pip install ${packages.join(" ")}`
+      const installExecution = await sbx.notebook.execCell(installCommand, {
+        timeoutMs: 15000
+      })
+
+      if (installExecution.error) {
+        console.error(
+          `[${userID}] Package installation error:`,
+          installExecution.error
+        )
+      }
+    }
+
     const execution = await sbx.notebook.execCell(code, {
       timeoutMs: 60000
     })

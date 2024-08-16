@@ -78,14 +78,28 @@ export async function POST(request: Request) {
           description: "Search the web for latest information",
           parameters: z.object({ search: z.boolean() })
         },
+        browser: {
+          description:
+            "Browse a webpage and extract its text content. \
+          For HTML retrieval or more complex web scraping, use the Python tool.",
+          parameters: z.object({
+            url: z.string().url().describe("The URL of the webpage to browse")
+          })
+        },
         python: tool({
           description: "Runs Python code.",
           parameters: z.object({
+            packages: z
+              .array(z.string())
+              .optional()
+              .describe(
+                "List of third-party packages to install using pip before running the code."
+              ),
             code: z
               .string()
-              .describe("The python code to execute in a single cell.")
+              .describe("The Python code to execute in a single cell.")
           }),
-          async execute({ code }) {
+          async execute({ code, packages }) {
             if (hasExecutedCode) {
               return {
                 results:
@@ -95,7 +109,11 @@ export async function POST(request: Request) {
             }
 
             hasExecutedCode = true
-            const execOutput = await executeCode(profile.user_id, code)
+            const execOutput = await executeCode(
+              profile.user_id,
+              code,
+              packages || []
+            )
             const { results, error: runtimeError } = execOutput
 
             return {
@@ -103,16 +121,7 @@ export async function POST(request: Request) {
               runtimeError
             }
           }
-        }),
-        browser: {
-          description: "Browse a webpage and extract its content",
-          parameters: z.object({
-            open_url: z
-              .string()
-              .url()
-              .describe("The URL of the webpage to browse")
-          })
-        }
+        })
       },
       toolChoice: "auto"
     })

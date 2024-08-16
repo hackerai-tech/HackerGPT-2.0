@@ -20,6 +20,7 @@ type InterpreterStatus = "idle" | "running" | "finished" | "error"
 
 interface ParsedContent {
   code: string
+  packages: string[]
   results: Array<{ text: string }>
   otherContent: string
   error: string | null
@@ -33,12 +34,13 @@ export const MessageCodeInterpreter: React.FC<MessageCodeInterpreterProps> = ({
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(true)
   const [interpreterStatus, setInterpreterStatus] =
     useState<InterpreterStatus>("idle")
-  const { code, results, otherContent, error } = useMemo(
+  const { code, packages, results, otherContent, error } = useMemo(
     () => parseCodeInterpreterContent(content, setInterpreterStatus),
     [content]
   )
 
-  const hasCodeOutput = code || results.length > 0 || error
+  const hasCodeOutput =
+    code || packages.length > 0 || results.length > 0 || error
 
   // Set status to "running" if there's code but no results or error yet
   useEffect(() => {
@@ -115,6 +117,14 @@ export const MessageCodeInterpreter: React.FC<MessageCodeInterpreterProps> = ({
                   : "max-h-0 opacity-0"
               }`}
             >
+              {packages.length > 0 && (
+                <div className="pt-4">
+                  <MessageMarkdown
+                    content={`\`\`\`bash\n!pip install ${packages.join(" ")}\n\`\`\``}
+                    isAssistant={true}
+                  />
+                </div>
+              )}
               {code && (
                 <div className="pt-4">
                   <MessageMarkdown
@@ -150,17 +160,37 @@ const parseCodeInterpreterContent = (
 ): ParsedContent => {
   const newContent: ParsedContent = {
     code: "",
+    packages: [],
     results: [],
     otherContent: "",
     error: null
   }
 
-  // Parse for code
-  const codeRegex = /\{"code":\s*"((?:\\.|[^"\\])*?)"\}/
-  const codeMatch = content.match(codeRegex)
+  // Parse for packages and code
+  const packageAndCodeRegex =
+    /\{"packages":\s*\[(.*?)\],\s*"code":\s*"((?:\\.|[^"\\])*?)"\}/
+  const packageAndCodeMatch = content.match(packageAndCodeRegex)
 
-  if (codeMatch) {
-    newContent.code = codeMatch[1].replace(/\\n/g, "\n").replace(/\\"/g, '"')
+  if (packageAndCodeMatch) {
+    // Extract packages
+    newContent.packages = packageAndCodeMatch[1]
+      .split(",")
+      .map(pkg => pkg.trim().replace(/^"|"$/g, ""))
+
+    // Extract code
+    newContent.code = packageAndCodeMatch[2]
+      .replace(/\\n/g, "\n")
+      .replace(/\\"/g, '"')
+  } else {
+    // If no packages found, try parsing for code only
+    const codeOnlyRegex = /\{"code":\s*"((?:\\.|[^"\\])*?)"\}/
+    const codeOnlyMatch = content.match(codeOnlyRegex)
+
+    if (codeOnlyMatch) {
+      newContent.code = codeOnlyMatch[1]
+        .replace(/\\n/g, "\n")
+        .replace(/\\"/g, '"')
+    }
   }
 
   // Parse results and errors
@@ -184,7 +214,8 @@ const parseCodeInterpreterContent = (
       /<\/?(?:results|runtimeError)>.*?<\/(?:results|runtimeError)>/gs,
       ""
     )
-    .replace(/\{"code":\s*"((?:\\.|[^"\\])*?)"\}/, "")
+    .replace(/\{"packages":\s*\[.*?\],\s*"code":\s*"(?:\\.|[^"\\])*?"\}/, "")
+    .replace(/\{"code":\s*"(?:\\.|[^"\\])*?"\}/, "")
     .trim()
 
   if (
