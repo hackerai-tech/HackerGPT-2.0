@@ -39,8 +39,10 @@ export const MessageCodeInterpreter: React.FC<MessageCodeInterpreterProps> = ({
     [content]
   )
 
+  const hasValidPackages = packages && packages.some(pkg => pkg.trim() !== '')
+  
   const hasCodeOutput =
-    code || packages.length > 0 || results.length > 0 || error
+    code || hasValidPackages || results.length > 0 || error
 
   // Set status to "running" if there's code but no results or error yet
   useEffect(() => {
@@ -117,7 +119,7 @@ export const MessageCodeInterpreter: React.FC<MessageCodeInterpreterProps> = ({
                   : "max-h-0 opacity-0"
               }`}
             >
-              {packages.length > 0 && (
+              {hasValidPackages && (
                 <div className="pt-4">
                   <MessageMarkdown
                     content={`\`\`\`bash\n!pip install ${packages.join(" ")}\n\`\`\``}

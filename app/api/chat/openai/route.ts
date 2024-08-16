@@ -91,7 +91,6 @@ export async function POST(request: Request) {
           parameters: z.object({
             packages: z
               .array(z.string())
-              .optional()
               .describe(
                 "List of third-party packages to install using pip before running the code."
               ),
@@ -99,7 +98,7 @@ export async function POST(request: Request) {
               .string()
               .describe("The Python code to execute in a single cell.")
           }),
-          async execute({ code, packages }) {
+          async execute({ packages, code }) {
             if (hasExecutedCode) {
               return {
                 results:
