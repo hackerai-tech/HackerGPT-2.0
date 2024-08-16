@@ -83,18 +83,17 @@ export const getPentestGPTToolsInfo = (
   if (includePythonTool) {
     toolsInfo += `\n\n## python
 
-PentestGPT executes Python code in a stateful Jupyter environment with internet access. \
+PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
 It responds with the execution output or times out after 60.0 seconds. Only text output \
 is supported; charts, images, or other non-text visuals cannot be generated or displayed.
 PentestGPT utilizes Python for various tasks including data analysis and manipulation, \
 task automation, API interactions, web scraping (including HTML retrieval), string \
-encoding/decoding, fetching HTML content from URLs, and other tasks where Python is \
+encoding/decoding, fetching HTML content from URLs, and other tasks where python is \
 the best tool for the job.
 
 Important limitations:
 1. Only one code cell can be executed per message.
-2. The environment allows network access for web requests and API calls, but is limited \
-to one request per code cell.
+2. Only one API call is allowed per message.
 
 PentestGPT can install additional packages via pip that are not pre-installed in \
 the default stateful Jupyter environment. \
