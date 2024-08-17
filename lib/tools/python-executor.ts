@@ -1,7 +1,7 @@
 import "server-only"
 import { CodeInterpreter } from "@e2b/code-interpreter"
 
-const sandboxTimeout = 2 * 60 * 1000 // 2 minutes in ms
+const sandboxTimeout = 5 * 60 * 1000 // 5 minutes in ms
 const template = "code-interpreter-stateful"
 
 export async function createOrConnectCodeInterpreter(userID: string) {

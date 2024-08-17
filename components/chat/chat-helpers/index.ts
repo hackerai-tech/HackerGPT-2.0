@@ -370,6 +370,7 @@ export const processResponse = async (
     let fullText = ""
     let finishReason = ""
     let toolCallId = ""
+    let bashCallId = ""
     let ragUsed = false
     let ragId = null
     let updatedPlugin = selectedPlugin
@@ -381,72 +382,65 @@ export const processResponse = async (
 
     try {
       for await (const streamPart of stream) {
-        // console.log(streamPart)
+        console.log(streamPart)
 
-        const runtPythonCheck =
-          streamPart.type === "tool_call_delta" &&
-          streamPart.value.toolCallId === toolCallId
-
-        const pythonResultCheck =
-          streamPart.type === "tool_result" &&
-          streamPart.value.toolCallId === toolCallId
+        const isToolCallDelta = (part: any): part is { type: "tool_call_delta", value: { toolCallId: string, argsTextDelta: string } } =>
+          part.type === "tool_call_delta" && "toolCallId" in part.value && "argsTextDelta" in part.value
+        
+        const isToolResult = (part: any): part is { type: "tool_result", value: { toolCallId: string, result: { results: string, runtimeError: string } } } =>
+          part.type === "tool_result" && "toolCallId" in part.value && "result" in part.value
+        
+        const isBashResult = (part: any): part is { type: "data", value: Array<{ type: string, content: string }> } =>
+          part.type === "data" && Array.isArray(part.value) && part.value.length > 0 &&
+          typeof part.value[0] === 'object' && 'type' in part.value[0] && 'content' in part.value[0]
+        
+        const processStreamPart = (streamPart: any, toolCallId: string, bashCallId: string): string => {
+          if (streamPart.type === "text") return streamPart.value
+        
+          if (isToolCallDelta(streamPart) && (streamPart.value.toolCallId === toolCallId || streamPart.value.toolCallId === bashCallId)) {
+            return streamPart.value.argsTextDelta
+          }
+        
+          if (isToolResult(streamPart) && streamPart.value.toolCallId === toolCallId) {
+            const { results, runtimeError } = streamPart.value.result
+            return (results ? `<results>${results}</results>` : '') +
+                   (runtimeError ? `<runtimeError>${runtimeError}</runtimeError>` : '')
+          }
+        
+          if (isBashResult(streamPart)) {
+            return streamPart.value.reduce((acc, item) => 
+              acc + (item.type === "stdout" ? item.content : `<stderr>${item.content}</stderr>`), 
+            '')
+          }
+        
+          return ''
+        }
 
         switch (streamPart.type) {
           case "text":
           case "tool_call_delta":
           case "tool_result":
-            if (
-              streamPart.type === "text" ||
-              runtPythonCheck ||
-              pythonResultCheck
-            ) {
+          case "data":
+            const streamText = processStreamPart(streamPart, toolCallId, bashCallId)
+            if (streamText) {
               setFirstTokenReceived(true)
-              let streamText = ""
-
-              if (streamPart.type === "text") {
-                streamText = streamPart.value
-              } else if (runtPythonCheck) {
-                streamText = streamPart.value.argsTextDelta
-              } else if (pythonResultCheck) {
-                const { result } = streamPart.value
-                const { results, runtimeError } = result
-
-                if (result) {
-                  streamText = `<results>${results}</results>`
-                }
-                if (runtimeError) {
-                  streamText = `<runtimeError>${runtimeError}</runtimeError>`
-                }
-              }
-
               fullText += streamText
               setChatMessages(prev =>
-                prev.map(chatMessage => {
-                  if (chatMessage.message.id === lastChatMessage.message.id) {
-                    return {
-                      ...chatMessage,
-                      message: {
-                        ...chatMessage.message,
-                        content: chatMessage.message.content + streamText
+                prev.map(chatMessage =>
+                  chatMessage.message.id === lastChatMessage.message.id
+                    ? {
+                        ...chatMessage,
+                        message: {
+                          ...chatMessage.message,
+                          content: chatMessage.message.content + streamText
+                        }
                       }
-                    }
-                  }
-                  return chatMessage
-                })
+                    : chatMessage
+                )
               )
-            }
-            break
-
-          // Process RAG data if present
-          case "data":
-            const [dataValue] = streamPart.value
-            if (
-              dataValue &&
-              typeof dataValue === "object" &&
-              "ragUsed" in dataValue
-            ) {
-              ragUsed = Boolean(dataValue.ragUsed)
-              ragId = dataValue.ragId !== null ? String(dataValue.ragId) : null
+            } else if (typeof streamPart.value === 'object' && streamPart.value !== null && 'ragUsed' in streamPart.value && 'ragId' in streamPart.value) {
+              ragUsed = Boolean(streamPart.value.ragUsed)
+              ragId = streamPart.value.ragId !== null ? String(streamPart.value.ragId) : null
             }
             break
 
@@ -491,6 +485,11 @@ export const processResponse = async (
               case "browser":
                 setToolInUse(PluginID.BROWSER)
                 updatedPlugin = PluginID.BROWSER
+                break
+              case "bash":
+                setToolInUse(PluginID.BASH)
+                bashCallId = streamPart.value.toolCallId
+                updatedPlugin = PluginID.BASH
                 break
             }
             break

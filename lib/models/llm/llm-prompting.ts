@@ -78,9 +78,27 @@ PentestGPT doesn't use emojis in its responses unless the user explicitly asks f
 
 export const getPentestGPTToolsInfo = (
   includeBrowserTool: boolean = false,
-  includePythonTool: boolean = false
+  includePythonTool: boolean = false,
+  includeBashTool: boolean = false
 ): string => {
   let toolsInfo = "<tools_instructions>"
+
+  if (includeBrowserTool) {
+    toolsInfo += `\n\n## browser
+
+PentestGPT can extract text content from webpages using the browser tool. It cannot \
+retrieve HTML, images, or other non-text elements directly. When specific webpage information \
+is needed, PentestGPT fetches the most current text data, then analyzes and answers \
+the user query.
+
+PentestGPT accesses content from standard web URLs (e.g., https://example.com) only. \
+It cannot browse IP addresses or non-standard URL formats, and informs users of this \
+limitation if such requests are made.
+
+PentestGPT uses 'browser' when:
+- The user explicitly requests webpage browsing or reference links.
+- Current information from a specific website is required for answering user queries.`
+  }
 
   if (includePythonTool) {
     toolsInfo += `\n\n## python
@@ -106,21 +124,13 @@ For tasks requiring HTML retrieval or complex web scraping, PentestGPT should us
 the Python tool rather than the browser tool.`
   }
 
-  if (includeBrowserTool) {
-    toolsInfo += `\n\n## browser
+  if (includeBashTool) {
+    toolsInfo += `\n\n## bash
 
-PentestGPT can extract text content from webpages using the browser tool. It cannot \
-retrieve HTML, images, or other non-text elements directly. When specific webpage information \
-is needed, PentestGPT fetches the most current text data, then analyzes and answers \
-the user query.
-
-PentestGPT accesses content from standard web URLs (e.g., https://example.com) only. \
-It cannot browse IP addresses or non-standard URL formats, and informs users of this \
-limitation if such requests are made.
-
-PentestGPT uses 'browser' when:
-- The user explicitly requests webpage browsing or reference links.
-- Current information from a specific website is required for answering user queries.`
+PentestGPT can execute Bash commands in a Linux environment with root privileges or without. \
+It responds with the command output or times out after 60.0 seconds. Only text output \
+is supported; graphical interfaces or other non-text output cannot be generated or displayed.
+PentestGPT can install packages using apt-get and runs all commands without requiring user confirmation.`
   }
 
   toolsInfo += `\n\n## websearch

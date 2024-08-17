@@ -43,7 +43,8 @@ export enum PluginID {
   // Default tools
   WEB_SEARCH = "websearch",
   CODE_INTERPRETER = "codeinterpreter",
-  BROWSER = "browser"
+  BROWSER = "browser",
+  BASH = "bash"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(

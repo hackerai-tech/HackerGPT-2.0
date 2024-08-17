@@ -11,8 +11,9 @@ import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { executePythonCode } from "@/lib/tools/python-executor"
+import { executeBashCommand } from "@/lib/tools/bash-executor"
 import { createOpenAI } from "@ai-sdk/openai"
-import { streamText, tool } from "ai"
+import { StreamData, streamText, tool } from "ai"
 import { ServerRuntime } from "next"
 import { z } from "zod"
 
@@ -62,6 +63,8 @@ export async function POST(request: Request) {
       baseUrl: llmConfig.openai.baseUrl,
       apiKey: llmConfig.openai.apiKey
     })
+
+    const data = new StreamData()
 
     let hasExecutedCode = false
 
@@ -121,12 +124,41 @@ export async function POST(request: Request) {
               runtimeError
             }
           }
+        }),
+        bash: tool({
+          description:
+            "Runs bash commands. Only one execution is allowed per request.",
+          parameters: z.object({
+            code: z.string().describe("The bash command to execute.")
+          }),
+          async execute({ code }) {
+            if (hasExecutedCode) {
+              return {
+                stdout:
+                  "Code execution skipped. Only one code cell can be executed per request.",
+                stderr: "",
+                runtimeError: null
+              }
+            }
+
+            hasExecutedCode = true
+
+            const execOutput = await executeBashCommand(
+              profile.user_id,
+              code,
+              data
+            )
+
+            return execOutput
+          }
         })
       },
-      toolChoice: "auto"
+      onFinish: () => {
+        data.close()
+      }
     })
 
-    return result.toDataStreamResponse()
+    return result.toDataStreamResponse({ data })
   } catch (error: any) {
     const errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500
