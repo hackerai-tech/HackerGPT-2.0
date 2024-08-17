@@ -20,7 +20,7 @@ type InterpreterStatus = "idle" | "running" | "finished" | "error"
 
 interface ParsedContent {
   code: string
-  packages: string[]
+  pipInstallCommand: string | null
   results: Array<{ text: string }>
   otherContent: string
   error: string | null
@@ -34,14 +34,16 @@ export const MessageCodeInterpreter: React.FC<MessageCodeInterpreterProps> = ({
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(true)
   const [interpreterStatus, setInterpreterStatus] =
     useState<InterpreterStatus>("idle")
-  const { code, packages, results, otherContent, error } = useMemo(
+  const { code, pipInstallCommand, results, otherContent, error } = useMemo(
     () => parseCodeInterpreterContent(content, setInterpreterStatus),
     [content]
   )
 
-  const hasValidPackages = packages && packages.some(pkg => pkg.trim() !== "")
+  const hasPipInstallCommand =
+    pipInstallCommand && pipInstallCommand.trim() !== ""
 
-  const hasCodeOutput = code || hasValidPackages || results.length > 0 || error
+  const hasCodeOutput =
+    code || hasPipInstallCommand || results.length > 0 || error
 
   // Set status to "running" if there's code but no results or error yet
   useEffect(() => {
@@ -118,10 +120,10 @@ export const MessageCodeInterpreter: React.FC<MessageCodeInterpreterProps> = ({
                   : "max-h-0 opacity-0"
               }`}
             >
-              {hasValidPackages && (
+              {hasPipInstallCommand && (
                 <div className="pt-4">
                   <MessageMarkdown
-                    content={`\`\`\`bash\n!pip install ${packages.join(" ")}\n\`\`\``}
+                    content={`\`\`\`bash\n${pipInstallCommand}\n\`\`\``}
                     isAssistant={true}
                   />
                 </div>
@@ -161,29 +163,29 @@ const parseCodeInterpreterContent = (
 ): ParsedContent => {
   const newContent: ParsedContent = {
     code: "",
-    packages: [],
+    pipInstallCommand: null,
     results: [],
     otherContent: "",
     error: null
   }
 
-  // Parse for packages and code
-  const packageAndCodeRegex =
-    /\{"packages":\s*\[(.*?)\],\s*"code":\s*"((?:\\.|[^"\\])*?)"\}/
-  const packageAndCodeMatch = content.match(packageAndCodeRegex)
+  // Parse for pip install command and code
+  const pipInstallAndCodeRegex =
+    /\{"pipInstallCommand":\s*"((?:\\.|[^"\\])*?)",\s*"code":\s*"((?:\\.|[^"\\])*?)"\}/
+  const pipInstallAndCodeMatch = content.match(pipInstallAndCodeRegex)
 
-  if (packageAndCodeMatch) {
-    // Extract packages
-    newContent.packages = packageAndCodeMatch[1]
-      .split(",")
-      .map(pkg => pkg.trim().replace(/^"|"$/g, ""))
+  if (pipInstallAndCodeMatch) {
+    // Extract pip install command
+    newContent.pipInstallCommand = pipInstallAndCodeMatch[1]
+      .replace(/\\n/g, "\n")
+      .replace(/\\"/g, '"')
 
     // Extract code
-    newContent.code = packageAndCodeMatch[2]
+    newContent.code = pipInstallAndCodeMatch[2]
       .replace(/\\n/g, "\n")
       .replace(/\\"/g, '"')
   } else {
-    // If no packages found, try parsing for code only
+    // If no pip install command found, try parsing for code only
     const codeOnlyRegex = /\{"code":\s*"((?:\\.|[^"\\])*?)"\}/
     const codeOnlyMatch = content.match(codeOnlyRegex)
 
@@ -215,7 +217,10 @@ const parseCodeInterpreterContent = (
       /<\/?(?:results|runtimeError)>.*?<\/(?:results|runtimeError)>/gs,
       ""
     )
-    .replace(/\{"packages":\s*\[.*?\],\s*"code":\s*"(?:\\.|[^"\\])*?"\}/, "")
+    .replace(
+      /\{"pipInstallCommand":\s*"(?:\\.|[^"\\])*?",\s*"code":\s*"(?:\\.|[^"\\])*?"\}/,
+      ""
+    )
     .replace(/\{"code":\s*"(?:\\.|[^"\\])*?"\}/, "")
     .trim()
 

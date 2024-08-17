@@ -90,16 +90,16 @@ export async function POST(request: Request) {
           description:
             "Runs Python code. Only one execution is allowed per request.",
           parameters: z.object({
-            packages: z
-              .array(z.string())
+            pipInstallCommand: z
+              .string()
               .describe(
-                "List of third-party packages to install using pip before running the code."
+                "Full pip install command to install packages (e.g., '!pip install package1 package2')"
               ),
             code: z
               .string()
               .describe("The Python code to execute in a single cell.")
           }),
-          async execute({ packages, code }) {
+          async execute({ pipInstallCommand, code }) {
             if (hasExecutedCode) {
               return {
                 results:
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
             const execOutput = await executeCode(
               profile.user_id,
               code,
-              packages || []
+              pipInstallCommand
             )
             const { results, error: runtimeError } = execOutput
 

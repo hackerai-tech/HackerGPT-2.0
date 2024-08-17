@@ -40,7 +40,7 @@ export async function createOrConnectCodeInterpreter(userID: string) {
 export async function executeCode(
   userID: string,
   code: string,
-  packages: string[]
+  pipInstallCommand: string | undefined
 ): Promise<{
   results: string | null
   stdout: string
@@ -51,10 +51,9 @@ export async function executeCode(
   const sbx = await createOrConnectCodeInterpreter(userID)
 
   try {
-    if (packages && packages.length > 0) {
-      console.log(`[${userID}] Installing packages: ${packages.join(" ")}`)
-      const installCommand = `!pip install ${packages.join(" ")}`
-      const installExecution = await sbx.notebook.execCell(installCommand, {
+    if (pipInstallCommand && pipInstallCommand.length > 0) {
+      console.log(`[${userID}] Installing packages: ${pipInstallCommand}`)
+      const installExecution = await sbx.notebook.execCell(pipInstallCommand, {
         timeoutMs: 15000
       })
 
