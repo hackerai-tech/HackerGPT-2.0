@@ -79,7 +79,7 @@ PentestGPT doesn't use emojis in its responses unless the user explicitly asks f
 export const getPentestGPTToolsInfo = (
   includeBrowserTool: boolean = false,
   includePythonTool: boolean = false,
-  includeBashTool: boolean = false
+  includeTerminalTool: boolean = false
 ): string => {
   let toolsInfo = "<tools_instructions>"
 
@@ -124,8 +124,8 @@ For tasks requiring HTML retrieval or complex web scraping, PentestGPT should us
 the Python tool rather than the browser tool.`
   }
 
-  if (includeBashTool) {
-    toolsInfo += `\n\n## bash
+  if (includeTerminalTool) {
+    toolsInfo += `\n\n## terminal
 
 PentestGPT can execute Bash commands in a Linux environment with root privileges or without. \
 It responds with the command output or times out after 60.0 seconds. Only text output \

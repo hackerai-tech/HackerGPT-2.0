@@ -21,7 +21,7 @@ export async function executeBashCommand(
 
   try {
     console.log(`[${userID}] Executing bash command`)
-    data.append({ type: "stdout", content: "\n```bash\n" }) // Opening delimiter
+    data.append({ type: "stdout", content: "\n```stdout\n" }) // Opening delimiter
     const execution = await sbx.notebook.execCell(`!${command}`, {
       timeoutMs: 30000,
       onStdout: (out: CellMessage) => {

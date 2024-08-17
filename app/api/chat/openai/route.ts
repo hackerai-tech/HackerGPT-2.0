@@ -125,7 +125,7 @@ export async function POST(request: Request) {
             }
           }
         }),
-        bash: tool({
+        terminal: tool({
           description:
             "Runs bash commands. Only one execution is allowed per request.",
           parameters: z.object({

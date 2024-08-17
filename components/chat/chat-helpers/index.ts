@@ -370,7 +370,7 @@ export const processResponse = async (
     let fullText = ""
     let finishReason = ""
     let toolCallId = ""
-    let bashCallId = ""
+    let terminalCallId = ""
     let ragUsed = false
     let ragId = null
     let updatedPlugin = selectedPlugin
@@ -384,36 +384,82 @@ export const processResponse = async (
       for await (const streamPart of stream) {
         console.log(streamPart)
 
-        const isToolCallDelta = (part: any): part is { type: "tool_call_delta", value: { toolCallId: string, argsTextDelta: string } } =>
-          part.type === "tool_call_delta" && "toolCallId" in part.value && "argsTextDelta" in part.value
-        
-        const isToolResult = (part: any): part is { type: "tool_result", value: { toolCallId: string, result: { results: string, runtimeError: string } } } =>
-          part.type === "tool_result" && "toolCallId" in part.value && "result" in part.value
-        
-        const isBashResult = (part: any): part is { type: "data", value: Array<{ type: string, content: string }> } =>
-          part.type === "data" && Array.isArray(part.value) && part.value.length > 0 &&
-          typeof part.value[0] === 'object' && 'type' in part.value[0] && 'content' in part.value[0]
-        
-        const processStreamPart = (streamPart: any, toolCallId: string, bashCallId: string): string => {
+        const isToolCallDelta = (
+          part: any
+        ): part is {
+          type: "tool_call_delta"
+          value: { toolCallId: string; argsTextDelta: string }
+        } =>
+          part.type === "tool_call_delta" &&
+          "toolCallId" in part.value &&
+          "argsTextDelta" in part.value
+
+        const isToolResult = (
+          part: any
+        ): part is {
+          type: "tool_result"
+          value: {
+            toolCallId: string
+            result: { results: string; runtimeError: string }
+          }
+        } =>
+          part.type === "tool_result" &&
+          "toolCallId" in part.value &&
+          "result" in part.value
+
+        const isTerminalResult = (
+          part: any
+        ): part is {
+          type: "data"
+          value: Array<{ type: string; content: string }>
+        } =>
+          part.type === "data" &&
+          Array.isArray(part.value) &&
+          part.value.length > 0 &&
+          typeof part.value[0] === "object" &&
+          "type" in part.value[0] &&
+          "content" in part.value[0]
+
+        const processStreamPart = (
+          streamPart: any,
+          toolCallId: string,
+          terminalCallId: string
+        ): string => {
           if (streamPart.type === "text") return streamPart.value
-        
-          if (isToolCallDelta(streamPart) && (streamPart.value.toolCallId === toolCallId || streamPart.value.toolCallId === bashCallId)) {
+
+          if (
+            isToolCallDelta(streamPart) &&
+            (streamPart.value.toolCallId === toolCallId ||
+              streamPart.value.toolCallId === terminalCallId)
+          ) {
             return streamPart.value.argsTextDelta
           }
-        
-          if (isToolResult(streamPart) && streamPart.value.toolCallId === toolCallId) {
+
+          if (
+            isToolResult(streamPart) &&
+            streamPart.value.toolCallId === toolCallId
+          ) {
             const { results, runtimeError } = streamPart.value.result
-            return (results ? `<results>${results}</results>` : '') +
-                   (runtimeError ? `<runtimeError>${runtimeError}</runtimeError>` : '')
+            return (
+              (results ? `<results>${results}</results>` : "") +
+              (runtimeError
+                ? `<runtimeError>${runtimeError}</runtimeError>`
+                : "")
+            )
           }
-        
-          if (isBashResult(streamPart)) {
-            return streamPart.value.reduce((acc, item) => 
-              acc + (item.type === "stdout" ? item.content : `<stderr>${item.content}</stderr>`), 
-            '')
+
+          if (isTerminalResult(streamPart)) {
+            return streamPart.value.reduce(
+              (acc, item) =>
+                acc +
+                (item.type === "stdout"
+                  ? item.content
+                  : `<stderr>${item.content}</stderr>`),
+              ""
+            )
           }
-        
-          return ''
+
+          return ""
         }
 
         switch (streamPart.type) {
@@ -421,7 +467,11 @@ export const processResponse = async (
           case "tool_call_delta":
           case "tool_result":
           case "data":
-            const streamText = processStreamPart(streamPart, toolCallId, bashCallId)
+            const streamText = processStreamPart(
+              streamPart,
+              toolCallId,
+              terminalCallId
+            )
             if (streamText) {
               setFirstTokenReceived(true)
               fullText += streamText
@@ -438,9 +488,17 @@ export const processResponse = async (
                     : chatMessage
                 )
               )
-            } else if (typeof streamPart.value === 'object' && streamPart.value !== null && 'ragUsed' in streamPart.value && 'ragId' in streamPart.value) {
+            } else if (
+              typeof streamPart.value === "object" &&
+              streamPart.value !== null &&
+              "ragUsed" in streamPart.value &&
+              "ragId" in streamPart.value
+            ) {
               ragUsed = Boolean(streamPart.value.ragUsed)
-              ragId = streamPart.value.ragId !== null ? String(streamPart.value.ragId) : null
+              ragId =
+                streamPart.value.ragId !== null
+                  ? String(streamPart.value.ragId)
+                  : null
             }
             break
 
@@ -486,10 +544,10 @@ export const processResponse = async (
                 setToolInUse(PluginID.BROWSER)
                 updatedPlugin = PluginID.BROWSER
                 break
-              case "bash":
-                setToolInUse(PluginID.BASH)
-                bashCallId = streamPart.value.toolCallId
-                updatedPlugin = PluginID.BASH
+              case "terminal":
+                setToolInUse(PluginID.TERMINAL)
+                terminalCallId = streamPart.value.toolCallId
+                updatedPlugin = PluginID.TERMINAL
                 break
             }
             break

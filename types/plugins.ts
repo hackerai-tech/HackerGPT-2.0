@@ -44,7 +44,7 @@ export enum PluginID {
   WEB_SEARCH = "websearch",
   CODE_INTERPRETER = "codeinterpreter",
   BROWSER = "browser",
-  BASH = "bash"
+  TERMINAL = "terminal"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
