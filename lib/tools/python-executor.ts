@@ -37,7 +37,7 @@ export async function createOrConnectCodeInterpreter(userID: string) {
   return sandbox
 }
 
-export async function executeCode(
+export async function executePythonCode(
   userID: string,
   code: string,
   pipInstallCommand: string | undefined
@@ -87,7 +87,7 @@ export async function executeCode(
       error: execution.error ? formatFullError(execution.error) : null
     }
   } catch (error: any) {
-    console.error(`[${userID}] Error in executeCode:`, error)
+    console.error(`[${userID}] Error in executePythonCode:`, error)
 
     return {
       results: null,

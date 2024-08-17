@@ -10,7 +10,7 @@ import {
 import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
-import { executeCode } from "@/lib/tools/code-interpreter-utils"
+import { executePythonCode } from "@/lib/tools/python-executor"
 import { createOpenAI } from "@ai-sdk/openai"
 import { streamText, tool } from "ai"
 import { ServerRuntime } from "next"
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
             }
 
             hasExecutedCode = true
-            const execOutput = await executeCode(
+            const execOutput = await executePythonCode(
               profile.user_id,
               code,
               pipInstallCommand

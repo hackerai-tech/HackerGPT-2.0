@@ -13,9 +13,9 @@ import { generateStandaloneQuestion } from "@/lib/models/question-generator"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
-import { StreamData, streamText } from "ai"
-import { jsonSchema } from "ai"
-import { executeCode } from "@/lib/tools/code-interpreter-utils"
+import { StreamData, streamText, tool } from "ai"
+import { executePythonCode } from "@/lib/tools/python-executor"
+import { z } from "zod"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -189,54 +189,33 @@ export async function POST(request: Request) {
             ? {
                 webSearch: {
                   description: "Search the web for latest information",
-                  parameters: jsonSchema({
-                    type: "object",
-                    properties: {
-                      search: {
-                        type: "boolean",
-                        description: "Whether to perform a web search"
-                      }
-                    },
-                    required: ["search"]
-                  })
+                  parameters: z.object({ search: z.boolean() })
                 },
                 browser: {
                   description:
                     "Browse a webpage and extract its text content. \
-                For HTML retrieval or more complex web scraping don't use this tool.",
-                  parameters: jsonSchema({
-                    type: "object",
-                    properties: {
-                      open_url: {
-                        type: "string",
-                        format: "uri",
-                        description: "The URL of the webpage to browse"
-                      }
-                    },
-                    required: ["open_url"]
+                For HTML retrieval or more complex web scraping, use the Python tool.",
+                  parameters: z.object({
+                    url: z
+                      .string()
+                      .url()
+                      .describe("The URL of the webpage to browse")
                   })
                 },
-                python: {
+                python: tool({
                   description:
                     "Runs Python code. Only one execution is allowed per request.",
-                  parameters: jsonSchema({
-                    type: "object",
-                    properties: {
-                      packages: {
-                        type: "array",
-                        items: { type: "string" },
-                        description:
-                          "List of third-party packages to install using pip before running the code."
-                      },
-                      code: {
-                        type: "string",
-                        description:
-                          "The Python code to execute in a single cell."
-                      }
-                    },
-                    required: ["packages", "code"]
+                  parameters: z.object({
+                    pipInstallCommand: z
+                      .string()
+                      .describe(
+                        "Full pip install command to install packages (e.g., '!pip install package1 package2')"
+                      ),
+                    code: z
+                      .string()
+                      .describe("The Python code to execute in a single cell.")
                   }),
-                  async execute({ packages, code }) {
+                  async execute({ pipInstallCommand, code }) {
                     if (hasExecutedCode) {
                       return {
                         results:
@@ -246,10 +225,10 @@ export async function POST(request: Request) {
                     }
 
                     hasExecutedCode = true
-                    const execOutput = await executeCode(
+                    const execOutput = await executePythonCode(
                       profile.user_id,
                       code,
-                      packages || []
+                      pipInstallCommand
                     )
                     const { results, error: runtimeError } = execOutput
 
@@ -258,7 +237,7 @@ export async function POST(request: Request) {
                       runtimeError
                     }
                   }
-                }
+                })
               }
             : undefined,
         onFinish: () => {
