@@ -30,7 +30,7 @@ interface RootLayoutProps {
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
-  metadataBase: new URL("https://chat.hackerai.co"),
+  metadataBase: new URL("https://pentestgpt.io"),
   title: {
     default: APP_DEFAULT_TITLE,
     template: APP_TITLE_TEMPLATE
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     description: APP_DESCRIPTION,
     images: [
       {
-        url: "https://chat.hackerai.co/icon-512x512.png",
+        url: "https://pentestgpt.io/icon-512x512.png",
         width: 512,
         height: 512,
         alt: "PentestGPT"
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     description: APP_DESCRIPTION,
     images: [
       {
-        url: "https://chat.hackerai.co/icon-512x512.png",
+        url: "https://pentestgpt.io/icon-512x512.png",
         width: 512,
         height: 512,
         alt: "PentestGPT"
