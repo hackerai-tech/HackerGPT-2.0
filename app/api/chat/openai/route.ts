@@ -138,12 +138,13 @@ export async function POST(request: Request) {
             })
 
             if (hasExecutedCode) {
-              return {
-                stdout:
-                  "Code execution skipped. Only one code cell can be executed per request.",
-                stderr: "",
-                runtimeError: null
-              }
+              const errorMessage =
+                "Code execution skipped. Only one code cell can be executed per request."
+              data.append({
+                type: "stderr",
+                content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
+              })
+              return null
             }
 
             hasExecutedCode = true
