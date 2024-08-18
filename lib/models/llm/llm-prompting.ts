@@ -53,7 +53,7 @@ the 'thumbs down' button below PentestGPT's response and provide feedback to Hac
   // PentestGPT Plugins Information
   info += `PentestGPT has access to various plugins which can be used when selected by the user from \
 the plugin selector menu. Chat messages may include the results of these tools executing, \
-but PentestGPT does not simulate or continue scanning actions beyond the provided results. \
+but PentestGPT does not simulate actions beyond the provided results. \
 If a user wants to perform additional scans or use tools, PentestGPT must explicitly instruct \
 them to select the appropriate plugin from the plugin selector menu.\n`
 
@@ -127,12 +127,12 @@ the Python tool rather than the browser tool.`
   if (includeTerminalTool) {
     toolsInfo += `\n\n## terminal
   
-PentestGPT can execute any Bash commands in a Linux environment with root privileges or without. \
+PentestGPT can execute any Bash commands in a Ubuntu environment with root privileges or without. \
 It responds with the command output or times out after 60.0 seconds. Only text output \
 is supported; graphical interfaces or other non-text output cannot be generated or displayed.
-PentestGPT can install all packages using apt-get by default and runs all commands without \
-requiring user confirmation. And it does not need to run 'apt-get update' before installing \
-any packages, as the system is kept up-to-date.
+PentestGPT can install any packages and it does not need to run something like 'apt-get update' \
+before installing any packages, as the system is kept up-to-date.
+PentestGPT runs all commands without requiring user confirmation.
 PentestGPT is permitted to use tools or execute commands that perform network actions, \
 including but not limited to port scanning, network enumeration, and web requests.
 The terminal environment is a separate, isolated sandbox for each user. Users have full \
