@@ -77,12 +77,12 @@ export async function POST(request: Request) {
 
     updateSystemMessage(
       messages,
-      (detectedModerationLevel === 0 && !isPentestGPTPro) ||
-        (detectedModerationLevel >= 0.0 &&
-          detectedModerationLevel <= 0.2 &&
-          !isPentestGPTPro)
-        ? llmConfig.systemPrompts.pgpt35WithTools
-        : llmConfig.systemPrompts.pentestGPTChat,
+      isPentestGPTPro
+        ? llmConfig.systemPrompts.pgpt4
+        : (detectedModerationLevel === 0 ||
+           (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.2))
+          ? llmConfig.systemPrompts.pgpt35WithTools
+          : llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
     )
 
