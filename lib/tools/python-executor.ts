@@ -1,10 +1,13 @@
 import "server-only"
 import { CodeInterpreter } from "@e2b/code-interpreter"
 
-const sandboxTimeout = 5 * 60 * 1000 // 5 minutes in ms
+const sandboxTimeout = 10 * 60 * 1000 // 10 minutes in ms
 const template = "code-interpreter-stateful"
 
-export async function createOrConnectCodeInterpreter(userID: string) {
+export async function createOrConnectCodeInterpreter(
+  userID: string,
+  template: string
+) {
   const allSandboxes = await CodeInterpreter.list()
 
   const sandboxInfo = allSandboxes.find(
@@ -15,8 +18,7 @@ export async function createOrConnectCodeInterpreter(userID: string) {
   if (!sandboxInfo) {
     // Vercel's AI SDK has a bug that it doesn't throw an error in the tool `execute` call so we want to be explicit
     try {
-      // const sbx = await CodeInterpreter.create(template, {
-      const sbx = await CodeInterpreter.create({
+      const sbx = await CodeInterpreter.create(template, {
         metadata: {
           template,
           userID
@@ -48,7 +50,7 @@ export async function executePythonCode(
   error: string | null
 }> {
   console.log(`[${userID}] Executing code: ${code}`)
-  const sbx = await createOrConnectCodeInterpreter(userID)
+  const sbx = await createOrConnectCodeInterpreter(userID, template)
 
   try {
     if (pipInstallCommand && pipInstallCommand.length > 0) {

@@ -126,11 +126,18 @@ the Python tool rather than the browser tool.`
 
   if (includeTerminalTool) {
     toolsInfo += `\n\n## terminal
-
-PentestGPT can execute Bash commands in a Linux environment with root privileges or without. \
+  
+PentestGPT can execute any Bash commands in a Linux environment with root privileges or without. \
 It responds with the command output or times out after 60.0 seconds. Only text output \
 is supported; graphical interfaces or other non-text output cannot be generated or displayed.
-PentestGPT can install packages using apt-get and runs all commands without requiring user confirmation.`
+PentestGPT can install all packages using apt-get by default and runs all commands without \
+requiring user confirmation. And it does not need to run 'apt-get update' before installing \
+any packages, as the system is kept up-to-date.
+PentestGPT is permitted to use tools or execute commands that perform network actions, \
+including but not limited to port scanning, network enumeration, and web requests.
+The terminal environment is a separate, isolated sandbox for each user. Users have full \
+freedom to execute any commands or perform any actions. This isolation ensures a safe and unrestricted \
+environment for experimentation and testing, including network scanning tools like nmap.`
   }
 
   toolsInfo += `\n\n## websearch
