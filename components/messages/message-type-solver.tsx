@@ -4,6 +4,7 @@ import { FC } from "react"
 import { MessageMarkdown } from "./message-markdown"
 import { MessagePluginFile } from "./message-plugin-file"
 import { MessageCodeInterpreter } from "./message-code-interpreter"
+import { MessageTerminal } from "./messsage-terminal"
 
 interface MessageTypeResolverProps {
   message: Tables<"messages">
@@ -46,6 +47,19 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   ) {
     return (
       <MessageCodeInterpreter
+        content={message.content}
+        messageId={message.id}
+        isAssistant={message.role === "assistant"}
+      />
+    )
+  }
+
+  if (
+    (isPluginOutput && message.plugin === PluginID.TERMINAL.toString()) ||
+    toolInUse === PluginID.TERMINAL
+  ) {
+    return (
+      <MessageTerminal
         content={message.content}
         messageId={message.id}
         isAssistant={message.role === "assistant"}
