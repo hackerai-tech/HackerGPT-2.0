@@ -370,7 +370,6 @@ export const processResponse = async (
     let fullText = ""
     let finishReason = ""
     let toolCallId = ""
-    let terminalCallId = ""
     let ragUsed = false
     let ragId = null
     let updatedPlugin = selectedPlugin
@@ -422,15 +421,13 @@ export const processResponse = async (
 
         const processStreamPart = (
           streamPart: any,
-          toolCallId: string,
-          terminalCallId: string
+          toolCallId: string
         ): string => {
           if (streamPart.type === "text") return streamPart.value
 
           if (
             isToolCallDelta(streamPart) &&
-            (streamPart.value.toolCallId === toolCallId ||
-              streamPart.value.toolCallId === terminalCallId)
+            streamPart.value.toolCallId === toolCallId
           ) {
             return streamPart.value.argsTextDelta
           }
@@ -452,9 +449,11 @@ export const processResponse = async (
             return streamPart.value.reduce(
               (acc, item) =>
                 acc +
-                (item.type === "stdout"
-                  ? item.content
-                  : `<stderr>${item.content}</stderr>`),
+                (item.type === "terminal"
+                  ? `${item.content}`
+                  : item.type === "stdout"
+                    ? item.content
+                    : `<stderr>${item.content}</stderr>`),
               ""
             )
           }
@@ -467,11 +466,7 @@ export const processResponse = async (
           case "tool_call_delta":
           case "tool_result":
           case "data":
-            const streamText = processStreamPart(
-              streamPart,
-              toolCallId,
-              terminalCallId
-            )
+            const streamText = processStreamPart(streamPart, toolCallId)
             if (streamText) {
               setFirstTokenReceived(true)
               fullText += streamText
@@ -546,7 +541,6 @@ export const processResponse = async (
                 break
               case "terminal":
                 setToolInUse(PluginID.TERMINAL)
-                terminalCallId = streamPart.value.toolCallId
                 updatedPlugin = PluginID.TERMINAL
                 break
             }

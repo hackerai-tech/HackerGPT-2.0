@@ -14,7 +14,8 @@ import {
   IconFileText,
   IconFileTypePdf,
   IconDatabaseSearch,
-  IconCode
+  IconCode,
+  IconTerminal2
 } from "@tabler/icons-react"
 import Image from "next/image"
 import { FC, useContext, useEffect, useRef, useState } from "react"
@@ -282,6 +283,13 @@ export const Message: FC<MessageProps> = ({
                           <IconCode size={20} />
 
                           <div>Using Code Interpreter...</div>
+                        </div>
+                      )
+                    case PluginID.TERMINAL:
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <IconTerminal2 size={20} />
+                          <div>Executing command in Terminal...</div>
                         </div>
                       )
                     default:

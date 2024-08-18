@@ -132,6 +132,11 @@ export async function POST(request: Request) {
             code: z.string().describe("The bash command to execute.")
           }),
           async execute({ code }) {
+            data.append({
+              type: "terminal",
+              content: `\n\`\`\`terminal\n${code}\n\`\`\``
+            })
+
             if (hasExecutedCode) {
               return {
                 stdout:
