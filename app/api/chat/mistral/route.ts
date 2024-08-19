@@ -148,7 +148,7 @@ export async function POST(request: Request) {
         detectedModerationLevel <= 0.2 &&
         !isPentestGPTPro)
     ) {
-      selectedModel = "openai/gpt-4o-mini"
+      selectedModel = "mistralai/mistral-nemo"
       filterEmptyAssistantMessages(messages)
     } else {
       filterEmptyAssistantMessages(messages)
@@ -185,7 +185,7 @@ export async function POST(request: Request) {
         abortSignal: request.signal,
         experimental_toolCallStreaming: true,
         tools:
-          selectedModel === "openai/gpt-4o-mini"
+          selectedModel === "mistralai/mistral-nemo"
             ? {
                 webSearch: {
                   description: "Search the web for latest information",
