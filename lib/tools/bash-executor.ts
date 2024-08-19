@@ -2,6 +2,7 @@ import { CellMessage } from "@e2b/code-interpreter"
 import { createOrConnectCodeInterpreter } from "./python-executor"
 import { StreamData } from "ai"
 
+const bashSandboxTimeout = 10 * 60 * 1000 // 10 minutes in ms
 const template = "bash_sandbox"
 
 export async function executeBashCommand(
@@ -14,14 +15,18 @@ export async function executeBashCommand(
 }> {
   console.log(`[${userID}] Starting bash command execution: ${command}`)
 
-  const sbx = await createOrConnectCodeInterpreter(userID, template)
+  const sbx = await createOrConnectCodeInterpreter(
+    userID,
+    template,
+    bashSandboxTimeout
+  )
 
   let stdoutAccumulator = ""
 
   try {
     data.append({ type: "stdout", content: "\n```stdout\n" })
     const execution = await sbx.notebook.execCell(`!${command}`, {
-      timeoutMs: 60000,
+      timeoutMs: 3 * 60 * 1000,
       onStdout: (out: CellMessage) => {
         stdoutAccumulator += out.toString()
         data.append({ type: "stdout", content: out.toString() })

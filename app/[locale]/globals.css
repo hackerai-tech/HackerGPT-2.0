@@ -130,3 +130,19 @@
     }
   }
 
+  .ansi-terminal .ansi-black-fg { color: #696969; }
+  .ansi-terminal .ansi-red-fg { color: #FF6B68; }
+  .ansi-terminal .ansi-green-fg { color: #A8FF60; }
+  .ansi-terminal .ansi-yellow-fg { color: #FFFFB6; }
+  .ansi-terminal .ansi-blue-fg { color: #96CBFE; }
+  .ansi-terminal .ansi-magenta-fg { color: #FF73FD; }
+  .ansi-terminal .ansi-cyan-fg { color: #C6C5FE; }
+  .ansi-terminal .ansi-white-fg { color: #EEEEEE; }
+  .ansi-terminal .ansi-bright-black-fg { color: #7C7C7C; }
+  .ansi-terminal .ansi-bright-red-fg { color: #FF8785; }
+  .ansi-terminal .ansi-bright-green-fg { color: #B6FFB2; }
+  .ansi-terminal .ansi-bright-yellow-fg { color: #FFFFCC; }
+  .ansi-terminal .ansi-bright-blue-fg { color: #B5DCFE; }
+  .ansi-terminal .ansi-bright-magenta-fg { color: #FF9CFE; }
+  .ansi-terminal .ansi-bright-cyan-fg { color: #DFDFFE; }
+  .ansi-terminal .ansi-bright-white-fg { color: #FFFFFF; }

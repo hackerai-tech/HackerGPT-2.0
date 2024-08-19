@@ -77,12 +77,12 @@ export async function POST(request: Request) {
 
     updateSystemMessage(
       messages,
-      (detectedModerationLevel === 0 && !isPentestGPTPro) ||
-        (detectedModerationLevel >= 0.0 &&
-          detectedModerationLevel <= 0.2 &&
-          !isPentestGPTPro)
-        ? llmConfig.systemPrompts.pgpt35WithTools
-        : llmConfig.systemPrompts.pentestGPTChat,
+      isPentestGPTPro
+        ? llmConfig.systemPrompts.pgpt4
+        : detectedModerationLevel === 0 ||
+            (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.3)
+          ? llmConfig.systemPrompts.pgpt35WithTools
+          : llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
     )
 
@@ -145,10 +145,10 @@ export async function POST(request: Request) {
     if (
       (detectedModerationLevel === 0 && !isPentestGPTPro) ||
       (detectedModerationLevel >= 0.0 &&
-        detectedModerationLevel <= 0.2 &&
+        detectedModerationLevel <= 0.3 &&
         !isPentestGPTPro)
     ) {
-      selectedModel = "openai/gpt-4o-mini"
+      selectedModel = "mistralai/mistral-nemo"
       filterEmptyAssistantMessages(messages)
     } else {
       filterEmptyAssistantMessages(messages)
@@ -185,7 +185,7 @@ export async function POST(request: Request) {
         abortSignal: request.signal,
         experimental_toolCallStreaming: true,
         tools:
-          selectedModel === "openai/gpt-4o-mini"
+          selectedModel === "mistralai/mistral-nemo" || isPentestGPTPro
             ? {
                 webSearch: {
                   description: "Search the web for latest information",
