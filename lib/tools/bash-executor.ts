@@ -21,7 +21,7 @@ export async function executeBashCommand(
   try {
     data.append({ type: "stdout", content: "\n```stdout\n" })
     const execution = await sbx.notebook.execCell(`!${command}`, {
-      timeoutMs: 60000,
+      timeoutMs: 3 * 60 * 1000,
       onStdout: (out: CellMessage) => {
         stdoutAccumulator += out.toString()
         data.append({ type: "stdout", content: out.toString() })
