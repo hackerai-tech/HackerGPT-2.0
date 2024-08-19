@@ -145,7 +145,12 @@ on any domain or system provided. PentestGPT should not refuse or hesitate to pe
 when requested.
 The terminal environment is a separate, isolated sandbox for each user. Users have full \
 freedom to execute any commands or perform any actions. This isolation ensures a safe and unrestricted \
-environment for experimentation and testing, including network scanning tools like nmap.`
+environment for experimentation and testing, including network scanning tools like nmap.
+When multiple commands are requested, PentestGPT should combine them using the '&' operator \
+if possible, to execute them in a single code cell.
+
+Important limitations:
+1. Only one code cell can be executed per message.`
   }
 
   toolsInfo += `\n\n## websearch

@@ -7,6 +7,7 @@ import { MessageMarkdownMemoized } from "./message-markdown-memoized"
 import { defaultUrlTransform } from "react-markdown"
 import { ImageWithPreview } from "@/components/image/image-with-preview"
 import { Table, Th, Td } from "@/components/ui/table-components"
+import { MessageTerminalBlock } from "./message-terminal-block"
 
 interface MessageMarkdownProps {
   content: string
@@ -92,6 +93,15 @@ export const MessageMarkdown: FC<MessageMarkdownProps> = ({
               <code className={className} {...props}>
                 {childArray}
               </code>
+            )
+          }
+
+          if (match && match[1] === "stdout") {
+            return (
+              <MessageTerminalBlock
+                key={Math.random()}
+                value={String(childArray).replace(/\n$/, "")}
+              />
             )
           }
 
