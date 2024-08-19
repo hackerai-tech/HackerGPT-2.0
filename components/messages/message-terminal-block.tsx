@@ -4,6 +4,7 @@ import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"
 import { IconCheck, IconCopy, IconDownload } from "@tabler/icons-react"
 import { cn } from "@/lib/utils"
 import { generateRandomString } from "./message-codeblock"
+import ansiHTML from "ansi-to-html"
 
 interface MessageTerminalBlockProps {
   value: string
@@ -35,6 +36,32 @@ const CopyButton: FC<{ value: string; title?: string; className?: string }> =
   })
 
 CopyButton.displayName = "CopyButton"
+
+const convert = new ansiHTML({
+  fg: "#FFF",
+  bg: "#000",
+  newline: true,
+  escapeXML: true,
+  stream: false,
+  colors: {
+    0: "#696969",
+    1: "#FF6B68",
+    2: "#A8FF60",
+    3: "#FFFFB6",
+    4: "#96CBFE",
+    5: "#FF73FD",
+    6: "#C6C5FE",
+    7: "#EEEEEE",
+    8: "#7C7C7C",
+    9: "#FF8785",
+    10: "#B6FFB2",
+    11: "#FFFFCC",
+    12: "#B5DCFE",
+    13: "#FF9CFE",
+    14: "#DFDFFE",
+    15: "#FFFFFF"
+  }
+})
 
 export const MessageTerminalBlock: FC<MessageTerminalBlockProps> = memo(
   ({ value }) => {
@@ -76,6 +103,8 @@ export const MessageTerminalBlock: FC<MessageTerminalBlockProps> = memo(
       return () => window.removeEventListener("resize", adjustFontSize)
     }, [value, fontSize])
 
+    const formattedValue = convert.toHtml(value)
+
     return (
       <div className="codeblock relative w-full bg-zinc-950 font-sans">
         <div className="sticky top-0 flex w-full items-center justify-between bg-zinc-700 px-4 text-white">
@@ -95,16 +124,15 @@ export const MessageTerminalBlock: FC<MessageTerminalBlockProps> = memo(
         </div>
         <div
           ref={terminalRef}
-          className="whitespace-pre-wrap break-words p-4 text-white"
+          className="ansi-terminal whitespace-pre-wrap break-words p-4 text-white"
           style={{
             fontSize: `${fontSize}px`,
             fontFamily: "var(--font-mono)",
             margin: 0,
             background: "transparent"
           }}
-        >
-          <code>{value}</code>
-        </div>
+          dangerouslySetInnerHTML={{ __html: formattedValue }}
+        />
       </div>
     )
   }
