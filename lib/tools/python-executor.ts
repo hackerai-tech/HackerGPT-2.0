@@ -1,12 +1,13 @@
 import "server-only"
 import { CodeInterpreter } from "@e2b/code-interpreter"
 
-const sandboxTimeout = 10 * 60 * 1000 // 10 minutes in ms
+const pythonSandboxTimeout = 3 * 60 * 1000 // 3 minutes in ms
 const template = "code-interpreter-stateful"
 
 export async function createOrConnectCodeInterpreter(
   userID: string,
-  template: string
+  template: string,
+  timeoutMs: number
 ) {
   const allSandboxes = await CodeInterpreter.list()
 
@@ -23,7 +24,7 @@ export async function createOrConnectCodeInterpreter(
           template,
           userID
         },
-        timeoutMs: sandboxTimeout
+        timeoutMs: timeoutMs
       })
 
       return sbx
@@ -34,7 +35,7 @@ export async function createOrConnectCodeInterpreter(
   }
 
   const sandbox = await CodeInterpreter.connect(sandboxInfo.sandboxID)
-  await sandbox.setTimeout(sandboxTimeout)
+  await sandbox.setTimeout(timeoutMs)
 
   return sandbox
 }
@@ -50,7 +51,11 @@ export async function executePythonCode(
   error: string | null
 }> {
   console.log(`[${userID}] Executing code: ${code}`)
-  const sbx = await createOrConnectCodeInterpreter(userID, template)
+  const sbx = await createOrConnectCodeInterpreter(
+    userID,
+    template,
+    pythonSandboxTimeout
+  )
 
   try {
     if (pipInstallCommand && pipInstallCommand.length > 0) {

@@ -2,6 +2,7 @@ import { CellMessage } from "@e2b/code-interpreter"
 import { createOrConnectCodeInterpreter } from "./python-executor"
 import { StreamData } from "ai"
 
+const bashSandboxTimeout = 10 * 60 * 1000 // 10 minutes in ms
 const template = "bash_sandbox"
 
 export async function executeBashCommand(
@@ -14,7 +15,11 @@ export async function executeBashCommand(
 }> {
   console.log(`[${userID}] Starting bash command execution: ${command}`)
 
-  const sbx = await createOrConnectCodeInterpreter(userID, template)
+  const sbx = await createOrConnectCodeInterpreter(
+    userID,
+    template,
+    bashSandboxTimeout
+  )
 
   let stdoutAccumulator = ""
 
