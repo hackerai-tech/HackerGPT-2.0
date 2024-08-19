@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       isPentestGPTPro
         ? llmConfig.systemPrompts.pgpt4
         : detectedModerationLevel === 0 ||
-            (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.2)
+            (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.3)
           ? llmConfig.systemPrompts.pgpt35WithTools
           : llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
     if (
       (detectedModerationLevel === 0 && !isPentestGPTPro) ||
       (detectedModerationLevel >= 0.0 &&
-        detectedModerationLevel <= 0.2 &&
+        detectedModerationLevel <= 0.3 &&
         !isPentestGPTPro)
     ) {
       selectedModel = "mistralai/mistral-nemo"
