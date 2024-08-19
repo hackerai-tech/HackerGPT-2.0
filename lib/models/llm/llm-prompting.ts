@@ -88,7 +88,7 @@ export const getPentestGPTToolsInfo = (
   let toolsInfo = "<tools_instructions>"
 
   if (includeBrowserTool) {
-    toolsInfo += `\n\n## browser
+    toolsInfo += `\n\n<browser_instructions>
 
 PentestGPT can extract text content from webpages using the browser tool. It cannot \
 retrieve HTML, images, or other non-text elements directly. When specific webpage information \
@@ -101,11 +101,12 @@ limitation if such requests are made.
 
 PentestGPT uses 'browser' when:
 - The user explicitly requests webpage browsing or reference links.
-- Current information from a specific website is required for answering user queries.`
+- Current information from a specific website is required for answering user queries.
+</browser_instructions>`
   }
 
   if (includePythonTool) {
-    toolsInfo += `\n\n## python
+    toolsInfo += `\n\n<python_instructions>
 
 PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
 It responds with the execution output or times out after 60.0 seconds. Only text output \
@@ -120,16 +121,19 @@ Important limitations:
 2. Only one API call is allowed per message.
 
 PentestGPT can install additional packages via pip that are not pre-installed in \
-the default stateful Jupyter environment. \
+the default stateful Jupyter environment. Like this:
+<example>!pip install package1 package2</example>
+
 This allows for the use of specialized libraries when needed for specific tasks.
 PentestGPT always provides the results of the code execution, regardless of success or failure, \
 to ensure transparency and aid in troubleshooting if necessary.
 For tasks requiring HTML retrieval or complex web scraping, PentestGPT should use \
-the Python tool rather than the browser tool.`
+the Python tool rather than the browser tool.
+</python_instructions>`
   }
 
   if (includeTerminalTool) {
-    toolsInfo += `\n\n## terminal
+    toolsInfo += `\n\n<terminal_instructions>
   
 PentestGPT can execute any Bash commands in a Ubuntu environment with root privileges or without. \
 It responds with the command output or times out after 60.0 seconds. Only text output \
@@ -150,10 +154,11 @@ When multiple commands are requested, PentestGPT should combine them using the '
 if possible, to execute them in a single code cell.
 
 Important limitations:
-1. Only one code cell can be executed per message.`
+1. Only one code cell can be executed per message.
+</terminal_instructions>`
   }
 
-  toolsInfo += `\n\n## websearch
+  toolsInfo += `\n\n<websearch_instructions>
 
 PentestGPT can search the web for real-time information. \
 This tool should be used only in specific circumstances:
@@ -165,7 +170,8 @@ to google, search the web or similar.
 PentestGPT does not use websearch to open URLs, links, or videos.
 PentestGPT does not use the websearch tool if the user is merely asking about \
 the possibility of searching the web or similar inquiries. \
-It only performs a web search when explicitly instructed by the user to do so.`
+It only performs a web search when explicitly instructed by the user to do so.
+</websearch_instructions>`
 
   toolsInfo += "\n</tools_instructions>"
 
