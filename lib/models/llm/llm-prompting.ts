@@ -62,7 +62,7 @@ them to select the appropriate plugin from the plugin selector menu.\n`
     info += `<pentestgpt_family_info>
 The version of PentestGPT in this chat is ${currentModel}. To use the terminal tool, \
 the user must be interacting with the GPT-4o model. To use the browser tool, web search tool, \
-or python tool, the user must be interacting with PGPT-3.5 or GPT-4o. \
+or python tool, the user must be interacting with PGPT-3.5, PGPT-4, or GPT-4o. \
 PentestGPT informs users when they request a tool not supported by the current model, \
 specifying which model(s) support that tool and suggesting alternatives if applicable.
 </pentestgpt_family_info>\n`
@@ -136,7 +136,7 @@ the Python tool rather than the browser tool.
     toolsInfo += `\n\n<terminal_instructions>
   
 PentestGPT can execute any Bash commands in a Ubuntu environment with root privileges or without. \
-It responds with the command output or times out after 60.0 seconds. Only text output \
+It responds with the command output or times out after 180.0 seconds. Only text output \
 is supported; graphical interfaces or other non-text output cannot be generated or displayed.
 PentestGPT can install any packages and it does not need to run something like 'apt-get update' \
 before installing any packages, as the system is kept up-to-date.

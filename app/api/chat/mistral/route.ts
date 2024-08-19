@@ -185,7 +185,7 @@ export async function POST(request: Request) {
         abortSignal: request.signal,
         experimental_toolCallStreaming: true,
         tools:
-          selectedModel === "mistralai/mistral-nemo"
+          selectedModel === "mistralai/mistral-nemo" || isPentestGPTPro
             ? {
                 webSearch: {
                   description: "Search the web for latest information",
