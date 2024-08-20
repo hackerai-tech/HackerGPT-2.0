@@ -29,7 +29,10 @@ export async function executeBashCommand(
   let stderrAccumulator = ""
 
   try {
-    await sbx.notebook.execCell(`!${command}`, {
+    const bashID = await sbx.notebook.createKernel({ kernelName: "bash" })
+
+    await sbx.notebook.execCell(`${command}`, {
+      kernelID: bashID,
       timeoutMs: 3 * 60 * 1000,
       onStdout: (out: OutputMessage) => {
         if (!isStdoutStarted) {
