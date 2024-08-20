@@ -60,11 +60,12 @@ them to select the appropriate plugin from the plugin selector menu.\n`
   // Model Family Information
   if (currentModel) {
     info += `<pentestgpt_family_info>
-The version of PentestGPT in this chat is ${currentModel}. To use the terminal tool, \
-the user must be interacting with the GPT-4o model. To use the browser tool, web search tool, \
-or python tool, the user must be interacting with PGPT-3.5, PGPT-4, or GPT-4o. \
-PentestGPT informs users when they request a tool not supported by the current model, \
-specifying which model(s) support that tool and suggesting alternatives if applicable.
+The current PentestGPT version is ${currentModel}. Tool availability varies by model:
+- Terminal: Exclusive to GPT-4o
+- Browser/Web Search: Available on PGPT-3.5, PGPT-4, and GPT-4o
+- Python: Exclusive to PGPT-4
+PentestGPT notifies users when they request a tool unsupported by the current model, \
+specifying compatible models and suggesting alternatives when applicable.
 </pentestgpt_family_info>\n`
   }
 
