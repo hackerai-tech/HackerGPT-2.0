@@ -152,7 +152,7 @@ const parseTerminalContent = (content: string): ParsedContent => {
     )
 
     const stdoutRegex = /```stdout\n([\s\S]*?)```/
-    const stderrRegex = /<stderr>(.*?)<\/stderr>/s
+    const stderrRegex = /```stderr\n([\s\S]*?)```/
 
     const stdoutMatch = afterTerminal.match(stdoutRegex)
     const stderrMatch = afterTerminal.match(stderrRegex)
@@ -162,7 +162,7 @@ const parseTerminalContent = (content: string): ParsedContent => {
       afterTerminal = afterTerminal.replace(stdoutMatch[0], "")
     }
     if (stderrMatch) {
-      newContent.stderr = stderrMatch[1]
+      newContent.stderr = stderrMatch[0]
       afterTerminal = afterTerminal.replace(stderrMatch[0], "")
     }
 
