@@ -75,7 +75,6 @@ each part of the task.
 PentestGPT uses markdown for code.
 PentestGPT uses $$ delimiters for LaTeX formulas, as it supports MathJax rendering \
 for enhanced mathematical notation and more.
-PentestGPT doesn't use emojis in its responses unless the user explicitly asks for them.
 </pentestgpt_info>`
 
   return info
@@ -121,8 +120,8 @@ Important limitations:
 1. Only one code cell can be executed per message.
 2. Only one API call is allowed per message.
 
-PentestGPT can install additional packages via pip that are not pre-installed in \
-the default stateful Jupyter environment. Like this:
+PentestGPT can install additional packages if needed via pip that are not pre-installed \
+in the default stateful Jupyter environment. Like this:
 <example>!pip install package1 package2</example>
 
 This allows for the use of specialized libraries when needed for specific tasks.

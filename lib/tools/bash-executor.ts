@@ -1,9 +1,12 @@
-import { CellMessage } from "@e2b/code-interpreter"
-import { createOrConnectCodeInterpreter } from "./python-executor"
 import { StreamData } from "ai"
+import {
+  CodeInterpreter,
+  ProcessExitError,
+  OutputMessage
+} from "@e2b/code-interpreter"
 
 const bashSandboxTimeout = 10 * 60 * 1000 // 10 minutes in ms
-const template = "bash_sandbox"
+const template = "terminal-sbx"
 
 export async function executeBashCommand(
   userID: string,
@@ -22,32 +25,78 @@ export async function executeBashCommand(
   )
 
   let stdoutAccumulator = ""
+  let isStdoutStarted = false
+  let stderrAccumulator = ""
 
   try {
-    data.append({ type: "stdout", content: "\n```stdout\n" })
-    const execution = await sbx.notebook.execCell(`!${command}`, {
+    await sbx.notebook.execCell(`!${command}`, {
       timeoutMs: 3 * 60 * 1000,
-      onStdout: (out: CellMessage) => {
-        stdoutAccumulator += out.toString()
-        data.append({ type: "stdout", content: out.toString() })
+      onStdout: (out: OutputMessage) => {
+        if (!isStdoutStarted) {
+          data.append({ type: "stdout", content: "\n```stdout\n" })
+          isStdoutStarted = true
+        }
+        stdoutAccumulator += out.line
+        data.append({ type: "stdout", content: out.line })
       }
     })
-    data.append({ type: "stdout", content: "\n```" })
 
-    const stderrOutput = execution.logs.stderr.join("\n")
-    if (stderrOutput.length > 0) {
-      data.append({
-        type: "stderr",
-        content: `\n\`\`\`stderr\n${stderrOutput}\n\`\`\``
-      })
+    if (isStdoutStarted) {
+      data.append({ type: "stdout", content: "\n```" })
     }
 
     return {
       stdout: stdoutAccumulator,
-      stderr: stderrOutput
+      stderr: stderrAccumulator
     }
-  } finally {
-    // TODO: This .close will be removed with the update to websocketless CodeInterpreter
-    await sbx.close()
+  } catch (error) {
+    if (error instanceof ProcessExitError) {
+      const errorMessage = `\`\`\`stderr\n${error.stderr}\n\`\`\``
+      data.append({ type: "stderr", content: errorMessage })
+      stderrAccumulator = errorMessage
+    } else {
+      console.error("Error executing bash command", error)
+    }
+
+    return {
+      stdout: stdoutAccumulator,
+      stderr: stderrAccumulator
+    }
   }
+}
+
+export async function createOrConnectCodeInterpreter(
+  userID: string,
+  template: string,
+  timeoutMs: number
+) {
+  const allSandboxes = await CodeInterpreter.list()
+
+  const sandboxInfo = allSandboxes.find(
+    sbx =>
+      sbx.metadata?.userID === userID && sbx.metadata?.template === template
+  )
+
+  if (!sandboxInfo) {
+    // Vercel's AI SDK has a bug that it doesn't throw an error in the tool `execute` call so we want to be explicit
+    try {
+      const sbx = await CodeInterpreter.create(template, {
+        metadata: {
+          template,
+          userID
+        },
+        timeoutMs: timeoutMs
+      })
+
+      return sbx
+    } catch (e) {
+      console.error("Error creating sandbox", e)
+      throw e
+    }
+  }
+
+  const sandbox = await CodeInterpreter.connect(sandboxInfo.sandboxId)
+  await sandbox.setTimeout(timeoutMs)
+
+  return sandbox
 }
