@@ -2,7 +2,7 @@ import "server-only"
 import { CodeInterpreter } from "@e2b/code-interpreter"
 
 const pythonSandboxTimeout = 3 * 60 * 1000 // 3 minutes in ms
-const template = "code-interpreter-stateful"
+const template = "code-interpreter"
 
 export async function createOrConnectCodeInterpreter(
   userID: string,
@@ -19,7 +19,8 @@ export async function createOrConnectCodeInterpreter(
   if (!sandboxInfo) {
     // Vercel's AI SDK has a bug that it doesn't throw an error in the tool `execute` call so we want to be explicit
     try {
-      const sbx = await CodeInterpreter.create(template, {
+      // const sbx = await CodeInterpreter.create(template, {
+      const sbx = await CodeInterpreter.create({
         metadata: {
           template,
           userID
@@ -34,7 +35,7 @@ export async function createOrConnectCodeInterpreter(
     }
   }
 
-  const sandbox = await CodeInterpreter.connect(sandboxInfo.sandboxID)
+  const sandbox = await CodeInterpreter.connect(sandboxInfo.sandboxId)
   await sandbox.setTimeout(timeoutMs)
 
   return sandbox
@@ -59,10 +60,20 @@ export async function executePythonCode(
 
   try {
     if (pipInstallCommand && pipInstallCommand.length > 0) {
-      console.log(`[${userID}] Installing packages: ${pipInstallCommand}`)
-      const installExecution = await sbx.notebook.execCell(pipInstallCommand, {
-        timeoutMs: 15000
-      })
+      // Ensure the pip install command starts with "!pip install"
+      const formattedPipCommand = pipInstallCommand
+        .trim()
+        .startsWith("!pip install")
+        ? pipInstallCommand
+        : `!pip install ${pipInstallCommand}`
+
+      console.log(`[${userID}] Installing packages: ${formattedPipCommand}`)
+      const installExecution = await sbx.notebook.execCell(
+        formattedPipCommand,
+        {
+          timeoutMs: 15000
+        }
+      )
 
       if (installExecution.error) {
         console.error(
@@ -102,9 +113,6 @@ export async function executePythonCode(
       stderr: "",
       error: formatFullError(error)
     }
-  } finally {
-    // TODO: This .close will be removed with the update to websocketless CodeInterpreter
-    await sbx.close()
   }
 }
 

@@ -4,7 +4,7 @@ import { FC } from "react"
 import { MessageMarkdown } from "./message-markdown"
 import { MessagePluginFile } from "./message-plugin-file"
 import { MessageCodeInterpreter } from "./message-code-interpreter"
-import { MessageTerminal } from "./messsage-terminal"
+import { MessageTerminal } from "./message-terminal"
 
 interface MessageTypeResolverProps {
   message: Tables<"messages">

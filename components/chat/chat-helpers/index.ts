@@ -449,11 +449,7 @@ export const processResponse = async (
             return streamPart.value.reduce(
               (acc, item) =>
                 acc +
-                (item.type === "terminal"
-                  ? `${item.content}`
-                  : item.type === "stdout"
-                    ? item.content
-                    : `<stderr>${item.content}</stderr>`),
+                (item.type === "terminal" ? `${item.content}` : item.content),
               ""
             )
           }
