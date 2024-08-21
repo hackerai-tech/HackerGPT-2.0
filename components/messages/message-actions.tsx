@@ -187,7 +187,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {isLast && (
+      {isLast && !messageHasImage && (
         <WithTooltip
           delayDuration={0}
           side="bottom"
@@ -248,7 +248,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {isLast && isPremium && (
+      {isLast && !messageHasImage && isPremium && (
         <ChangeModelIcon
           currentModel={messageModel}
           onChangeModel={onRegenerateSpecificModel}

@@ -81,11 +81,61 @@ PentestGPT doesn't use emojis in its responses unless the user explicitly asks f
 }
 
 export const getPentestGPTToolsInfo = (
+  includeGenerateImageTool: boolean = false,
   includeBrowserTool: boolean = false,
+  includeWebSearchTool: boolean = false,
   includePythonTool: boolean = false,
   includeTerminalTool: boolean = false
 ): string => {
   let toolsInfo = "<tools_instructions>"
+
+  if (includeGenerateImageTool) {
+    toolsInfo += `\n\n<generateImage_instructions>
+PentestGPT can generate images based on text descriptions. When an image description is provided, \
+PentestGPT creates a detailed prompt for the image generation tool, adhering to the following guidelines:
+
+1. The prompt must be in English. PentestGPT translates to English if necessary.
+2. PentestGPT generates the image without asking for permission.
+3. Only one image is created per request, regardless of user specifications.
+
+The generated prompt should be highly detailed, approximately 100 words long, and \
+tailored to produce the best possible image based on the user's description.
+
+PentestGPT uses the following function to generate images:
+
+generateImage: (params: {
+  // The detailed image description, refined to comply with image generation policies.
+  // If modifying a previous image, integrate user suggestions into a cohesive prompt.
+  prompt: string,
+  
+  // Optional: Image width in pixels. Range: 256 to 1280. Default: 512.
+  width?: number,
+  
+  // Optional: Image height in pixels. Range: 256 to 1280. Default: 512.
+  height?: number,
+}) => string // Returns the generated image identifier
+
+PentestGPT always includes the prompt parameter and may include width and/or height if \
+specified by the user or if the desired image proportions are clear from the description.
+</generateImage_instructions>`
+  }
+
+  if (includeWebSearchTool) {
+    toolsInfo += `\n\n<websearch_instructions>
+
+PentestGPT can search the web for real-time information. \
+This tool should be used only in specific circumstances:
+- When the user inquires about current events or requires real-time information \
+such as weather conditions or sports scores.
+- When the user explicitly requests or instructs PentestGPT \
+to google, search the web or similar.
+
+PentestGPT does not use websearch to open URLs, links, or videos.
+PentestGPT does not use the websearch tool if the user is merely asking about \
+the possibility of searching the web or similar inquiries. \
+It only performs a web search when explicitly instructed by the user to do so.
+</websearch_instructions>`
+  }
 
   if (includeBrowserTool) {
     toolsInfo += `\n\n<browser_instructions>
@@ -157,21 +207,6 @@ Important limitations:
 1. Only one code cell can be executed per message.
 </terminal_instructions>`
   }
-
-  toolsInfo += `\n\n<websearch_instructions>
-
-PentestGPT can search the web for real-time information. \
-This tool should be used only in specific circumstances:
-- When the user inquires about current events or requires real-time information \
-such as weather conditions or sports scores.
-- When the user explicitly requests or instructs PentestGPT \
-to google, search the web or similar.
-
-PentestGPT does not use websearch to open URLs, links, or videos.
-PentestGPT does not use the websearch tool if the user is merely asking about \
-the possibility of searching the web or similar inquiries. \
-It only performs a web search when explicitly instructed by the user to do so.
-</websearch_instructions>`
 
   toolsInfo += "\n</tools_instructions>"
 

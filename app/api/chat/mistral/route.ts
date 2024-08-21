@@ -81,7 +81,7 @@ export async function POST(request: Request) {
         ? llmConfig.systemPrompts.pgpt4
         : detectedModerationLevel === 0 ||
             (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.3)
-          ? llmConfig.systemPrompts.pgpt35WithTools
+          ? llmConfig.systemPrompts.pgpt35
           : llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
     )
