@@ -42,13 +42,6 @@ export async function executeBashCommand(
         }
         stdoutAccumulator += out.line
         data.append({ type: "stdout", content: out.line })
-      },
-      onStderr: (err: OutputMessage) => {
-        stderrAccumulator += err.line
-        data.append({
-          type: "stderr",
-          content: `\n\`\`\`stderr\n${err.line}\n\`\`\``
-        })
       }
     })
 
