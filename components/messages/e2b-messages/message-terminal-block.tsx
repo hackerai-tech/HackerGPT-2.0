@@ -42,8 +42,8 @@ export const MessageTerminalBlock: FC<MessageTerminalBlockProps> = memo(
           </div>
         </div>
         <div
-          className="whitespace-pre-wrap break-words p-4 text-sm text-white font-mono"
-          style={{ background: "transparent"}}
+          className="whitespace-pre-wrap break-words p-4 font-mono text-sm text-white"
+          style={{ background: "transparent" }}
         >
           {stripAnsi(value)}
         </div>
