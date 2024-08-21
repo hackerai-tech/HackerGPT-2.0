@@ -147,7 +147,7 @@ export async function POST(request: Request) {
                 type: "stderr",
                 content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
               })
-              return
+              return { stdout: "", stderr: errorMessage }
             }
 
             hasExecutedCode = true

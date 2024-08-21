@@ -5,8 +5,8 @@ import {
   OutputMessage
 } from "@e2b/code-interpreter"
 
-const bashSandboxTimeout = 10 * 60 * 1000 // 10 minutes in ms
-const template = "terminal-sbx"
+const bashSandboxTimeout = 10 * 60 * 1000
+const template = "bash-terminal"
 
 export async function executeBashCommand(
   userID: string,
@@ -18,20 +18,21 @@ export async function executeBashCommand(
 }> {
   console.log(`[${userID}] Starting bash command execution: ${command}`)
 
-  const sbx = await createOrConnectCodeInterpreter(
-    userID,
-    template,
-    bashSandboxTimeout
-  )
-
-  let stdoutAccumulator = ""
-  let isStdoutStarted = false
-  let stderrAccumulator = ""
-
+  let sbx: CodeInterpreter | null = null
   try {
+    sbx = await createOrConnectCodeInterpreter(
+      userID,
+      template,
+      bashSandboxTimeout
+    )
+
+    let stdoutAccumulator = ""
+    let isStdoutStarted = false
+    let stderrAccumulator = ""
+
     const bashID = await sbx.notebook.createKernel({ kernelName: "bash" })
 
-    await sbx.notebook.execCell(`${command}`, {
+    const execution = await sbx.notebook.execCell(`${command}`, {
       kernelID: bashID,
       timeoutMs: 3 * 60 * 1000,
       onStdout: (out: OutputMessage) => {
@@ -41,6 +42,13 @@ export async function executeBashCommand(
         }
         stdoutAccumulator += out.line
         data.append({ type: "stdout", content: out.line })
+      },
+      onStderr: (err: OutputMessage) => {
+        stderrAccumulator += err.line
+        data.append({
+          type: "stderr",
+          content: `\n\`\`\`stderr\n${err.line}\n\`\`\``
+        })
       }
     })
 
@@ -48,22 +56,38 @@ export async function executeBashCommand(
       data.append({ type: "stdout", content: "\n```" })
     }
 
-    return {
-      stdout: stdoutAccumulator,
-      stderr: stderrAccumulator
-    }
-  } catch (error) {
-    if (error instanceof ProcessExitError) {
-      const errorMessage = `\`\`\`stderr\n${error.stderr}\n\`\`\``
-      data.append({ type: "stderr", content: errorMessage })
-      stderrAccumulator = errorMessage
-    } else {
-      console.error("Error executing bash command", error)
+    if (execution.error) {
+      console.error(`[${userID}] Bash execution error:`, execution.error)
+      stderrAccumulator += `\nExecution error: ${execution.error}`
+      data.append({
+        type: "stderr",
+        content: `\n\`\`\`stderr\nExecution error: ${execution.error}\n\`\`\``
+      })
     }
 
     return {
       stdout: stdoutAccumulator,
       stderr: stderrAccumulator
+    }
+  } catch (error) {
+    console.error(`[${userID}] Error executing bash command:`, error)
+    let errorMessage =
+      "An unexpected error occurred during bash command execution."
+
+    if (error instanceof ProcessExitError) {
+      errorMessage = error.stderr
+    } else if (error instanceof Error) {
+      errorMessage = error.message
+    }
+
+    data.append({
+      type: "stderr",
+      content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
+    })
+
+    return {
+      stdout: "",
+      stderr: errorMessage
     }
   }
 }
