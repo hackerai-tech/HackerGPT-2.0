@@ -442,8 +442,6 @@ export const processResponse = async (
             type: string
             content: {
               url: string
-              width: number
-              height: number
               prompt: string
             }
           }>
@@ -957,7 +955,6 @@ export const handleCreateMessages = async (
       }
     ]
 
-    console.log("finalChatMessages", finalChatMessages)
     setChatMessages(finalChatMessages)
   }
 }

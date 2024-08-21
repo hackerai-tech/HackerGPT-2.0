@@ -27,7 +27,13 @@ export async function generateAndUploadImage({
     throw new Error("Image API configuration is missing")
   }
 
-  const requestBody = { prompt, steps: 6, width, height, response_format: "url" }
+  const requestBody = {
+    prompt,
+    steps: 6,
+    width,
+    height,
+    response_format: "url"
+  }
 
   try {
     const response = await fetch(imageApiUrl, {
@@ -81,8 +87,6 @@ export async function generateAndUploadImage({
 
     return {
       url: uploadData.path,
-      width: imageData.width,
-      height: imageData.height,
       prompt: imageData.prompt,
       originalUrl: imageData.url
     }

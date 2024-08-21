@@ -187,8 +187,6 @@ export async function POST(request: Request) {
               type: "imageGenerated",
               content: {
                 url: generatedImage.url,
-                width: generatedImage.width,
-                height: generatedImage.height,
                 prompt: generatedImage.prompt
               }
             })
