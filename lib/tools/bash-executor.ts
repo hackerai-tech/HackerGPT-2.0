@@ -12,76 +12,69 @@ export async function executeBashCommand(
   userID: string,
   command: string,
   data: StreamData
-): Promise<{
-  stdout: string
-  stderr: string
-}> {
+): Promise<{ stdout: string; stderr: string }> {
   console.log(`[${userID}] Starting bash command execution: ${command}`)
 
   let sbx: CodeInterpreter | null = null
+  let stdoutAccumulator = ""
+  let isOutputStarted = false
+
   try {
     sbx = await createOrConnectCodeInterpreter(
       userID,
       template,
       bashSandboxTimeout
     )
-
-    let stdoutAccumulator = ""
-    let isStdoutStarted = false
-    let stderrAccumulator = ""
-
     const bashID = await sbx.notebook.createKernel({ kernelName: "bash" })
 
-    const execution = await sbx.notebook.execCell(`${command}`, {
+    const execution = await sbx.notebook.execCell(command, {
       kernelID: bashID,
       timeoutMs: 3 * 60 * 1000,
       onStdout: (out: OutputMessage) => {
-        if (!isStdoutStarted) {
+        if (!isOutputStarted) {
           data.append({ type: "stdout", content: "\n```stdout\n" })
-          isStdoutStarted = true
+          isOutputStarted = true
         }
         stdoutAccumulator += out.line
         data.append({ type: "stdout", content: out.line })
       }
     })
 
-    if (isStdoutStarted) {
+    if (isOutputStarted) {
       data.append({ type: "stdout", content: "\n```" })
     }
 
     if (execution.error) {
       console.error(`[${userID}] Bash execution error:`, execution.error)
-      stderrAccumulator += `\nExecution error: ${execution.error}`
+    }
+
+    const stderr = Array.isArray(execution.logs.stderr)
+      ? execution.logs.stderr.join("\n")
+      : execution.logs.stderr || ""
+
+    if (stderr) {
       data.append({
         type: "stderr",
-        content: `\n\`\`\`stderr\nExecution error: ${execution.error}\n\`\`\``
+        content: `\n\`\`\`stderr\n${stderr}\n\`\`\``
       })
     }
 
-    return {
-      stdout: stdoutAccumulator,
-      stderr: stderrAccumulator
-    }
+    return { stdout: stdoutAccumulator, stderr }
   } catch (error) {
     console.error(`[${userID}] Error executing bash command:`, error)
-    let errorMessage =
-      "An unexpected error occurred during bash command execution."
-
-    if (error instanceof ProcessExitError) {
-      errorMessage = error.stderr
-    } else if (error instanceof Error) {
-      errorMessage = error.message
-    }
+    const errorMessage =
+      error instanceof ProcessExitError
+        ? error.stderr
+        : error instanceof Error
+          ? error.message
+          : "An unexpected error occurred during bash command execution."
 
     data.append({
       type: "stderr",
       content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
     })
 
-    return {
-      stdout: "",
-      stderr: errorMessage
-    }
+    return { stdout: "", stderr: errorMessage }
   }
 }
 
