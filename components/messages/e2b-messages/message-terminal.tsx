@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react"
-import { MessageMarkdown } from "./message-markdown"
+import { MessageMarkdown } from "../message-markdown"
 import {
   IconChevronDown,
   IconChevronUp,
@@ -8,7 +8,7 @@ import {
   IconExclamationCircle
 } from "@tabler/icons-react"
 import { PluginID } from "@/types/plugins"
-import { MessageTooLong } from "./message-too-long"
+import { MessageTooLong } from "../message-too-long"
 
 interface MessageTerminalProps {
   content: string
