@@ -9,7 +9,6 @@ const supabaseAdmin = createClient<Database>(
 
 interface ImageGenerationParams {
   prompt: string
-  steps?: number
   width?: number
   height?: number
   userId: string
@@ -17,7 +16,6 @@ interface ImageGenerationParams {
 
 export async function generateAndUploadImage({
   prompt,
-  steps = 6,
   width = 512,
   height = 512,
   userId
@@ -29,7 +27,7 @@ export async function generateAndUploadImage({
     throw new Error("Image API configuration is missing")
   }
 
-  const requestBody = { prompt, steps, width, height, response_format: "url" }
+  const requestBody = { prompt, steps: 6, width, height, response_format: "url" }
 
   try {
     const response = await fetch(imageApiUrl, {

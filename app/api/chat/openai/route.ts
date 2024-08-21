@@ -16,9 +16,6 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText, tool } from "ai"
 import { ServerRuntime } from "next"
 import { z } from "zod"
-import { createClient } from "@supabase/supabase-js"
-import { Database } from "@/supabase/types"
-import { v4 as uuidv4 } from "uuid" // Ensure uuidv4 is imported
 import { generateAndUploadImage } from "@/lib/tools/image-generator"
 
 export const runtime: ServerRuntime = "edge"
@@ -47,11 +44,6 @@ export async function POST(request: Request) {
     const { messages } = await request.json()
 
     const profile = await getAIProfile()
-    const supabaseAdmin = createClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
     const rateLimitCheckResult = await checkRatelimitOnApi(
       profile.user_id,
       "gpt-4"
@@ -174,12 +166,6 @@ export async function POST(request: Request) {
           description: "Generates an image based on a text prompt.",
           parameters: z.object({
             prompt: z.string().describe("The text prompt for image generation"),
-            steps: z
-              .number()
-              .optional()
-              .describe(
-                "Number of denoising steps (integer 1 to 6, default: 6)"
-              ),
             width: z
               .number()
               .optional()
@@ -189,10 +175,9 @@ export async function POST(request: Request) {
               .optional()
               .describe("Height (integer 256 to 1280, default: 512)")
           }),
-          async execute({ prompt, steps, width, height }) {
+          async execute({ prompt, width, height }) {
             const generatedImage = await generateAndUploadImage({
               prompt,
-              steps,
               width,
               height,
               userId: profile.user_id
@@ -208,7 +193,7 @@ export async function POST(request: Request) {
               }
             })
 
-            return
+            return `Image generated successfully. URL: ${generatedImage.url}`
           }
         })
       },

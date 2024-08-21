@@ -15,7 +15,8 @@ import {
   IconFileTypePdf,
   IconDatabaseSearch,
   IconCode,
-  IconTerminal2
+  IconTerminal2,
+  IconPhoto
 } from "@tabler/icons-react"
 import Image from "next/image"
 import { FC, useContext, useEffect, useRef, useState } from "react"
@@ -297,6 +298,13 @@ export const Message: FC<MessageProps> = ({
                         <div className="flex animate-pulse items-center space-x-2">
                           <IconTerminal2 size={20} />
                           <div>Executing command in Terminal...</div>
+                        </div>
+                      )
+                    case PluginID.IMAGE_GENERATOR:
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <IconPhoto size={20} />
+                          <div>Generating image...</div>
                         </div>
                       )
                     default:
