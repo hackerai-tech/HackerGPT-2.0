@@ -323,12 +323,13 @@ export const Message: FC<MessageProps> = ({
                 <div className={`flex flex-wrap justify-end gap-2`}>
                   {message.image_paths.map((path, index) => {
                     const item = chatImages.find(image => image.path === path)
-
+                    const src = path.startsWith("data") ? path : item?.base64
+                    if (!src) return null
                     return (
                       <Image
                         key={index}
                         className="mb-2 cursor-pointer rounded hover:opacity-50"
-                        src={path.startsWith("data") ? path : item?.base64}
+                        src={src}
                         alt="message image"
                         width={300}
                         height={300}
@@ -336,9 +337,7 @@ export const Message: FC<MessageProps> = ({
                           setSelectedImage({
                             messageId: message.id,
                             path,
-                            base64: path.startsWith("data")
-                              ? path
-                              : item?.base64 || "",
+                            base64: src,
                             url: path.startsWith("data") ? "" : item?.url || "",
                             file: null
                           })
@@ -458,7 +457,7 @@ export const Message: FC<MessageProps> = ({
               onRegenerateSpecificModel={handleRegenerateSpecificModel}
               onGoodResponse={handleGoodResponse}
               onBadResponse={handleBadResponse}
-              messageContent={message.content}
+              messageContent={message.content || ""}
               messageModel={message.model}
               messageSequenceNumber={message.sequence_number}
             />

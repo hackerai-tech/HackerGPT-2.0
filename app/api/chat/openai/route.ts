@@ -16,6 +16,9 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText, tool } from "ai"
 import { ServerRuntime } from "next"
 import { z } from "zod"
+import { createClient } from "@supabase/supabase-js"
+import { Database } from "@/supabase/types"
+import { v4 as uuidv4 } from "uuid" // Ensure uuidv4 is imported
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -43,6 +46,11 @@ export async function POST(request: Request) {
     const { messages } = await request.json()
 
     const profile = await getAIProfile()
+    const supabaseAdmin = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
     const rateLimitCheckResult = await checkRatelimitOnApi(
       profile.user_id,
       "gpt-4"
@@ -159,6 +167,92 @@ export async function POST(request: Request) {
             )
 
             return execOutput
+          }
+        }),
+        generateImage: tool({
+          description: "Generates an image based on a text prompt.",
+          parameters: z.object({
+            prompt: z.string().describe("The text prompt for image generation"),
+            steps: z
+              .number()
+              .optional()
+              .describe(
+                "Number of denoising steps (integer 1 to 6, default: 4)"
+              ),
+            width: z
+              .number()
+              .optional()
+              .describe("Width (integer 256 to 1280, default: 512)"),
+            height: z
+              .number()
+              .optional()
+              .describe("Height (integer 256 to 1280, default: 512)")
+          }),
+          async execute({ prompt, steps, width, height }) {
+            const imageApiUrl = process.env.IMAGE_API_URL
+            const imageApiKey = process.env.IMAGE_API_KEY
+
+            if (!imageApiUrl || !imageApiKey) {
+              throw new Error("Image API configuration is missing")
+            }
+
+            const requestBody = {
+              prompt,
+              steps: steps || 4,
+              width: width || 512,
+              height: height || 512,
+              response_format: "url"
+            }
+
+            const response = await fetch(imageApiUrl, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${imageApiKey}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(requestBody)
+            })
+
+            if (!response.ok) {
+              const errorBody = await response.text()
+              throw new Error(
+                `HTTP error! status: ${response.status}. Error Body: ${errorBody}`
+              )
+            }
+
+            const imageData = await response.json()
+
+            const userId = profile.user_id
+            const filename = uuidv4()
+            const filePath = `${userId}/${filename}.jpg` // Use filename instead of imageData.url
+
+            const { data: uploadData, error: uploadError } =
+              await supabaseAdmin.storage
+                .from("message_images")
+                .upload(
+                  filePath,
+                  await fetch(imageData.url).then(res => res.blob()),
+                  {
+                    cacheControl: "3600",
+                    upsert: false
+                  }
+                )
+
+            if (uploadError) {
+              throw new Error(`Failed to upload image: ${uploadError.message}`)
+            }
+
+            data.append({
+              type: "imageGenerated",
+              content: {
+                url: uploadData.path,
+                width: imageData.width,
+                height: imageData.height,
+                prompt: imageData.prompt
+              }
+            })
+
+            return `Image generated successfully. URL: ${imageData.url}`
           }
         })
       },
