@@ -320,7 +320,9 @@ export const Message: FC<MessageProps> = ({
               />
             ) : (
               <div>
-                <div className={`flex flex-wrap justify-end gap-2`}>
+                <div
+                  className={`flex flex-wrap ${message.role === "user" ? "justify-end" : "justify-start"} gap-2`}
+                >
                   {message.image_paths.map((path, index) => {
                     const item = chatImages.find(image => image.path === path)
                     const src = path.startsWith("data") ? path : item?.base64
