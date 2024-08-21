@@ -71,12 +71,10 @@ export const MessageTerminalBlock: FC<MessageTerminalBlockProps> = memo(
     const downloadAsFile = useCallback(() => {
       const suggestedFileName = `terminal-output-${generateRandomString(3, true)}.txt`
       const fileName = window.prompt("Enter file name", suggestedFileName)
-
       if (!fileName) return
 
       const blob = new Blob([value], { type: "text/plain" })
       const url = URL.createObjectURL(blob)
-
       const link = document.createElement("a")
       link.href = url
       link.download = fileName
@@ -87,12 +85,10 @@ export const MessageTerminalBlock: FC<MessageTerminalBlockProps> = memo(
     useEffect(() => {
       const adjustFontSize = () => {
         if (terminalRef.current) {
-          const containerHeight = terminalRef.current.clientHeight
-          const contentHeight = terminalRef.current.scrollHeight
-
-          if (contentHeight > containerHeight) {
+          const { clientHeight, scrollHeight } = terminalRef.current
+          if (scrollHeight > clientHeight) {
             setFontSize(prevSize => Math.max(prevSize - 0.5, 8))
-          } else if (fontSize < 14 && contentHeight < containerHeight * 0.9) {
+          } else if (fontSize < 14 && scrollHeight < clientHeight * 0.9) {
             setFontSize(prevSize => Math.min(prevSize + 0.5, 14))
           }
         }
