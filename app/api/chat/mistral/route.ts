@@ -235,12 +235,7 @@ export async function POST(request: Request) {
                         }
                       })
 
-                      return `<ai_generated_image>
-                        prompt: ${prompt}
-                        width: ${width}
-                        height: ${height}
-                        url: ${generatedImage.url}
-                      </ai_generated_image>`
+                      return `Image generated successfully. URL: ${generatedImage.url}`
                     }
                   })
                 })
