@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect } from "react"
-import { MessageMarkdown } from "./message-markdown"
 import {
   IconChevronDown,
   IconChevronUp,
@@ -8,7 +7,8 @@ import {
   IconLoader2
 } from "@tabler/icons-react"
 import { PluginID } from "@/types/plugins"
-import { MessageTooLong } from "./message-too-long"
+import { MessageMarkdown } from "../message-markdown"
+import { MessageTooLong } from "../message-too-long"
 
 interface MessageCodeInterpreterProps {
   content: string

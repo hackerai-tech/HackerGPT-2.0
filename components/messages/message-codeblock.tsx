@@ -52,30 +52,33 @@ export const generateRandomString = (length: number, lowercase = false) => {
   return lowercase ? result.toLowerCase() : result
 }
 
-const CopyButton: FC<{ value: string; title?: string; className?: string }> =
-  memo(({ value, title = "Copy to clipboard", className }) => {
-    const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 })
-    return (
-      <Button
-        title={title}
-        variant="ghost"
-        size="sm"
-        className={cn(
-          "text-xs text-white hover:bg-zinc-800 focus-visible:ring-1 focus-visible:ring-slate-700 focus-visible:ring-offset-0",
-          className
-        )}
-        onClick={() => !isCopied && copyToClipboard(value)}
-        aria-label={isCopied ? "Copied" : "Copy to clipboard"}
-      >
-        <span className="flex items-center space-x-1">
-          {isCopied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-          <span className="hidden sm:inline">
-            {isCopied ? "Copied!" : "Copy"}
-          </span>
+export const CopyButton: FC<{
+  value: string
+  title?: string
+  className?: string
+}> = memo(({ value, title = "Copy to clipboard", className }) => {
+  const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 })
+  return (
+    <Button
+      title={title}
+      variant="ghost"
+      size="sm"
+      className={cn(
+        "text-xs text-white hover:bg-zinc-800 focus-visible:ring-1 focus-visible:ring-slate-700 focus-visible:ring-offset-0",
+        className
+      )}
+      onClick={() => !isCopied && copyToClipboard(value)}
+      aria-label={isCopied ? "Copied" : "Copy to clipboard"}
+    >
+      <span className="flex items-center space-x-1">
+        {isCopied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+        <span className="hidden sm:inline">
+          {isCopied ? "Copied!" : "Copy"}
         </span>
-      </Button>
-    )
-  })
+      </span>
+    </Button>
+  )
+})
 
 CopyButton.displayName = "CopyButton"
 
