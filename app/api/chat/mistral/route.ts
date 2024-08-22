@@ -80,8 +80,7 @@ export async function POST(request: Request) {
       messages,
       isPentestGPTPro
         ? llmConfig.systemPrompts.pgpt4
-        : detectedModerationLevel === 0 ||
-            (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1)
+        : detectedModerationLevel === 0
           ? llmConfig.systemPrompts.pgpt35
           : llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
@@ -143,12 +142,7 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
-    if (
-      (detectedModerationLevel === 0 && !isPentestGPTPro) ||
-      (detectedModerationLevel >= 0.0 &&
-        detectedModerationLevel <= 0.1 &&
-        !isPentestGPTPro)
-    ) {
+    if (detectedModerationLevel === 0 && !isPentestGPTPro) {
       selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(messages)
     } else {
