@@ -443,6 +443,8 @@ export const processResponse = async (
             content: {
               url: string
               prompt: string
+              width: number
+              height: number
             }
           }>
         } =>
@@ -457,14 +459,18 @@ export const processResponse = async (
         const processStreamPart = (
           streamPart: any,
           toolCallId: string
-        ): string => {
-          if (streamPart.type === "text") return streamPart.value
+        ): { contentToAdd: string; newImagePath: string | null } => {
+          if (streamPart.type === "text")
+            return { contentToAdd: streamPart.value, newImagePath: null }
 
           if (
             isToolCallDelta(streamPart) &&
             streamPart.value.toolCallId === toolCallId
           ) {
-            return streamPart.value.argsTextDelta
+            return {
+              contentToAdd: streamPart.value.argsTextDelta,
+              newImagePath: null
+            }
           }
 
           if (
@@ -472,52 +478,39 @@ export const processResponse = async (
             streamPart.value.toolCallId === toolCallId
           ) {
             const { results, runtimeError } = streamPart.value.result
-            return (
-              (results ? `<results>${results}</results>` : "") +
-              (runtimeError
-                ? `<runtimeError>${runtimeError}</runtimeError>`
-                : "")
-            )
+            const content = [
+              results && `<results>${results}</results>`,
+              runtimeError && `<runtimeError>${runtimeError}</runtimeError>`
+            ]
+              .filter(Boolean)
+              .join("")
+            return { contentToAdd: content, newImagePath: null }
           }
 
           if (isTerminalResult(streamPart)) {
-            return streamPart.value.reduce(
-              (acc, item) =>
-                acc +
-                (item.type === "terminal"
-                  ? `${item.content}`
-                  : item.type === "stdout"
-                    ? item.content
-                    : `<stderr>${item.content}</stderr>`),
-              ""
-            )
+            const content = streamPart.value.reduce((acc, item) => {
+              switch (item.type) {
+                case "terminal":
+                case "stdout":
+                  return acc + item.content
+                case "stderr":
+                  return acc + `<stderr>${item.content}</stderr>`
+                default:
+                  return acc
+              }
+            }, "")
+            return { contentToAdd: content, newImagePath: null }
           }
 
           if (isImageResult(streamPart)) {
-            const imageUrl = streamPart.value[0].content.url
-            const imagePrompt = streamPart.value[0].content.prompt
-            assistantGeneratedImages.push(imageUrl)
-            setChatMessages(prev =>
-              prev.map(chatMessage =>
-                chatMessage.message.id === lastChatMessage.message.id
-                  ? {
-                      ...chatMessage,
-                      message: {
-                        ...chatMessage.message,
-                        content: imagePrompt,
-                        image_paths: [
-                          ...chatMessage.message.image_paths,
-                          imageUrl
-                        ]
-                      }
-                    }
-                  : chatMessage
-              )
-            )
-            return ""
+            const { url, prompt, width, height } = streamPart.value[0].content
+            return {
+              contentToAdd: `<ai_generated_image>${prompt} width: ${width} height: ${height}</ai_generated_image>`,
+              newImagePath: url
+            }
           }
 
-          return ""
+          return { contentToAdd: "", newImagePath: null }
         }
 
         switch (streamPart.type) {
@@ -525,10 +518,19 @@ export const processResponse = async (
           case "tool_call_delta":
           case "tool_result":
           case "data":
-            const streamText = processStreamPart(streamPart, toolCallId)
-            if (streamText) {
+            const { contentToAdd, newImagePath } = processStreamPart(
+              streamPart,
+              toolCallId
+            )
+
+            if (contentToAdd || newImagePath) {
               setFirstTokenReceived(true)
-              fullText += streamText
+              fullText += contentToAdd
+
+              if (newImagePath) {
+                assistantGeneratedImages.push(newImagePath)
+              }
+
               setChatMessages(prev =>
                 prev.map(chatMessage =>
                   chatMessage.message.id === lastChatMessage.message.id
@@ -536,7 +538,10 @@ export const processResponse = async (
                         ...chatMessage,
                         message: {
                           ...chatMessage.message,
-                          content: chatMessage.message.content + streamText
+                          content: chatMessage.message.content + contentToAdd,
+                          image_paths: newImagePath
+                            ? [...chatMessage.message.image_paths, newImagePath]
+                            : chatMessage.message.image_paths
                         }
                       }
                     : chatMessage
@@ -604,7 +609,6 @@ export const processResponse = async (
                 break
               case "generateImage":
                 setToolInUse(PluginID.IMAGE_GENERATOR)
-                toolCallId = streamPart.value.toolCallId
                 updatedPlugin = PluginID.IMAGE_GENERATOR
                 break
             }
@@ -836,9 +840,7 @@ export const handleCreateMessages = async (
 
     const chatImagesWithUrls = await Promise.all(
       assistantGeneratedImages.map(async url => {
-        console.log(url)
         const base64 = await fetchImageData(url)
-        console.log(base64)
         return {
           messageId: createdMessages[0].id,
           path: url,
@@ -859,7 +861,6 @@ export const handleCreateMessages = async (
       }
     ]
 
-    console.log("finalChatMessages", finalChatMessages)
     setChatMessages(finalChatMessages)
   } else if (isContinuation) {
     const lastStartingMessage = chatMessages[chatMessages.length - 1].message

@@ -5,6 +5,7 @@ import { MessageMarkdown } from "./message-markdown"
 import { MessagePluginFile } from "./message-plugin-file"
 import { MessageCodeInterpreter } from "./message-code-interpreter"
 import { MessageTerminal } from "./messsage-terminal"
+import { MessageImageGenerator } from "./message-image-generator"
 
 interface MessageTypeResolverProps {
   message: Tables<"messages">
@@ -62,6 +63,18 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
       <MessageTerminal
         content={message.content}
         messageId={message.id}
+        isAssistant={message.role === "assistant"}
+      />
+    )
+  }
+
+  if (
+    message.plugin === PluginID.IMAGE_GENERATOR.toString() ||
+    toolInUse === PluginID.IMAGE_GENERATOR
+  ) {
+    return (
+      <MessageImageGenerator
+        content={message.content}
         isAssistant={message.role === "assistant"}
       />
     )
