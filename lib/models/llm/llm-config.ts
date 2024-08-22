@@ -35,6 +35,8 @@ const llmConfig = {
     openaiCurrentDateOnly: `${openaiInitialSystemPrompt}\n${currentDate}`,
     // For Hacker RAG
     RAG: `${initialSystemPrompt} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
+    // For PGPT-3.5
+    pgpt35WithTools: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${getPentestGPTToolsInfo(false, true, true)}\n${getPentestGPTSystemPromptEnding}`,
     // For PGPT
     pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTSystemPromptEnding}`,
     // For PGPT-3.5

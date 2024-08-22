@@ -14,7 +14,7 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText, tool } from "ai"
-import { executePythonCode } from "@/lib/tools/python-executor"
+// import { executePythonCode } from "@/lib/tools/python-executor"
 import { z } from "zod"
 
 export const runtime: ServerRuntime = "edge"
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       isPentestGPTPro
         ? llmConfig.systemPrompts.pgpt4
         : detectedModerationLevel === 0 ||
-            (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.3)
+            (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1)
           ? llmConfig.systemPrompts.pgpt35
           : llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
@@ -145,10 +145,10 @@ export async function POST(request: Request) {
     if (
       (detectedModerationLevel === 0 && !isPentestGPTPro) ||
       (detectedModerationLevel >= 0.0 &&
-        detectedModerationLevel <= 0.3 &&
+        detectedModerationLevel <= 0.1 &&
         !isPentestGPTPro)
     ) {
-      selectedModel = "mistralai/mistral-nemo"
+      selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(messages)
     } else {
       filterEmptyAssistantMessages(messages)
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
-      let hasExecutedCode = false
+      // let hasExecutedCode = false
 
       const result = await streamText({
         model: provider(selectedModel),
@@ -185,7 +185,7 @@ export async function POST(request: Request) {
         abortSignal: request.signal,
         experimental_toolCallStreaming: true,
         tools:
-          selectedModel === "mistralai/mistral-nemo" || isPentestGPTPro
+          selectedModel === "openai/gpt-4o-mini" || isPentestGPTPro
             ? {
                 webSearch: {
                   description: "Search the web for latest information",
@@ -201,43 +201,43 @@ export async function POST(request: Request) {
                       .url()
                       .describe("The URL of the webpage to browse")
                   })
-                },
-                python: tool({
-                  description:
-                    "Runs Python code. Only one execution is allowed per request.",
-                  parameters: z.object({
-                    pipInstallCommand: z
-                      .string()
-                      .describe(
-                        "Full pip install command to install packages (e.g., '!pip install package1 package2')"
-                      ),
-                    code: z
-                      .string()
-                      .describe("The Python code to execute in a single cell.")
-                  }),
-                  async execute({ pipInstallCommand, code }) {
-                    if (hasExecutedCode) {
-                      return {
-                        results:
-                          "Code execution skipped. Only one code cell can be executed per request.",
-                        runtimeError: null
-                      }
-                    }
+                }
+                // python: tool({
+                //   description:
+                //     "Runs Python code. Only one execution is allowed per request.",
+                //   parameters: z.object({
+                //     pipInstallCommand: z
+                //       .string()
+                //       .describe(
+                //         "Full pip install command to install packages (e.g., '!pip install package1 package2')"
+                //       ),
+                //     code: z
+                //       .string()
+                //       .describe("The Python code to execute in a single cell.")
+                //   }),
+                //   async execute({ pipInstallCommand, code }) {
+                //     if (hasExecutedCode) {
+                //       return {
+                //         results:
+                //           "Code execution skipped. Only one code cell can be executed per request.",
+                //         runtimeError: null
+                //       }
+                //     }
 
-                    hasExecutedCode = true
-                    const execOutput = await executePythonCode(
-                      profile.user_id,
-                      code,
-                      pipInstallCommand
-                    )
-                    const { results, error: runtimeError } = execOutput
+                //     hasExecutedCode = true
+                //     const execOutput = await executePythonCode(
+                //       profile.user_id,
+                //       code,
+                //       pipInstallCommand
+                //     )
+                //     const { results, error: runtimeError } = execOutput
 
-                    return {
-                      results,
-                      runtimeError
-                    }
-                  }
-                })
+                //     return {
+                //       results,
+                //       runtimeError
+                //     }
+                //   }
+                // })
               }
             : undefined,
         onFinish: () => {

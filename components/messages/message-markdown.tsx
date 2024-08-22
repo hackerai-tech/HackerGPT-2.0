@@ -7,7 +7,7 @@ import { MessageMarkdownMemoized } from "./message-markdown-memoized"
 import { defaultUrlTransform } from "react-markdown"
 import { ImageWithPreview } from "@/components/image/image-with-preview"
 import { Table, Th, Td } from "@/components/ui/table-components"
-import { MessageTerminalBlock } from "./message-terminal-block"
+import { MessageTerminalBlock } from "./e2b-messages/message-terminal-block"
 
 interface MessageMarkdownProps {
   content: string

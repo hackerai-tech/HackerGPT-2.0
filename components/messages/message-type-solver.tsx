@@ -3,9 +3,9 @@ import { PluginID } from "@/types/plugins"
 import { FC } from "react"
 import { MessageMarkdown } from "./message-markdown"
 import { MessagePluginFile } from "./message-plugin-file"
-import { MessageCodeInterpreter } from "./message-code-interpreter"
-import { MessageTerminal } from "./messsage-terminal"
 import { MessageImageGenerator } from "./message-image-generator"
+import { MessageCodeInterpreter } from "./e2b-messages/message-code-interpreter"
+import { MessageTerminal } from "./e2b-messages/message-terminal"
 
 interface MessageTypeResolverProps {
   message: Tables<"messages">
