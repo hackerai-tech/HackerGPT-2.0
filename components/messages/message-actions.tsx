@@ -69,7 +69,8 @@ export const MessageActions: FC<MessageActionsProps> = ({
   const isPremium = subscription !== null
 
   const MESSAGE_ICON_SIZE = isMobile ? 22 : 20
-  const isMessageLengthValid = messageContent.length > 0 && messageContent.length < 4096
+  const isMessageLengthValid =
+    messageContent.length > 0 && messageContent.length < 4096
   const isMessageLengthTooShort = messageContent.length === 0
 
   useEffect(() => {
