@@ -16,6 +16,7 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText, tool } from "ai"
 import { ServerRuntime } from "next"
 import { z } from "zod"
+import { generateAndUploadImage } from "@/lib/tools/image-generator"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
 
     updateSystemMessage(
       messages,
-      llmConfig.systemPrompts.gpt4oWithTools,
+      llmConfig.systemPrompts.gpt4o,
       profile.profile_context
     )
     filterEmptyAssistantMessages(messages)
@@ -159,6 +160,38 @@ export async function POST(request: Request) {
             )
 
             return execOutput
+          }
+        }),
+        generateImage: tool({
+          description: "Generates an image based on a text prompt.",
+          parameters: z.object({
+            prompt: z.string().describe("The text prompt for image generation"),
+            width: z
+              .number()
+              .describe("Width (integer 256 to 1280, default: 512)"),
+            height: z
+              .number()
+              .describe("Height (integer 256 to 1280, default: 512)")
+          }),
+          async execute({ prompt, width, height }) {
+            const generatedImage = await generateAndUploadImage({
+              prompt,
+              width,
+              height,
+              userId: profile.user_id
+            })
+
+            data.append({
+              type: "imageGenerated",
+              content: {
+                url: generatedImage.url,
+                prompt: prompt,
+                width: width,
+                height: height
+              }
+            })
+
+            return `Image generated successfully. URL: ${generatedImage.url}`
           }
         })
       },

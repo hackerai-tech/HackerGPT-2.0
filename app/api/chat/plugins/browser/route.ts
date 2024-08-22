@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
     updateSystemMessage(
       messages,
-      llmConfig.systemPrompts.gpt4oWithTools,
+      llmConfig.systemPrompts.pentestGPTBrowser,
       profile.profile_context
     )
     filterEmptyAssistantMessages(messages)

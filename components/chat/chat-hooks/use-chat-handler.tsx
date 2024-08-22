@@ -288,7 +288,7 @@ export const useChatHandler = () => {
       let finishReasonFromResponse = ""
       let ragUsed = false
       let ragId = null
-
+      let assistantGeneratedImages: string[] = []
       let detectedModerationLevel = -1
       if (
         !isContinuation &&
@@ -392,7 +392,8 @@ export const useChatHandler = () => {
           finishReason,
           ragUsed: ragUsedFromResponse,
           ragId: ragIdFromResponse,
-          selectedPlugin: updatedSelectedPlugin
+          selectedPlugin: updatedSelectedPlugin,
+          assistantGeneratedImages: assistantGeneratedImagesFromResponse
         } = await handleHostedChat(
           payload,
           profile!,
@@ -416,6 +417,7 @@ export const useChatHandler = () => {
         ragUsed = ragUsedFromResponse
         ragId = ragIdFromResponse
         selectedPlugin = updatedSelectedPlugin
+        assistantGeneratedImages = assistantGeneratedImagesFromResponse
       }
 
       if (!currentChat) {
@@ -466,7 +468,8 @@ export const useChatHandler = () => {
         selectedPlugin,
         editSequenceNumber,
         ragUsed,
-        ragId
+        ragId,
+        assistantGeneratedImages
       )
 
       setIsGenerating(false)

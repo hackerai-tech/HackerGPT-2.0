@@ -175,7 +175,7 @@ export async function buildFinalMessages(
   const finalMessages: BuiltChatMessage[] = truncatedMessages.map(message => {
     let content
 
-    if (message.image_paths.length > 0) {
+    if (message.image_paths.length > 0 && message.role !== "assistant") {
       content = [
         {
           type: "text",

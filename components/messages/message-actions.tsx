@@ -69,7 +69,9 @@ export const MessageActions: FC<MessageActionsProps> = ({
   const isPremium = subscription !== null
 
   const MESSAGE_ICON_SIZE = isMobile ? 22 : 20
-  const BELOW_MAX_LENGTH = messageContent.length < 4096
+  const isMessageLengthValid =
+    messageContent.length > 0 && messageContent.length < 4096
+  const isMessageLengthTooShort = messageContent.length === 0
 
   useEffect(() => {
     if (showCheckmark) {
@@ -133,7 +135,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {(isHovering || isLast) && isAssistant && BELOW_MAX_LENGTH && (
+      {(isHovering || isLast) && isAssistant && isMessageLengthValid && (
         <WithTooltip
           delayDuration={0}
           side="bottom"
@@ -168,7 +170,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {(isHovering || isLast) && (
+      {(isHovering || isLast) && isMessageLengthValid && (
         <WithTooltip
           delayDuration={0}
           side="bottom"
@@ -187,7 +189,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {isLast && (
+      {isLast && !messageHasImage && (
         <WithTooltip
           delayDuration={0}
           side="bottom"
@@ -248,7 +250,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {isLast && isPremium && (
+      {isLast && !messageHasImage && isPremium && (
         <ChangeModelIcon
           currentModel={messageModel}
           onChangeModel={onRegenerateSpecificModel}
