@@ -261,10 +261,6 @@ export default async function Login({
             placeholder="you@example.com"
             required
           />
-          <div className="text-muted-foreground mb-3 flex items-center text-sm">
-            <IconAlertCircle className="mr-2" size={16} />
-            Temporary or non-TLS emails will not work
-          </div>
 
           <Label className="text-md" htmlFor="password">
             Password

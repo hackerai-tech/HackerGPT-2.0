@@ -16,6 +16,7 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText, tool } from "ai"
 // import { executePythonCode } from "@/lib/tools/python-executor"
 import { z } from "zod"
+import { generateAndUploadImage } from "@/lib/tools/image-generator"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -79,8 +80,7 @@ export async function POST(request: Request) {
       messages,
       isPentestGPTPro
         ? llmConfig.systemPrompts.pgpt4
-        : detectedModerationLevel === 0 ||
-            (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1)
+        : detectedModerationLevel === 0
           ? llmConfig.systemPrompts.pgpt35
           : llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
@@ -142,12 +142,7 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
-    if (
-      (detectedModerationLevel === 0 && !isPentestGPTPro) ||
-      (detectedModerationLevel >= 0.0 &&
-        detectedModerationLevel <= 0.1 &&
-        !isPentestGPTPro)
-    ) {
+    if (detectedModerationLevel === 0 && !isPentestGPTPro) {
       selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(messages)
     } else {
@@ -201,7 +196,45 @@ export async function POST(request: Request) {
                       .url()
                       .describe("The URL of the webpage to browse")
                   })
-                }
+                },
+                ...(isPentestGPTPro && {
+                  generateImage: tool({
+                    description: "Generates an image based on a text prompt.",
+                    parameters: z.object({
+                      prompt: z
+                        .string()
+                        .describe("The text prompt for image generation"),
+                      width: z
+                        .number()
+                        .optional()
+                        .describe("Width (integer 256 to 1280, default: 512)"),
+                      height: z
+                        .number()
+                        .optional()
+                        .describe("Height (integer 256 to 1280, default: 512)")
+                    }),
+                    async execute({ prompt, width, height }) {
+                      const generatedImage = await generateAndUploadImage({
+                        prompt,
+                        width,
+                        height,
+                        userId: profile.user_id
+                      })
+
+                      data.append({
+                        type: "imageGenerated",
+                        content: {
+                          url: generatedImage.url,
+                          prompt: prompt,
+                          width: width || 512,
+                          height: height || 512
+                        }
+                      })
+
+                      return `Image generated successfully. URL: ${generatedImage.url}`
+                    }
+                  })
+                })
                 // python: tool({
                 //   description:
                 //     "Runs Python code. Only one execution is allowed per request.",
@@ -279,7 +312,7 @@ async function getProviderConfig(chatSettings: any, profile: any) {
     "X-Title": chatSettings.model
   }
 
-  let modelTemperature = 0.4
+  let modelTemperature = 0.5
   let similarityTopK = 3
   let selectedModel = isPentestGPTPro ? proModel : defaultModel
   let rateLimitCheckResult = await checkRatelimitOnApi(

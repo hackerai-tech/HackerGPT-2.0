@@ -201,8 +201,10 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                       PortScanner, and more
                     </ProsStatement>
                     <ProsStatement>
-                      Access to vision, web browsing, and code interpreter
+                      Access to file uploads, vision, code interpreter and
+                      terminal
                     </ProsStatement>
+                    <ProsStatement>FLUX.1 image generation</ProsStatement>
                   </div>
                 </div>
               </div>

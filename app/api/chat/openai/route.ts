@@ -168,9 +168,11 @@ export async function POST(request: Request) {
             prompt: z.string().describe("The text prompt for image generation"),
             width: z
               .number()
+              .optional()
               .describe("Width (integer 256 to 1280, default: 512)"),
             height: z
               .number()
+              .optional()
               .describe("Height (integer 256 to 1280, default: 512)")
           }),
           async execute({ prompt, width, height }) {
@@ -186,8 +188,8 @@ export async function POST(request: Request) {
               content: {
                 url: generatedImage.url,
                 prompt: prompt,
-                width: width,
-                height: height
+                width: width || 512,
+                height: height || 512
               }
             })
 
