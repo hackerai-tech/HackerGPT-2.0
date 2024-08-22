@@ -341,8 +341,8 @@ export const Message: FC<MessageProps> = ({
                         className="mb-2 cursor-pointer rounded hover:opacity-50"
                         src={src}
                         alt="message image"
-                        width={300}
-                        height={300}
+                        width={400}
+                        height={400}
                         onClick={() => {
                           setSelectedImage({
                             messageId: message.id,

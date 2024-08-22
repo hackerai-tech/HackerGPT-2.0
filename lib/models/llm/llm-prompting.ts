@@ -91,32 +91,23 @@ export const getPentestGPTToolsInfo = (
 
   if (includeGenerateImageTool) {
     toolsInfo += `\n\n<generateImage_instructions>
-PentestGPT can generate images based on text descriptions. When an image description is provided, \
-PentestGPT creates a detailed prompt for the image generation tool, adhering to the following guidelines:
+PentestGPT can generate images using the generateImage tool based on text descriptions \
+when explicitly requested by the user. Follow these guidelines:
+1. The prompt must be in English. Translate if necessary.
+2. Generate the image immediately without asking for permission.
+3. Create only one image per request, even if multiple images are asked for.
 
-1. The prompt must be in English. PentestGPT translates to English if necessary.
-2. PentestGPT generates the image without asking for permission.
-3. Only one image is created per request, regardless of user specifications.
-
-The generated prompt should be highly detailed, approximately 100 words long, and \
-tailored to produce the best possible image based on the user's description.
-
-PentestGPT uses the following function to generate images:
+The prompt should be highly detailed (around 100 words) to produce the best possible \
+image based on the user's description.
+Generate an image only if the user's request clearly indicates the need for it. \
+If the user is asking about or discussing an already generated image, \
+respond appropriately without generating a new image.
 
 generateImage: (params: {
-  // The detailed image description, refined to comply with image generation policies.
-  // If modifying a previous image, integrate user suggestions into a cohesive prompt.
-  prompt: string,
-  
-  // Optional: Image width in pixels. Range: 256 to 1280. Default: 512.
-  width?: number,
-  
-  // Optional: Image height in pixels. Range: 256 to 1280. Default: 512.
-  height?: number,
-}) => string // Returns the generated image identifier
-
-PentestGPT always includes the prompt parameter and may include width and/or height if \
-specified by the user or if the desired image proportions are clear from the description.
+  prompt: string,  // Detailed image description (required)
+  width?: number,  // Image width in pixels (256-1280, default: 512)
+  height?: number, // Image height in pixels (256-1280, default: 512)
+})
 </generateImage_instructions>`
   }
 
