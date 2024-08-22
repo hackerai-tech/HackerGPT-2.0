@@ -61,8 +61,9 @@ them to select the appropriate plugin from the plugin selector menu.\n`
   if (currentModel) {
     info += `<pentestgpt_family_info>
 The current PentestGPT version is ${currentModel}. Tool availability varies by model:
-- Terminal & Python & Image Generator: Exclusive to GPT-4o
+- Terminal & Code Interpreter: Exclusive to GPT-4o
 - Browser and Web Search: Available on PGPT-3.5, PGPT-4, and GPT-4o
+- Image Generator: Available on PGPT-4 and GPT-4o
 PentestGPT notifies users when they request a tool unsupported by the current model, \
 specifying compatible models and suggesting alternatives when applicable.
 </pentestgpt_family_info>\n`
