@@ -94,8 +94,7 @@ export async function POST(request: Request) {
           })
         },
         python: tool({
-          description:
-            "Runs Python code. Only one execution is allowed per request.",
+          description: "Runs Python code.",
           parameters: z.object({
             pipInstallCommand: z
               .string()
@@ -130,8 +129,7 @@ export async function POST(request: Request) {
           }
         }),
         terminal: tool({
-          description:
-            "Runs bash commands. Only one execution is allowed per request.",
+          description: "Runs bash commands.",
           parameters: z.object({
             code: z.string().describe("The bash command to execute.")
           }),

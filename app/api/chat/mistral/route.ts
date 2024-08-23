@@ -233,42 +233,6 @@ export async function POST(request: Request) {
                     return `Image generated successfully. URL: ${generatedImage.url}`
                   }
                 })
-                // python: tool({
-                //   description:
-                //     "Runs Python code. Only one execution is allowed per request.",
-                //   parameters: z.object({
-                //     pipInstallCommand: z
-                //       .string()
-                //       .describe(
-                //         "Full pip install command to install packages (e.g., '!pip install package1 package2')"
-                //       ),
-                //     code: z
-                //       .string()
-                //       .describe("The Python code to execute in a single cell.")
-                //   }),
-                //   async execute({ pipInstallCommand, code }) {
-                //     if (hasExecutedCode) {
-                //       return {
-                //         results:
-                //           "Code execution skipped. Only one code cell can be executed per request.",
-                //         runtimeError: null
-                //       }
-                //     }
-
-                //     hasExecutedCode = true
-                //     const execOutput = await executePythonCode(
-                //       profile.user_id,
-                //       code,
-                //       pipInstallCommand
-                //     )
-                //     const { results, error: runtimeError } = execOutput
-
-                //     return {
-                //       results,
-                //       runtimeError
-                //     }
-                //   }
-                // })
               }
             : undefined,
         onFinish: () => {
