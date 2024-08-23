@@ -175,10 +175,7 @@ export const handleHostedChat = async (
   detectedModerationLevel: number
 ) => {
   const { provider } = modelData
-  const isWebSearch = selectedPlugin === PluginID.WEB_SEARCH
-  let apiEndpoint = isWebSearch
-    ? "/api/chat/plugins/web-search"
-    : `/api/chat/${provider}`
+  const apiEndpoint = `/api/chat/${provider}`
 
   setToolInUse(
     isRagEnabled && provider !== "openai"
@@ -198,7 +195,7 @@ export const handleHostedChat = async (
   const chatSettings = payload.chatSettings
 
   const requestBody =
-    provider === "openai" || isWebSearch
+    provider === "openai"
       ? { messages: formattedMessages, chatSettings, detectedModerationLevel }
       : {
           messages: formattedMessages,
@@ -213,7 +210,6 @@ export const handleHostedChat = async (
   const chatResponse = await fetchChatResponse(
     apiEndpoint,
     requestBody,
-    true,
     newAbortController,
     setIsGenerating,
     setChatMessages,
@@ -277,7 +273,6 @@ export const handleHostedPluginsChat = async (
   const response = await fetchChatResponse(
     apiEndpoint,
     requestBody,
-    true,
     newAbortController,
     setIsGenerating,
     setChatMessages,
@@ -299,7 +294,6 @@ export const handleHostedPluginsChat = async (
 export const fetchChatResponse = async (
   url: string,
   body: object,
-  isHosted: boolean,
   controller: AbortController,
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
@@ -571,7 +565,6 @@ export const processResponse = async (
                 const webSearchResponse = await fetchChatResponse(
                   "/api/chat/plugins/web-search",
                   requestBody,
-                  true,
                   controller,
                   setIsGenerating,
                   setChatMessages,
@@ -628,7 +621,6 @@ export const processResponse = async (
               const browserResponse = await fetchChatResponse(
                 "/api/chat/plugins/browser",
                 browserRequestBody,
-                true,
                 controller,
                 setIsGenerating,
                 setChatMessages,
