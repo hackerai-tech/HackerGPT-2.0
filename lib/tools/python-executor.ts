@@ -51,7 +51,7 @@ export async function executePythonCode(
   stderr: string
   error: string | null
 }> {
-  console.log(`[${userID}] Executing code: ${code}`)
+  console.log(`[${userID}] Executing python code: ${code}`)
   let sbx: CodeInterpreter | null = null
 
   try {
@@ -102,12 +102,24 @@ export async function executePythonCode(
       error: execution.error ? formatError(execution.error) : null
     }
   } catch (error: any) {
-    console.error(`[${userID}] Error in executePythonCode:`, error)
+    console.error(`[${userID}] Python execution error:`, error)
+    let errorMessage: string
+
+    if (
+      error.name === "TimeoutError" &&
+      error.message.includes("Cannot connect to sandbox")
+    ) {
+      errorMessage =
+        "The Python Code Interpreter is currently unavailable. The e2b team is working on a fix. Please try again later."
+    } else {
+      errorMessage = formatError(error)
+    }
+
     return {
       results: null,
       stdout: "",
       stderr: "",
-      error: formatError(error)
+      error: errorMessage
     }
   }
 }
