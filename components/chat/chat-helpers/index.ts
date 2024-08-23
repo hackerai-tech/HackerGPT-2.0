@@ -492,9 +492,8 @@ export const processResponse = async (
               switch (item.type) {
                 case "terminal":
                 case "stdout":
-                  return acc + item.content
                 case "stderr":
-                  return acc + `<stderr>${item.content}</stderr>`
+                  return acc + item.content
                 default:
                   return acc
               }
