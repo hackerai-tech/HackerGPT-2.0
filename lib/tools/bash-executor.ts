@@ -76,8 +76,12 @@ export async function executeBashCommand(
         (error.name === "TimeoutError" &&
           error.message.includes("Cannot connect to sandbox")) ||
         error.message.includes("503 Service Unavailable") ||
-        error.message.includes("504 Gateway Timeout")
+        error.message.includes("504 Gateway Timeout") ||
+        error.message.includes("502 Bad Gateway")
       ) {
+        if (sbx) {
+          await sbx.kill()
+        }
         errorMessage =
           "The Terminal is currently unavailable. The e2b.dev team is working on a fix. Please try again later."
       } else {
