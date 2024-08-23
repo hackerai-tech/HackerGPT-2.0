@@ -1,7 +1,7 @@
 import "server-only"
 import { CodeInterpreter } from "@e2b/code-interpreter"
 
-const pythonSandboxTimeout = 3 * 60 * 1000 // 3 minutes in ms
+const pythonSandboxTimeout = 1 * 60 * 1000
 const template = "code-interpreter"
 
 export async function createOrConnectCodeInterpreter(
@@ -109,6 +109,9 @@ export async function executePythonCode(
       error.name === "TimeoutError" &&
       error.message.includes("Cannot connect to sandbox")
     ) {
+      if (sbx) {
+        await sbx.kill()
+      }
       errorMessage =
         "The Python Code Interpreter is currently unavailable. The e2b.dev team is working on a fix. Please try again later."
     } else {
