@@ -197,43 +197,41 @@ export async function POST(request: Request) {
                       .describe("The URL of the webpage to browse")
                   })
                 },
-                ...(isPentestGPTPro && {
-                  generateImage: tool({
-                    description: "Generates an image based on a text prompt.",
-                    parameters: z.object({
-                      prompt: z
-                        .string()
-                        .describe("The text prompt for image generation"),
-                      width: z
-                        .number()
-                        .optional()
-                        .describe("Width (integer 256 to 1280, default: 512)"),
-                      height: z
-                        .number()
-                        .optional()
-                        .describe("Height (integer 256 to 1280, default: 512)")
-                    }),
-                    async execute({ prompt, width, height }) {
-                      const generatedImage = await generateAndUploadImage({
-                        prompt,
-                        width,
-                        height,
-                        userId: profile.user_id
-                      })
+                generateImage: tool({
+                  description: "Generates an image based on a text prompt.",
+                  parameters: z.object({
+                    prompt: z
+                      .string()
+                      .describe("The text prompt for image generation"),
+                    width: z
+                      .number()
+                      .optional()
+                      .describe("Width (integer 256 to 1280, default: 512)"),
+                    height: z
+                      .number()
+                      .optional()
+                      .describe("Height (integer 256 to 1280, default: 512)")
+                  }),
+                  async execute({ prompt, width, height }) {
+                    const generatedImage = await generateAndUploadImage({
+                      prompt,
+                      width,
+                      height,
+                      userId: profile.user_id
+                    })
 
-                      data.append({
-                        type: "imageGenerated",
-                        content: {
-                          url: generatedImage.url,
-                          prompt: prompt,
-                          width: width || 512,
-                          height: height || 512
-                        }
-                      })
+                    data.append({
+                      type: "imageGenerated",
+                      content: {
+                        url: generatedImage.url,
+                        prompt: prompt,
+                        width: width || 512,
+                        height: height || 512
+                      }
+                    })
 
-                      return `Image generated successfully. URL: ${generatedImage.url}`
-                    }
-                  })
+                    return `Image generated successfully. URL: ${generatedImage.url}`
+                  }
                 })
                 // python: tool({
                 //   description:
