@@ -21,11 +21,7 @@ export async function executeBashCommand(
   let isOutputStarted = false
 
   try {
-    sbx = await createOrConnectCodeInterpreter(
-      userID,
-      template,
-      bashSandboxTimeout
-    )
+    sbx = await createOrConnectTerminal(userID, template, bashSandboxTimeout)
     const bashID = await sbx.notebook.createKernel({ kernelName: "bash" })
 
     const execution = await sbx.notebook.execCell(command, {
@@ -76,7 +72,17 @@ export async function executeBashCommand(
     if (error instanceof ProcessExitError) {
       errorMessage = error.stderr
     } else if (error instanceof Error) {
-      errorMessage = error.message
+      if (
+        (error.name === "TimeoutError" &&
+          error.message.includes("Cannot connect to sandbox")) ||
+        error.message.includes("503 Service Unavailable") ||
+        error.message.includes("504 Gateway Timeout")
+      ) {
+        errorMessage =
+          "The Terminal is currently unavailable. The e2b team is working on a fix. Please try again later."
+      } else {
+        errorMessage = error.message
+      }
     } else {
       errorMessage =
         "An unexpected error occurred during bash command execution."
@@ -95,7 +101,7 @@ export async function executeBashCommand(
   }
 }
 
-export async function createOrConnectCodeInterpreter(
+export async function createOrConnectTerminal(
   userID: string,
   template: string,
   timeoutMs: number
