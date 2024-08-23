@@ -1,7 +1,7 @@
 import "server-only"
 import { CodeInterpreter } from "@e2b/code-interpreter"
 
-const pythonSandboxTimeout = 3 * 60 * 1000 // 3 minutes in ms
+const pythonSandboxTimeout = 1 * 60 * 1000
 const template = "code-interpreter"
 
 export async function createOrConnectCodeInterpreter(
@@ -51,16 +51,17 @@ export async function executePythonCode(
   stderr: string
   error: string | null
 }> {
-  console.log(`[${userID}] Executing code: ${code}`)
-  const sbx = await createOrConnectCodeInterpreter(
-    userID,
-    template,
-    pythonSandboxTimeout
-  )
+  console.log(`[${userID}] Executing python code: ${code}`)
+  let sbx: CodeInterpreter | null = null
 
   try {
-    if (pipInstallCommand && pipInstallCommand.length > 0) {
-      // Ensure the pip install command starts with "!pip install"
+    sbx = await createOrConnectCodeInterpreter(
+      userID,
+      template,
+      pythonSandboxTimeout
+    )
+
+    if (pipInstallCommand && pipInstallCommand.trim().length > 0) {
       const formattedPipCommand = pipInstallCommand
         .trim()
         .startsWith("!pip install")
@@ -71,7 +72,7 @@ export async function executePythonCode(
       const installExecution = await sbx.notebook.execCell(
         formattedPipCommand,
         {
-          timeoutMs: 15000
+          timeoutMs: 30000
         }
       )
 
@@ -87,10 +88,6 @@ export async function executePythonCode(
       timeoutMs: 60000
     })
 
-    if (execution.error) {
-      console.error(`[${userID}] Execution error:`, execution.error)
-    }
-
     let formattedResults = null
     if (execution.results && execution.results.length > 0) {
       formattedResults = execution.results
@@ -102,28 +99,43 @@ export async function executePythonCode(
       results: formattedResults,
       stdout: execution.logs.stdout.join("\n"),
       stderr: execution.logs.stderr.join("\n"),
-      error: execution.error ? formatFullError(execution.error) : null
+      error: execution.error ? formatError(execution.error) : null
     }
   } catch (error: any) {
-    console.error(`[${userID}] Error in executePythonCode:`, error)
+    console.error(`[${userID}] Python execution error:`, error)
+    let errorMessage: string
+
+    if (
+      error.name === "TimeoutError" &&
+      error.message.includes("Cannot connect to sandbox")
+    ) {
+      if (sbx) {
+        await sbx.kill()
+      }
+      errorMessage =
+        "The Python Code Interpreter is currently unavailable. The e2b.dev team is working on a fix. Please try again later."
+    } else {
+      errorMessage = formatError(error)
+    }
 
     return {
       results: null,
       stdout: "",
       stderr: "",
-      error: formatFullError(error)
+      error: errorMessage
     }
   }
 }
 
-function formatFullError(error: any): string {
+function formatError(error: any): string {
   if (!error) return ""
 
-  let output = ""
-  if (error.name) output += `${error.name}: `
-  if (error.value) output += `${error.value}\n\n`
-  if (error.tracebackRaw && Array.isArray(error.tracebackRaw)) {
-    output += error.tracebackRaw.join("\n")
-  }
-  return output.trim()
+  const name = error.name || "Error"
+  const value = error.value || ""
+  const traceback =
+    error.tracebackRaw && Array.isArray(error.tracebackRaw)
+      ? error.tracebackRaw.join("\n")
+      : error.traceback || ""
+
+  return `${name}: ${value}\n\n${traceback}`.trim()
 }

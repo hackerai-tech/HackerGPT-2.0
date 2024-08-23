@@ -197,80 +197,42 @@ export async function POST(request: Request) {
                       .describe("The URL of the webpage to browse")
                   })
                 },
-                ...(isPentestGPTPro && {
-                  generateImage: tool({
-                    description: "Generates an image based on a text prompt.",
-                    parameters: z.object({
-                      prompt: z
-                        .string()
-                        .describe("The text prompt for image generation"),
-                      width: z
-                        .number()
-                        .optional()
-                        .describe("Width (integer 256 to 1280, default: 512)"),
-                      height: z
-                        .number()
-                        .optional()
-                        .describe("Height (integer 256 to 1280, default: 512)")
-                    }),
-                    async execute({ prompt, width, height }) {
-                      const generatedImage = await generateAndUploadImage({
-                        prompt,
-                        width,
-                        height,
-                        userId: profile.user_id
-                      })
+                generateImage: tool({
+                  description: "Generates an image based on a text prompt.",
+                  parameters: z.object({
+                    prompt: z
+                      .string()
+                      .describe("The text prompt for image generation"),
+                    width: z
+                      .number()
+                      .optional()
+                      .describe("Width (integer 256 to 1280, default: 512)"),
+                    height: z
+                      .number()
+                      .optional()
+                      .describe("Height (integer 256 to 1280, default: 512)")
+                  }),
+                  async execute({ prompt, width, height }) {
+                    const generatedImage = await generateAndUploadImage({
+                      prompt,
+                      width,
+                      height,
+                      userId: profile.user_id
+                    })
 
-                      data.append({
-                        type: "imageGenerated",
-                        content: {
-                          url: generatedImage.url,
-                          prompt: prompt,
-                          width: width || 512,
-                          height: height || 512
-                        }
-                      })
+                    data.append({
+                      type: "imageGenerated",
+                      content: {
+                        url: generatedImage.url,
+                        prompt: prompt,
+                        width: width || 512,
+                        height: height || 512
+                      }
+                    })
 
-                      return `Image generated successfully. URL: ${generatedImage.url}`
-                    }
-                  })
+                    return `Image generated successfully. URL: ${generatedImage.url}`
+                  }
                 })
-                // python: tool({
-                //   description:
-                //     "Runs Python code. Only one execution is allowed per request.",
-                //   parameters: z.object({
-                //     pipInstallCommand: z
-                //       .string()
-                //       .describe(
-                //         "Full pip install command to install packages (e.g., '!pip install package1 package2')"
-                //       ),
-                //     code: z
-                //       .string()
-                //       .describe("The Python code to execute in a single cell.")
-                //   }),
-                //   async execute({ pipInstallCommand, code }) {
-                //     if (hasExecutedCode) {
-                //       return {
-                //         results:
-                //           "Code execution skipped. Only one code cell can be executed per request.",
-                //         runtimeError: null
-                //       }
-                //     }
-
-                //     hasExecutedCode = true
-                //     const execOutput = await executePythonCode(
-                //       profile.user_id,
-                //       code,
-                //       pipInstallCommand
-                //     )
-                //     const { results, error: runtimeError } = execOutput
-
-                //     return {
-                //       results,
-                //       runtimeError
-                //     }
-                //   }
-                // })
               }
             : undefined,
         onFinish: () => {

@@ -7,6 +7,7 @@ import {
 
 const bashSandboxTimeout = 10 * 60 * 1000
 const template = "bash-terminal"
+const maxExecutionTime = 3 * 60 * 1000
 
 export async function executeBashCommand(
   userID: string,
@@ -20,16 +21,12 @@ export async function executeBashCommand(
   let isOutputStarted = false
 
   try {
-    sbx = await createOrConnectCodeInterpreter(
-      userID,
-      template,
-      bashSandboxTimeout
-    )
+    sbx = await createOrConnectTerminal(userID, template, bashSandboxTimeout)
     const bashID = await sbx.notebook.createKernel({ kernelName: "bash" })
 
     const execution = await sbx.notebook.execCell(command, {
       kernelID: bashID,
-      timeoutMs: 3 * 60 * 1000,
+      timeoutMs: maxExecutionTime,
       onStdout: (out: OutputMessage) => {
         if (!isOutputStarted) {
           data.append({ type: "stdout", content: "\n```stdout\n" })
@@ -46,6 +43,14 @@ export async function executeBashCommand(
 
     if (execution.error) {
       console.error(`[${userID}] Bash execution error:`, execution.error)
+      if (execution.error.name.includes("TimeoutError")) {
+        const timeoutMessage = `Command execution timed out after ${maxExecutionTime / 1000} seconds. Please try a shorter command or split your task into multiple commands.`
+        data.append({
+          type: "stderr",
+          content: `\n\`\`\`stderr\n${timeoutMessage}\n\`\`\``
+        })
+        return { stdout: stdoutAccumulator, stderr: timeoutMessage }
+      }
     }
 
     const stderr = Array.isArray(execution.logs.stderr)
@@ -62,23 +67,45 @@ export async function executeBashCommand(
     return { stdout: stdoutAccumulator, stderr }
   } catch (error) {
     console.error(`[${userID}] Error executing bash command:`, error)
-    const errorMessage =
-      error instanceof ProcessExitError
-        ? error.stderr
-        : error instanceof Error
-          ? error.message
-          : "An unexpected error occurred during bash command execution."
+    let errorMessage: string
+
+    if (error instanceof ProcessExitError) {
+      errorMessage = error.stderr
+    } else if (error instanceof Error) {
+      if (
+        (error.name === "TimeoutError" &&
+          error.message.includes("Cannot connect to sandbox")) ||
+        error.message.includes("503 Service Unavailable") ||
+        error.message.includes("504 Gateway Timeout") ||
+        error.message.includes("502 Bad Gateway")
+      ) {
+        if (sbx) {
+          await sbx.kill()
+        }
+        errorMessage =
+          "The Terminal is currently unavailable. The e2b.dev team is working on a fix. Please try again later."
+      } else {
+        errorMessage = error.message
+      }
+    } else {
+      errorMessage =
+        "An unexpected error occurred during bash command execution."
+    }
+
+    if (errorMessage.includes("Execution timed out")) {
+      errorMessage = `Command execution timed out after ${maxExecutionTime / 1000} seconds. Please try a shorter command or split your task into multiple commands.`
+    }
 
     data.append({
       type: "stderr",
       content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
     })
 
-    return { stdout: "", stderr: errorMessage }
+    return { stdout: stdoutAccumulator, stderr: errorMessage }
   }
 }
 
-export async function createOrConnectCodeInterpreter(
+export async function createOrConnectTerminal(
   userID: string,
   template: string,
   timeoutMs: number
