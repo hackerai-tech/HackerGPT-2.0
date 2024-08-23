@@ -79,7 +79,7 @@ export async function executeBashCommand(
         error.message.includes("504 Gateway Timeout")
       ) {
         errorMessage =
-          "The Terminal is currently unavailable. The e2b team is working on a fix. Please try again later."
+          "The Terminal is currently unavailable. The e2b.dev team is working on a fix. Please try again later."
       } else {
         errorMessage = error.message
       }

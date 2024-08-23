@@ -685,7 +685,6 @@ export const processResponsePlugins = async (
   setToolInUse: React.Dispatch<React.SetStateAction<string>>
 ) => {
   let fullText = ""
-  let contentToAdd = ""
 
   if (response.body) {
     await consumeReadableStream(
