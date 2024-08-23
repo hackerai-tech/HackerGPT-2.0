@@ -134,20 +134,19 @@ export async function POST(request: Request) {
             code: z.string().describe("The bash command to execute.")
           }),
           async execute({ code }) {
-            data.append({
-              type: "terminal",
-              content: `\n\`\`\`terminal\n${code}\n\`\`\``
-            })
-
             if (hasExecutedCode) {
-              const errorMessage =
-                "Code execution skipped. Only one code cell can be executed per request."
+              const errorMessage = `Skipped execution for: "${code}". Only one command can be run per request.`
               data.append({
                 type: "stderr",
                 content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
               })
               return { stdout: "", stderr: errorMessage }
             }
+
+            data.append({
+              type: "terminal",
+              content: `\n\`\`\`terminal\n${code}\n\`\`\``
+            })
 
             hasExecutedCode = true
 
