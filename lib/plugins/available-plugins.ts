@@ -89,7 +89,8 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "Decode Base64 String",
         description: "UGVudGVzdEdQVCBpcyBiZXN0IEFJ",
-        chatMessage: "Decode the following base64 encoded string: UGVudGVzdEdQVCBpcyBiZXN0IEFJ"
+        chatMessage:
+          "Decode the following base64 encoded string: UGVudGVzdEdQVCBpcyBiZXN0IEFJ"
       },
       {
         title: "Create & Run Subdomain Wordlist",

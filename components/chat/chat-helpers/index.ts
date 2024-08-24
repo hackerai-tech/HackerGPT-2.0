@@ -175,8 +175,11 @@ export const handleHostedChat = async (
   detectedModerationLevel: number
 ) => {
   let { provider } = modelData
-  if (selectedPlugin === PluginID.TERMINAL 
-    || selectedPlugin === PluginID.PYTHON) provider = "openai"
+  if (
+    selectedPlugin === PluginID.TERMINAL ||
+    selectedPlugin === PluginID.PYTHON
+  )
+    provider = "openai"
   let apiEndpoint = `/api/chat/${provider}`
 
   setToolInUse(

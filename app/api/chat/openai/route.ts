@@ -49,8 +49,10 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    const toolToUse = selectedTool === "terminal" 
-    || selectedTool === "python" ? selectedTool : "all";
+    const toolToUse =
+      selectedTool === "terminal" || selectedTool === "python"
+        ? selectedTool
+        : "all"
 
     updateSystemMessage(
       messages,
