@@ -37,6 +37,43 @@ export const availablePlugins: PluginSummary[] = [
   },
   {
     id: 1,
+    name: "Terminal",
+    selectorName: "Terminal",
+    value: PluginID.TERMINAL,
+    categories: ["recon", "vuln-scanners"],
+    icon: "https://cdn-icons-png.flaticon.com/512/5576/5576886.png",
+    invertInDarkMode: true,
+    description: "Execute Bash commands",
+    githubRepoUrl: pluginUrls.PENTESTGPT,
+    isInstalled: false,
+    isPremium: true,
+    createdAt: "2024-08-24",
+    starters: [
+      {
+        title: "Run a quick Nmap scan",
+        description: "on hackerone.com to get open ports",
+        chatMessage: "Run a quick Nmap scan on hackerone.com to get open ports"
+      },
+      {
+        title: "Find hackerone.com subdomains",
+        description: "using subfinder",
+        chatMessage: "Find hackerone.com subdomains using subfinder"
+      },
+      {
+        title: "Start Vulnerability Scan",
+        description: "with nuclei on hackerone.com",
+        chatMessage: "Start vulnerability scan with nuclei on hackerone.com"
+      },
+      {
+        title: "Perform Basic SQLi Scan",
+        description: "on testphp.vulnweb.com using sqlmap",
+        chatMessage:
+          "Perform a basic SQLi scan on http://testphp.vulnweb.com/search.php?test=1 using sqlmap"
+      }
+    ]
+  },
+  {
+    id: 2,
     name: "Enhanced Search",
     selectorName: "Enhanced Search",
     value: PluginID.ENHANCED_SEARCH,

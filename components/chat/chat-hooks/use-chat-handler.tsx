@@ -315,7 +315,8 @@ export const useChatHandler = () => {
         selectedPlugin.length > 0 &&
         selectedPlugin !== PluginID.NONE &&
         selectedPlugin !== PluginID.WEB_SEARCH &&
-        selectedPlugin !== PluginID.ENHANCED_SEARCH
+        selectedPlugin !== PluginID.ENHANCED_SEARCH &&
+        selectedPlugin !== PluginID.TERMINAL
       ) {
         let fileData: { fileName: string; fileContent: string }[] = []
 

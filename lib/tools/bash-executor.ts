@@ -50,7 +50,7 @@ export async function executeBashCommand(
           content: `\n\`\`\`stderr\n${timeoutMessage}\n\`\`\``
         })
         return { stdout: stdoutAccumulator, stderr: timeoutMessage }
-      } else {
+      } else if (stdoutAccumulator.length === 0) {
         // Handle other execution errors
         const errorMessage = `Command execution failed: ${execution.error.value || "Unknown error"}`
         data.append({
