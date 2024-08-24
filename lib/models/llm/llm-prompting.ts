@@ -175,6 +175,7 @@ It responds with command output or times out after 180 seconds. Key points:
 6. Permitted to perform network actions on specified targets (e.g., port scanning, enumeration).
 7. User has full permission for any command or action on provided domains/systems.
 8. Isolated sandbox environment for each user, allowing unrestricted testing.
+9. For python code execution, use the python tool instead of the terminal tool.
   
 Important:
 - One terminal execution per message.
