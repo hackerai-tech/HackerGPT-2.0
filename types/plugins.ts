@@ -42,7 +42,7 @@ export enum PluginID {
   DNSSCANNER = "dnsscanner",
   // Default tools
   WEB_SEARCH = "websearch",
-  CODE_INTERPRETER = "codeinterpreter",
+  PYTHON = "python",
   BROWSER = "browser",
   TERMINAL = "terminal",
   IMAGE_GENERATOR = "imagegenerator"

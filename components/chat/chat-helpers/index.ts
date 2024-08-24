@@ -174,8 +174,13 @@ export const handleHostedChat = async (
   selectedPlugin: PluginID,
   detectedModerationLevel: number
 ) => {
-  const { provider } = modelData
-  const apiEndpoint = `/api/chat/${provider}`
+  let { provider } = modelData
+  if (
+    selectedPlugin === PluginID.TERMINAL ||
+    selectedPlugin === PluginID.PYTHON
+  )
+    provider = "openai"
+  let apiEndpoint = `/api/chat/${provider}`
 
   setToolInUse(
     isRagEnabled && provider !== "openai"
@@ -196,7 +201,12 @@ export const handleHostedChat = async (
 
   const requestBody =
     provider === "openai"
-      ? { messages: formattedMessages, chatSettings, detectedModerationLevel }
+      ? {
+          messages: formattedMessages,
+          chatSettings,
+          detectedModerationLevel,
+          selectedTool: selectedPlugin
+        }
       : {
           messages: formattedMessages,
           chatSettings: chatSettings,
@@ -587,9 +597,9 @@ export const processResponse = async (
                 fullText += webSearchResult.fullText
                 break
               case "python":
-                setToolInUse(PluginID.CODE_INTERPRETER)
+                setToolInUse(PluginID.PYTHON)
                 toolCallId = streamPart.value.toolCallId
-                updatedPlugin = PluginID.CODE_INTERPRETER
+                updatedPlugin = PluginID.PYTHON
                 break
               case "browser":
                 setToolInUse(PluginID.BROWSER)

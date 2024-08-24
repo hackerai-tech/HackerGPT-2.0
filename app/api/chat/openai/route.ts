@@ -10,13 +10,10 @@ import {
 import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
-import { executePythonCode } from "@/lib/tools/python-executor"
-import { executeBashCommand } from "@/lib/tools/bash-executor"
 import { createOpenAI } from "@ai-sdk/openai"
-import { StreamData, streamText, tool } from "ai"
+import { StreamData, streamText } from "ai"
 import { ServerRuntime } from "next"
-import { z } from "zod"
-import { generateAndUploadImage } from "@/lib/tools/image-generator"
+import { createToolSchemas } from "@/lib/tools/toolSchemas"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -41,7 +38,7 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   try {
-    const { messages } = await request.json()
+    const { messages, selectedTool } = await request.json()
 
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
@@ -52,9 +49,18 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
+    const toolToUse =
+      selectedTool === "terminal" || selectedTool === "python"
+        ? selectedTool
+        : "all"
+
     updateSystemMessage(
       messages,
-      llmConfig.systemPrompts.gpt4o,
+      toolToUse === "terminal"
+        ? llmConfig.systemPrompts.pentestGPTTerminal
+        : toolToUse === "python"
+          ? llmConfig.systemPrompts.pentestGPTPython
+          : llmConfig.systemPrompts.gpt4o,
       profile.profile_context
     )
     filterEmptyAssistantMessages(messages)
@@ -67,133 +73,19 @@ export async function POST(request: Request) {
 
     const data = new StreamData()
 
-    let hasExecutedCode = false
+    const { getSelectedSchemas } = createToolSchemas({
+      profile,
+      data
+    })
 
     const result = await streamText({
       model: openai("gpt-4o-2024-08-06"),
       temperature: 0.5,
       maxTokens: 1024,
       messages: toVercelChatMessages(messages, true),
-      // abortSignal isn't working for some reason.
       abortSignal: request.signal,
       experimental_toolCallStreaming: true,
-      tools: {
-        webSearch: {
-          description: "Search the web for latest information",
-          parameters: z.object({ search: z.boolean() })
-        },
-        browser: {
-          description:
-            "Browse a webpage and extract its text content. \
-        For HTML retrieval or more complex web scraping, use the Python tool.",
-          parameters: z.object({
-            open_url: z
-              .string()
-              .url()
-              .describe("The URL of the webpage to browse")
-          })
-        },
-        python: tool({
-          description: "Runs Python code.",
-          parameters: z.object({
-            pipInstallCommand: z
-              .string()
-              .describe(
-                "Full pip install command to install packages (e.g., '!pip install package1 package2')"
-              ),
-            code: z
-              .string()
-              .describe("The Python code to execute in a single cell.")
-          }),
-          async execute({ pipInstallCommand, code }) {
-            if (hasExecutedCode) {
-              return {
-                results:
-                  "Code execution skipped. Only one code cell can be executed per request.",
-                runtimeError: null
-              }
-            }
-
-            hasExecutedCode = true
-            const execOutput = await executePythonCode(
-              profile.user_id,
-              code,
-              pipInstallCommand
-            )
-            const { results, error: runtimeError } = execOutput
-
-            return {
-              results,
-              runtimeError
-            }
-          }
-        }),
-        terminal: tool({
-          description: "Runs bash commands.",
-          parameters: z.object({
-            code: z.string().describe("The bash command to execute.")
-          }),
-          async execute({ code }) {
-            if (hasExecutedCode) {
-              const errorMessage = `Skipped execution for: "${code}". Only one command can be run per request.`
-              data.append({
-                type: "stderr",
-                content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
-              })
-              return { stdout: "", stderr: errorMessage }
-            }
-
-            data.append({
-              type: "terminal",
-              content: `\n\`\`\`terminal\n${code}\n\`\`\``
-            })
-
-            hasExecutedCode = true
-
-            const execOutput = await executeBashCommand(
-              profile.user_id,
-              code,
-              data
-            )
-
-            return execOutput
-          }
-        }),
-        generateImage: tool({
-          description: "Generates an image based on a text prompt.",
-          parameters: z.object({
-            prompt: z.string().describe("The text prompt for image generation"),
-            width: z
-              .number()
-              .optional()
-              .describe("Width (integer 256 to 1280, default: 512)"),
-            height: z
-              .number()
-              .optional()
-              .describe("Height (integer 256 to 1280, default: 512)")
-          }),
-          async execute({ prompt, width, height }) {
-            const generatedImage = await generateAndUploadImage({
-              prompt,
-              width,
-              height,
-              userId: profile.user_id
-            })
-
-            data.append({
-              type: "imageGenerated",
-              content: {
-                url: generatedImage.url,
-                prompt: prompt,
-                width: width || 512,
-                height: height || 512
-              }
-            })
-
-            return `Image generated successfully. URL: ${generatedImage.url}`
-          }
-        })
-      },
+      tools: getSelectedSchemas(toolToUse),
       onFinish: () => {
         data.close()
       }

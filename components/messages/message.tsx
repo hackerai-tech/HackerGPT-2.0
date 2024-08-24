@@ -285,7 +285,7 @@ export const Message: FC<MessageProps> = ({
                           <div>Using Enhanced Search...</div>
                         </div>
                       )
-                    case PluginID.CODE_INTERPRETER:
+                    case PluginID.PYTHON:
                       return (
                         <div className="flex animate-pulse items-center space-x-2">
                           <IconCode size={20} />
