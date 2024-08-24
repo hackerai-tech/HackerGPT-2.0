@@ -72,7 +72,7 @@ export async function executePythonCode(
       const installExecution = await sbx.notebook.execCell(
         formattedPipCommand,
         {
-          timeoutMs: 30000
+          timeoutMs: 15000
         }
       )
 

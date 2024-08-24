@@ -175,7 +175,8 @@ export const handleHostedChat = async (
   detectedModerationLevel: number
 ) => {
   let { provider } = modelData
-  if (selectedPlugin === PluginID.TERMINAL) provider = "openai"
+  if (selectedPlugin === PluginID.TERMINAL 
+    || selectedPlugin === PluginID.PYTHON) provider = "openai"
   let apiEndpoint = `/api/chat/${provider}`
 
   setToolInUse(
@@ -201,7 +202,7 @@ export const handleHostedChat = async (
           messages: formattedMessages,
           chatSettings,
           detectedModerationLevel,
-          selectedPlugin
+          selectedTool: selectedPlugin
         }
       : {
           messages: formattedMessages,
@@ -593,9 +594,9 @@ export const processResponse = async (
                 fullText += webSearchResult.fullText
                 break
               case "python":
-                setToolInUse(PluginID.CODE_INTERPRETER)
+                setToolInUse(PluginID.PYTHON)
                 toolCallId = streamPart.value.toolCallId
-                updatedPlugin = PluginID.CODE_INTERPRETER
+                updatedPlugin = PluginID.PYTHON
                 break
               case "browser":
                 setToolInUse(PluginID.BROWSER)

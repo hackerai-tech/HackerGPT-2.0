@@ -62,6 +62,7 @@ export const createToolSchemas = (context: {
       parameters: z.object({
         pipInstallCommand: z
           .string()
+          .optional()
           .describe(
             "Full pip install command to install packages (e.g., '!pip install package1 package2')"
           ),

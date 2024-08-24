@@ -38,7 +38,7 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   try {
-    const { messages, selectedPlugin } = await request.json()
+    const { messages, selectedTool } = await request.json()
 
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
@@ -49,13 +49,16 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    const toolToUse = selectedPlugin === "terminal" ? "terminal" : "all"
+    const toolToUse = selectedTool === "terminal" 
+    || selectedTool === "python" ? selectedTool : "all";
 
     updateSystemMessage(
       messages,
       toolToUse === "terminal"
         ? llmConfig.systemPrompts.pentestGPTTerminal
-        : llmConfig.systemPrompts.gpt4o,
+        : toolToUse === "python"
+          ? llmConfig.systemPrompts.pentestGPTPython
+          : llmConfig.systemPrompts.gpt4o,
       profile.profile_context
     )
     filterEmptyAssistantMessages(messages)

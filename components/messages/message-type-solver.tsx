@@ -43,8 +43,8 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
 
   if (
     (isPluginOutput &&
-      message.plugin === PluginID.CODE_INTERPRETER.toString()) ||
-    toolInUse === PluginID.CODE_INTERPRETER
+      message.plugin === PluginID.PYTHON.toString()) ||
+    toolInUse === PluginID.PYTHON
   ) {
     return (
       <MessageCodeInterpreter

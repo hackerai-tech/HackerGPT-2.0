@@ -74,7 +74,7 @@ export const MessageCodeInterpreter: React.FC<MessageCodeInterpreterProps> = ({
         <div className="mt-4">
           <MessageTooLong
             content={content}
-            plugin={PluginID.CODE_INTERPRETER}
+            plugin={PluginID.PYTHON}
             id={messageId || ""}
           />
         </div>

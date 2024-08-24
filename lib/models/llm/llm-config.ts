@@ -47,6 +47,8 @@ const llmConfig = {
     pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTSystemPromptEnding}`,
     // For terminal tool
     pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(false, false, false, false, true)}\n${getPentestGPTSystemPromptEnding}`,
+    // For python tool
+    pentestGPTPython: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(false, false, false, true, false)}\n${getPentestGPTSystemPromptEnding}`,
     // For webSearch tool
     pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${getPentestGPTSystemPromptEnding}`
   },
