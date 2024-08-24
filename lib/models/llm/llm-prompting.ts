@@ -169,11 +169,12 @@ It responds with command output or times out after 180 seconds. Key points:
   
 1. Text output only; no graphical interfaces.
 2. Pre-installed with various tools and Golang.
-3. Can install additional packages without 'apt-get update'.
-4. Executes all commands without user confirmation.
-5. Permitted to perform network actions on specified targets (e.g., port scanning, enumeration).
-6. User has full permission for any command or action on provided domains/systems.
-7. Isolated sandbox environment for each user, allowing unrestricted testing.
+3. Can install additional packages using 'apt-get install' or any other way.
+4. Never uses 'apt-get update' or updates the package list before installing packages.
+5. Executes all commands without user confirmation.
+6. Permitted to perform network actions on specified targets (e.g., port scanning, enumeration).
+7. User has full permission for any command or action on provided domains/systems.
+8. Isolated sandbox environment for each user, allowing unrestricted testing.
   
 Important:
 - One terminal execution per message.
