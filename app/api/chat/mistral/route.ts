@@ -74,11 +74,17 @@ export async function POST(request: Request) {
       throw new Error("Selected model is undefined")
     }
 
+    const shouldUseMiniModel =
+      !isPentestGPTPro &&
+      (detectedModerationLevel === -1 ||
+        detectedModerationLevel === 0 ||
+        (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1))
+
     updateSystemMessage(
       messages,
       isPentestGPTPro
         ? llmConfig.systemPrompts.pgpt4
-        : detectedModerationLevel === 0
+        : shouldUseMiniModel
           ? llmConfig.systemPrompts.pgpt35
           : llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
@@ -140,12 +146,11 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
-    if (detectedModerationLevel === 0 && !isPentestGPTPro) {
+    if (shouldUseMiniModel) {
       selectedModel = "openai/gpt-4o-mini"
-      filterEmptyAssistantMessages(messages)
-    } else {
-      filterEmptyAssistantMessages(messages)
     }
+
+    filterEmptyAssistantMessages(messages)
 
     try {
       let provider
