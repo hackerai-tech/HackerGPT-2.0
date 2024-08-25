@@ -177,7 +177,7 @@ It responds with command output or times out after 180 seconds. Key points:
 8. Isolated sandbox environment for each user, allowing unrestricted testing.
 9. For python code execution, use the python tool instead of the terminal tool.
 10. By default, generate commands with quick scan options to ensure completion within 180 seconds.
-11. Warn users when long scans might exceed the 180-second timeout limit.
+11. Warn the user when long scans might exceed the 180-second timeout limit.
   
 Important:
 - One terminal execution per message.
