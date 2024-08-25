@@ -14,9 +14,7 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText, tool } from "ai"
-// import { executePythonCode } from "@/lib/tools/python-executor"
-import { z } from "zod"
-import { generateAndUploadImage } from "@/lib/tools/image-generator"
+import { createToolSchemas } from "@/lib/tools/toolSchemas"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -169,7 +167,15 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
-      // let hasExecutedCode = false
+      let tools
+      if (selectedModel === "openai/gpt-4o-mini" || isPentestGPTPro) {
+        const toolSchemas = createToolSchemas({ profile, data })
+        tools = toolSchemas.getSelectedSchemas([
+          "webSearch",
+          "browser",
+          "generateImage"
+        ])
+      }
 
       const result = await streamText({
         model: provider(selectedModel),
@@ -179,62 +185,7 @@ export async function POST(request: Request) {
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
         experimental_toolCallStreaming: true,
-        tools:
-          selectedModel === "openai/gpt-4o-mini" || isPentestGPTPro
-            ? {
-                webSearch: {
-                  description: "Search the web for latest information",
-                  parameters: z.object({ search: z.boolean() })
-                },
-                browser: {
-                  description:
-                    "Browse a webpage and extract its text content. \
-                For HTML retrieval or more complex web scraping, use the Python tool.",
-                  parameters: z.object({
-                    open_url: z
-                      .string()
-                      .url()
-                      .describe("The URL of the webpage to browse")
-                  })
-                },
-                generateImage: tool({
-                  description: "Generates an image based on a text prompt.",
-                  parameters: z.object({
-                    prompt: z
-                      .string()
-                      .describe("The text prompt for image generation"),
-                    width: z
-                      .number()
-                      .optional()
-                      .describe("Width (integer 256 to 1280, default: 512)"),
-                    height: z
-                      .number()
-                      .optional()
-                      .describe("Height (integer 256 to 1280, default: 512)")
-                  }),
-                  async execute({ prompt, width, height }) {
-                    const generatedImage = await generateAndUploadImage({
-                      prompt,
-                      width,
-                      height,
-                      userId: profile.user_id
-                    })
-
-                    data.append({
-                      type: "imageGenerated",
-                      content: {
-                        url: generatedImage.url,
-                        prompt: prompt,
-                        width: width || 512,
-                        height: height || 512
-                      }
-                    })
-
-                    return `Image generated successfully. URL: ${generatedImage.url}`
-                  }
-                })
-              }
-            : undefined,
+        tools,
         onFinish: () => {
           data.close()
         }

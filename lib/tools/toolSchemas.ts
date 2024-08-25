@@ -5,10 +5,12 @@ import { executeBashCommand } from "@/lib/tools/bash-executor"
 import { generateAndUploadImage } from "@/lib/tools/image-generator"
 import { StreamData } from "ai"
 
-export const createToolSchemas = (context: {
-  profile: any
+type ToolContext = {
+  profile: { user_id: string }
   data: StreamData
-}) => {
+}
+
+export const createToolSchemas = (context: ToolContext) => {
   let hasExecutedCode = false
 
   const allSchemas = {
@@ -23,40 +25,6 @@ export const createToolSchemas = (context: {
         open_url: z.string().url().describe("The URL of the webpage to browse")
       })
     },
-    generateImage: tool({
-      description: "Generates an image based on a text prompt.",
-      parameters: z.object({
-        prompt: z.string().describe("The text prompt for image generation"),
-        width: z
-          .number()
-          .optional()
-          .describe("Width (integer 256 to 1280, default: 512)"),
-        height: z
-          .number()
-          .optional()
-          .describe("Height (integer 256 to 1280, default: 512)")
-      }),
-      execute: async ({ prompt, width, height }) => {
-        const generatedImage = await generateAndUploadImage({
-          prompt,
-          width,
-          height,
-          userId: context.profile.user_id
-        })
-
-        context.data.append({
-          type: "imageGenerated",
-          content: {
-            url: generatedImage.url,
-            prompt: prompt,
-            width: width || 512,
-            height: height || 512
-          }
-        })
-
-        return `Image generated successfully. URL: ${generatedImage.url}`
-      }
-    }),
     python: tool({
       description: "Runs Python code.",
       parameters: z.object({
@@ -66,9 +34,7 @@ export const createToolSchemas = (context: {
           .describe(
             "Full pip install command to install packages (e.g., '!pip install package1 package2')"
           ),
-        code: z
-          .string()
-          .describe("The Python code to execute in a single cell.")
+        code: z.string().min(1).describe("The Python code to execute")
       }),
       execute: async ({ pipInstallCommand, code }) => {
         if (hasExecutedCode) {
@@ -78,50 +44,65 @@ export const createToolSchemas = (context: {
             runtimeError: null
           }
         }
-
         hasExecutedCode = true
-        const execOutput = await executePythonCode(
+
+        const { results, error: runtimeError } = await executePythonCode(
           context.profile.user_id,
           code,
           pipInstallCommand
         )
-        const { results, error: runtimeError } = execOutput
-
-        return {
-          results,
-          runtimeError
-        }
+        return { results, runtimeError }
       }
     }),
     terminal: tool({
       description: "Runs bash commands.",
       parameters: z.object({
-        code: z.string().describe("The bash command to execute.")
+        command: z.string().min(1).describe("The bash command to execute")
       }),
-      execute: async ({ code }) => {
+      execute: async ({ command }) => {
         if (hasExecutedCode) {
-          const errorMessage = `Skipped execution for: "${code}". Only one command can be run per request.`
+          const errorMessage = `Skipped execution for: "${command}". Only one command can be run per request.`
           context.data.append({
             type: "stderr",
             content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
           })
           return { stdout: "", stderr: errorMessage }
         }
-
         hasExecutedCode = true
 
         context.data.append({
           type: "terminal",
-          content: `\n\`\`\`terminal\n${code}\n\`\`\``
+          content: `\n\`\`\`terminal\n${command}\n\`\`\``
         })
-
-        const execOutput = await executeBashCommand(
+        return await executeBashCommand(
           context.profile.user_id,
-          code,
+          command,
           context.data
         )
-
-        return execOutput
+      }
+    }),
+    generateImage: tool({
+      description: "Generates an image based on a text prompt.",
+      parameters: z.object({
+        prompt: z
+          .string()
+          .min(1)
+          .describe("The text prompt for image generation"),
+        width: z.number().int().min(256).max(1280).optional().default(512),
+        height: z.number().int().min(256).max(1280).optional().default(512)
+      }),
+      execute: async ({ prompt, width = 512, height = 512 }) => {
+        const generatedImage = await generateAndUploadImage({
+          prompt,
+          width,
+          height,
+          userId: context.profile.user_id
+        })
+        context.data.append({
+          type: "imageGenerated",
+          content: { url: generatedImage.url, prompt, width, height }
+        })
+        return `Image generated successfully. URL: ${generatedImage.url}`
       }
     })
   }
