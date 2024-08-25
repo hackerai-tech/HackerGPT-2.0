@@ -4,6 +4,8 @@ import { executePythonCode } from "@/lib/tools/python-executor"
 import { executeBashCommand } from "@/lib/tools/bash-executor"
 import { generateAndUploadImage } from "@/lib/tools/image-generator"
 import { StreamData } from "ai"
+import { ratelimit } from "../server/ratelimiter"
+import { epochTimeToNaturalLanguage } from "../utils"
 
 type ToolContext = {
   profile: { user_id: string }
@@ -11,7 +13,42 @@ type ToolContext = {
 }
 
 export const createToolSchemas = (context: ToolContext) => {
-  let hasExecutedCode = false
+  let executionPromise: Promise<void> | null = null
+
+  const executeOnce = async <T>(
+    toolName: string,
+    command: string,
+    fn: () => Promise<T>
+  ): Promise<T> => {
+    if (executionPromise) {
+      await executionPromise
+      const errorMessage = `Execution skipped for: "${command}". Only one ${toolName} execution is allowed per message for now.`
+      if (toolName === "terminal") {
+        context.data.append({
+          type: "terminal",
+          content: `\n\`\`\`terminal\n${command}\n\`\`\``
+        })
+      }
+      context.data.append({
+        type: "stderr",
+        content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
+      })
+      return {
+        results: errorMessage,
+        runtimeError: null
+      } as T
+    }
+
+    let resolve: () => void
+    executionPromise = new Promise<void>(r => (resolve = r))
+
+    try {
+      return await fn()
+    } finally {
+      resolve!()
+      executionPromise = null
+    }
+  }
 
   const allSchemas = {
     webSearch: {
@@ -37,21 +74,14 @@ export const createToolSchemas = (context: ToolContext) => {
         code: z.string().min(1).describe("The Python code to execute")
       }),
       execute: async ({ pipInstallCommand, code }) => {
-        if (hasExecutedCode) {
-          return {
-            results:
-              "Code execution skipped. Only one code cell can be executed per request.",
-            runtimeError: null
-          }
-        }
-        hasExecutedCode = true
-
-        const { results, error: runtimeError } = await executePythonCode(
-          context.profile.user_id,
-          code,
-          pipInstallCommand
-        )
-        return { results, runtimeError }
+        return executeOnce("Python", code, async () => {
+          const { results, error: runtimeError } = await executePythonCode(
+            context.profile.user_id,
+            code,
+            pipInstallCommand
+          )
+          return { results, runtimeError }
+        })
       }
     }),
     terminal: tool({
@@ -60,25 +90,35 @@ export const createToolSchemas = (context: ToolContext) => {
         command: z.string().min(1).describe("The bash command to execute")
       }),
       execute: async ({ command }) => {
-        if (hasExecutedCode) {
-          const errorMessage = `Skipped execution for: "${command}". Only one command can be run per request.`
+        return executeOnce("terminal", command, async () => {
           context.data.append({
-            type: "stderr",
-            content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
+            type: "terminal",
+            content: `\n\`\`\`terminal\n${command}\n\`\`\``
           })
-          return { stdout: "", stderr: errorMessage }
-        }
-        hasExecutedCode = true
 
-        context.data.append({
-          type: "terminal",
-          content: `\n\`\`\`terminal\n${command}\n\`\`\``
+          const rateLimitResult = await ratelimit(
+            context.profile.user_id,
+            "terminal"
+          )
+          if (!rateLimitResult.allowed) {
+            const waitTime = epochTimeToNaturalLanguage(
+              rateLimitResult.timeRemaining!
+            )
+            const errorMessage = `Oops! It looks like you've reached the limit for terminal commands. 
+      To ensure fair usage for all users, please wait ${waitTime} before trying again.`
+            context.data.append({
+              type: "stderr",
+              content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
+            })
+            return { stdout: "", stderr: errorMessage }
+          }
+
+          return await executeBashCommand(
+            context.profile.user_id,
+            command,
+            context.data
+          )
         })
-        return await executeBashCommand(
-          context.profile.user_id,
-          command,
-          context.data
-        )
       }
     }),
     generateImage: tool({
