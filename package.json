@@ -113,7 +113,7 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^14.2.5",
     "@tailwindcss/typography": "^0.5.13",
-    "@testing-library/jest-dom": "^6.4.8",
+    "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.0.0",
