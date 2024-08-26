@@ -126,7 +126,7 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                       <b>Access to advanced features</b>
                     </ProsStatement>
                     <Description>
-                      Vision, web browsing and code interpreter
+                      File uploads, Vision, Code interpreter, and Terminal
                     </Description>
                     <ProsStatement>
                       <b>Access to advanced tools</b>
@@ -134,6 +134,7 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                     <Description>
                       Nuclei, SQLi Exploiter, PortScanner, and more
                     </Description>
+                    <ProsStatement>FLUX.1 image generation</ProsStatement>
                   </div>
                 </div>
                 <div className="mt-4 w-full max-w-md">
@@ -197,12 +198,12 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                       Access to PGPT-4, GPT-4o, PGPT-3.5
                     </ProsStatement>
                     <ProsStatement>
-                      Access to advanced tools like Nuclei, SQLi Exploiter,
-                      PortScanner, and more
-                    </ProsStatement>
-                    <ProsStatement>
                       Access to file uploads, vision, code interpreter and
                       terminal
+                    </ProsStatement>
+                    <ProsStatement>
+                      Access to advanced tools like Nuclei, SQLi Exploiter,
+                      PortScanner, and more
                     </ProsStatement>
                     <ProsStatement>FLUX.1 image generation</ProsStatement>
                   </div>
