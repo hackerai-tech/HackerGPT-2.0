@@ -5,7 +5,8 @@ import {
   IconChevronUp,
   IconLoader2,
   IconCircleCheck,
-  IconExclamationCircle
+  IconExclamationCircle,
+  IconTerminal2
 } from "@tabler/icons-react"
 import { PluginID } from "@/types/plugins"
 import { MessageTooLong } from "../message-too-long"
@@ -16,11 +17,15 @@ interface MessageTerminalProps {
   isAssistant: boolean
 }
 
-interface ParsedContent {
-  beforeTerminal: string
-  terminalBlock: string
+interface TerminalBlock {
+  command: string
   stdout: string
   stderr: string
+}
+
+interface ParsedContent {
+  beforeTerminal: string
+  terminalBlocks: TerminalBlock[]
   afterTerminal: string
 }
 
@@ -31,41 +36,24 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
 }) => {
   const [isOutputOpen, setIsOutputOpen] = useState(true)
 
-  const {
-    beforeTerminal,
-    terminalBlock,
-    stdout,
-    stderr,
-    afterTerminal,
-    hasTerminalOutput,
-    terminalStatus
-  } = useMemo(() => {
-    const parsed = parseTerminalContent(content)
-    return {
-      ...parsed,
-      hasTerminalOutput: parsed.terminalBlock || parsed.stdout || parsed.stderr,
-      terminalStatus: parsed.stderr
-        ? "error"
-        : parsed.stdout
-          ? "finished"
-          : parsed.terminalBlock
-            ? "running"
-            : "idle"
-    }
-  }, [content])
+  const { beforeTerminal, terminalBlocks, afterTerminal, hasTerminalOutput } =
+    useMemo(() => {
+      const parsed = parseTerminalContent(content)
+      return {
+        ...parsed,
+        hasTerminalOutput: parsed.terminalBlocks.length > 0
+      }
+    }, [content])
 
-  const getStatusIndicator = useCallback(() => {
-    switch (terminalStatus) {
-      case "running":
-        return <IconLoader2 size={20} className="animate-spin" />
-      case "finished":
-        return <IconCircleCheck size={20} />
-      case "error":
-        return <IconExclamationCircle size={20} />
-      default:
-        return null
+  const getStatusIndicator = useCallback((block: TerminalBlock) => {
+    if (block.stderr) {
+      return <IconExclamationCircle size={20} />
+    } else if (block.stdout) {
+      return <IconCircleCheck size={20} />
+    } else {
+      return <IconLoader2 size={20} className="animate-spin" />
     }
-  }, [terminalStatus])
+  }, [])
 
   const renderContent = useCallback(
     (content: string) => {
@@ -100,12 +88,12 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
             aria-controls="terminal-content"
           >
             <div className="flex items-center">
-              {getStatusIndicator()}
-              <h4 className="mx-2 font-medium">Terminal</h4>
+              <IconTerminal2 size={20} />
+              <h4 className="ml-2 mr-1 text-lg">Terminal</h4>
               {isOutputOpen ? (
-                <IconChevronUp size={20} />
+                <IconChevronUp size={16} />
               ) : (
-                <IconChevronDown size={20} />
+                <IconChevronDown size={16} />
               )}
             </div>
           </button>
@@ -118,13 +106,33 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
                   : "max-h-0 opacity-0"
               }`}
             >
-              {terminalBlock && (
-                <div className="pt-4">
-                  <MessageMarkdown content={terminalBlock} isAssistant={true} />
+              {terminalBlocks.map((block, index) => (
+                <div
+                  key={index}
+                  className="mt-4 border-t pt-4 first:border-t-0 first:pt-0"
+                >
+                  <div className="flex items-center">
+                    {getStatusIndicator(block)}
+                    <h5 className="ml-2 font-medium">Command {index + 1}</h5>
+                  </div>
+                  <div className="mt-2">
+                    <MessageMarkdown
+                      content={`\`\`\`terminal\n${block.command}\n\`\`\``}
+                      isAssistant={true}
+                    />
+                  </div>
+                  {block.stdout && (
+                    <div className="mt-2">
+                      {renderContent(`\`\`\`stdout\n${block.stdout}\n\`\`\``)}
+                    </div>
+                  )}
+                  {block.stderr && (
+                    <div className="mt-2">
+                      {renderContent(`\`\`\`stderr\n${block.stderr}\n\`\`\``)}
+                    </div>
+                  )}
                 </div>
-              )}
-              {stdout && <div className="mt-2">{renderContent(stdout)}</div>}
-              {stderr && <div className="mt-2">{renderContent(stderr)}</div>}
+              ))}
             </div>
           )}
         </div>
@@ -139,45 +147,41 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
 const parseTerminalContent = (content: string): ParsedContent => {
   const newContent: ParsedContent = {
     beforeTerminal: "",
-    terminalBlock: "",
-    stdout: "",
-    stderr: "",
+    terminalBlocks: [],
     afterTerminal: ""
   }
 
-  // Find the terminal block
-  const terminalBlockRegex = /```terminal\n([\s\S]*?)```/
-  const terminalBlockMatch = content.match(terminalBlockRegex)
+  const blockRegex =
+    /(```terminal\n[\s\S]*?```(?:\n```(?:stdout|stderr)\n[\s\S]*?```)*)/g
+  const terminalRegex = /```terminal\n([\s\S]*?)```/
+  const stdoutRegex = /```stdout\n([\s\S]*?)```/
+  const stderrRegex = /```stderr\n([\s\S]*?)```/
 
-  if (terminalBlockMatch) {
-    const terminalIndex = content.indexOf(terminalBlockMatch[0])
-    newContent.beforeTerminal = content.slice(0, terminalIndex).trim()
-    newContent.terminalBlock = terminalBlockMatch[0]
-
-    // Parse stdout and stderr after the terminal block
-    let afterTerminal = content.slice(
-      terminalIndex + terminalBlockMatch[0].length
-    )
-
-    const stdoutRegex = /```stdout\n([\s\S]*?)```/
-    const stderrRegex = /```stderr\n([\s\S]*?)```/
-
-    const stdoutMatch = afterTerminal.match(stdoutRegex)
-    const stderrMatch = afterTerminal.match(stderrRegex)
-
-    if (stdoutMatch) {
-      newContent.stdout = stdoutMatch[0]
-      afterTerminal = afterTerminal.replace(stdoutMatch[0], "")
-    }
-    if (stderrMatch) {
-      newContent.stderr = stderrMatch[0]
-      afterTerminal = afterTerminal.replace(stderrMatch[0], "")
+  let match
+  let lastIndex = 0
+  while ((match = blockRegex.exec(content)) !== null) {
+    if (newContent.terminalBlocks.length === 0) {
+      newContent.beforeTerminal = content.slice(lastIndex, match.index).trim()
     }
 
-    newContent.afterTerminal = afterTerminal.trim()
-  } else {
-    newContent.beforeTerminal = content
+    const block = match[1]
+    const terminalMatch = block.match(terminalRegex)
+    const stdoutMatch = block.match(stdoutRegex)
+    const stderrMatch = block.match(stderrRegex)
+
+    if (terminalMatch) {
+      const terminalBlock: TerminalBlock = {
+        command: terminalMatch[1].trim(),
+        stdout: stdoutMatch ? stdoutMatch[1].trim() : "",
+        stderr: stderrMatch ? stderrMatch[1].trim() : ""
+      }
+      newContent.terminalBlocks.push(terminalBlock)
+    }
+
+    lastIndex = blockRegex.lastIndex
   }
+
+  newContent.afterTerminal = content.slice(lastIndex).trim()
 
   return newContent
 }
