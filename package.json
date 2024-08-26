@@ -26,7 +26,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@ai-sdk/mistral": "^0.0.28",
+    "@ai-sdk/mistral": "^0.0.37",
     "@ai-sdk/openai": "^0.0.48",
     "@apidevtools/json-schema-ref-parser": "^11.6.4",
     "@e2b/code-interpreter": "^0.0.9-beta.39",
