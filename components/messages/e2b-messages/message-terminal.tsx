@@ -3,8 +3,6 @@ import { MessageMarkdown } from "../message-markdown"
 import {
   IconChevronDown,
   IconChevronUp,
-  IconLoader2,
-  IconCircleCheck,
   IconExclamationCircle,
   IconTerminal2
 } from "@tabler/icons-react"
@@ -45,34 +43,18 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
       }
     }, [content])
 
-  const getStatusIndicator = useCallback((block: TerminalBlock) => {
-    if (block.stderr) {
-      return <IconExclamationCircle size={20} />
-    } else if (block.stdout) {
-      return <IconCircleCheck size={20} />
-    } else {
-      return <IconLoader2 size={20} className="animate-spin" />
-    }
-  }, [])
-
-  const renderContent = useCallback(
-    (content: string) => {
-      return content.length > 12000 ? (
-        <div className="mt-4">
-          <MessageTooLong
-            content={content}
-            plugin={PluginID.TERMINAL}
-            id={messageId || ""}
-          />
-        </div>
-      ) : (
-        <MessageMarkdown content={content} isAssistant={true} />
-      )
-    },
-    [messageId]
-  )
-
-  const toggleOutput = useCallback(() => setIsOutputOpen(prev => !prev), [])
+  const renderContent = (content: string) =>
+    content.length > 12000 ? (
+      <div className="mt-4">
+        <MessageTooLong
+          content={content}
+          plugin={PluginID.TERMINAL}
+          id={messageId || ""}
+        />
+      </div>
+    ) : (
+      <MessageMarkdown content={content} isAssistant={true} />
+    )
 
   return (
     <div>
@@ -83,7 +65,7 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
         <div className={`mb-2 overflow-hidden ${beforeTerminal ? "mt-2" : ""}`}>
           <button
             className="flex w-full items-center justify-between transition-colors duration-200"
-            onClick={toggleOutput}
+            onClick={() => setIsOutputOpen(prev => !prev)}
             aria-expanded={isOutputOpen}
             aria-controls="terminal-content"
           >
@@ -100,11 +82,7 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
           {isOutputOpen && (
             <div
               id="terminal-content"
-              className={`transition-all duration-300 ease-in-out ${
-                isOutputOpen
-                  ? "max-h-[12000px] opacity-100"
-                  : "max-h-0 opacity-0"
-              }`}
+              className="max-h-[12000px] opacity-100 transition-all duration-300 ease-in-out"
             >
               {terminalBlocks.map((block, index) => (
                 <div
@@ -112,7 +90,7 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
                   className="mt-4 border-t pt-4 first:border-t-0 first:pt-0"
                 >
                   <div className="flex items-center">
-                    {getStatusIndicator(block)}
+                    {block.stderr && <IconExclamationCircle size={20} />}
                     <h5 className="ml-2 font-medium">Command {index + 1}</h5>
                   </div>
                   <div className="mt-2">
