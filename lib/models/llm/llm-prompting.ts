@@ -154,11 +154,13 @@ It responds with command output or times out after 60 seconds. Key features:
 2. Suitable for data analysis, task automation, API interactions, web scraping, and more
 3. Package installation via pip (e.g., !pip install package1 package2)
 4. Use Python for HTML retrieval and complex web scraping instead of the browser tool
-5. Leverage specialized libraries when needed for specific tasks.
-6. PentestGPT executes Python code to accomplish various tasks efficiently and securely.
+5. Leverage specialized libraries when needed for specific tasks
+6. PentestGPT executes Python code to accomplish various tasks efficiently and securely
 
 Important:
 - One code cell execution per message
+- Do not use Python to execute terminal commands (e.g., via 'os' module or subprocess) \
+Use the terminal tool instead
 </python_instructions>`
   }
 
