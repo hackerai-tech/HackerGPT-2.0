@@ -126,7 +126,7 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                       <b>Access to advanced features</b>
                     </ProsStatement>
                     <Description>
-                      Vision, web browsing and code interpreter
+                      File uploads, Vision, Code interpreter, and Terminal
                     </Description>
                     <ProsStatement>
                       <b>Access to advanced tools</b>
@@ -134,6 +134,7 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                     <Description>
                       Nuclei, SQLi Exploiter, PortScanner, and more
                     </Description>
+                    <ProsStatement>FLUX.1 image generation</ProsStatement>
                   </div>
                 </div>
                 <div className="mt-4 w-full max-w-md">
@@ -149,7 +150,7 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                     <span className="ml-1 text-white">Upgrade to Pro</span>
                   </Button>
                   <p className="text-primary mt-2 text-xs">
-                    Auto-renews for $25/month until canceled
+                    Auto-renews for $20/month until canceled
                   </p>
                 </div>
               </div>
@@ -177,7 +178,7 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                     <div className="flex items-center justify-between">
                       <h3 className="mb-2 text-lg font-bold">Pro</h3>
                       <div className="mb-2 text-lg text-[#8e8ea0]">
-                        USD 25/month
+                        USD 20/month
                       </div>
                     </div>
                     <div className="mb-4 grid grid-cols-1 gap-1">
@@ -197,12 +198,12 @@ export const PlanDialog: FC<PlanDialogProps> = ({
                       Access to PGPT-4, GPT-4o, PGPT-3.5
                     </ProsStatement>
                     <ProsStatement>
-                      Access to advanced tools like Nuclei, SQLi Exploiter,
-                      PortScanner, and more
-                    </ProsStatement>
-                    <ProsStatement>
                       Access to file uploads, vision, code interpreter and
                       terminal
+                    </ProsStatement>
+                    <ProsStatement>
+                      Access to advanced tools like Nuclei, SQLi Exploiter,
+                      PortScanner, and more
                     </ProsStatement>
                     <ProsStatement>FLUX.1 image generation</ProsStatement>
                   </div>
