@@ -492,17 +492,15 @@ export const processResponse = async (
           }
 
           if (isTerminalResult(streamPart)) {
-            const content = streamPart.value.reduce((acc, item) => {
-              switch (item.type) {
-                case "terminal":
-                case "stdout":
-                case "stderr":
-                  return acc + item.content
-                default:
-                  return acc
-              }
-            }, "")
-            return { contentToAdd: content, newImagePath: null }
+            return {
+              contentToAdd: streamPart.value
+                .filter(item =>
+                  ["terminal", "stdout", "stderr"].includes(item.type)
+                )
+                .map(item => item.content)
+                .join(""),
+              newImagePath: null
+            }
           }
 
           if (isImageResult(streamPart)) {

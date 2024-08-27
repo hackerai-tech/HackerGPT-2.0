@@ -8,6 +8,8 @@ import {
 const bashSandboxTimeout = 10 * 60 * 1000
 const template = "bash-terminal"
 const maxExecutionTime = 3 * 60 * 1000
+const outputBufferSize = 1000 // Characters to buffer before sending
+const debounceInterval = 100 // Milliseconds to wait before sending output
 
 export async function executeBashCommand(
   userID: string,
@@ -18,7 +20,27 @@ export async function executeBashCommand(
 
   let sbx: CodeInterpreter | null = null
   let stdoutAccumulator = ""
+  let outputBuffer: string[] = []
+  let outputBufferLength = 0
   let isOutputStarted = false
+  let flushTimeout: NodeJS.Timeout | null = null
+
+  const flushOutput = () => {
+    if (outputBuffer.length > 0) {
+      const output = outputBuffer.join("")
+      data.append({ type: "stdout", content: output })
+      outputBuffer = []
+      outputBufferLength = 0
+    }
+    flushTimeout = null
+  }
+
+  const debouncedFlushOutput = () => {
+    if (flushTimeout) {
+      clearTimeout(flushTimeout)
+    }
+    flushTimeout = setTimeout(flushOutput, debounceInterval)
+  }
 
   try {
     sbx = await createOrConnectTerminal(userID, template, bashSandboxTimeout)
@@ -33,9 +55,22 @@ export async function executeBashCommand(
           isOutputStarted = true
         }
         stdoutAccumulator += out.line
-        data.append({ type: "stdout", content: out.line })
+        outputBuffer.push(out.line)
+        outputBufferLength += out.line.length
+
+        if (outputBufferLength >= outputBufferSize) {
+          flushOutput()
+        } else {
+          debouncedFlushOutput()
+        }
       }
     })
+
+    // Flush any remaining output
+    if (flushTimeout) {
+      clearTimeout(flushTimeout)
+    }
+    flushOutput()
 
     if (isOutputStarted) {
       data.append({ type: "stdout", content: "\n```" })
