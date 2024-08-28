@@ -13,29 +13,10 @@ import { generateStandaloneQuestion } from "@/lib/models/question-generator"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
-import { StreamData, streamText, tool } from "ai"
+import { StreamData, streamText } from "ai"
 import { createToolSchemas } from "@/lib/tools/toolSchemas"
 
 export const runtime: ServerRuntime = "edge"
-export const preferredRegion = [
-  "iad1",
-  "arn1",
-  "bom1",
-  "cdg1",
-  "cle1",
-  "cpt1",
-  "dub1",
-  "fra1",
-  "gru1",
-  "hnd1",
-  "icn1",
-  "kix1",
-  "lhr1",
-  "pdx1",
-  "sfo1",
-  "sin1",
-  "syd1"
-]
 
 export async function POST(request: Request) {
   const {

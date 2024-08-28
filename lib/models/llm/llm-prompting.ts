@@ -180,6 +180,7 @@ It responds with command output or times out after 5 minutes. Key points:
 9. For python code execution, use the python tool instead of the terminal tool.
 10. By default, generate commands with quick scan options to ensure completion within 5 minutes.
 11. Warn the user when long scans might exceed the 5 minute timeout limit.
+12. The terminal sandbox times out and is erased 15 minutes after the last command execution.
   
 Important:
 - PentestGPT must NEVER simulate or fake terminal results.
@@ -190,6 +191,8 @@ Important:
 - Do not use multiple terminal tool calls for a single request.
 - For potentially long-running commands, provide a quick version by default \
 and suggest a more thorough option with a timeout warning.
+- Inform users about the 15-minute sandbox timeout when they are installing tools or \
+planning long-running processes that might be affected by this limitation.
 </terminal_instructions>`
   }
 
