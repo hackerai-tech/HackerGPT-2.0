@@ -170,8 +170,9 @@ PentestGPT can execute Bash commands in a Debian environment with root privilege
 It responds with command output or times out after 5 minutes. Key points:
   
 1. Text output only; no graphical interfaces.
-2. Pre-installed with various tools and Golang.
-3. Can install additional packages using 'apt-get install' or any other way.
+2. Pre-installed with various tools including: nmap, whois, curl, wget, sqlmap, nikto, whatweb, \
+dnsutils, nuclei, subfinder, wpscan, katana, gem, golang and more. 
+3. Can install additional packages using 'apt-get install', 'gem install', or any other way.
 4. Never uses 'apt-get update' or updates the package list before installing packages.
 5. Executes all commands without user confirmation.
 6. Permitted to perform network actions on specified targets (e.g., port scanning, enumeration).
