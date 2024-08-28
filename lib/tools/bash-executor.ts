@@ -6,7 +6,7 @@ import {
 } from "@e2b/code-interpreter"
 
 const template = "bash-terminal"
-const bashSandboxTimeout = 10 * 60 * 1000
+const bashSandboxTimeout = 15 * 60 * 1000
 const maxExecutionTime = 5 * 60 * 1000
 const outputBufferSize = 1000 // Characters to buffer before sending
 const debounceInterval = 100 // Milliseconds to wait before sending output
