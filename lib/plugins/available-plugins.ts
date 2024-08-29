@@ -102,44 +102,6 @@ export const availablePlugins: PluginSummary[] = [
   // },
   {
     id: 3,
-    name: "Enhanced Search",
-    selectorName: "Enhanced Search",
-    value: PluginID.ENHANCED_SEARCH,
-    categories: [],
-    icon: "https://cdn-icons-png.flaticon.com/128/11751/11751689.png",
-    invertInDarkMode: true,
-    description:
-      "Enhances the model with curated PentestGPT knowledge, including popular guides, techniques, and tools",
-    githubRepoUrl: pluginUrls.PENTESTGPT,
-    isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-07-26",
-    starters: [
-      {
-        title: "What are Some Ways",
-        description: "to bypass payment process?",
-        chatMessage: "What are some ways to bypass payment process?"
-      },
-      {
-        title: "Explain the OWASP Top 10",
-        description: "and how to test for them",
-        chatMessage: "Explain the OWASP Top 10 and how to test for them."
-      },
-      {
-        title: "Describe Common Techniques",
-        description: "for exploiting server-side request forgery",
-        chatMessage:
-          "Describe common techniques for exploiting server-side request forgery."
-      },
-      {
-        title: "List Popular Vulnerabel",
-        description: "ports to exploit",
-        chatMessage: "List popular vulnerabel ports to exploit."
-      }
-    ]
-  },
-  {
-    id: 4,
     name: "CVEMap",
     selectorName: "CVEMap",
     value: PluginID.CVEMAP,
@@ -177,7 +139,7 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 5,
+    id: 4,
     name: "Subdomain Finder",
     selectorName: "Subdomain Finder",
     categories: ["recon"],
@@ -214,7 +176,7 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 6,
+    id: 5,
     name: "Link Finder",
     selectorName: "Link Finder",
     value: PluginID.LINKFINDER,
@@ -237,6 +199,44 @@ export const availablePlugins: PluginSummary[] = [
         title: "Link Finder Help",
         description: "How does the Link Finder plugin work?",
         chatMessage: "/linkfinder -help"
+      }
+    ]
+  },
+  {
+    id: 6,
+    name: "Enhanced Search",
+    selectorName: "Enhanced Search",
+    value: PluginID.ENHANCED_SEARCH,
+    categories: [],
+    icon: "https://cdn-icons-png.flaticon.com/128/11751/11751689.png",
+    invertInDarkMode: true,
+    description:
+      "Enhances the model with curated PentestGPT knowledge, including popular guides, techniques, and tools",
+    githubRepoUrl: pluginUrls.PENTESTGPT,
+    isInstalled: false,
+    isPremium: false,
+    createdAt: "2024-07-26",
+    starters: [
+      {
+        title: "What are Some Ways",
+        description: "to bypass payment process?",
+        chatMessage: "What are some ways to bypass payment process?"
+      },
+      {
+        title: "Explain the OWASP Top 10",
+        description: "and how to test for them",
+        chatMessage: "Explain the OWASP Top 10 and how to test for them."
+      },
+      {
+        title: "Describe Common Techniques",
+        description: "for exploiting server-side request forgery",
+        chatMessage:
+          "Describe common techniques for exploiting server-side request forgery."
+      },
+      {
+        title: "List Popular Vulnerabel",
+        description: "ports to exploit",
+        chatMessage: "List popular vulnerabel ports to exploit."
       }
     ]
   },
