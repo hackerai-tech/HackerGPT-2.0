@@ -155,10 +155,15 @@ export async function createOrConnectTerminal(
 ) {
   const allSandboxes = await CodeInterpreter.list()
 
+  console.log("allSandboxes", allSandboxes)
+
   const sandboxInfo = allSandboxes.find(
     sbx =>
-      sbx.metadata?.userID === userID && sbx.metadata?.template === template
+      sbx.metadata?.userID === userID &&
+      sbx.metadata?.template === template
   )
+
+  console.log("sandboxInfo", sandboxInfo)
 
   if (!sandboxInfo) {
     // Vercel's AI SDK has a bug that it doesn't throw an error in the tool `execute` call so we want to be explicit

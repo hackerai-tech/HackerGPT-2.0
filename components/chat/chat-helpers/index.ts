@@ -435,7 +435,7 @@ export const processResponse = async (
           part.value.length > 0 &&
           typeof part.value[0] === "object" &&
           "type" in part.value[0] &&
-          part.value[0].type !== "imageGenerated" &&
+          (part.value[0].type === "console" || part.value[0].type === "stdout" || part.value[0].type === "stderr") &&
           "content" in part.value[0]
 
         const isImageResult = (
@@ -510,6 +510,8 @@ export const processResponse = async (
               newImagePath: url
             }
           }
+
+          console.log("partIgnored", streamPart)
 
           return { contentToAdd: "", newImagePath: null }
         }
