@@ -342,7 +342,6 @@ export const fetchChatResponse = async (
 const processStreamPart = (
   streamPart: any,
   toolCallId: string
-
 ): { contentToAdd: string; newImagePath: string | null } => {
   if (streamPart.type === "text")
     return { contentToAdd: streamPart.value, newImagePath: null }
@@ -357,13 +356,9 @@ const processStreamPart = (
     }
   }
 
-  if (
-    isToolResult(streamPart) &&
-    streamPart.value.toolCallId === toolCallId
-  ) {
+  if (isToolResult(streamPart) && streamPart.value.toolCallId === toolCallId) {
     console.log("toolResult", streamPart.value.result)
-    const { results, stdout, stderr, runtimeError } =
-      streamPart.value.result
+    const { results, stdout, stderr, runtimeError } = streamPart.value.result
     const content = [
       results && `<results>${results}</results>`,
       stdout && `<stdout>${stdout}</stdout>`,
@@ -380,15 +375,11 @@ const processStreamPart = (
     return {
       contentToAdd: streamPart.value
         .filter(item =>
-          ["terminal", "console", "stdout", "stderr"].includes(
-            item.type
-          )
+          ["terminal", "console", "stdout", "stderr"].includes(item.type)
         )
         .map(
           item =>
-            (item.content || "") +
-            (item.stdout || "") +
-            (item.stderr || "")
+            (item.content || "") + (item.stdout || "") + (item.stderr || "")
         )
         .join(""),
       newImagePath: null
@@ -408,7 +399,6 @@ const processStreamPart = (
 
   return { contentToAdd: "", newImagePath: null }
 }
-
 
 const isToolCallDelta = (
   part: any
@@ -436,9 +426,7 @@ const isToolResult = (
 } =>
   part.type === "tool_result" &&
   "toolCallId" in part.value &&
-  ("result" in part.value ||
-    "stdout" in part.value ||
-    "stderr" in part.value)
+  ("result" in part.value || "stdout" in part.value || "stderr" in part.value)
 
 const isTerminalResult = (
   part: any
@@ -485,7 +473,6 @@ const isImageResult = (
   "type" in part.value[0] &&
   part.value[0].type === "imageGenerated" &&
   "content" in part.value[0]
-
 
 export const processResponse = async (
   response: Response,
@@ -567,22 +554,13 @@ export const processResponse = async (
                 assistantGeneratedImages.push(newImagePath)
               }
 
-              setChatMessages(prev =>
-                prev.map(chatMessage =>
-                  chatMessage.message.id === lastChatMessage.message.id
-                    ? {
-                        ...chatMessage,
-                        message: {
-                          ...chatMessage.message,
-                          content: chatMessage.message.content + contentToAdd,
-                          image_paths: newImagePath
-                            ? [...chatMessage.message.image_paths, newImagePath]
-                            : chatMessage.message.image_paths
-                        }
-                      }
-                    : chatMessage
-                )
-              )
+              lastChatMessage.message.content += contentToAdd
+              lastChatMessage.message.image_paths = newImagePath
+                ? [...lastChatMessage.message.image_paths, newImagePath]
+                : lastChatMessage.message.image_paths
+                /*
+
+              )*/
             } else if (
               typeof streamPart.value === "object" &&
               streamPart.value !== null &&
@@ -706,6 +684,8 @@ export const processResponse = async (
       reader.releaseLock()
       setToolInUse("none")
     }
+
+    
 
     return {
       fullText,
