@@ -159,8 +159,7 @@ export async function createOrConnectTerminal(
 
   const sandboxInfo = allSandboxes.find(
     sbx =>
-      sbx.metadata?.userID === userID &&
-      sbx.metadata?.template === template
+      sbx.metadata?.userID === userID && sbx.metadata?.template === template
   )
 
   console.log("sandboxInfo", sandboxInfo)

@@ -435,7 +435,9 @@ export const processResponse = async (
           part.value.length > 0 &&
           typeof part.value[0] === "object" &&
           "type" in part.value[0] &&
-          (part.value[0].type === "console" || part.value[0].type === "stdout" || part.value[0].type === "stderr") &&
+          (part.value[0].type === "console" ||
+            part.value[0].type === "stdout" ||
+            part.value[0].type === "stderr") &&
           "content" in part.value[0]
 
         const isImageResult = (
@@ -481,6 +483,7 @@ export const processResponse = async (
             isToolResult(streamPart) &&
             streamPart.value.toolCallId === toolCallId
           ) {
+            console.log("toolResult", streamPart.value.result)
             const { results, runtimeError } = streamPart.value.result
             const content = [
               results && `<results>${results}</results>`,
@@ -492,6 +495,7 @@ export const processResponse = async (
           }
 
           if (isTerminalResult(streamPart)) {
+            console.log("terminalResult", streamPart.value)
             return {
               contentToAdd: streamPart.value
                 .filter(item =>
@@ -504,6 +508,7 @@ export const processResponse = async (
           }
 
           if (isImageResult(streamPart)) {
+            console.log("imageResult", streamPart.value)
             const { url, prompt, width, height } = streamPart.value[0].content
             return {
               contentToAdd: `<ai_generated_image>${prompt} width: ${width} height: ${height}</ai_generated_image>`,
