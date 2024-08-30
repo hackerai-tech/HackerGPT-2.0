@@ -558,7 +558,7 @@ export const processResponse = async (
               lastChatMessage.message.image_paths = newImagePath
                 ? [...lastChatMessage.message.image_paths, newImagePath]
                 : lastChatMessage.message.image_paths
-                /*
+              /*
 
               )*/
             } else if (
@@ -684,8 +684,6 @@ export const processResponse = async (
       reader.releaseLock()
       setToolInUse("none")
     }
-
-    
 
     return {
       fullText,

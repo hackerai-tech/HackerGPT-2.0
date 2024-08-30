@@ -10,6 +10,8 @@ interface ChatMessagesProps {}
 export const ChatMessages: FC<ChatMessagesProps> = ({}) => {
   const { chatMessages } = useContext(PentestGPTContext)
 
+  console.log("Rendering ChatMessages")
+
   const { handleSendEdit, handleSendFeedback } = useChatHandler()
 
   const onSendFeedback = (
