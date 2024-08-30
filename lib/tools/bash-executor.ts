@@ -58,7 +58,11 @@ export async function executeBashCommand(
         outputBuffer.push(out.line)
         outputBufferLength += out.line.length
 
-        flushOutput()
+        if (outputBufferLength >= outputBufferSize) {
+          flushOutput()
+        } else {
+          debouncedFlushOutput()
+        }
       }
     })
 

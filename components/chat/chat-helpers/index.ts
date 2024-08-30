@@ -339,6 +339,154 @@ export const fetchChatResponse = async (
   return response
 }
 
+const processStreamPart = (
+  streamPart: any,
+  toolCallId: string
+
+): { contentToAdd: string; newImagePath: string | null } => {
+  if (streamPart.type === "text")
+    return { contentToAdd: streamPart.value, newImagePath: null }
+
+  if (
+    isToolCallDelta(streamPart) &&
+    streamPart.value.toolCallId === toolCallId
+  ) {
+    return {
+      contentToAdd: streamPart.value.argsTextDelta,
+      newImagePath: null
+    }
+  }
+
+  if (
+    isToolResult(streamPart) &&
+    streamPart.value.toolCallId === toolCallId
+  ) {
+    console.log("toolResult", streamPart.value.result)
+    const { results, stdout, stderr, runtimeError } =
+      streamPart.value.result
+    const content = [
+      results && `<results>${results}</results>`,
+      stdout && `<stdout>${stdout}</stdout>`,
+      stderr && `<stderr>${stderr}</stderr>`,
+      runtimeError && `<runtimeError>${runtimeError}</runtimeError>`
+    ]
+      .filter(Boolean)
+      .join("")
+    return { contentToAdd: content, newImagePath: null }
+  }
+
+  if (isTerminalResult(streamPart)) {
+    console.log("terminalResult", streamPart.value)
+    return {
+      contentToAdd: streamPart.value
+        .filter(item =>
+          ["terminal", "console", "stdout", "stderr"].includes(
+            item.type
+          )
+        )
+        .map(
+          item =>
+            (item.content || "") +
+            (item.stdout || "") +
+            (item.stderr || "")
+        )
+        .join(""),
+      newImagePath: null
+    }
+  }
+
+  if (isImageResult(streamPart)) {
+    console.log("imageResult", streamPart.value)
+    const { url, prompt, width, height } = streamPart.value[0].content
+    return {
+      contentToAdd: `<ai_generated_image>${prompt} width: ${width} height: ${height}</ai_generated_image>`,
+      newImagePath: url
+    }
+  }
+
+  console.log("partIgnored", streamPart)
+
+  return { contentToAdd: "", newImagePath: null }
+}
+
+
+const isToolCallDelta = (
+  part: any
+): part is {
+  type: "tool_call_delta"
+  value: { toolCallId: string; argsTextDelta: string }
+} =>
+  part.type === "tool_call_delta" &&
+  "toolCallId" in part.value &&
+  "argsTextDelta" in part.value
+
+const isToolResult = (
+  part: any
+): part is {
+  type: "tool_result"
+  value: {
+    toolCallId: string
+    result: {
+      results: string
+      runtimeError: string
+      stdout: string
+      stderr: string
+    }
+  }
+} =>
+  part.type === "tool_result" &&
+  "toolCallId" in part.value &&
+  ("result" in part.value ||
+    "stdout" in part.value ||
+    "stderr" in part.value)
+
+const isTerminalResult = (
+  part: any
+): part is {
+  type: "data"
+  value: Array<{
+    type: string
+    content: string | null
+    stdout: string | null
+    stderr: string | null
+  }>
+} =>
+  part.type === "data" &&
+  Array.isArray(part.value) &&
+  part.value.length > 0 &&
+  typeof part.value[0] === "object" &&
+  "type" in part.value[0] &&
+  (part.value[0].type === "console" ||
+    part.value[0].type === "terminal" ||
+    part.value[0].type === "stdout" ||
+    part.value[0].type === "stderr") &&
+  ("content" in part.value[0] ||
+    "stdout" in part.value[0] ||
+    "stderr" in part.value[0])
+
+const isImageResult = (
+  part: any
+): part is {
+  type: "data"
+  value: Array<{
+    type: string
+    content: {
+      url: string
+      prompt: string
+      width: number
+      height: number
+    }
+  }>
+} =>
+  part.type === "data" &&
+  Array.isArray(part.value) &&
+  part.value.length > 0 &&
+  typeof part.value[0] === "object" &&
+  "type" in part.value[0] &&
+  part.value[0].type === "imageGenerated" &&
+  "content" in part.value[0]
+
+
 export const processResponse = async (
   response: Response,
   lastChatMessage: ChatMessage,
@@ -400,151 +548,6 @@ export const processResponse = async (
     try {
       for await (const streamPart of stream) {
         console.log(streamPart)
-
-        const isToolCallDelta = (
-          part: any
-        ): part is {
-          type: "tool_call_delta"
-          value: { toolCallId: string; argsTextDelta: string }
-        } =>
-          part.type === "tool_call_delta" &&
-          "toolCallId" in part.value &&
-          "argsTextDelta" in part.value
-
-        const isToolResult = (
-          part: any
-        ): part is {
-          type: "tool_result"
-          value: {
-            toolCallId: string
-            result: {
-              results: string
-              runtimeError: string
-              stdout: string
-              stderr: string
-            }
-          }
-        } =>
-          part.type === "tool_result" &&
-          "toolCallId" in part.value &&
-          ("result" in part.value ||
-            "stdout" in part.value ||
-            "stderr" in part.value)
-
-        const isTerminalResult = (
-          part: any
-        ): part is {
-          type: "data"
-          value: Array<{
-            type: string
-            content: string | null
-            stdout: string | null
-            stderr: string | null
-          }>
-        } =>
-          part.type === "data" &&
-          Array.isArray(part.value) &&
-          part.value.length > 0 &&
-          typeof part.value[0] === "object" &&
-          "type" in part.value[0] &&
-          (part.value[0].type === "console" ||
-            part.value[0].type === "terminal" ||
-            part.value[0].type === "stdout" ||
-            part.value[0].type === "stderr") &&
-          ("content" in part.value[0] ||
-            "stdout" in part.value[0] ||
-            "stderr" in part.value[0])
-
-        const isImageResult = (
-          part: any
-        ): part is {
-          type: "data"
-          value: Array<{
-            type: string
-            content: {
-              url: string
-              prompt: string
-              width: number
-              height: number
-            }
-          }>
-        } =>
-          part.type === "data" &&
-          Array.isArray(part.value) &&
-          part.value.length > 0 &&
-          typeof part.value[0] === "object" &&
-          "type" in part.value[0] &&
-          part.value[0].type === "imageGenerated" &&
-          "content" in part.value[0]
-
-        const processStreamPart = (
-          streamPart: any,
-          toolCallId: string
-        ): { contentToAdd: string; newImagePath: string | null } => {
-          if (streamPart.type === "text")
-            return { contentToAdd: streamPart.value, newImagePath: null }
-
-          if (
-            isToolCallDelta(streamPart) &&
-            streamPart.value.toolCallId === toolCallId
-          ) {
-            return {
-              contentToAdd: streamPart.value.argsTextDelta,
-              newImagePath: null
-            }
-          }
-
-          if (
-            isToolResult(streamPart) &&
-            streamPart.value.toolCallId === toolCallId
-          ) {
-            console.log("toolResult", streamPart.value.result)
-            const { results, stdout, stderr, runtimeError } =
-              streamPart.value.result
-            const content = [
-              results && `<results>${results}</results>`,
-              stdout && `<stdout>${stdout}</stdout>`,
-              stderr && `<stderr>${stderr}</stderr>`,
-              runtimeError && `<runtimeError>${runtimeError}</runtimeError>`
-            ]
-              .filter(Boolean)
-              .join("")
-            return { contentToAdd: content, newImagePath: null }
-          }
-
-          if (isTerminalResult(streamPart)) {
-            console.log("terminalResult", streamPart.value)
-            return {
-              contentToAdd: streamPart.value
-                .filter(item =>
-                  ["terminal", "console", "stdout", "stderr"].includes(
-                    item.type
-                  )
-                )
-                .map(
-                  item =>
-                    (item.content || "") +
-                    (item.stdout || "") +
-                    (item.stderr || "")
-                )
-                .join(""),
-              newImagePath: null
-            }
-          }
-
-          if (isImageResult(streamPart)) {
-            console.log("imageResult", streamPart.value)
-            const { url, prompt, width, height } = streamPart.value[0].content
-            return {
-              contentToAdd: `<ai_generated_image>${prompt} width: ${width} height: ${height}</ai_generated_image>`,
-              newImagePath: url
-            }
-          }
-
-          console.log("partIgnored", streamPart)
-
-          return { contentToAdd: "", newImagePath: null }
-        }
 
         switch (streamPart.type) {
           case "text":
