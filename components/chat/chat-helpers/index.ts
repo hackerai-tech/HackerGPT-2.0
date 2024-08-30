@@ -450,8 +450,7 @@ export const processResponse = async (
           (part.value[0].type === "console" ||
             part.value[0].type === "terminal" ||
             part.value[0].type === "stdout" ||
-            part.value[0].type === "stderr"
-          ) &&
+            part.value[0].type === "stderr") &&
           ("content" in part.value[0] ||
             "stdout" in part.value[0] ||
             "stderr" in part.value[0])
@@ -556,9 +555,6 @@ export const processResponse = async (
               streamPart,
               toolCallId
             )
-            console.log("contentToAdd", contentToAdd)
-            console.log("newImagePath", newImagePath)
-            console.log("fullText", fullText)
 
             if (contentToAdd || newImagePath) {
               setFirstTokenReceived(true)
