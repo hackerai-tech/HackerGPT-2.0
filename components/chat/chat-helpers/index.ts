@@ -554,13 +554,22 @@ export const processResponse = async (
                 assistantGeneratedImages.push(newImagePath)
               }
 
-              lastChatMessage.message.content += contentToAdd
-              lastChatMessage.message.image_paths = newImagePath
-                ? [...lastChatMessage.message.image_paths, newImagePath]
-                : lastChatMessage.message.image_paths
-              /*
-
-              )*/
+              setChatMessages(prev =>
+                prev.map(chatMessage =>
+                  chatMessage.message.id === lastChatMessage.message.id
+                    ? {
+                        ...chatMessage,
+                        message: {
+                          ...chatMessage.message,
+                          content: chatMessage.message.content + contentToAdd,
+                          image_paths: newImagePath
+                            ? [...chatMessage.message.image_paths, newImagePath]
+                            : chatMessage.message.image_paths
+                        }
+                      }
+                    : chatMessage
+                )
+              )
             } else if (
               typeof streamPart.value === "object" &&
               streamPart.value !== null &&
