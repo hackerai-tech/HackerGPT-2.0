@@ -129,9 +129,6 @@ export async function POST(request: Request) {
 
     if (shouldUseMiniModel) {
       selectedModel = "openai/gpt-4o-mini"
-    } else if (detectedModerationLevel >= 0.7) {
-      selectedModel = "mistralai/mistral-nemo"
-      modelTemperature = 0.3
     }
 
     filterEmptyAssistantMessages(messages)
