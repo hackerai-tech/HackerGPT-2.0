@@ -156,17 +156,14 @@ export async function POST(request: Request) {
       let tools
       if (selectedModel === "openai/gpt-4o-mini" || isPentestGPTPro) {
         const toolSchemas = createToolSchemas({ profile, data })
-        tools = toolSchemas.getSelectedSchemas([
-          "webSearch",
-          "browser",
-        ])
+        tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
       }
 
       const result = await streamText({
         model: provider(selectedModel),
         messages: toVercelChatMessages(messages),
         temperature: modelTemperature,
-        maxTokens: 1024,
+        maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
         experimental_toolCallStreaming: true,
