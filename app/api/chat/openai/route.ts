@@ -38,7 +38,7 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   try {
-    const { messages, selectedTool } = await request.json()
+    const { messages } = await request.json()
 
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
@@ -49,18 +49,9 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    const toolToUse =
-      selectedTool === "terminal" || selectedTool === "python"
-        ? selectedTool
-        : "all"
-
     updateSystemMessage(
       messages,
-      toolToUse === "terminal"
-        ? llmConfig.systemPrompts.pentestGPTTerminal
-        : toolToUse === "python"
-          ? llmConfig.systemPrompts.pentestGPTPython
-          : llmConfig.systemPrompts.gpt4o,
+      llmConfig.systemPrompts.gpt4o,
       profile.profile_context
     )
     filterEmptyAssistantMessages(messages)
@@ -85,7 +76,7 @@ export async function POST(request: Request) {
       messages: toVercelChatMessages(messages, true),
       abortSignal: request.signal,
       experimental_toolCallStreaming: true,
-      tools: getSelectedSchemas(toolToUse),
+      tools: getSelectedSchemas("all"),
       onFinish: () => {
         data.close()
       }
