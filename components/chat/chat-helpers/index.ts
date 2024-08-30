@@ -417,7 +417,12 @@ export const processResponse = async (
           type: "tool_result"
           value: {
             toolCallId: string
-            result: { results: string; runtimeError: string }
+            result: {
+              results: string
+              runtimeError: string
+              stdout: string
+              stderr: string
+            }
           }
         } =>
           part.type === "tool_result" &&
