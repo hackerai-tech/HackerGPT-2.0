@@ -422,7 +422,9 @@ export const processResponse = async (
         } =>
           part.type === "tool_result" &&
           "toolCallId" in part.value &&
-          "result" in part.value
+          ("result" in part.value ||
+            "stdout" in part.value ||
+            "stderr" in part.value)
 
         const isTerminalResult = (
           part: any
@@ -436,6 +438,7 @@ export const processResponse = async (
           typeof part.value[0] === "object" &&
           "type" in part.value[0] &&
           (part.value[0].type === "console" ||
+            part.value[0].type === "terminal" ||
             part.value[0].type === "stdout" ||
             part.value[0].type === "stderr") &&
           "content" in part.value[0]
@@ -484,9 +487,12 @@ export const processResponse = async (
             streamPart.value.toolCallId === toolCallId
           ) {
             console.log("toolResult", streamPart.value.result)
-            const { results, runtimeError } = streamPart.value.result
+            const { results, stdout, stderr, runtimeError } =
+              streamPart.value.result
             const content = [
               results && `<results>${results}</results>`,
+              stdout && `<stdout>${stdout}</stdout>`,
+              stderr && `<stderr>${stderr}</stderr>`,
               runtimeError && `<runtimeError>${runtimeError}</runtimeError>`
             ]
               .filter(Boolean)
