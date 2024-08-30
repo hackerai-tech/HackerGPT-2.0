@@ -159,7 +159,6 @@ export async function POST(request: Request) {
         tools = toolSchemas.getSelectedSchemas([
           "webSearch",
           "browser",
-          "generateImage"
         ])
       }
 
