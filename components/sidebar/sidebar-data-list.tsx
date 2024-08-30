@@ -287,12 +287,8 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
                 })}
                 {contentType === "chats" && data.length > 0 && hasMoreChats && (
                   <div ref={loaderRef} className="mt-4 flex justify-center">
-                    {isLoadingMore ? (
-                      <Loader2 className="text-primary size-6 animate-spin" />
-                    ) : (
-                      <div className="text-muted-foreground text-sm">
-                        Scroll for more
-                      </div>
+                    {isLoadingMore && (
+                      <Loader2 className="text-primary size-4 animate-spin" />
                     )}
                   </div>
                 )}
