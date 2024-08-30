@@ -399,7 +399,7 @@ export const processResponse = async (
 
     try {
       for await (const streamPart of stream) {
-        // console.log(streamPart)
+        console.log(streamPart)
 
         const isToolCallDelta = (
           part: any
