@@ -13,8 +13,6 @@ import {
 import PluginStoreModal from "./plugin-store"
 import { PluginID, PluginSummary } from "@/types/plugins"
 import { PentestGPTContext } from "@/context/context"
-import Modal from "./dialog-portal"
-import { PlanDialog } from "../utility/plan-dialog"
 import {
   usePluginContext,
   ActionTypes,
@@ -23,6 +21,7 @@ import {
 import { availablePlugins } from "@/lib/plugins/available-plugins"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { DialogPanel } from "@headlessui/react"
+import { useRouter } from "next/navigation"
 
 interface PluginSelectorProps {
   onPluginSelect: (type: string) => void
@@ -36,8 +35,9 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
   const [isPluginStoreModalOpen, setIsPluginStoreModalOpen] = useState(false)
   const [showLockedPluginDialog, setShowLockedPluginDialog] = useState(false)
   const [currentPlugin, setCurrentPlugin] = useState<PluginSummary | null>(null)
-  const [showPlanDialog, setShowPlanDialog] = useState(false)
   const { state: pluginState, dispatch: pluginDispatch } = usePluginContext()
+
+  const router = useRouter()
 
   const defaultPluginIds = [0, 99]
 
@@ -45,7 +45,7 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
 
   const handleUpgradeToPlus = () => {
     setShowLockedPluginDialog(false)
-    setShowPlanDialog(true)
+    router.push("/upgrade")
   }
 
   useEffect(() => {
@@ -161,11 +161,6 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
         handleCancelUpgrade={() => setShowLockedPluginDialog(false)}
         handleUpgradeToPlus={handleUpgradeToPlus}
         isPremium={isPremium}
-      />
-      <PlanDialog
-        showIcon={false}
-        open={showPlanDialog}
-        onOpenChange={setShowPlanDialog}
       />
     </div>
   )
