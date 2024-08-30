@@ -435,7 +435,12 @@ export const processResponse = async (
           part: any
         ): part is {
           type: "data"
-          value: Array<{ type: string; content: string }>
+          value: Array<{
+            type: string
+            content: string | null
+            stdout: string | null
+            stderr: string | null
+          }>
         } =>
           part.type === "data" &&
           Array.isArray(part.value) &&
@@ -443,10 +448,10 @@ export const processResponse = async (
           typeof part.value[0] === "object" &&
           "type" in part.value[0] &&
           (part.value[0].type === "console" ||
-            part.value[0].type === "terminal" ||
-            part.value[0].type === "stdout" ||
-            part.value[0].type === "stderr") &&
-          "content" in part.value[0]
+            part.value[0].type === "terminal") &&
+          ("content" in part.value[0] ||
+            "stdout" in part.value[0] ||
+            "stderr" in part.value[0])
 
         const isImageResult = (
           part: any
@@ -510,9 +515,16 @@ export const processResponse = async (
             return {
               contentToAdd: streamPart.value
                 .filter(item =>
-                  ["terminal", "stdout", "stderr"].includes(item.type)
+                  ["terminal", "console", "stdout", "stderr"].includes(
+                    item.type
+                  )
                 )
-                .map(item => item.content)
+                .map(
+                  item =>
+                    (item.content || "") +
+                    (item.stdout || "") +
+                    (item.stderr || "")
+                )
                 .join(""),
               newImagePath: null
             }
