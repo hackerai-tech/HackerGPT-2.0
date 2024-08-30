@@ -448,7 +448,10 @@ export const processResponse = async (
           typeof part.value[0] === "object" &&
           "type" in part.value[0] &&
           (part.value[0].type === "console" ||
-            part.value[0].type === "terminal") &&
+            part.value[0].type === "terminal" ||
+            part.value[0].type === "stdout" ||
+            part.value[0].type === "stderr"
+          ) &&
           ("content" in part.value[0] ||
             "stdout" in part.value[0] ||
             "stderr" in part.value[0])
@@ -553,6 +556,9 @@ export const processResponse = async (
               streamPart,
               toolCallId
             )
+            console.log("contentToAdd", contentToAdd)
+            console.log("newImagePath", newImagePath)
+            console.log("fullText", fullText)
 
             if (contentToAdd || newImagePath) {
               setFirstTokenReceived(true)
@@ -627,6 +633,7 @@ export const processResponse = async (
               case "python":
                 setToolInUse(PluginID.PYTHON)
                 toolCallId = streamPart.value.toolCallId
+                console.log("toolCallId", toolCallId)
                 updatedPlugin = PluginID.PYTHON
                 break
               case "browser":
