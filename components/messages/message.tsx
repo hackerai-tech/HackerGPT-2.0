@@ -15,7 +15,8 @@ import {
   IconFileTypePdf,
   IconDatabaseSearch,
   IconCode,
-  IconTerminal2
+  IconTerminal2,
+  IconPhoto
 } from "@tabler/icons-react"
 import Image from "next/image"
 import { FC, useContext, useEffect, useRef, useState } from "react"
@@ -284,7 +285,7 @@ export const Message: FC<MessageProps> = ({
                           <div>Using Enhanced Search...</div>
                         </div>
                       )
-                    case PluginID.CODE_INTERPRETER:
+                    case PluginID.PYTHON:
                       return (
                         <div className="flex animate-pulse items-center space-x-2">
                           <IconCode size={20} />
@@ -297,6 +298,13 @@ export const Message: FC<MessageProps> = ({
                         <div className="flex animate-pulse items-center space-x-2">
                           <IconTerminal2 size={20} />
                           <div>Executing command in Terminal...</div>
+                        </div>
+                      )
+                    case PluginID.IMAGE_GENERATOR:
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <IconPhoto size={20} />
+                          <div>Generating image...</div>
                         </div>
                       )
                     default:
@@ -320,25 +328,26 @@ export const Message: FC<MessageProps> = ({
               />
             ) : (
               <div>
-                <div className={`flex flex-wrap justify-end gap-2`}>
+                <div
+                  className={`flex flex-wrap ${message.role === "user" ? "justify-end" : "justify-start"} gap-2`}
+                >
                   {message.image_paths.map((path, index) => {
                     const item = chatImages.find(image => image.path === path)
-
+                    const src = path.startsWith("data") ? path : item?.base64
+                    if (!src) return null
                     return (
                       <Image
                         key={index}
                         className="mb-2 cursor-pointer rounded hover:opacity-50"
-                        src={path.startsWith("data") ? path : item?.base64}
+                        src={src}
                         alt="message image"
-                        width={300}
-                        height={300}
+                        width={400}
+                        height={400}
                         onClick={() => {
                           setSelectedImage({
                             messageId: message.id,
                             path,
-                            base64: path.startsWith("data")
-                              ? path
-                              : item?.base64 || "",
+                            base64: src,
                             url: path.startsWith("data") ? "" : item?.url || "",
                             file: null
                           })
@@ -458,7 +467,7 @@ export const Message: FC<MessageProps> = ({
               onRegenerateSpecificModel={handleRegenerateSpecificModel}
               onGoodResponse={handleGoodResponse}
               onBadResponse={handleBadResponse}
-              messageContent={message.content}
+              messageContent={message.content || ""}
               messageModel={message.model}
               messageSequenceNumber={message.sequence_number}
             />

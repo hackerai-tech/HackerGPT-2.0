@@ -222,7 +222,7 @@ export async function buildFinalMessages(
     finalMessages[finalMessages.length - 2] = {
       ...finalMessages[finalMessages.length - 2],
       content: endent`Assist with the user's query: '${finalMessages[finalMessages.length - 2].content}' using uploaded files. 
-      Each <BEGIN SOURCE>...<END SOURCE> section represents part of the overall file. 
+      Each <doc>...</doc> section represents part of the overall file. 
       Assess each section for information pertinent to the query.
       
       \n\n${retrievalText}\n\n
@@ -239,7 +239,7 @@ export async function buildFinalMessages(
 
 function buildRetrievalText(fileItems: Tables<"file_items">[]) {
   const retrievalText = fileItems
-    .map(item => `<BEGIN SOURCE>\n${item.content}\n</END SOURCE>`)
+    .map(item => `<doc>\n${item.content}\n</doc>`)
     .join("\n\n")
 
   return `${retrievalText}`

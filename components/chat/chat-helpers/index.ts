@@ -29,6 +29,7 @@ import { v4 as uuidv4 } from "uuid"
 import { readDataStream } from "ai"
 import { CONTINUE_PROMPT } from "@/lib/models/llm/llm-prompting"
 import { buildFinalMessages } from "@/lib/build-prompt-v2"
+import { supabase } from "@/lib/supabase/browser-client"
 
 export const validateChatSettings = (
   chatSettings: ChatSettings | null,
@@ -57,6 +58,19 @@ export const validateChatSettings = (
   if (!isContinuation && !messageContent) {
     throw new Error("Message content not found")
   }
+}
+
+const fetchImageData = async (url: string) => {
+  const { data, error } = await supabase.storage
+    .from("message_images")
+    .createSignedUrl(url, 60 * 60)
+
+  if (error) {
+    console.error(error)
+    return null
+  }
+
+  return data?.signedUrl || null
 }
 
 export const handleRetrieval = async (
@@ -160,11 +174,13 @@ export const handleHostedChat = async (
   selectedPlugin: PluginID,
   detectedModerationLevel: number
 ) => {
-  const { provider } = modelData
-  const isWebSearch = selectedPlugin === PluginID.WEB_SEARCH
-  let apiEndpoint = isWebSearch
-    ? "/api/chat/plugins/web-search"
-    : `/api/chat/${provider}`
+  let { provider } = modelData
+  if (
+    selectedPlugin === PluginID.TERMINAL ||
+    selectedPlugin === PluginID.PYTHON
+  )
+    provider = "openai"
+  let apiEndpoint = `/api/chat/${provider}`
 
   setToolInUse(
     isRagEnabled && provider !== "openai"
@@ -184,8 +200,13 @@ export const handleHostedChat = async (
   const chatSettings = payload.chatSettings
 
   const requestBody =
-    provider === "openai" || isWebSearch
-      ? { messages: formattedMessages, chatSettings, detectedModerationLevel }
+    provider === "openai"
+      ? {
+          messages: formattedMessages,
+          chatSettings,
+          detectedModerationLevel,
+          selectedTool: selectedPlugin
+        }
       : {
           messages: formattedMessages,
           chatSettings: chatSettings,
@@ -199,7 +220,6 @@ export const handleHostedChat = async (
   const chatResponse = await fetchChatResponse(
     apiEndpoint,
     requestBody,
-    true,
     newAbortController,
     setIsGenerating,
     setChatMessages,
@@ -263,7 +283,6 @@ export const handleHostedPluginsChat = async (
   const response = await fetchChatResponse(
     apiEndpoint,
     requestBody,
-    true,
     newAbortController,
     setIsGenerating,
     setChatMessages,
@@ -285,7 +304,6 @@ export const handleHostedPluginsChat = async (
 export const fetchChatResponse = async (
   url: string,
   body: object,
-  isHosted: boolean,
   controller: AbortController,
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
@@ -373,7 +391,7 @@ export const processResponse = async (
     let ragUsed = false
     let ragId = null
     let updatedPlugin = selectedPlugin
-
+    let assistantGeneratedImages: string[] = []
     const reader = response.body.getReader()
     const stream = readDataStream(reader, {
       isAborted: () => controller.signal.aborted
@@ -417,19 +435,46 @@ export const processResponse = async (
           part.value.length > 0 &&
           typeof part.value[0] === "object" &&
           "type" in part.value[0] &&
+          part.value[0].type !== "imageGenerated" &&
+          "content" in part.value[0]
+
+        const isImageResult = (
+          part: any
+        ): part is {
+          type: "data"
+          value: Array<{
+            type: string
+            content: {
+              url: string
+              prompt: string
+              width: number
+              height: number
+            }
+          }>
+        } =>
+          part.type === "data" &&
+          Array.isArray(part.value) &&
+          part.value.length > 0 &&
+          typeof part.value[0] === "object" &&
+          "type" in part.value[0] &&
+          part.value[0].type === "imageGenerated" &&
           "content" in part.value[0]
 
         const processStreamPart = (
           streamPart: any,
           toolCallId: string
-        ): string => {
-          if (streamPart.type === "text") return streamPart.value
+        ): { contentToAdd: string; newImagePath: string | null } => {
+          if (streamPart.type === "text")
+            return { contentToAdd: streamPart.value, newImagePath: null }
 
           if (
             isToolCallDelta(streamPart) &&
             streamPart.value.toolCallId === toolCallId
           ) {
-            return streamPart.value.argsTextDelta
+            return {
+              contentToAdd: streamPart.value.argsTextDelta,
+              newImagePath: null
+            }
           }
 
           if (
@@ -437,24 +482,36 @@ export const processResponse = async (
             streamPart.value.toolCallId === toolCallId
           ) {
             const { results, runtimeError } = streamPart.value.result
-            return (
-              (results ? `<results>${results}</results>` : "") +
-              (runtimeError
-                ? `<runtimeError>${runtimeError}</runtimeError>`
-                : "")
-            )
+            const content = [
+              results && `<results>${results}</results>`,
+              runtimeError && `<runtimeError>${runtimeError}</runtimeError>`
+            ]
+              .filter(Boolean)
+              .join("")
+            return { contentToAdd: content, newImagePath: null }
           }
 
           if (isTerminalResult(streamPart)) {
-            return streamPart.value.reduce(
-              (acc, item) =>
-                acc +
-                (item.type === "terminal" ? `${item.content}` : item.content),
-              ""
-            )
+            return {
+              contentToAdd: streamPart.value
+                .filter(item =>
+                  ["terminal", "stdout", "stderr"].includes(item.type)
+                )
+                .map(item => item.content)
+                .join(""),
+              newImagePath: null
+            }
           }
 
-          return ""
+          if (isImageResult(streamPart)) {
+            const { url, prompt, width, height } = streamPart.value[0].content
+            return {
+              contentToAdd: `<ai_generated_image>${prompt} width: ${width} height: ${height}</ai_generated_image>`,
+              newImagePath: url
+            }
+          }
+
+          return { contentToAdd: "", newImagePath: null }
         }
 
         switch (streamPart.type) {
@@ -462,10 +519,19 @@ export const processResponse = async (
           case "tool_call_delta":
           case "tool_result":
           case "data":
-            const streamText = processStreamPart(streamPart, toolCallId)
-            if (streamText) {
+            const { contentToAdd, newImagePath } = processStreamPart(
+              streamPart,
+              toolCallId
+            )
+
+            if (contentToAdd || newImagePath) {
               setFirstTokenReceived(true)
-              fullText += streamText
+              fullText += contentToAdd
+
+              if (newImagePath) {
+                assistantGeneratedImages.push(newImagePath)
+              }
+
               setChatMessages(prev =>
                 prev.map(chatMessage =>
                   chatMessage.message.id === lastChatMessage.message.id
@@ -473,7 +539,10 @@ export const processResponse = async (
                         ...chatMessage,
                         message: {
                           ...chatMessage.message,
-                          content: chatMessage.message.content + streamText
+                          content: chatMessage.message.content + contentToAdd,
+                          image_paths: newImagePath
+                            ? [...chatMessage.message.image_paths, newImagePath]
+                            : chatMessage.message.image_paths
                         }
                       }
                     : chatMessage
@@ -504,7 +573,6 @@ export const processResponse = async (
                 const webSearchResponse = await fetchChatResponse(
                   "/api/chat/plugins/web-search",
                   requestBody,
-                  true,
                   controller,
                   setIsGenerating,
                   setChatMessages,
@@ -527,9 +595,9 @@ export const processResponse = async (
                 fullText += webSearchResult.fullText
                 break
               case "python":
-                setToolInUse(PluginID.CODE_INTERPRETER)
+                setToolInUse(PluginID.PYTHON)
                 toolCallId = streamPart.value.toolCallId
-                updatedPlugin = PluginID.CODE_INTERPRETER
+                updatedPlugin = PluginID.PYTHON
                 break
               case "browser":
                 setToolInUse(PluginID.BROWSER)
@@ -538,6 +606,10 @@ export const processResponse = async (
               case "terminal":
                 setToolInUse(PluginID.TERMINAL)
                 updatedPlugin = PluginID.TERMINAL
+                break
+              case "generateImage":
+                setToolInUse(PluginID.IMAGE_GENERATOR)
+                updatedPlugin = PluginID.IMAGE_GENERATOR
                 break
             }
             break
@@ -557,7 +629,6 @@ export const processResponse = async (
               const browserResponse = await fetchChatResponse(
                 "/api/chat/plugins/browser",
                 browserRequestBody,
-                true,
                 controller,
                 setIsGenerating,
                 setChatMessages,
@@ -605,7 +676,8 @@ export const processResponse = async (
       finishReason,
       ragUsed,
       ragId,
-      selectedPlugin: updatedPlugin
+      selectedPlugin: updatedPlugin,
+      assistantGeneratedImages
     }
   } else {
     throw new Error("Response body is null")
@@ -621,7 +693,6 @@ export const processResponsePlugins = async (
   setToolInUse: React.Dispatch<React.SetStateAction<string>>
 ) => {
   let fullText = ""
-  let contentToAdd = ""
 
   if (response.body) {
     await consumeReadableStream(
@@ -717,7 +788,8 @@ export const handleCreateMessages = async (
   selectedPlugin: PluginID | null,
   editSequenceNumber: number | undefined,
   ragUsed: boolean,
-  ragId: string | null
+  ragId: string | null,
+  assistantGeneratedImages: string[]
 ) => {
   const isEdit = editSequenceNumber !== undefined
 
@@ -742,7 +814,7 @@ export const handleCreateMessages = async (
     plugin: selectedPlugin,
     role: "assistant",
     sequence_number: lastSequenceNumber(chatMessages) + 2,
-    image_paths: [],
+    image_paths: assistantGeneratedImages,
     rag_used: ragUsed,
     rag_id: ragId
   }
@@ -763,6 +835,21 @@ export const handleCreateMessages = async (
     await deleteMessage(lastMessageId)
 
     const createdMessages = await createMessages([finalAssistantMessage])
+
+    const chatImagesWithUrls = await Promise.all(
+      assistantGeneratedImages.map(async url => {
+        const base64 = await fetchImageData(url)
+        return {
+          messageId: createdMessages[0].id,
+          path: url,
+          base64: base64,
+          url: base64 || url,
+          file: null
+        }
+      })
+    )
+
+    setChatImages(prevChatImages => [...prevChatImages, ...chatImagesWithUrls])
 
     finalChatMessages = [
       ...chatMessages.slice(0, -1),
@@ -810,13 +897,29 @@ export const handleCreateMessages = async (
       Boolean
     ) as string[]
 
+    const newImages = newMessageImages.map((obj, index) => ({
+      ...obj,
+      messageId: createdMessages[0].id,
+      path: paths[index]
+    }))
+
+    const generatedImages = await Promise.all(
+      assistantGeneratedImages.map(async url => {
+        const base64Data = await fetchImageData(url)
+        return {
+          messageId: createdMessages[1].id,
+          path: url,
+          base64: base64Data,
+          url: url,
+          file: null
+        }
+      })
+    )
+
     setChatImages(prevImages => [
       ...prevImages,
-      ...newMessageImages.map((obj, index) => ({
-        ...obj,
-        messageId: createdMessages[0].id,
-        path: paths[index]
-      }))
+      ...newImages,
+      ...generatedImages
     ])
 
     const updatedMessage = await updateMessage(createdMessages[0].id, {
@@ -824,7 +927,7 @@ export const handleCreateMessages = async (
       image_paths: paths
     })
 
-    const createdMessageFileItems = await createMessageFileItems(
+    await createMessageFileItems(
       retrievedFileItems.map(fileItem => {
         return {
           user_id: profile.user_id,

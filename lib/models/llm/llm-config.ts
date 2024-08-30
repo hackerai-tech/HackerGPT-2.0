@@ -35,16 +35,20 @@ const llmConfig = {
     openaiCurrentDateOnly: `${openaiInitialSystemPrompt}\n${currentDate}`,
     // For Hacker RAG
     RAG: `${initialSystemPrompt} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
-    // For PGPT-3.5
-    pgpt35WithTools: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${getPentestGPTToolsInfo(true)}\n${getPentestGPTSystemPromptEnding}`,
     // For PGPT
     pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTSystemPromptEnding}`,
+    // For PGPT-3.5
+    pgpt35: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${getPentestGPTToolsInfo(true, true, true)}\n${getPentestGPTSystemPromptEnding}`,
     // For PGPT-4
-    pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-4")}\n${getPentestGPTToolsInfo(true)}\n${getPentestGPTSystemPromptEnding}`,
+    pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-4")}\n${getPentestGPTToolsInfo(true, true, true)}\n${getPentestGPTSystemPromptEnding}`,
     // For GPT-4o
-    gpt4oWithTools: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true)}\n${getPentestGPTSystemPromptEnding}`,
+    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true, true)}\n${getPentestGPTSystemPromptEnding}`,
     // For browser tool
-    pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(true)}\n${getPentestGPTSystemPromptEnding}`,
+    pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTSystemPromptEnding}`,
+    // For terminal tool
+    pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(false, false, false, false, true)}\n${getPentestGPTSystemPromptEnding}`,
+    // For python tool
+    pentestGPTPython: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(false, false, false, true, false)}\n${getPentestGPTSystemPromptEnding}`,
     // For webSearch tool
     pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${getPentestGPTSystemPromptEnding}`
   },

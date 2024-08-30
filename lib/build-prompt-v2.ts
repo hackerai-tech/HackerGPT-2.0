@@ -52,9 +52,9 @@ export async function buildFinalMessages(
   if (chatSettings.model === GPT4o.modelId) {
     CHUNK_SIZE = 14000
   } else if (chatSettings.model === "mistral-large") {
-    CHUNK_SIZE = 10000
+    CHUNK_SIZE = 14000
   } else if (chatSettings.model === "mistral-medium") {
-    CHUNK_SIZE = 10000
+    CHUNK_SIZE = 14000
   }
 
   // Lower chunk size for plugins that don't need to handle long inputs
@@ -175,7 +175,7 @@ export async function buildFinalMessages(
   const finalMessages: BuiltChatMessage[] = truncatedMessages.map(message => {
     let content
 
-    if (message.image_paths.length > 0) {
+    if (message.image_paths.length > 0 && message.role !== "assistant") {
       content = [
         {
           type: "text",
@@ -218,7 +218,7 @@ export async function buildFinalMessages(
     finalMessages[finalMessages.length - 2] = {
       ...finalMessages[finalMessages.length - 2],
       content: endent`Assist with the user's query: '${finalMessages[finalMessages.length - 2].content}' using uploaded files. 
-      Each <BEGIN SOURCE>...<END SOURCE> section represents part of the overall file. 
+      Each <doc>...</doc> section represents part of the overall file. 
       Assess each section for information pertinent to the query.
       
       \n\n${retrievalText}\n\n
@@ -235,7 +235,7 @@ export async function buildFinalMessages(
 
 function buildRetrievalText(fileItems: Tables<"file_items">[]) {
   const retrievalText = fileItems
-    .map(item => `<BEGIN SOURCE>\n${item.content}\n</END SOURCE>`)
+    .map(item => `<doc>\n${item.content}\n</doc>`)
     .join("\n\n")
 
   return `${retrievalText}`

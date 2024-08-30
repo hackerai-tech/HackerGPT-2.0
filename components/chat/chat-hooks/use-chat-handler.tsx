@@ -288,7 +288,7 @@ export const useChatHandler = () => {
       let finishReasonFromResponse = ""
       let ragUsed = false
       let ragId = null
-
+      let assistantGeneratedImages: string[] = []
       let detectedModerationLevel = -1
       if (
         !isContinuation &&
@@ -315,7 +315,9 @@ export const useChatHandler = () => {
         selectedPlugin.length > 0 &&
         selectedPlugin !== PluginID.NONE &&
         selectedPlugin !== PluginID.WEB_SEARCH &&
-        selectedPlugin !== PluginID.ENHANCED_SEARCH
+        selectedPlugin !== PluginID.ENHANCED_SEARCH &&
+        selectedPlugin !== PluginID.TERMINAL &&
+        selectedPlugin !== PluginID.PYTHON
       ) {
         let fileData: { fileName: string; fileContent: string }[] = []
 
@@ -392,7 +394,8 @@ export const useChatHandler = () => {
           finishReason,
           ragUsed: ragUsedFromResponse,
           ragId: ragIdFromResponse,
-          selectedPlugin: updatedSelectedPlugin
+          selectedPlugin: updatedSelectedPlugin,
+          assistantGeneratedImages: assistantGeneratedImagesFromResponse
         } = await handleHostedChat(
           payload,
           profile!,
@@ -416,6 +419,7 @@ export const useChatHandler = () => {
         ragUsed = ragUsedFromResponse
         ragId = ragIdFromResponse
         selectedPlugin = updatedSelectedPlugin
+        assistantGeneratedImages = assistantGeneratedImagesFromResponse
       }
 
       if (!currentChat) {
@@ -466,7 +470,8 @@ export const useChatHandler = () => {
         selectedPlugin,
         editSequenceNumber,
         ragUsed,
-        ragId
+        ragId,
+        assistantGeneratedImages
       )
 
       setIsGenerating(false)

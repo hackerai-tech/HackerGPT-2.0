@@ -35,71 +35,71 @@ export const availablePlugins: PluginSummary[] = [
       }
     ]
   },
-  {
-    id: 1,
-    name: "Enhanced Search",
-    selectorName: "Enhanced Search",
-    value: PluginID.ENHANCED_SEARCH,
-    categories: [],
-    icon: "https://cdn-icons-png.flaticon.com/128/11751/11751689.png",
-    invertInDarkMode: true,
-    description:
-      "Enhances the model with curated PentestGPT knowledge, including popular guides, techniques, and tools",
-    githubRepoUrl: pluginUrls.PENTESTGPT,
-    isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-07-26",
-    starters: [
-      {
-        title: "What are Some Ways",
-        description: "to bypass payment process?",
-        chatMessage: "What are some ways to bypass payment process?"
-      },
-      {
-        title: "Explain the OWASP Top 10",
-        description: "and how to test for them",
-        chatMessage: "Explain the OWASP Top 10 and how to test for them."
-      },
-      {
-        title: "Describe Common Techniques",
-        description: "for exploiting server-side request forgery",
-        chatMessage:
-          "Describe common techniques for exploiting server-side request forgery."
-      },
-      {
-        title: "List Popular Vulnerabel",
-        description: "ports to exploit",
-        chatMessage: "List popular vulnerabel ports to exploit."
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: "Web Search",
-    selectorName: "Web Search",
-    value: PluginID.WEB_SEARCH,
-    categories: [],
-    icon: "https://cdn-icons-png.flaticon.com/128/11193/11193901.png",
-    invertInDarkMode: true,
-    description:
-      "Enhance responses with up-to-date web information and broader knowledge",
-    githubRepoUrl: pluginUrls.PENTESTGPT,
-    isInstalled: false,
-    isPremium: true,
-    createdAt: "2024-06-12",
-    starters: [
-      {
-        title: "Tell Me The Latest",
-        description: "news from Hacker News",
-        chatMessage: "Tell me the latest news from Hacker News."
-      },
-      {
-        title: "Tell Me The Latest",
-        description: "trends in the bug bounty",
-        chatMessage: "Tell me the latest trends in the bug bounty."
-      }
-    ]
-  },
+  // {
+  //   id: 1,
+  //   name: "Terminal",
+  //   selectorName: "Terminal",
+  //   value: PluginID.TERMINAL,
+  //   categories: ["recon", "vuln-scanners"],
+  //   icon: "https://cdn-icons-png.flaticon.com/128/5576/5576886.png",
+  //   invertInDarkMode: true,
+  //   description: "Execute Bash commands",
+  //   githubRepoUrl: pluginUrls.PENTESTGPT,
+  //   isInstalled: false,
+  //   isPremium: true,
+  //   createdAt: "2024-08-24",
+  //   starters: [
+  //     {
+  //       title: "Run a quick Nmap scan",
+  //       description: "on hackerone.com to get open ports",
+  //       chatMessage: "Run a quick Nmap scan on hackerone.com to get open ports"
+  //     },
+  //     {
+  //       title: "Find hackerone.com subdomains",
+  //       description: "using subfinder",
+  //       chatMessage: "Find hackerone.com subdomains using subfinder"
+  //     },
+  //     {
+  //       title: "Start Vulnerability Scan",
+  //       description: "with nuclei on hackerone.com",
+  //       chatMessage: "Start vulnerability scan with nuclei on hackerone.com"
+  //     },
+  //     {
+  //       title: "Perform Basic SQLi Scan",
+  //       description: "on testphp.vulnweb.com using sqlmap",
+  //       chatMessage:
+  //         "Perform a basic SQLi scan on http://testphp.vulnweb.com/search.php?test=1 using sqlmap"
+  //     }
+  //   ]
+  // },
+  // {
+  //   id: 2,
+  //   name: "Code Interpreter",
+  //   selectorName: "Code Interpreter",
+  //   value: PluginID.PYTHON,
+  //   categories: ["recon", "vuln-scanners"],
+  //   icon: "https://cdn-icons-png.flaticon.com/128/3573/3573187.png",
+  //   invertInDarkMode: true,
+  //   description: "Execute Python code",
+  //   githubRepoUrl: pluginUrls.PENTESTGPT,
+  //   isInstalled: false,
+  //   isPremium: true,
+  //   createdAt: "2024-08-24",
+  //   starters: [
+  //     {
+  //       title: "Decode Base64 String",
+  //       description: "UGVudGVzdEdQVCBpcyBiZXN0IEFJ",
+  //       chatMessage:
+  //         "Decode the following base64 encoded string: UGVudGVzdEdQVCBpcyBiZXN0IEFJ"
+  //     },
+  //     {
+  //       title: "Create & Run Subdomain Wordlist",
+  //       description: "generator for hackerone.com",
+  //       chatMessage:
+  //         "Create and run subdomain wordlist generator for hackerone.com"
+  //     }
+  //   ]
+  // },
   {
     id: 3,
     name: "CVEMap",
@@ -199,6 +199,44 @@ export const availablePlugins: PluginSummary[] = [
         title: "Link Finder Help",
         description: "How does the Link Finder plugin work?",
         chatMessage: "/linkfinder -help"
+      }
+    ]
+  },
+  {
+    id: 6,
+    name: "Enhanced Search",
+    selectorName: "Enhanced Search",
+    value: PluginID.ENHANCED_SEARCH,
+    categories: [],
+    icon: "https://cdn-icons-png.flaticon.com/128/11751/11751689.png",
+    invertInDarkMode: true,
+    description:
+      "Enhances the model with curated PentestGPT knowledge, including popular guides, techniques, and tools",
+    githubRepoUrl: pluginUrls.PENTESTGPT,
+    isInstalled: false,
+    isPremium: false,
+    createdAt: "2024-07-26",
+    starters: [
+      {
+        title: "What are Some Ways",
+        description: "to bypass payment process?",
+        chatMessage: "What are some ways to bypass payment process?"
+      },
+      {
+        title: "Explain the OWASP Top 10",
+        description: "and how to test for them",
+        chatMessage: "Explain the OWASP Top 10 and how to test for them."
+      },
+      {
+        title: "Describe Common Techniques",
+        description: "for exploiting server-side request forgery",
+        chatMessage:
+          "Describe common techniques for exploiting server-side request forgery."
+      },
+      {
+        title: "List Popular Vulnerabel",
+        description: "ports to exploit",
+        chatMessage: "List popular vulnerabel ports to exploit."
       }
     ]
   },

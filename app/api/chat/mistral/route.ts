@@ -13,30 +13,10 @@ import { generateStandaloneQuestion } from "@/lib/models/question-generator"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
-import { StreamData, streamText, tool } from "ai"
-// import { executePythonCode } from "@/lib/tools/python-executor"
-import { z } from "zod"
+import { StreamData, streamText } from "ai"
+import { createToolSchemas } from "@/lib/tools/toolSchemas"
 
 export const runtime: ServerRuntime = "edge"
-export const preferredRegion = [
-  "iad1",
-  "arn1",
-  "bom1",
-  "cdg1",
-  "cle1",
-  "cpt1",
-  "dub1",
-  "fra1",
-  "gru1",
-  "hnd1",
-  "icn1",
-  "kix1",
-  "lhr1",
-  "pdx1",
-  "sfo1",
-  "sin1",
-  "syd1"
-]
 
 export async function POST(request: Request) {
   const {
@@ -75,13 +55,18 @@ export async function POST(request: Request) {
       throw new Error("Selected model is undefined")
     }
 
+    const shouldUseMiniModel =
+      !isPentestGPTPro &&
+      (detectedModerationLevel === -1 ||
+        detectedModerationLevel === 0 ||
+        (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1))
+
     updateSystemMessage(
       messages,
       isPentestGPTPro
         ? llmConfig.systemPrompts.pgpt4
-        : detectedModerationLevel === 0 ||
-            (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1)
-          ? llmConfig.systemPrompts.pgpt35WithTools
+        : shouldUseMiniModel
+          ? llmConfig.systemPrompts.pgpt35
           : llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
     )
@@ -142,17 +127,14 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
-    if (
-      (detectedModerationLevel === 0 && !isPentestGPTPro) ||
-      (detectedModerationLevel >= 0.0 &&
-        detectedModerationLevel <= 0.1 &&
-        !isPentestGPTPro)
-    ) {
+    if (shouldUseMiniModel) {
       selectedModel = "openai/gpt-4o-mini"
-      filterEmptyAssistantMessages(messages)
-    } else {
-      filterEmptyAssistantMessages(messages)
+    } else if (detectedModerationLevel >= 0.7) {
+      selectedModel = "mistralai/mistral-nemo"
+      modelTemperature = 0.3
     }
+
+    filterEmptyAssistantMessages(messages)
 
     try {
       let provider
@@ -174,7 +156,15 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
-      // let hasExecutedCode = false
+      let tools
+      if (selectedModel === "openai/gpt-4o-mini" || isPentestGPTPro) {
+        const toolSchemas = createToolSchemas({ profile, data })
+        tools = toolSchemas.getSelectedSchemas([
+          "webSearch",
+          "browser",
+          "generateImage"
+        ])
+      }
 
       const result = await streamText({
         model: provider(selectedModel),
@@ -184,62 +174,7 @@ export async function POST(request: Request) {
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
         experimental_toolCallStreaming: true,
-        tools:
-          selectedModel === "openai/gpt-4o-mini" || isPentestGPTPro
-            ? {
-                webSearch: {
-                  description: "Search the web for latest information",
-                  parameters: z.object({ search: z.boolean() })
-                },
-                browser: {
-                  description:
-                    "Browse a webpage and extract its text content. \
-                For HTML retrieval or more complex web scraping, use the Python tool.",
-                  parameters: z.object({
-                    open_url: z
-                      .string()
-                      .url()
-                      .describe("The URL of the webpage to browse")
-                  })
-                }
-                // python: tool({
-                //   description:
-                //     "Runs Python code. Only one execution is allowed per request.",
-                //   parameters: z.object({
-                //     pipInstallCommand: z
-                //       .string()
-                //       .describe(
-                //         "Full pip install command to install packages (e.g., '!pip install package1 package2')"
-                //       ),
-                //     code: z
-                //       .string()
-                //       .describe("The Python code to execute in a single cell.")
-                //   }),
-                //   async execute({ pipInstallCommand, code }) {
-                //     if (hasExecutedCode) {
-                //       return {
-                //         results:
-                //           "Code execution skipped. Only one code cell can be executed per request.",
-                //         runtimeError: null
-                //       }
-                //     }
-
-                //     hasExecutedCode = true
-                //     const execOutput = await executePythonCode(
-                //       profile.user_id,
-                //       code,
-                //       pipInstallCommand
-                //     )
-                //     const { results, error: runtimeError } = execOutput
-
-                //     return {
-                //       results,
-                //       runtimeError
-                //     }
-                //   }
-                // })
-              }
-            : undefined,
+        tools,
         onFinish: () => {
           data.close()
         }
@@ -279,17 +214,13 @@ async function getProviderConfig(chatSettings: any, profile: any) {
     "X-Title": chatSettings.model
   }
 
-  let modelTemperature = 0.4
+  let modelTemperature = 0.5
   let similarityTopK = 3
   let selectedModel = isPentestGPTPro ? proModel : defaultModel
   let rateLimitCheckResult = await checkRatelimitOnApi(
     profile.user_id,
     isPentestGPTPro ? "pentestgpt-pro" : "pentestgpt"
   )
-
-  if (selectedModel === "mistralai/mistral-nemo") {
-    modelTemperature = 0.3
-  }
 
   return {
     providerUrl,

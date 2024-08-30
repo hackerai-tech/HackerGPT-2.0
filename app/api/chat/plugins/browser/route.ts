@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
     updateSystemMessage(
       messages,
-      llmConfig.systemPrompts.gpt4oWithTools,
+      llmConfig.systemPrompts.pentestGPTBrowser,
       profile.profile_context
     )
     filterEmptyAssistantMessages(messages)
@@ -143,7 +143,8 @@ async function browsePage(url: string): Promise<string> {
       headers: {
         Authorization: `Bearer ${jinaToken}`,
         "X-With-Generated-Alt": "true",
-        "X-No-Cache": "true"
+        "X-No-Cache": "true",
+        "X-Return-Format": "markdown"
       }
     })
 

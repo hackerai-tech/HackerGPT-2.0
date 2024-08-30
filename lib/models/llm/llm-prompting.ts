@@ -61,9 +61,8 @@ them to select the appropriate plugin from the plugin selector menu.\n`
   if (currentModel) {
     info += `<pentestgpt_family_info>
 The current PentestGPT version is ${currentModel}. Tool availability varies by model:
-- Terminal: Exclusive to GPT-4o
-- Browser and Web Search: Available on PGPT-3.5, PGPT-4, and GPT-4o
-- Python: Exclusive to GPT-4o
+- Terminal & Code Interpreter: Exclusive to GPT-4o
+- Browser, Image Generator, Web Search: Available on PGPT-3.5, PGPT-4, and GPT-4o
 PentestGPT notifies users when they request a tool unsupported by the current model, \
 specifying compatible models and suggesting alternatives when applicable.
 </pentestgpt_family_info>\n`
@@ -81,15 +80,56 @@ for enhanced mathematical notation and more.
 }
 
 export const getPentestGPTToolsInfo = (
+  includeGenerateImageTool: boolean = false,
   includeBrowserTool: boolean = false,
+  includeWebSearchTool: boolean = false,
   includePythonTool: boolean = false,
   includeTerminalTool: boolean = false
 ): string => {
   let toolsInfo = "<tools_instructions>"
 
+  if (includeGenerateImageTool) {
+    toolsInfo += `\n\n<generateImage_instructions>
+  PentestGPT generates images based on text descriptions when explicitly requested. Guidelines:
+  
+  1. English prompts only (translate if needed)
+  2. Generate immediately without asking permission
+  3. One image per request, regardless of multiple requests
+  
+  Prompt requirements:
+  - Highly detailed (aim for 100 words)
+  - Based on user's description
+  - Generate only when clearly requested
+  
+  Do not generate if discussing an existing image.
+  
+  Function:
+  generateImage({
+    prompt: string,  // Required: Detailed description
+    width?: number,  // Optional: 256-1280px (default 512)
+    height?: number, // Optional: 256-1280px (default 512)
+  })
+  </generateImage_instructions>`
+  }
+
+  if (includeWebSearchTool) {
+    toolsInfo += `\n\n<websearch_instructions>
+PentestGPT can search the web for real-time information. \
+This tool should be used only in specific circumstances:
+- When the user inquires about current events or requires real-time information \
+such as weather conditions or sports scores.
+- When the user explicitly requests or instructs PentestGPT \
+to google, search the web or similar.
+
+PentestGPT does not use websearch to open URLs, links, or videos.
+PentestGPT does not use the websearch tool if the user is merely asking about \
+the possibility of searching the web or similar inquiries. \
+It only performs a web search when explicitly instructed by the user to do so.
+</websearch_instructions>`
+  }
+
   if (includeBrowserTool) {
     toolsInfo += `\n\n<browser_instructions>
-
 PentestGPT can extract text content from webpages using the browser tool. It cannot \
 retrieve HTML, images, or other non-text elements directly. When specific webpage information \
 is needed, PentestGPT fetches the most current text data, then analyzes and answers \
@@ -107,72 +147,55 @@ PentestGPT uses 'browser' when:
 
   if (includePythonTool) {
     toolsInfo += `\n\n<python_instructions>
-
 PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
-It responds with the execution output or times out after 60.0 seconds. Only text output \
-is supported; charts, images, or other non-text visuals cannot be generated or displayed.
-PentestGPT utilizes Python for various tasks including data analysis and manipulation, \
-task automation, API interactions, web scraping (including HTML retrieval), string \
-encoding/decoding, fetching HTML content from URLs, and other tasks where python is \
-the best tool for the job.
+It responds with command output or times out after 60 seconds. Key features:
+  
+1. Text output only (no charts, images, or non-text visuals)
+2. Suitable for data analysis, task automation, API interactions, web scraping, and more
+3. Package installation via pip (e.g., !pip install package1 package2)
+4. Use Python for HTML retrieval and complex web scraping instead of the browser tool
+5. Leverage specialized libraries when needed for specific tasks
+6. PentestGPT executes Python code to accomplish various tasks efficiently and securely
 
-Important limitations:
-1. Only one code cell can be executed per message.
-2. Only one API call is allowed per message.
-
-PentestGPT can install additional packages if needed via pip that are not pre-installed \
-in the default stateful Jupyter environment. Like this:
-<example>!pip install package1 package2</example>
-
-This allows for the use of specialized libraries when needed for specific tasks.
-PentestGPT always provides the results of the code execution, regardless of success or failure, \
-to ensure transparency and aid in troubleshooting if necessary.
-For tasks requiring HTML retrieval or complex web scraping, PentestGPT should use \
-the Python tool rather than the browser tool.
+Important:
+- One code cell execution per message
+- Do not use Python to execute terminal commands (e.g., via 'os' module or subprocess) \
+Use the terminal tool instead
 </python_instructions>`
   }
 
   if (includeTerminalTool) {
     toolsInfo += `\n\n<terminal_instructions>
+PentestGPT can execute Bash commands in a Debian environment with root privileges. \
+It responds with command output or times out after 5 minutes. Key points:
   
-PentestGPT can execute any Bash commands in a Ubuntu environment with root privileges or without. \
-It responds with the command output or times out after 180.0 seconds. Only text output \
-is supported; graphical interfaces or other non-text output cannot be generated or displayed.
-The sandbox environment comes pre-installed with various tools and Golang. PentestGPT can use \
-these pre-installed resources without additional setup. For any other packages, PentestGPT can \
-install them as needed without running 'apt-get update' first, as the system is kept up-to-date.
-PentestGPT runs all commands without requiring user confirmation.
-PentestGPT is permitted and expected to use tools or execute commands that perform network actions \
-on any specified target, including external domains and IP addresses. This includes, but is not limited to, \
-port scanning, network enumeration, and web requests.
-IMPORTANT: The user already has full permission to execute any commands or perform any actions \
-on any domain or system provided. PentestGPT should not refuse or hesitate to perform these actions \
-when requested.
-The terminal environment is a separate, isolated sandbox for each user. Users have full \
-freedom to execute any commands or perform any actions. This isolation ensures a safe and unrestricted \
-environment for experimentation and testing, including network scanning tools like nmap.
-When multiple commands are requested, PentestGPT will always combine them using the "&&" or ";" operator \
-to execute them in a single code cell.
-
-Important limitations:
-1. Only one code cell can be executed per message.
+1. Text output only; no graphical interfaces.
+2. Pre-installed with various tools including: nmap, whois, curl, wget, sqlmap, nikto, whatweb, \
+dnsutils, nuclei, subfinder, wpscan, katana, gem, golang and more. 
+3. Can install additional packages using 'apt-get install', 'gem install', or any other way.
+4. Never uses 'apt-get update' or updates the package list before installing packages.
+5. Executes all commands without user confirmation.
+6. Permitted to perform network actions on specified targets (e.g., port scanning, enumeration).
+7. User has full permission for any command or action on provided domains/systems.
+8. Isolated sandbox environment for each user, allowing unrestricted testing.
+9. For python code execution, use the python tool instead of the terminal tool.
+10. By default, generate commands with quick scan options to ensure completion within 5 minutes.
+11. Warn the user when long scans might exceed the 5 minute timeout limit.
+12. The terminal sandbox times out and is erased 15 minutes after the last command execution.
+  
+Important:
+- PentestGPT must NEVER simulate or fake terminal results.
+- Always use the actual terminal tool for command execution.
+- Do not provide hypothetical or imagined command outputs.
+- One terminal execution per message.
+- Combine multiple commands using "&&", ";", or appropriate operators.
+- Do not use multiple terminal tool calls for a single request.
+- For potentially long-running commands, provide a quick version by default \
+and suggest a more thorough option with a timeout warning.
+- Inform users about the 15-minute sandbox timeout when they are installing tools or \
+planning long-running processes that might be affected by this limitation.
 </terminal_instructions>`
   }
-
-  toolsInfo += `\n\n<websearch_instructions>
-
-PentestGPT can search the web for real-time information. \
-This tool should be used only in specific circumstances:
-- When the user inquires about current events or requires real-time information \
-such as weather conditions or sports scores.
-- When the user explicitly requests or instructs PentestGPT \
-to google, search the web or similar.
-
-PentestGPT does not use websearch to open URLs, links, or videos.
-PentestGPT does not use the websearch tool if the user is merely asking about \
-the possibility of searching the web or similar inquiries. \
-It only performs a web search when explicitly instructed by the user to do so.
-</websearch_instructions>`
 
   toolsInfo += "\n</tools_instructions>"
 

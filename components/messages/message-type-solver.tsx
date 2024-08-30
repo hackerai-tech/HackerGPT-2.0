@@ -3,6 +3,7 @@ import { PluginID } from "@/types/plugins"
 import { FC } from "react"
 import { MessageMarkdown } from "./message-markdown"
 import { MessagePluginFile } from "./message-plugin-file"
+import { MessageImageGenerator } from "./message-image-generator"
 import { MessageCodeInterpreter } from "./e2b-messages/message-code-interpreter"
 import { MessageTerminal } from "./e2b-messages/message-terminal"
 
@@ -41,9 +42,8 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   // })
 
   if (
-    (isPluginOutput &&
-      message.plugin === PluginID.CODE_INTERPRETER.toString()) ||
-    toolInUse === PluginID.CODE_INTERPRETER
+    (isPluginOutput && message.plugin === PluginID.PYTHON.toString()) ||
+    toolInUse === PluginID.PYTHON
   ) {
     return (
       <MessageCodeInterpreter
@@ -62,6 +62,18 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
       <MessageTerminal
         content={message.content}
         messageId={message.id}
+        isAssistant={message.role === "assistant"}
+      />
+    )
+  }
+
+  if (
+    message.plugin === PluginID.IMAGE_GENERATOR.toString() ||
+    toolInUse === PluginID.IMAGE_GENERATOR
+  ) {
+    return (
+      <MessageImageGenerator
+        content={message.content}
         isAssistant={message.role === "assistant"}
       />
     )
@@ -114,7 +126,10 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
     )
   }
 
-  if (message.content.length > messageSizeLimit) {
+  if (
+    typeof message.content === "string" &&
+    message.content.length > messageSizeLimit
+  ) {
     return (
       <MessagePluginFile
         created_at={message.created_at}
