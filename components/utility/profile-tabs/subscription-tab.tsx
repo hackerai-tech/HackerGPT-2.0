@@ -1,4 +1,4 @@
-import { FC, useContext, useState, useRef, useEffect } from "react"
+import { FC, useContext, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -7,7 +7,6 @@ import { TabsContent } from "@/components/ui/tabs"
 import { PentestGPTContext } from "@/context/context"
 import { getBillingPortalUrl } from "@/lib/server/stripe-url"
 import { restoreSubscription } from "@/lib/server/restore"
-import { PlanDialog } from "../plan-dialog"
 import { toast } from "sonner"
 import * as Sentry from "@sentry/nextjs"
 import { IconRefresh } from "@tabler/icons-react"
@@ -25,7 +24,6 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
 }) => {
   const router = useRouter()
   const isLongEmail = userEmail.length > 30
-  const [showPlanDialog, setShowPlanDialog] = useState(false)
   const [loading, setLoading] = useState(false)
   const { subscription, setSubscription, profile } =
     useContext(PentestGPTContext)
@@ -65,6 +63,10 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
     }
   }
 
+  const handleUpgradeClick = () => {
+    router.push("/upgrade")
+  }
+
   const showRestoreSubscription =
     !isPremium && process.env.NEXT_PUBLIC_ENABLE_STRIPE_RESTORE === "true"
 
@@ -90,7 +92,7 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
           <Button
             variant="secondary"
             disabled={loading}
-            onClick={() => setShowPlanDialog(true)}
+            onClick={handleUpgradeClick}
             className="flex items-center"
           >
             Upgrade to Pro
@@ -130,12 +132,6 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
           className="bg-secondary w-full cursor-default truncate sm:w-2/3"
         />
       </div>
-
-      <PlanDialog
-        showIcon={false}
-        open={showPlanDialog}
-        onOpenChange={setShowPlanDialog}
-      />
     </TabsContent>
   )
 }

@@ -13,25 +13,6 @@ import { createOpenAI as createOpenRouterClient } from "@ai-sdk/openai"
 import { streamText } from "ai"
 
 export const runtime: ServerRuntime = "edge"
-export const preferredRegion = [
-  "iad1",
-  "arn1",
-  "bom1",
-  "cdg1",
-  "cle1",
-  "cpt1",
-  "dub1",
-  "fra1",
-  "gru1",
-  "hnd1",
-  "icn1",
-  "kix1",
-  "lhr1",
-  "pdx1",
-  "sfo1",
-  "sin1",
-  "syd1"
-]
 
 export async function POST(request: Request) {
   const { messages, chatSettings, open_url } = await request.json()

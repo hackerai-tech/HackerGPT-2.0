@@ -104,8 +104,7 @@ export const createToolSchemas = (context: ToolContext) => {
             const waitTime = epochTimeToNaturalLanguage(
               rateLimitResult.timeRemaining!
             )
-            const errorMessage = `Oops! It looks like you've reached the limit for terminal commands. 
-      To ensure fair usage for all users, please wait ${waitTime} before trying again.`
+            const errorMessage = `Oops! It looks like you've reached the limit for terminal commands.\nTo ensure fair usage for all users, please wait ${waitTime} before trying again.`
             context.data.append({
               type: "stderr",
               content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
