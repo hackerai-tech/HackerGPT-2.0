@@ -1,5 +1,6 @@
 "use client"
 
+import Loading from "@/app/[locale]/loading"
 import { Button } from "@/components/ui/button"
 import { PentestGPTContext } from "@/context/context"
 import { getCheckoutUrl } from "@/lib/server/stripe-url"
@@ -12,11 +13,9 @@ import {
 import { Sparkle, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { FC, useContext, useState, useEffect } from "react"
-import Image from "next/image"
-import textLogo from "@/public/text-logo.png"
 import { toast } from "sonner"
 import { useTheme } from "next-themes"
-import Loading from "@/app/[locale]/loading"
+import PentestGPTTextSVG from "@/components/icons/pentestgpt-text-svg"
 
 export const UpgradePlan: FC = () => {
   const router = useRouter()
@@ -81,17 +80,14 @@ export const UpgradePlan: FC = () => {
           variant="ghost"
           onClick={() => router.push("/login")}
           className="absolute left-4 p-2"
-          aria-label="Exit to login"
+          aria-label="Exit"
         >
           <IconArrowLeft size={24} />
         </Button>
-        <div className="flex items-center">
-          <Image
-            src={textLogo}
-            alt="PentestGPT Logo"
-            width={170}
-            height={45}
-            className={theme === "dark" ? "" : "invert"}
+        <div className="flex w-full items-center justify-center">
+          <PentestGPTTextSVG
+            className={`${theme === "dark" ? "text-white" : "text-black"}`}
+            scale={0.08}
           />
         </div>
       </div>
@@ -116,7 +112,7 @@ export const UpgradePlan: FC = () => {
             <PlanStatement>Limited access to PGPT-3.5</PlanStatement>
             <PlanStatement>Limited access to plugins</PlanStatement>
             <PlanStatement>
-              Limited access to web search and web browsing
+              Limited access to web search and browsing
             </PlanStatement>
           </PlanCard>
 

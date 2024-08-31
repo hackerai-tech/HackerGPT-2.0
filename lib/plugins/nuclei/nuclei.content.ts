@@ -140,7 +140,6 @@ interface NucleiRequestBody {
 }
 
 const parseCommandLine = (input: string) => {
-  const MAX_INPUT_LENGTH = 4000
   const MAX_DOMAIN_LENGTH = 2000
   const MAX_URL_LENGTH = 2000
 
@@ -209,11 +208,6 @@ const parseCommandLine = (input: string) => {
 
     // ERROR
     error: null
-  }
-
-  if (input.length > MAX_INPUT_LENGTH) {
-    params.error = `🚨 Input command is too long`
-    return params
   }
 
   const trimmedInput = input.trim().toLowerCase()
