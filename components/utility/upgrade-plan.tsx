@@ -112,7 +112,7 @@ export const UpgradePlan: FC = () => {
             <PlanStatement>Limited access to PGPT-3.5</PlanStatement>
             <PlanStatement>Limited access to plugins</PlanStatement>
             <PlanStatement>
-              Limited access to web search and web browsing
+              Limited access to web search and browsing
             </PlanStatement>
           </PlanCard>
 
