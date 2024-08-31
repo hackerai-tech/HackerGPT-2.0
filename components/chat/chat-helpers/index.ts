@@ -528,6 +528,16 @@ export const processResponse = async (
     let updatedPlugin = selectedPlugin
     let assistantGeneratedImages: string[] = []
     const reader = response.body.getReader()
+
+    const streamReader = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        console.log('Stream chunk:', new TextDecoder().decode(value));
+      }
+    };
+    streamReader().catch(error => console.error('Error reading stream:', error));
+
     const stream = readDataStream(reader, {
       isAborted: () => controller.signal.aborted
     })
