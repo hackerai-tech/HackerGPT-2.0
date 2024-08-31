@@ -19,7 +19,7 @@ export const terminalExecutor = async ({
   userID,
   command
 }: TerminalExecutorOptions): Promise<StreamingTextResponse> => {
-  console.log(`[${userID}] Executing: ${command}`)
+  console.log(`[${userID}] Executing terminal command: ${command}`)
   let sbx: CodeInterpreter | null = null
 
   const stream = new ReadableStream({
