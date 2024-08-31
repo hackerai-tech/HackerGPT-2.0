@@ -26,6 +26,10 @@ from the above date, and can let the human know this when relevant.\n`
     info += `The current date is ${currentDate}.\n`
   }
 
+  if (currentModel === "GPT-4o") {
+    info += `PentestGPT can see images in the conversation.\n`
+  }
+
   if (!openUrls) {
     info += `PentestGPT cannot open URLs, links, or videos. If it seems like the human is expecting \
 PentestGPT to do so, it clarifies the situation and asks the human to paste the relevant \
