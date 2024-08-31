@@ -531,12 +531,16 @@ export const processResponse = async (
 
     const streamReader = async () => {
       while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        console.log('Stream chunk:', new TextDecoder().decode(value));
+        const { done, value } = await reader.read()
+        if (done) break
+        try {
+          console.log("Stream chunk:", new TextDecoder().decode(value))
+        } catch (error) {
+          console.error("Error decoding stream chunk:", value)
+        }
       }
-    };
-    streamReader().catch(error => console.error('Error reading stream:', error));
+    }
+    streamReader().catch(error => console.error("Error reading stream:", error))
 
     const stream = readDataStream(reader, {
       isAborted: () => controller.signal.aborted
