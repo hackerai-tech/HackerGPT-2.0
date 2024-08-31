@@ -644,6 +644,37 @@ export const processResponse = async (
 
               fullText += browserResult.fullText
               break
+            } else if (
+              streamPart.value.toolName === "terminal" &&
+              streamPart.value.args.command
+            ) {
+              const command = streamPart.value.args.command
+
+              const terminalRequestBody = {
+                ...requestBody,
+                command: command
+              }
+
+              const terminalResponse = await fetchChatResponse(
+                "/api/chat/tools/terminal",
+                terminalRequestBody,
+                controller,
+                setIsGenerating,
+                setChatMessages,
+                alertDispatch
+              )
+
+              const terminalResult = await processResponsePlugins(
+                terminalResponse,
+                lastChatMessage,
+                controller,
+                setFirstTokenReceived,
+                setChatMessages,
+                setToolInUse
+              )
+
+              fullText += terminalResult.fullText
+              break
             }
             break
 
@@ -687,34 +718,38 @@ export const processResponsePlugins = async (
   setToolInUse: React.Dispatch<React.SetStateAction<string>>
 ) => {
   let fullText = ""
+  let isFirstChunk = true
 
   if (response.body) {
-    await consumeReadableStream(
-      response.body,
-      chunk => {
-        setFirstTokenReceived(true)
-        setToolInUse("none")
-        fullText += chunk
-        setChatMessages(prev =>
-          prev.map(chatMessage => {
-            if (chatMessage.message.id === lastChatMessage.message.id) {
-              const updatedChatMessage: ChatMessage = {
-                message: {
-                  ...chatMessage.message,
-                  content: chatMessage.message.content + chunk
-                },
-                fileItems: chatMessage.fileItems
-              }
+    try {
+      await consumeReadableStream(
+        response.body,
+        chunk => {
+          if (isFirstChunk) {
+            setFirstTokenReceived(true)
+            isFirstChunk = false
+          }
 
-              return updatedChatMessage
-            }
-
-            return chatMessage
-          })
-        )
-      },
-      controller.signal
-    )
+          fullText += chunk
+          setChatMessages(prev =>
+            prev.map(chatMessage =>
+              chatMessage.message.id === lastChatMessage.message.id
+                ? {
+                    message: {
+                      ...chatMessage.message,
+                      content: chatMessage.message.content + chunk
+                    },
+                    fileItems: chatMessage.fileItems
+                  }
+                : chatMessage
+            )
+          )
+        },
+        controller.signal
+      )
+    } finally {
+      setToolInUse("none")
+    }
 
     return { fullText, finishReason: "" }
   } else {

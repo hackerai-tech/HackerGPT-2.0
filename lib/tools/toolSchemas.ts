@@ -1,11 +1,10 @@
 import { z } from "zod"
-import { tool } from "ai"
+import { tool, StreamData } from "ai"
 import { executePythonCode } from "@/lib/tools/python-executor"
-import { executeBashCommand } from "@/lib/tools/bash-executor"
+// import { executeBashCommand } from "@/lib/tools/bash-executor"
 import { generateAndUploadImage } from "@/lib/tools/image-generator"
-import { StreamData } from "ai"
-import { ratelimit } from "../server/ratelimiter"
-import { epochTimeToNaturalLanguage } from "../utils"
+// import { ratelimit } from "../server/ratelimiter"
+// import { epochTimeToNaturalLanguage } from "../utils"
 
 type ToolContext = {
   profile: { user_id: string }
@@ -90,35 +89,43 @@ export const createToolSchemas = (context: ToolContext) => {
         command: z.string().min(1).describe("The bash command to execute")
       }),
       execute: async ({ command }) => {
-        return executeOnce("terminal", command, async () => {
-          context.data.append({
-            type: "terminal",
-            content: `\n\`\`\`terminal\n${command}\n\`\`\``
-          })
-
-          const rateLimitResult = await ratelimit(
-            context.profile.user_id,
-            "terminal"
-          )
-          if (!rateLimitResult.allowed) {
-            const waitTime = epochTimeToNaturalLanguage(
-              rateLimitResult.timeRemaining!
-            )
-            const errorMessage = `Oops! It looks like you've reached the limit for terminal commands.\nTo ensure fair usage for all users, please wait ${waitTime} before trying again.`
-            context.data.append({
-              type: "stderr",
-              content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
-            })
-            return { stdout: "", stderr: errorMessage }
-          }
-
-          return await executeBashCommand(
-            context.profile.user_id,
-            command,
-            context.data
-          )
+        context.data.append({
+          type: "terminal",
+          content: `\n\`\`\`terminal\n${command}\n\`\`\``
         })
+
+        return { command }
       }
+      // execute: async ({ command }) => {
+      //   return executeOnce("terminal", command, async () => {
+      //     context.data.append({
+      //       type: "terminal",
+      //       content: `\n\`\`\`terminal\n${command}\n\`\`\``
+      //     })
+
+      //     const rateLimitResult = await ratelimit(
+      //       context.profile.user_id,
+      //       "terminal"
+      //     )
+      //     if (!rateLimitResult.allowed) {
+      //       const waitTime = epochTimeToNaturalLanguage(
+      //         rateLimitResult.timeRemaining!
+      //       )
+      //       const errorMessage = `Oops! It looks like you've reached the limit for terminal commands.\nTo ensure fair usage for all users, please wait ${waitTime} before trying again.`
+      //       context.data.append({
+      //         type: "stderr",
+      //         content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
+      //       })
+      //       return { stdout: "", stderr: errorMessage }
+      //     }
+
+      //     return await executeBashCommand(
+      //       context.profile.user_id,
+      //       command,
+      //       context.data
+      //     )
+      //   })
+      // }
     }),
     generateImage: tool({
       description: "Generates an image based on a text prompt.",
