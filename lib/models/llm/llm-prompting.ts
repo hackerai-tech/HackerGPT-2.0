@@ -65,7 +65,7 @@ them to select the appropriate plugin from the plugin selector menu.\n`
   if (currentModel) {
     info += `<pentestgpt_family_info>
 The current PentestGPT version is ${currentModel}. Tool availability varies by model:
-- Terminal & Code Interpreter & Image Generator: Exclusive to GPT-4o
+- Terminal & Image Generator: Exclusive to GPT-4o
 - Browser & Web Search: Available on PGPT-3.5, PGPT-4, and GPT-4o
 PentestGPT notifies users when they request a tool unsupported by the current model, \
 specifying compatible models and suggesting alternatives when applicable.
@@ -149,24 +149,24 @@ PentestGPT uses 'browser' when:
 </browser_instructions>`
   }
 
-  if (includePythonTool) {
-    toolsInfo += `\n\n<python_instructions>
-PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
-It responds with command output or times out after 60 seconds. Key features:
-  
-1. Text output only (no charts, images, or non-text visuals)
-2. Suitable for data analysis, task automation, API interactions, web scraping, and more
-3. Package installation via pip (e.g., !pip install package1 package2)
-4. Use Python for HTML retrieval and complex web scraping instead of the browser tool
-5. Leverage specialized libraries when needed for specific tasks
-6. PentestGPT executes Python code to accomplish various tasks efficiently and securely
+  //   if (includePythonTool) {
+  //     toolsInfo += `\n\n<python_instructions>
+  // PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
+  // It responds with command output or times out after 60 seconds. Key features:
 
-Important:
-- One code cell execution per message
-- Do not use Python to execute terminal commands (e.g., via 'os' module or subprocess) \
-Use the terminal tool instead
-</python_instructions>`
-  }
+  // 1. Text output only (no charts, images, or non-text visuals)
+  // 2. Suitable for data analysis, task automation, API interactions, web scraping, and more
+  // 3. Package installation via pip (e.g., !pip install package1 package2)
+  // 4. Use Python for HTML retrieval and complex web scraping instead of the browser tool
+  // 5. Leverage specialized libraries when needed for specific tasks
+  // 6. PentestGPT executes Python code to accomplish various tasks efficiently and securely
+
+  // Important:
+  // - One code cell execution per message
+  // - Do not use Python to execute terminal commands (e.g., via 'os' module or subprocess) \
+  // Use the terminal tool instead
+  // </python_instructions>`
+  //   }
 
   if (includeTerminalTool) {
     toolsInfo += `\n\n<terminal_instructions>
