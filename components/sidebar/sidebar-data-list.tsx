@@ -50,31 +50,31 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
       setIsLoadingMore(false)
     }
   }, [contentType, data, isLoadingMore, hasMoreChats, setChats])
-  
+
   useEffect(() => {
     const options = {
       root: null,
       rootMargin: "0px",
       threshold: 1.0
     }
-  
+
     const observer = new IntersectionObserver(entries => {
       const [entry] = entries
       if (entry.isIntersecting && !isLoadingMore && hasMoreChats) {
         fetchMoreChats()
       }
     }, options)
-  
+
     if (loaderRef.current) {
       observer.observe(loaderRef.current)
     }
-  
+
     return () => {
       if (loaderRef.current) {
         observer.unobserve(loaderRef.current)
       }
     }
-  }, [loaderRef, isLoadingMore, hasMoreChats, fetchMoreChats])  
+  }, [loaderRef, isLoadingMore, hasMoreChats, fetchMoreChats])
 
   const getDataListComponent = (
     contentType: ContentType,

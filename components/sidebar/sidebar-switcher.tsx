@@ -2,7 +2,6 @@ import { ContentType } from "@/types"
 import {
   IconFile,
   IconLayoutSidebarRightExpand,
-  IconLockOpen,
   IconMessage,
   IconPuzzle
 } from "@tabler/icons-react"
@@ -58,10 +57,6 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
     isInstalled: installedPlugins.some(p => p.id === plugin.id)
   }))
 
-  const handleUpgradeClick = () => {
-    router.push("/upgrade")
-  }
-
   return (
     <div className="flex flex-col justify-between border-r-2 pb-5">
       <PluginStoreModal
@@ -110,14 +105,6 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
       </TabsList>
 
       <div className="flex flex-col items-center space-y-4">
-        {!subscription && (
-          <IconLockOpen
-            className="cursor-pointer hover:opacity-50"
-            size={24}
-            onClick={handleUpgradeClick}
-          />
-        )}
-
         <WithTooltip display={<div>Settings</div>} trigger={<Settings />} />
       </div>
     </div>

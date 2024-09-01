@@ -1,7 +1,9 @@
 import { ContentType, DataListType } from "@/types"
-import { FC } from "react"
+import { FC, useContext } from "react"
 import { SidebarCreateButtons } from "./sidebar-create-buttons"
 import { SidebarDataList } from "./sidebar-data-list"
+import { PentestGPTContext } from "@/context/context"
+import { SidebarUpgrade } from "./sidebar-upgrade"
 
 interface SidebarContentProps {
   contentType: ContentType
@@ -12,6 +14,8 @@ export const SidebarContent: FC<SidebarContentProps> = ({
   contentType,
   data
 }) => {
+  const { subscription } = useContext(PentestGPTContext)
+
   return (
     <div className="flex max-h-[calc(100%-10px)] grow flex-col">
       <div className="flex items-center">
@@ -22,6 +26,8 @@ export const SidebarContent: FC<SidebarContentProps> = ({
       </div>
 
       <SidebarDataList contentType={contentType} data={data} />
+
+      {!subscription && <SidebarUpgrade />}
     </div>
   )
 }
