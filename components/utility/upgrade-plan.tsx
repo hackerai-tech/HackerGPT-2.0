@@ -4,6 +4,7 @@ import Loading from "@/app/[locale]/loading"
 import { Button } from "@/components/ui/button"
 import { PentestGPTContext } from "@/context/context"
 import { getCheckoutUrl } from "@/lib/server/stripe-url"
+import { getSubscriptionByUserId } from "@/db/subscriptions"
 import * as Sentry from "@sentry/nextjs"
 import {
   IconLoader2,
@@ -16,20 +17,36 @@ import { FC, useContext, useState, useEffect } from "react"
 import { toast } from "sonner"
 import { useTheme } from "next-themes"
 import PentestGPTTextSVG from "@/components/icons/pentestgpt-text-svg"
+import { TabGroup, TabList, Tab } from "@headlessui/react"
+
+const YEARLY_PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRO_PRICE_ID
 
 export const UpgradePlan: FC = () => {
   const router = useRouter()
   const { profile, isMobile } = useContext(PentestGPTContext)
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isButtonLoading, setIsButtonLoading] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
+    "monthly"
+  )
   const { theme } = useTheme()
 
   useEffect(() => {
-    const fetchStripeCheckoutUrl = async () => {
-      if (!profile) return
+    const initialize = async () => {
+      if (!profile) {
+        setIsLoading(false)
+        return
+      }
+
+      const subscription = await getSubscriptionByUserId(profile.user_id)
+
+      if (subscription) {
+        router.push("/login")
+        return
+      }
 
       const result = await getCheckoutUrl()
-
       if (result.type === "error") {
         Sentry.withScope(scope => {
           scope.setExtras({ userId: profile.user_id })
@@ -43,16 +60,16 @@ export const UpgradePlan: FC = () => {
       setIsLoading(false)
     }
 
-    fetchStripeCheckoutUrl()
-  }, [profile])
+    initialize()
+  }, [profile, router])
 
   const handleUpgradeClick = async () => {
-    if (checkoutUrl) {
-      router.push(checkoutUrl)
-    } else if (!isLoading && profile) {
-      setIsLoading(true)
-      const result = await getCheckoutUrl()
-      setIsLoading(false)
+    if (!isLoading && profile) {
+      setIsButtonLoading(true)
+      const result = await getCheckoutUrl(
+        selectedPlan === "yearly" ? YEARLY_PRO_PRICE_ID : undefined
+      )
+      setIsButtonLoading(false)
       if (result.type === "error") {
         Sentry.withScope(scope => {
           scope.setExtras({ userId: profile.user_id })
@@ -71,6 +88,18 @@ export const UpgradePlan: FC = () => {
 
   if (!profile) {
     return null
+  }
+
+  const planPrices = {
+    free: { monthly: "$0", yearly: "$0" },
+    pro: { monthly: "$20", yearly: "$15" }
+  }
+
+  const getYearlySavingsNote = () => {
+    if (selectedPlan === "yearly") {
+      return "Save $60 (3 months free)"
+    }
+    return ""
   }
 
   return (
@@ -92,10 +121,35 @@ export const UpgradePlan: FC = () => {
         </div>
       </div>
 
-      <div className="flex grow flex-col items-center justify-center p-2 md:mt-24 md:p-8">
+      <div className="flex grow flex-col items-center justify-center p-2 md:mt-16 md:p-8">
         <span className="mb-8 text-center text-2xl font-semibold md:text-3xl">
           Upgrade your plan
         </span>
+
+        <TabGroup
+          onChange={index =>
+            setSelectedPlan(index === 0 ? "monthly" : "yearly")
+          }
+        >
+          <TabList className="bg-secondary mx-auto mb-6 flex w-64 space-x-2 rounded-xl p-1">
+            {["Monthly", "Yearly"].map(plan => (
+              <Tab
+                key={plan}
+                className={({ selected }) =>
+                  `w-full px-4 py-1.5 text-sm font-medium leading-5 rounded-lg
+                  transition-all duration-200 ease-in-out
+                  ${
+                    selected
+                      ? "bg-primary text-primary-foreground shadow"
+                      : "text-muted-foreground hover:bg-secondary/20 hover:text-foreground"
+                  }`
+                }
+              >
+                {plan}
+              </Tab>
+            ))}
+          </TabList>
+        </TabGroup>
 
         <div
           className={`grid w-full max-w-5xl ${
@@ -105,7 +159,7 @@ export const UpgradePlan: FC = () => {
           {/* Free Plan */}
           <PlanCard
             title="Free"
-            price="USD $0/month"
+            price={`USD ${planPrices.free[selectedPlan]}/month`}
             buttonText="Your current plan"
             buttonDisabled
           >
@@ -119,15 +173,16 @@ export const UpgradePlan: FC = () => {
           {/* Pro Plan */}
           <PlanCard
             title="Pro"
-            price="USD $20/month"
+            price={`USD ${planPrices.pro[selectedPlan]}/month`}
             buttonText="Upgrade to Pro"
-            buttonLoading={isLoading}
+            buttonLoading={isButtonLoading}
             onButtonClick={handleUpgradeClick}
+            savingsNote={getYearlySavingsNote()}
           >
             <PlanStatement>Early access to new features</PlanStatement>
             <PlanStatement>Access to PGPT-4, GPT-4o, PGPT-3.5</PlanStatement>
             <PlanStatement>
-              Access to file uploads, vision, code interpreter and terminal
+              Access to file uploads, vision, and terminal
             </PlanStatement>
             <PlanStatement>
               Access to advanced plugins like Nuclei, SQLi Exploiter,
@@ -150,6 +205,7 @@ interface PlanCardProps {
   buttonLoading?: boolean
   buttonDisabled?: boolean
   onButtonClick?: () => void
+  savingsNote?: string
   children: React.ReactNode
 }
 
@@ -160,6 +216,7 @@ const PlanCard: FC<PlanCardProps> = ({
   buttonLoading,
   buttonDisabled,
   onButtonClick,
+  savingsNote,
   children
 }) => (
   <div className="bg-popover border-primary/20 flex flex-col rounded-lg border p-6 text-left shadow-md">
@@ -173,6 +230,9 @@ const PlanCard: FC<PlanCardProps> = ({
         {title}
       </h2>
       <p className="text-muted-foreground mt-1">{price}</p>
+      {savingsNote && (
+        <p className="mt-1 text-sm font-medium text-green-500">{savingsNote}</p>
+      )}
     </div>
     <Button
       variant={buttonDisabled ? "outline" : "default"}

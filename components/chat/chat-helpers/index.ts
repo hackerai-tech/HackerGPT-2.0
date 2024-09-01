@@ -384,6 +384,7 @@ export const processResponse = async (
     let toolCallId = ""
     let ragUsed = false
     let ragId = null
+    let isFirstChunk = true
     let updatedPlugin = selectedPlugin
     let assistantGeneratedImages: string[] = []
     const reader = response.body.getReader()
@@ -519,7 +520,10 @@ export const processResponse = async (
             )
 
             if (contentToAdd || newImagePath) {
-              setFirstTokenReceived(true)
+              if (isFirstChunk) {
+                setFirstTokenReceived(true)
+                isFirstChunk = false
+              }
               fullText += contentToAdd
 
               if (newImagePath) {

@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { tool, StreamData } from "ai"
-import { executePythonCode } from "@/lib/tools/python-executor"
+// import { executePythonCode } from "@/lib/tools/python-executor"
 // import { executeBashCommand } from "@/lib/tools/bash-executor"
 import { generateAndUploadImage } from "@/lib/tools/image-generator"
 // import { ratelimit } from "../server/ratelimiter"
@@ -61,41 +61,33 @@ export const createToolSchemas = (context: ToolContext) => {
         open_url: z.string().url().describe("The URL of the webpage to browse")
       })
     },
-    python: tool({
-      description: "Runs Python code.",
-      parameters: z.object({
-        pipInstallCommand: z
-          .string()
-          .optional()
-          .describe(
-            "Full pip install command to install packages (e.g., '!pip install package1 package2')"
-          ),
-        code: z.string().min(1).describe("The Python code to execute")
-      }),
-      execute: async ({ pipInstallCommand, code }) => {
-        return executeOnce("Python", code, async () => {
-          const { results, error: runtimeError } = await executePythonCode(
-            context.profile.user_id,
-            code,
-            pipInstallCommand
-          )
-          return { results, runtimeError }
-        })
-      }
-    }),
-    terminal: tool({
+    // python: tool({
+    //   description: "Runs Python code.",
+    //   parameters: z.object({
+    //     pipInstallCommand: z
+    //       .string()
+    //       .optional()
+    //       .describe(
+    //         "Full pip install command to install packages (e.g., '!pip install package1 package2')"
+    //       ),
+    //     code: z.string().min(1).describe("The Python code to execute")
+    //   }),
+    //   execute: async ({ pipInstallCommand, code }) => {
+    //     return executeOnce("Python", code, async () => {
+    //       const { results, error: runtimeError } = await executePythonCode(
+    //         context.profile.user_id,
+    //         code,
+    //         pipInstallCommand
+    //       )
+    //       return { results, runtimeError }
+    //     })
+    //   }
+    // }),
+    terminal: {
       description: "Runs bash commands.",
       parameters: z.object({
         command: z.string().min(1).describe("The bash command to execute")
-      }),
-      execute: async ({ command }) => {
-        context.data.append({
-          type: "terminal",
-          content: `\n\`\`\`terminal\n${command}\n\`\`\``
-        })
-
-        return { command }
-      }
+      })
       // execute: async ({ command }) => {
       //   return executeOnce("terminal", command, async () => {
       //     context.data.append({
@@ -126,7 +118,7 @@ export const createToolSchemas = (context: ToolContext) => {
       //     )
       //   })
       // }
-    }),
+    },
     generateImage: tool({
       description: "Generates an image based on a text prompt.",
       parameters: z.object({

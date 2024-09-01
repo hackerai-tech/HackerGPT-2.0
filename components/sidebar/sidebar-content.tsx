@@ -1,8 +1,9 @@
 import { ContentType, DataListType } from "@/types"
-import { FC, useState } from "react"
+import { FC, useContext } from "react"
 import { SidebarCreateButtons } from "./sidebar-create-buttons"
 import { SidebarDataList } from "./sidebar-data-list"
-import { SidebarSearch } from "./sidebar-search"
+import { PentestGPTContext } from "@/context/context"
+import { SidebarUpgrade } from "./sidebar-upgrade"
 
 interface SidebarContentProps {
   contentType: ContentType
@@ -13,11 +14,7 @@ export const SidebarContent: FC<SidebarContentProps> = ({
   contentType,
   data
 }) => {
-  const [searchTerm, setSearchTerm] = useState("")
-
-  const filteredData: any = data.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const { subscription } = useContext(PentestGPTContext)
 
   return (
     <div className="flex max-h-[calc(100%-10px)] grow flex-col">
@@ -28,15 +25,9 @@ export const SidebarContent: FC<SidebarContentProps> = ({
         />
       </div>
 
-      <div className="mt-2">
-        <SidebarSearch
-          contentType={contentType}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-        />
-      </div>
+      <SidebarDataList contentType={contentType} data={data} />
 
-      <SidebarDataList contentType={contentType} data={filteredData} />
+      {!subscription && <SidebarUpgrade />}
     </div>
   )
 }
