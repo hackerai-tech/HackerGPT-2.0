@@ -19,12 +19,14 @@ export const terminalExecutor = async ({
   userID,
   command
 }: TerminalExecutorOptions): Promise<StreamingTextResponse> => {
-  console.log(`[${userID}] Executing terminal command: ${command}`)
   let sbx: CodeInterpreter | null = null
   let hasTerminalOutput = false
 
   const stream = new ReadableStream({
     async start(controller) {
+      controller.enqueue(ENCODER.encode(`\n\`\`\`terminal\n${command}\n\`\`\``))
+      console.log(`[${userID}] Executing terminal command: ${command}`)
+
       try {
         sbx = await createOrConnectTerminal(
           userID,

@@ -83,19 +83,11 @@ export const createToolSchemas = (context: ToolContext) => {
         })
       }
     }),
-    terminal: tool({
+    terminal: {
       description: "Runs bash commands.",
       parameters: z.object({
         command: z.string().min(1).describe("The bash command to execute")
       }),
-      execute: async ({ command }) => {
-        context.data.append({
-          type: "terminal",
-          content: `\n\`\`\`terminal\n${command}\n\`\`\``
-        })
-
-        return { command }
-      }
       // execute: async ({ command }) => {
       //   return executeOnce("terminal", command, async () => {
       //     context.data.append({
@@ -126,7 +118,7 @@ export const createToolSchemas = (context: ToolContext) => {
       //     )
       //   })
       // }
-    }),
+    },
     generateImage: tool({
       description: "Generates an image based on a text prompt.",
       parameters: z.object({
