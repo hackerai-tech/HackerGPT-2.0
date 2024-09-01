@@ -22,7 +22,8 @@ export const UpgradePlan: FC = () => {
   const router = useRouter()
   const { profile, isMobile } = useContext(PentestGPTContext)
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isButtonLoading, setIsButtonLoading] = useState(false)
   const { theme } = useTheme()
 
   useEffect(() => {
@@ -60,9 +61,9 @@ export const UpgradePlan: FC = () => {
     if (checkoutUrl) {
       router.push(checkoutUrl)
     } else if (!isLoading && profile) {
-      setIsLoading(true)
+      setIsButtonLoading(true)
       const result = await getCheckoutUrl()
-      setIsLoading(false)
+      setIsButtonLoading(false)
       if (result.type === "error") {
         Sentry.withScope(scope => {
           scope.setExtras({ userId: profile.user_id })
@@ -131,7 +132,7 @@ export const UpgradePlan: FC = () => {
             title="Pro"
             price="USD $20/month"
             buttonText="Upgrade to Pro"
-            buttonLoading={isLoading}
+            buttonLoading={isButtonLoading}
             onButtonClick={handleUpgradeClick}
           >
             <PlanStatement>Early access to new features</PlanStatement>
