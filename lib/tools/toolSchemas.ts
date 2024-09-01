@@ -87,7 +87,7 @@ export const createToolSchemas = (context: ToolContext) => {
       description: "Runs bash commands.",
       parameters: z.object({
         command: z.string().min(1).describe("The bash command to execute")
-      }),
+      })
       // execute: async ({ command }) => {
       //   return executeOnce("terminal", command, async () => {
       //     context.data.append({

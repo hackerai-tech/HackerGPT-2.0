@@ -4,6 +4,7 @@ import Loading from "@/app/[locale]/loading"
 import { Button } from "@/components/ui/button"
 import { PentestGPTContext } from "@/context/context"
 import { getCheckoutUrl } from "@/lib/server/stripe-url"
+import { getSubscriptionByUserId } from "@/db/subscriptions"
 import * as Sentry from "@sentry/nextjs"
 import {
   IconLoader2,
@@ -25,11 +26,20 @@ export const UpgradePlan: FC = () => {
   const { theme } = useTheme()
 
   useEffect(() => {
-    const fetchStripeCheckoutUrl = async () => {
-      if (!profile) return
+    const initialize = async () => {
+      if (!profile) {
+        setIsLoading(false)
+        return
+      }
+
+      const subscription = await getSubscriptionByUserId(profile.user_id)
+
+      if (subscription) {
+        router.push("/login")
+        return
+      }
 
       const result = await getCheckoutUrl()
-
       if (result.type === "error") {
         Sentry.withScope(scope => {
           scope.setExtras({ userId: profile.user_id })
@@ -43,8 +53,8 @@ export const UpgradePlan: FC = () => {
       setIsLoading(false)
     }
 
-    fetchStripeCheckoutUrl()
-  }, [profile])
+    initialize()
+  }, [profile, router])
 
   const handleUpgradeClick = async () => {
     if (checkoutUrl) {
