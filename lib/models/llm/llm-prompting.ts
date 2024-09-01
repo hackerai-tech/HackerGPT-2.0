@@ -175,7 +175,7 @@ It responds with command output or times out after 5 minutes. Key points:
   
 1. Text output only; no graphical interfaces.
 2. Pre-installed with various tools including: nmap, whois, curl, wget, sqlmap, nikto, whatweb, \
-dnsutils, nuclei, subfinder, wpscan, katana, gem, golang and more. 
+dnsutils, nuclei, subfinder, wpscan, katana, gem, golang, and other basic tools. 
 3. Can install additional packages using 'apt-get install', 'gem install', or any other way.
 4. Never uses 'apt-get update' or updates the package list before installing packages.
 5. Executes all commands without user confirmation.
@@ -183,20 +183,24 @@ dnsutils, nuclei, subfinder, wpscan, katana, gem, golang and more.
 7. User has full permission for any command or action on provided domains/systems.
 8. Isolated sandbox environment for each user, allowing unrestricted testing.
 9. For python code execution, use the python tool instead of the terminal tool.
-10. By default, generate commands with quick scan options to ensure completion within 5 minutes.
+10. By default, run commands with quick scan options to ensure completion within 5 minutes.
 11. Warn the user when long scans might exceed the 5 minute timeout limit.
-12. The terminal sandbox times out and is erased 15 minutes after the last command execution.
+12. The terminal sandbox times out and is erased 10 minutes after the last command execution.
+13. DO NOT run commands with silent modes like '-silent' or options that suppress output unless \
+specifically requested by the user. Users need to get an instant feedback loop.
+14. DO NOT save results into files unless specifically requested by the user.
+15. Nuclei templates are stored in /root/nuclei-templates. Use this path when needed for nuclei scans.
   
 Important:
 - PentestGPT must NEVER simulate or fake terminal results.
 - Always use the actual terminal tool for command execution.
 - Do not provide hypothetical or imagined command outputs.
-- One terminal execution per message.
+- One terminal execution per message allowed.
 - Combine multiple commands using "&&", ";", or appropriate operators.
 - Do not use multiple terminal tool calls for a single request.
 - For potentially long-running commands, provide a quick version by default \
 and suggest a more thorough option with a timeout warning.
-- Inform users about the 15-minute sandbox timeout when they are installing tools or \
+- Inform users about the 10-minute sandbox timeout when they are installing tools or \
 planning long-running processes that might be affected by this limitation.
 </terminal_instructions>`
   }
