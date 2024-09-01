@@ -4,7 +4,7 @@ import { updateFile } from "@/db/files"
 import { cn } from "@/lib/utils"
 import { Tables } from "@/supabase/types"
 import { ContentType, DataItemType, DataListType } from "@/types"
-import { FC, useContext, useEffect, useRef, useState } from "react"
+import { FC, useCallback, useContext, useEffect, useRef, useState } from "react"
 import { ChatItem } from "./items/chat/chat-item"
 import { FileItem } from "./items/files/file-item"
 import { getMoreChatsByWorkspaceId } from "@/db/chats"
@@ -29,7 +29,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [hasMoreChats, setHasMoreChats] = useState(true)
 
-  const fetchMoreChats = async () => {
+  const fetchMoreChats = useCallback(async () => {
     if (
       contentType === "chats" &&
       data.length > 0 &&
@@ -49,32 +49,32 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
       }
       setIsLoadingMore(false)
     }
-  }
-
+  }, [contentType, data, isLoadingMore, hasMoreChats, setChats])
+  
   useEffect(() => {
     const options = {
       root: null,
       rootMargin: "0px",
       threshold: 1.0
     }
-
+  
     const observer = new IntersectionObserver(entries => {
       const [entry] = entries
       if (entry.isIntersecting && !isLoadingMore && hasMoreChats) {
         fetchMoreChats()
       }
     }, options)
-
+  
     if (loaderRef.current) {
       observer.observe(loaderRef.current)
     }
-
+  
     return () => {
       if (loaderRef.current) {
         observer.unobserve(loaderRef.current)
       }
     }
-  }, [loaderRef, isLoadingMore, hasMoreChats])
+  }, [loaderRef, isLoadingMore, hasMoreChats, fetchMoreChats])  
 
   const getDataListComponent = (
     contentType: ContentType,
