@@ -107,6 +107,9 @@ export const getPentestGPTToolsInfo = (
   
   Do not generate if discussing an existing image.
   
+  The generated image will be displayed at the top of the message text, \
+  so there's no need to reference or provide a link to the image.
+  
   Function:
   generateImage({
     prompt: string,  // Required: Detailed description
