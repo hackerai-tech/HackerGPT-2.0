@@ -322,7 +322,6 @@ export const useChatHandler = () => {
         let fileData: { fileName: string; fileContent: string }[] = []
 
         const nonExcludedPluginsForFilesCommand = [
-          PluginID.NUCLEI,
           PluginID.KATANA
         ]
 

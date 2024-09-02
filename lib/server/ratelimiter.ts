@@ -197,7 +197,7 @@ export function getRateLimitErrorMessage(
 - Higher usage limits
 - Access to PGPT-4 and GPT-4o
 - Access to file uploads, vision, and terminal
-- Access to advanced plugins like Nuclei, SQLi Exploiter, PortScanner, and more
+- Access to advanced plugins like DNS Scanner, SQLi Exploiter, PortScanner, and more
 - FLUX.1 image generation`
   }
 

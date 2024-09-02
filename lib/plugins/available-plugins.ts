@@ -176,42 +176,6 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 7,
-    name: "Nuclei",
-    selectorName: "Nuclei",
-    value: PluginID.NUCLEI,
-    categories: ["vuln-scanners"],
-    icon: "https://avatars.githubusercontent.com/u/50994705",
-    description: "Fast and customisable vulnerability scanner",
-    githubRepoUrl: pluginUrls.NUCLEI,
-    isInstalled: false,
-    isPremium: true,
-    createdAt: "2024-02-27",
-    starters: [
-      {
-        title: "Start Vulnerability Scan",
-        description: "for hackerone.com with a focus on cves and osint",
-        chatMessage:
-          "Start vulnerability scan for hackerone.com with a focus on cves and osint."
-      },
-      {
-        title: "Initiate Web Tech Detection Scan",
-        description: "on hackerone.com",
-        chatMessage: "/nuclei -u hackerone.com -tags tech"
-      },
-      {
-        title: "Perform Automatic Scan",
-        description: "for hackerone.com",
-        chatMessage: "/nuclei -target hackerone.com -automatic-scan"
-      },
-      {
-        title: "Nuclei Help",
-        description: "How does the Nuclei plugin work?",
-        chatMessage: "/nuclei -help"
-      }
-    ]
-  },
-  {
     id: 8,
     name: "Katana",
     selectorName: "Katana",

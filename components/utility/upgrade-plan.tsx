@@ -185,7 +185,7 @@ export const UpgradePlan: FC = () => {
               Access to file uploads, vision, and terminal
             </PlanStatement>
             <PlanStatement>
-              Access to advanced plugins like Nuclei, SQLi Exploiter,
+              Access to advanced plugins like DNS Scanner, SQLi Exploiter,
               PortScanner, and more
             </PlanStatement>
             <PlanStatement>FLUX.1 image generation</PlanStatement>

@@ -27,7 +27,6 @@ export interface Plugin {
 export enum PluginID {
   NONE = "none",
   CVEMAP = "cvemap",
-  NUCLEI = "nuclei",
   SUBFINDER = "subfinder",
   KATANA = "katana",
   ENHANCED_SEARCH = "enhancedsearch",
@@ -60,7 +59,6 @@ export const pluginUrls: PluginUrls = {
   PENTESTGPT: "https://github.com/hackerai-tech/PentestGPT",
   CVEMAP: "https://github.com/projectdiscovery/cvemap",
   SUBFINDER: "https://github.com/projectdiscovery/subfinder",
-  NUCLEI: "https://github.com/projectdiscovery/nuclei",
   KATANA: "https://github.com/projectdiscovery/katana",
   // Tools
   PORTSCANNER: "https://github.com/projectdiscovery/naabu",

@@ -61,7 +61,6 @@ export async function buildFinalMessages(
   if (
     selectedPlugin === PluginID.KATANA ||
     selectedPlugin === PluginID.CVEMAP ||
-    selectedPlugin === PluginID.NUCLEI ||
     selectedPlugin === PluginID.SUBFINDER ||
     // Tools
     selectedPlugin === PluginID.LINKFINDER ||
