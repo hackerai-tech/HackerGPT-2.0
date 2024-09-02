@@ -154,7 +154,7 @@ export async function POST(request: Request) {
       data.append({ ragUsed, ragId })
 
       let tools
-      if (selectedModel === "openai/gpt-4o-mini" || isPentestGPTPro) {
+      if (selectedModel === "openai/gpt-4o-mini") {
         const toolSchemas = createToolSchemas({ profile, data })
         tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
       }
