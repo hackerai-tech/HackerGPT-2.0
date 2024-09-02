@@ -28,7 +28,6 @@ export enum PluginID {
   NONE = "none",
   CVEMAP = "cvemap",
   SUBFINDER = "subfinder",
-  KATANA = "katana",
   ENHANCED_SEARCH = "enhancedsearch",
   PLUGINS_STORE = "pluginselector",
   // Tools
@@ -59,7 +58,6 @@ export const pluginUrls: PluginUrls = {
   PENTESTGPT: "https://github.com/hackerai-tech/PentestGPT",
   CVEMAP: "https://github.com/projectdiscovery/cvemap",
   SUBFINDER: "https://github.com/projectdiscovery/subfinder",
-  KATANA: "https://github.com/projectdiscovery/katana",
   // Tools
   PORTSCANNER: "https://github.com/projectdiscovery/naabu",
   LINKFINDER: "https://github.com/0xsha/GoLinkFinder",

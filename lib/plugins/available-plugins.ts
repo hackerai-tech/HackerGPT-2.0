@@ -176,42 +176,6 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 8,
-    name: "Katana",
-    selectorName: "Katana",
-    value: PluginID.KATANA,
-    categories: ["recon"],
-    icon: "https://avatars.githubusercontent.com/u/50994705",
-    description:
-      "Web crawling framework designed to navigate and parse for hidden details",
-    githubRepoUrl: pluginUrls.KATANA,
-    isInstalled: false,
-    isPremium: true,
-    createdAt: "2024-02-27",
-    starters: [
-      {
-        title: "Crawl With JavaScript Parsing",
-        description: "for dynamic content on hackerone.com",
-        chatMessage: "/katana -u hackerone.com -js-crawl"
-      },
-      {
-        title: "Perform Scope-Defined Crawling",
-        description: "on hackerone.com",
-        chatMessage: "/katana -u hackerone.com -crawl-scope '.*hackerone.com*'"
-      },
-      {
-        title: "Filter Content by Extension",
-        description: "on target.com, excluding CSS and PNG",
-        chatMessage: "/katana -u hackerone.com -extension-filter png,css"
-      },
-      {
-        title: "Katana Help",
-        description: "How does the Katana plugin work?",
-        chatMessage: "/katana -help"
-      }
-    ]
-  },
-  {
     id: 10,
     name: "Port Scanner",
     selectorName: "Port Scanner",

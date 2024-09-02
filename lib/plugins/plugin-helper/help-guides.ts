@@ -62,56 +62,6 @@ export const displayHelpGuideForCvemap = () => {
      `
 }
 
-export const displayHelpGuideForKatana = () => {
-  return endent`
-    [Katana](${pluginUrls.KATANA}) is a fast crawler focused on execution in automation pipelines offering both headless and non-headless crawling.
-    ## Interaction Methods
-  
-    **Conversational AI Requests:**
-    Interact with Katana conversationally by simply describing your web crawling needs in plain language. The AI will understand your requirements and automatically configure and execute the appropriate Katana command, facilitating an intuitive user experience.
-      
-    **Direct Commands:**
-    Use direct commands to specifically control the crawling process. Begin your command with the program name followed by relevant flags to precisely define the crawling scope and parameters.
-
-    \`\`\`
-      Usage:
-         /katana [flags]
-    
-      Flags:
-      INPUT:
-         -u, -list string[]  target url / list to crawl
-  
-      CONFIGURATION:
-         -d, -depth int               maximum depth to crawl (default 3)
-         -jc, -js-crawl               enable endpoint parsing / crawling in javascript file
-         -timeout int                 time to wait for request in seconds (default 15)
-         -iqp, -ignore-query-params   Ignore crawling same path with different query-param values
-  
-      HEADLESS:
-         -xhr, -xhr-extraction   extract xhr request url,method in jsonl output
-      
-      PASSIVE:
-         -ps, -passive                   enable passive sources to discover target endpoints
-         -pss, -passive-source string[]  passive source to use for url discovery (waybackarchive,commoncrawl,alienvault)
-
-      SCOPE:
-         -cs, -crawl-scope string[]        in scope url regex to be followed by crawler
-         -cos, -crawl-out-scope string[]   out of scope url regex to be excluded by crawler
-         -do, -display-out-scope           display external endpoint from scoped crawling
-  
-      FILTER:
-         -mr, -match-regex string[]        regex or list of regex to match on output url (cli, file)
-         -fr, -filter-regex string[]       regex or list of regex to filter on output url (cli, file)
-         -em, -extension-match string[]    match output for given extension (eg, -em php,html,js)
-         -ef, -extension-filter string[]   filter output for given extension (eg, -ef png,css)
-         -mdc, -match-condition string     match response with dsl based condition
-         -fdc, -filter-condition string    filter response with dsl based condition
-      
-      OUTPUT:
-         -output string  write output to a file
-    \`\`\``
-}
-
 export const displayHelpGuideForLinkFinder = () => {
   return endent`
     [Link Finder](${pluginUrls.LINKFINDER}) is a minimalistic JavaScript endpoint extractor that efficiently pulls endpoints from HTML and embedded JavaScript files. 

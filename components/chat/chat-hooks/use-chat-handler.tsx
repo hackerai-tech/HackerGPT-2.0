@@ -321,52 +321,50 @@ export const useChatHandler = () => {
       ) {
         let fileData: { fileName: string; fileContent: string }[] = []
 
-        const nonExcludedPluginsForFilesCommand = [
-          PluginID.KATANA
-        ]
+        // const nonExcludedPluginsForFilesCommand = []
 
-        const isCommand = (allowedCommands: string[], message: string) => {
-          if (!message.startsWith("/")) return false
-          const trimmedMessage = message.trim().toLowerCase()
+        // const isCommand = (allowedCommands: string[], message: string) => {
+        //   if (!message.startsWith("/")) return false
+        //   const trimmedMessage = message.trim().toLowerCase()
 
-          // Check if the message matches any of the allowed commands
-          return allowedCommands.some(commandName => {
-            const commandPattern = new RegExp(
-              `^\\/${commandName}(?:\\s+(-[a-z]+|\\S+))*$`
-            )
-            return commandPattern.test(trimmedMessage)
-          })
-        }
+        //   // Check if the message matches any of the allowed commands
+        //   return allowedCommands.some(commandName => {
+        //     const commandPattern = new RegExp(
+        //       `^\\/${commandName}(?:\\s+(-[a-z]+|\\S+))*$`
+        //     )
+        //     return commandPattern.test(trimmedMessage)
+        //   })
+        // }
 
-        if (
-          messageContent &&
-          newMessageFiles.length > 0 &&
-          newMessageFiles[0].type === "text" &&
-          (nonExcludedPluginsForFilesCommand.includes(selectedPlugin) ||
-            isCommand(nonExcludedPluginsForFilesCommand, messageContent))
-        ) {
-          const fileIds = newMessageFiles
-            .filter(file => file.type === "text")
-            .map(file => file.id)
+        // if (
+        //   messageContent &&
+        //   newMessageFiles.length > 0 &&
+        //   newMessageFiles[0].type === "text" &&
+        //   (nonExcludedPluginsForFilesCommand.includes(selectedPlugin) ||
+        //     isCommand(nonExcludedPluginsForFilesCommand, messageContent))
+        // ) {
+        //   const fileIds = newMessageFiles
+        //     .filter(file => file.type === "text")
+        //     .map(file => file.id)
 
-          if (fileIds.length > 0) {
-            const response = await fetch(`/api/retrieval/file-2v`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ fileIds: fileIds })
-            })
+        //   if (fileIds.length > 0) {
+        //     const response = await fetch(`/api/retrieval/file-2v`, {
+        //       method: "POST",
+        //       headers: {
+        //         "Content-Type": "application/json"
+        //       },
+        //       body: JSON.stringify({ fileIds: fileIds })
+        //     })
 
-            if (!response.ok) {
-              const errorData = await response.json()
-              toast.warning(errorData.message)
-            }
+        //     if (!response.ok) {
+        //       const errorData = await response.json()
+        //       toast.warning(errorData.message)
+        //     }
 
-            const data = await response.json()
-            fileData.push(...data.files)
-          }
-        }
+        //     const data = await response.json()
+        //     fileData.push(...data.files)
+        //   }
+        // }
 
         const { fullText, finishReason } = await handleHostedPluginsChat(
           payload,
