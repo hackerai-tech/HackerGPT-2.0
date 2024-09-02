@@ -15,25 +15,6 @@ import { streamText } from "ai"
 import { toVercelChatMessages } from "@/lib/build-prompt"
 
 export const runtime: ServerRuntime = "edge"
-export const preferredRegion = [
-  "iad1",
-  "arn1",
-  "bom1",
-  "cdg1",
-  "cle1",
-  "cpt1",
-  "dub1",
-  "fra1",
-  "gru1",
-  "hnd1",
-  "icn1",
-  "kix1",
-  "lhr1",
-  "pdx1",
-  "sfo1",
-  "sin1",
-  "syd1"
-]
 
 export async function POST(request: Request) {
   const { messages, chatSettings, detectedModerationLevel } =
@@ -54,13 +35,7 @@ export async function POST(request: Request) {
       llmConfig.systemPrompts.pentestGPTWebSearch
     )
 
-    if (
-      detectedModerationLevel === 1 ||
-      (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1) ||
-      (detectedModerationLevel >= 0.8 && detectedModerationLevel < 1)
-    ) {
-      filterEmptyAssistantMessages(messages)
-    } else if (detectedModerationLevel > 0.3 && detectedModerationLevel < 0.8) {
+    if (detectedModerationLevel > 0.3 && detectedModerationLevel < 0.8) {
       handleAssistantMessages(messages)
     } else {
       filterEmptyAssistantMessages(messages)
@@ -75,7 +50,7 @@ export async function POST(request: Request) {
     const result = await streamText({
       model: openrouter(selectedModel),
       messages: toVercelChatMessages(messages),
-      temperature: 0.4,
+      temperature: 0.5,
       maxTokens: 1024,
       // abortSignal isn't working for some reason.
       abortSignal: request.signal
