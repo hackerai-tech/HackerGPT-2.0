@@ -141,6 +141,10 @@ export async function POST(request: Request) {
       filterEmptyAssistantMessages(messages)
     }
 
+    if (ragUsed) {
+      selectedModel = "perplexity/llama-3.1-sonar-large-128k-online"
+    }
+
     try {
       let provider
 
