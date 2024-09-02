@@ -5,6 +5,7 @@ import { updateSystemMessage } from "@/lib/ai-helper"
 
 import {
   filterEmptyAssistantMessages,
+  handleAssistantMessages,
   toVercelChatMessages
 } from "@/lib/build-prompt"
 import { handleErrorResponse } from "@/lib/models/llm/api-error"
@@ -129,9 +130,16 @@ export async function POST(request: Request) {
 
     if (shouldUseMiniModel) {
       selectedModel = "openai/gpt-4o-mini"
+      filterEmptyAssistantMessages(messages)
+    } else if (
+      detectedModerationLevel >= 0.3 &&
+      detectedModerationLevel <= 0.7 &&
+      !isPentestGPTPro
+    ) {
+      handleAssistantMessages(messages)
+    } else {
+      filterEmptyAssistantMessages(messages)
     }
-
-    filterEmptyAssistantMessages(messages)
 
     try {
       let provider
