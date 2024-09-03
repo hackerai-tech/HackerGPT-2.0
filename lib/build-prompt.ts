@@ -247,6 +247,7 @@ export function filterEmptyAssistantMessages(messages: any[]) {
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i].role === "assistant" && messages[i].content.trim() === "") {
       messages.splice(i, 1)
+      break
     }
   }
 }

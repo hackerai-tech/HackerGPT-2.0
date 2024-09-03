@@ -290,6 +290,12 @@ export const useChatHandler = () => {
       let ragId = null
       let assistantGeneratedImages: string[] = []
       let detectedModerationLevel = -1
+
+      // Always update the assistant message, even if it's empty
+      sentChatMessages[sentChatMessages.length - 1].message.content =
+        generatedText
+      setChatMessages(sentChatMessages)
+
       if (
         !isContinuation &&
         (selectedPlugin === PluginID.NONE ||
@@ -476,8 +482,6 @@ export const useChatHandler = () => {
     } catch (error) {
       setIsGenerating(false)
       setFirstTokenReceived(false)
-      // Restore the chat messages to the previous state
-      setChatMessages(chatMessages)
     }
   }
 
