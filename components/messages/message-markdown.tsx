@@ -25,11 +25,11 @@ export const MessageMarkdown: FC<MessageMarkdownProps> = ({
   content,
   isAssistant
 }) => {
-  const processedContent = useMemo(() => {
-    return content
-      .replace(/<ai_generated_image>.*?<\/ai_generated_image>/gs, "")
-      .trim()
-  }, [content])
+  // const processedContent = useMemo(() => {
+  //   return content
+  //     .replace(/<ai_generated_image>.*?<\/ai_generated_image>/gs, "")
+  //     .trim()
+  // }, [content])
 
   if (!isAssistant) {
     return (
@@ -122,7 +122,7 @@ export const MessageMarkdown: FC<MessageMarkdownProps> = ({
         }
       }}
     >
-      {processedContent}
+      {content}
     </MessageMarkdownMemoized>
   )
 }

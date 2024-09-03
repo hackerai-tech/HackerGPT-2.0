@@ -42,8 +42,8 @@ export enum PluginID {
   WEB_SEARCH = "websearch",
   PYTHON = "python",
   BROWSER = "browser",
-  TERMINAL = "terminal",
-  IMAGE_GENERATOR = "imagegenerator"
+  TERMINAL = "terminal"
+  // IMAGE_GENERATOR = "imagegenerator"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(

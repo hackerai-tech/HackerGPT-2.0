@@ -300,13 +300,13 @@ export const Message: FC<MessageProps> = ({
                           <div>Executing command in Terminal...</div>
                         </div>
                       )
-                    case PluginID.IMAGE_GENERATOR:
-                      return (
-                        <div className="flex animate-pulse items-center space-x-2">
-                          <IconPhoto size={20} />
-                          <div>Generating image...</div>
-                        </div>
-                      )
+                    // case PluginID.IMAGE_GENERATOR:
+                    //   return (
+                    //     <div className="flex animate-pulse items-center space-x-2">
+                    //       <IconPhoto size={20} />
+                    //       <div>Generating image...</div>
+                    //     </div>
+                    //   )
                     default:
                       return (
                         <div className="flex animate-pulse items-center space-x-2">

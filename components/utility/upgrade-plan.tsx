@@ -182,13 +182,13 @@ export const UpgradePlan: FC = () => {
             <PlanStatement>Early access to new features</PlanStatement>
             <PlanStatement>Access to PGPT-4, GPT-4o, PGPT-3.5</PlanStatement>
             <PlanStatement>
-              Access to file uploads, vision, and terminal
+              Access to file uploads, vision, and code interpreter
             </PlanStatement>
             <PlanStatement>
               Access to advanced plugins like DNS Scanner, SQLi Exploiter,
               PortScanner, and more
             </PlanStatement>
-            <PlanStatement>FLUX.1 image generation</PlanStatement>
+            <PlanStatement>Terminal access</PlanStatement>
           </PlanCard>
         </div>
       </div>
