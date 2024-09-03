@@ -67,17 +67,17 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
     )
   }
 
-  if (
-    message.plugin === PluginID.IMAGE_GENERATOR.toString() ||
-    toolInUse === PluginID.IMAGE_GENERATOR
-  ) {
-    return (
-      <MessageImageGenerator
-        content={message.content}
-        isAssistant={message.role === "assistant"}
-      />
-    )
-  }
+  // if (
+  //   message.plugin === PluginID.IMAGE_GENERATOR.toString() ||
+  //   toolInUse === PluginID.IMAGE_GENERATOR
+  // ) {
+  //   return (
+  //     <MessageImageGenerator
+  //       content={message.content}
+  //       isAssistant={message.role === "assistant"}
+  //     />
+  //   )
+  // }
 
   // If the previous message is a plugin command and the current message is the output
   if (

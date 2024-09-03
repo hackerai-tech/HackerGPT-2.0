@@ -65,7 +65,7 @@ them to select the appropriate plugin from the plugin selector menu.\n`
   if (currentModel) {
     info += `<pentestgpt_family_info>
 The current PentestGPT version is ${currentModel}. Tool availability varies by model:
-- Terminal & Image Generator: Exclusive to GPT-4o
+- Terminal & Code Interpreter: Exclusive to GPT-4o
 - Browser & Web Search: Available on PGPT-3.5, and GPT-4o
 PentestGPT notifies users when they request a tool unsupported by the current model, \
 specifying compatible models and suggesting alternatives when applicable.
@@ -84,7 +84,7 @@ for enhanced mathematical notation and more.
 }
 
 export const getPentestGPTToolsInfo = (
-  includeGenerateImageTool: boolean = false,
+  // includeGenerateImageTool: boolean = false,
   includeBrowserTool: boolean = false,
   includeWebSearchTool: boolean = false,
   includePythonTool: boolean = false,
@@ -92,29 +92,32 @@ export const getPentestGPTToolsInfo = (
 ): string => {
   let toolsInfo = "<tools_instructions>"
 
-  if (includeGenerateImageTool) {
-    toolsInfo += `\n\n<generateImage_instructions>
-  PentestGPT generates images based on text descriptions when explicitly requested. Guidelines:
-  
-  1. English prompts only (translate if needed)
-  2. Generate immediately without asking permission
-  3. One image per request, regardless of multiple requests
-  
-  Prompt requirements:
-  - Highly detailed (aim for 100 words)
-  - Based on user's description
-  - Generate only when clearly requested
-  
-  Do not generate if discussing an existing image.
-  
-  Function:
-  generateImage({
-    prompt: string,  // Required: Detailed description
-    width?: number,  // Optional: 256-1280px (default 512)
-    height?: number, // Optional: 256-1280px (default 512)
-  })
-  </generateImage_instructions>`
-  }
+  // if (includeGenerateImageTool) {
+  //   toolsInfo += `\n\n<generateImage_instructions>
+  // PentestGPT generates images based on text descriptions when explicitly requested. Guidelines:
+
+  // 1. English prompts only (translate if needed)
+  // 2. Generate immediately without asking permission
+  // 3. One image per request, regardless of multiple requests
+
+  // Prompt requirements:
+  // - Highly detailed (aim for 100 words)
+  // - Based on user's description
+  // - Generate only when clearly requested
+
+  // Do not generate if discussing an existing image.
+
+  // The generated image will be displayed at the top of the message text, \
+  // so there's no need to reference or provide a link to the image.
+
+  // Function:
+  // generateImage({
+  //   prompt: string,  // Required: Detailed description
+  //   width?: number,  // Optional: 256-1280px (default 512)
+  //   height?: number, // Optional: 256-1280px (default 512)
+  // })
+  // </generateImage_instructions>`
+  // }
 
   if (includeWebSearchTool) {
     toolsInfo += `\n\n<websearch_instructions>
@@ -149,24 +152,24 @@ PentestGPT uses 'browser' when:
 </browser_instructions>`
   }
 
-  //   if (includePythonTool) {
-  //     toolsInfo += `\n\n<python_instructions>
-  // PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
-  // It responds with command output or times out after 60 seconds. Key features:
+  if (includePythonTool) {
+    toolsInfo += `\n\n<python_instructions>
+  PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
+  It responds with command output or times out after 60 seconds. Key features:
 
-  // 1. Text output only (no charts, images, or non-text visuals)
-  // 2. Suitable for data analysis, task automation, API interactions, web scraping, and more
-  // 3. Package installation via pip (e.g., !pip install package1 package2)
-  // 4. Use Python for HTML retrieval and complex web scraping instead of the browser tool
-  // 5. Leverage specialized libraries when needed for specific tasks
-  // 6. PentestGPT executes Python code to accomplish various tasks efficiently and securely
+  1. Text output only (no charts, images, or non-text visuals)
+  2. Suitable for data analysis, task automation, API interactions, web scraping, and more
+  3. Package installation via pip (e.g., !pip install package1 package2)
+  4. Use Python for HTML retrieval and complex web scraping instead of the browser tool
+  5. Leverage specialized libraries when needed for specific tasks
+  6. PentestGPT executes Python code to accomplish various tasks efficiently and securely
 
-  // Important:
-  // - One code cell execution per message
-  // - Do not use Python to execute terminal commands (e.g., via 'os' module or subprocess) \
-  // Use the terminal tool instead
-  // </python_instructions>`
-  //   }
+  Important:
+  - One code cell execution per message
+  - Do not use Python to execute terminal commands (e.g., via 'os' module or subprocess) \
+  Use the terminal tool instead
+  </python_instructions>`
+  }
 
   if (includeTerminalTool) {
     toolsInfo += `\n\n<terminal_instructions>

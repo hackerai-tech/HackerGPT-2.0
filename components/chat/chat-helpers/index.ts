@@ -433,27 +433,27 @@ export const processResponse = async (
           part.value[0].type !== "imageGenerated" &&
           "content" in part.value[0]
 
-        const isImageResult = (
-          part: any
-        ): part is {
-          type: "data"
-          value: Array<{
-            type: string
-            content: {
-              url: string
-              prompt: string
-              width: number
-              height: number
-            }
-          }>
-        } =>
-          part.type === "data" &&
-          Array.isArray(part.value) &&
-          part.value.length > 0 &&
-          typeof part.value[0] === "object" &&
-          "type" in part.value[0] &&
-          part.value[0].type === "imageGenerated" &&
-          "content" in part.value[0]
+        // const isImageResult = (
+        //   part: any
+        // ): part is {
+        //   type: "data"
+        //   value: Array<{
+        //     type: string
+        //     content: {
+        //       url: string
+        //       prompt: string
+        //       width: number
+        //       height: number
+        //     }
+        //   }>
+        // } =>
+        //   part.type === "data" &&
+        //   Array.isArray(part.value) &&
+        //   part.value.length > 0 &&
+        //   typeof part.value[0] === "object" &&
+        //   "type" in part.value[0] &&
+        //   part.value[0].type === "imageGenerated" &&
+        //   "content" in part.value[0]
 
         const processStreamPart = (
           streamPart: any,
@@ -498,13 +498,13 @@ export const processResponse = async (
             }
           }
 
-          if (isImageResult(streamPart)) {
-            const { url, prompt, width, height } = streamPart.value[0].content
-            return {
-              contentToAdd: `<ai_generated_image>${prompt} width: ${width} height: ${height}</ai_generated_image>`,
-              newImagePath: url
-            }
-          }
+          // if (isImageResult(streamPart)) {
+          //   const { url, prompt, width, height } = streamPart.value[0].content
+          //   return {
+          //     contentToAdd: `<ai_generated_image>${prompt} width: ${width} height: ${height}</ai_generated_image>`,
+          //     newImagePath: url
+          //   }
+          // }
 
           return { contentToAdd: "", newImagePath: null }
         }
@@ -605,10 +605,10 @@ export const processResponse = async (
                 setToolInUse(PluginID.TERMINAL)
                 updatedPlugin = PluginID.TERMINAL
                 break
-              case "generateImage":
-                setToolInUse(PluginID.IMAGE_GENERATOR)
-                updatedPlugin = PluginID.IMAGE_GENERATOR
-                break
+              // case "generateImage":
+              //   setToolInUse(PluginID.IMAGE_GENERATOR)
+              //   updatedPlugin = PluginID.IMAGE_GENERATOR
+              //   break
             }
             break
 

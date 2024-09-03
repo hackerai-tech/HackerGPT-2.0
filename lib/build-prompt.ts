@@ -64,9 +64,7 @@ export async function buildFinalMessages(
 
   // Lower chunk size for plugins that don't need to handle long inputs
   if (
-    selectedPlugin === PluginID.KATANA ||
     selectedPlugin === PluginID.CVEMAP ||
-    selectedPlugin === PluginID.NUCLEI ||
     selectedPlugin === PluginID.SUBFINDER ||
     // Tools
     selectedPlugin === PluginID.LINKFINDER ||
@@ -249,6 +247,7 @@ export function filterEmptyAssistantMessages(messages: any[]) {
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i].role === "assistant" && messages[i].content.trim() === "") {
       messages.splice(i, 1)
+      break
     }
   }
 }
