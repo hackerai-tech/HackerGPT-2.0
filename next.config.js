@@ -23,20 +23,10 @@ module.exports = withBundleAnalyzer(
           protocol: "https",
           hostname: "**"
         }
-      ],
-      unoptimized: true
+      ]
     },
     experimental: {
-      serverComponentsExternalPackages: ["sharp", "onnxruntime-node", "jsdom"]
-    },
-    webpack: (config, { isServer }) => {
-      if (isServer) {
-        config.externals.push({
-          'onnxruntime-node': 'commonjs onnxruntime-node',
-          'sharp': 'commonjs sharp'
-        })
-      }
-      return config
+      serverComponentsExternalPackages: ["sharp", "onnxruntime-node"]
     }
   })
 )
