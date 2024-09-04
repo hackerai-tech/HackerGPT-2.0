@@ -27,7 +27,7 @@ module.exports = withBundleAnalyzer(
       unoptimized: true
     },
     experimental: {
-      serverComponentsExternalPackages: ["sharp", "onnxruntime-node"]
+      serverComponentsExternalPackages: ["sharp", "onnxruntime-node", "jsdom"]
     },
     webpack: (config, { isServer }) => {
       if (isServer) {
