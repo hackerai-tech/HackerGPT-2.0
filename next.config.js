@@ -28,6 +28,15 @@ module.exports = withBundleAnalyzer(
     },
     experimental: {
       serverComponentsExternalPackages: ["sharp", "onnxruntime-node"]
+    },
+    webpack: (config, { isServer }) => {
+      if (isServer) {
+        config.externals.push({
+          'onnxruntime-node': 'commonjs onnxruntime-node',
+          'sharp': 'commonjs sharp'
+        })
+      }
+      return config
     }
   })
 )
