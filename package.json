@@ -6,7 +6,6 @@
     "chat": "supabase start && npm run db-types && npm run dev",
     "restart": "supabase stop && npm run chat",
     "update": "git pull origin main && npm run db-migrate && npm run db-types",
-    "prepare": "husky install",
     "clean": "npm run lint:fix && npm run format:write",
     "dev": "next dev",
     "build": "next build",
@@ -23,7 +22,8 @@
     "db-types": "supabase gen types typescript --local > supabase/types.ts",
     "db-pull": "supabase db remote commit",
     "db-push": "supabase db push",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/mistral": "^0.0.38",
@@ -73,6 +73,7 @@
     "d3-dsv": "^2.0.0",
     "endent": "^2.1.0",
     "gpt-tokenizer": "^2.2.1",
+    "husky": "^9.1.5",
     "i18next": "^23.14.0",
     "i18next-resources-to-backend": "^1.2.1",
     "langchain": "^0.1.35",
@@ -102,6 +103,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.4.1",
+    "@commitlint/config-conventional": "^19.4.1",
     "@next/bundle-analyzer": "^14.2.7",
     "@tailwindcss/typography": "^0.5.15",
     "@types/jest": "^29.5.12",
@@ -119,7 +122,6 @@
     "eslint-config-next": "^14.2.7",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-tailwindcss": "^3.17.4",
-    "husky": "^8.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.4.44",
