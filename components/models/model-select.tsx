@@ -1,10 +1,10 @@
 import { PentestGPTContext } from "@/context/context"
-import { LLM, LLMID, ModelProvider } from "@/types"
+import { LLM, LLMID } from "@/types"
 import { IconCircle, IconCircleCheck, IconLock } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { DropdownMenu, DropdownMenuTrigger } from "../ui/dropdown-menu"
 import { ModelOption } from "./model-option"
-import { PlanDialog } from "../utility/plan-dialog"
+import { useRouter } from "next/navigation"
 
 interface ModelSelectProps {
   selectedModelId: string
@@ -15,9 +15,9 @@ export const ModelSelect: FC<ModelSelectProps> = ({
   selectedModelId,
   onSelectModel
 }) => {
+  const router = useRouter()
   const { subscription, profile, availableHostedModels } =
     useContext(PentestGPTContext)
-  const [showPlanDialog, setShowPlanDialog] = useState(false)
   const isPremium = subscription !== null
 
   const inputRef = useRef<HTMLInputElement>(null)
@@ -72,6 +72,10 @@ export const ModelSelect: FC<ModelSelectProps> = ({
 
   if (!profile) return null
 
+  const handleUpgradeClick = () => {
+    router.push("/upgrade")
+  }
+
   return (
     <DropdownMenu
       open={isOpen}
@@ -109,12 +113,12 @@ export const ModelSelect: FC<ModelSelectProps> = ({
                       className="hover:bg-accent flex w-full cursor-not-allowed items-center justify-between space-x-3 truncate rounded p-1"
                       onClick={() => {
                         if (!isPremium && model.provider === "openai") {
-                          setShowPlanDialog(true) // Show dialog for non-premium users trying to select an OpenAI model
+                          handleUpgradeClick() // Show dialog for non-premium users trying to select an OpenAI model
                         } else if (
                           model.modelId === "mistral-large" &&
                           !isPremium
                         ) {
-                          setShowPlanDialog(true) // Show dialog for non-premium users trying to select a Mistral Large model
+                          handleUpgradeClick() // Show dialog for non-premium users trying to select a Mistral Large model
                         } else {
                           handleSelectModel(model.modelId) // Allow selection for premium users or non-OpenAI models
                         }
@@ -138,11 +142,6 @@ export const ModelSelect: FC<ModelSelectProps> = ({
           })}
         </div>
       </DropdownMenuTrigger>
-      <PlanDialog
-        showIcon={false}
-        open={showPlanDialog}
-        onOpenChange={setShowPlanDialog}
-      />
     </DropdownMenu>
   )
 }

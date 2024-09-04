@@ -38,17 +38,13 @@ const llmConfig = {
     // For PGPT
     pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTSystemPromptEnding}`,
     // For PGPT-3.5
-    pgpt35: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${getPentestGPTToolsInfo(true, true, true)}\n${getPentestGPTSystemPromptEnding}`,
+    pgpt35: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${getPentestGPTToolsInfo(true, true)}\n${getPentestGPTSystemPromptEnding}`,
     // For PGPT-4
-    pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-4")}\n${getPentestGPTToolsInfo(true, true, true)}\n${getPentestGPTSystemPromptEnding}`,
+    pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-4")}\n${getPentestGPTSystemPromptEnding}`,
     // For GPT-4o
-    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true, true)}\n${getPentestGPTSystemPromptEnding}`,
+    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true)}\n${getPentestGPTSystemPromptEnding}`,
     // For browser tool
     pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTSystemPromptEnding}`,
-    // For terminal tool
-    pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(false, false, false, false, true)}\n${getPentestGPTSystemPromptEnding}`,
-    // For python tool
-    pentestGPTPython: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTToolsInfo(false, false, false, true, false)}\n${getPentestGPTSystemPromptEnding}`,
     // For webSearch tool
     pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${getPentestGPTSystemPromptEnding}`
   },

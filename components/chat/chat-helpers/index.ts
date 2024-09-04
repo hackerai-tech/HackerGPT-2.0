@@ -175,11 +175,6 @@ export const handleHostedChat = async (
   detectedModerationLevel: number
 ) => {
   let { provider } = modelData
-  if (
-    selectedPlugin === PluginID.TERMINAL ||
-    selectedPlugin === PluginID.PYTHON
-  )
-    provider = "openai"
   let apiEndpoint = `/api/chat/${provider}`
 
   setToolInUse(
@@ -204,8 +199,7 @@ export const handleHostedChat = async (
       ? {
           messages: formattedMessages,
           chatSettings,
-          detectedModerationLevel,
-          selectedTool: selectedPlugin
+          detectedModerationLevel
         }
       : {
           messages: formattedMessages,
@@ -390,6 +384,7 @@ export const processResponse = async (
     let toolCallId = ""
     let ragUsed = false
     let ragId = null
+    let isFirstChunk = true
     let updatedPlugin = selectedPlugin
     let assistantGeneratedImages: string[] = []
     const reader = response.body.getReader()
@@ -438,27 +433,27 @@ export const processResponse = async (
           part.value[0].type !== "imageGenerated" &&
           "content" in part.value[0]
 
-        const isImageResult = (
-          part: any
-        ): part is {
-          type: "data"
-          value: Array<{
-            type: string
-            content: {
-              url: string
-              prompt: string
-              width: number
-              height: number
-            }
-          }>
-        } =>
-          part.type === "data" &&
-          Array.isArray(part.value) &&
-          part.value.length > 0 &&
-          typeof part.value[0] === "object" &&
-          "type" in part.value[0] &&
-          part.value[0].type === "imageGenerated" &&
-          "content" in part.value[0]
+        // const isImageResult = (
+        //   part: any
+        // ): part is {
+        //   type: "data"
+        //   value: Array<{
+        //     type: string
+        //     content: {
+        //       url: string
+        //       prompt: string
+        //       width: number
+        //       height: number
+        //     }
+        //   }>
+        // } =>
+        //   part.type === "data" &&
+        //   Array.isArray(part.value) &&
+        //   part.value.length > 0 &&
+        //   typeof part.value[0] === "object" &&
+        //   "type" in part.value[0] &&
+        //   part.value[0].type === "imageGenerated" &&
+        //   "content" in part.value[0]
 
         const processStreamPart = (
           streamPart: any,
@@ -503,13 +498,13 @@ export const processResponse = async (
             }
           }
 
-          if (isImageResult(streamPart)) {
-            const { url, prompt, width, height } = streamPart.value[0].content
-            return {
-              contentToAdd: `<ai_generated_image>${prompt} width: ${width} height: ${height}</ai_generated_image>`,
-              newImagePath: url
-            }
-          }
+          // if (isImageResult(streamPart)) {
+          //   const { url, prompt, width, height } = streamPart.value[0].content
+          //   return {
+          //     contentToAdd: `<ai_generated_image>${prompt} width: ${width} height: ${height}</ai_generated_image>`,
+          //     newImagePath: url
+          //   }
+          // }
 
           return { contentToAdd: "", newImagePath: null }
         }
@@ -525,7 +520,10 @@ export const processResponse = async (
             )
 
             if (contentToAdd || newImagePath) {
-              setFirstTokenReceived(true)
+              if (isFirstChunk) {
+                setFirstTokenReceived(true)
+                isFirstChunk = false
+              }
               fullText += contentToAdd
 
               if (newImagePath) {
@@ -607,10 +605,10 @@ export const processResponse = async (
                 setToolInUse(PluginID.TERMINAL)
                 updatedPlugin = PluginID.TERMINAL
                 break
-              case "generateImage":
-                setToolInUse(PluginID.IMAGE_GENERATOR)
-                updatedPlugin = PluginID.IMAGE_GENERATOR
-                break
+              // case "generateImage":
+              //   setToolInUse(PluginID.IMAGE_GENERATOR)
+              //   updatedPlugin = PluginID.IMAGE_GENERATOR
+              //   break
             }
             break
 
@@ -649,6 +647,37 @@ export const processResponse = async (
               )
 
               fullText += browserResult.fullText
+              break
+            } else if (
+              streamPart.value.toolName === "terminal" &&
+              streamPart.value.args.command
+            ) {
+              const command = streamPart.value.args.command
+
+              const terminalRequestBody = {
+                ...requestBody,
+                command: command
+              }
+
+              const terminalResponse = await fetchChatResponse(
+                "/api/chat/tools/terminal",
+                terminalRequestBody,
+                controller,
+                setIsGenerating,
+                setChatMessages,
+                alertDispatch
+              )
+
+              const terminalResult = await processResponsePlugins(
+                terminalResponse,
+                lastChatMessage,
+                controller,
+                setFirstTokenReceived,
+                setChatMessages,
+                setToolInUse
+              )
+
+              fullText += terminalResult.fullText
               break
             }
             break
@@ -693,34 +722,38 @@ export const processResponsePlugins = async (
   setToolInUse: React.Dispatch<React.SetStateAction<string>>
 ) => {
   let fullText = ""
+  let isFirstChunk = true
 
   if (response.body) {
-    await consumeReadableStream(
-      response.body,
-      chunk => {
-        setFirstTokenReceived(true)
-        setToolInUse("none")
-        fullText += chunk
-        setChatMessages(prev =>
-          prev.map(chatMessage => {
-            if (chatMessage.message.id === lastChatMessage.message.id) {
-              const updatedChatMessage: ChatMessage = {
-                message: {
-                  ...chatMessage.message,
-                  content: chatMessage.message.content + chunk
-                },
-                fileItems: chatMessage.fileItems
-              }
+    try {
+      await consumeReadableStream(
+        response.body,
+        chunk => {
+          if (isFirstChunk) {
+            setFirstTokenReceived(true)
+            isFirstChunk = false
+          }
 
-              return updatedChatMessage
-            }
-
-            return chatMessage
-          })
-        )
-      },
-      controller.signal
-    )
+          fullText += chunk
+          setChatMessages(prev =>
+            prev.map(chatMessage =>
+              chatMessage.message.id === lastChatMessage.message.id
+                ? {
+                    message: {
+                      ...chatMessage.message,
+                      content: chatMessage.message.content + chunk
+                    },
+                    fileItems: chatMessage.fileItems
+                  }
+                : chatMessage
+            )
+          )
+        },
+        controller.signal
+      )
+    } finally {
+      setToolInUse("none")
+    }
 
     return { fullText, finishReason: "" }
   } else {

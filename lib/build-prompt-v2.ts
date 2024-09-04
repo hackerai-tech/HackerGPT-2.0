@@ -59,9 +59,7 @@ export async function buildFinalMessages(
 
   // Lower chunk size for plugins that don't need to handle long inputs
   if (
-    selectedPlugin === PluginID.KATANA ||
     selectedPlugin === PluginID.CVEMAP ||
-    selectedPlugin === PluginID.NUCLEI ||
     selectedPlugin === PluginID.SUBFINDER ||
     // Tools
     selectedPlugin === PluginID.LINKFINDER ||

@@ -114,6 +114,7 @@ export default async function RootLayout({
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body className={inter.className + " h-full"}>
         <Providers attribute="class" defaultTheme="dark">

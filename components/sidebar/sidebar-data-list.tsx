@@ -4,9 +4,11 @@ import { updateFile } from "@/db/files"
 import { cn } from "@/lib/utils"
 import { Tables } from "@/supabase/types"
 import { ContentType, DataItemType, DataListType } from "@/types"
-import { FC, useContext, useEffect, useRef, useState } from "react"
+import { FC, useCallback, useContext, useEffect, useRef, useState } from "react"
 import { ChatItem } from "./items/chat/chat-item"
 import { FileItem } from "./items/files/file-item"
+import { getMoreChatsByWorkspaceId } from "@/db/chats"
+import { Loader2 } from "lucide-react"
 
 interface SidebarDataListProps {
   contentType: ContentType
@@ -20,9 +22,59 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
   const { setChats, setFiles } = useContext(PentestGPTContext)
 
   const divRef = useRef<HTMLDivElement>(null)
+  const loaderRef = useRef<HTMLDivElement>(null)
 
   const [isOverflowing, setIsOverflowing] = useState(false)
   const [isDragOver, setIsDragOver] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMoreChats, setHasMoreChats] = useState(true)
+
+  const fetchMoreChats = useCallback(async () => {
+    if (
+      contentType === "chats" &&
+      data.length > 0 &&
+      !isLoadingMore &&
+      hasMoreChats
+    ) {
+      setIsLoadingMore(true)
+      const lastChat = data[data.length - 1] as Tables<"chats">
+      const moreChats = await getMoreChatsByWorkspaceId(
+        lastChat.workspace_id,
+        lastChat.created_at
+      )
+      if (moreChats.length > 0) {
+        setChats((prevChats: Tables<"chats">[]) => [...prevChats, ...moreChats])
+      } else {
+        setHasMoreChats(false)
+      }
+      setIsLoadingMore(false)
+    }
+  }, [contentType, data, isLoadingMore, hasMoreChats, setChats])
+
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 1.0
+    }
+
+    const observer = new IntersectionObserver(entries => {
+      const [entry] = entries
+      if (entry.isIntersecting && !isLoadingMore && hasMoreChats) {
+        fetchMoreChats()
+      }
+    }, options)
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current)
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current)
+      }
+    }
+  }, [loaderRef, isLoadingMore, hasMoreChats, fetchMoreChats])
 
   const getDataListComponent = (
     contentType: ContentType,
@@ -171,7 +223,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
       >
         {data.length === 0 && (
           <div className="flex grow flex-col items-center justify-center">
-            <div className=" text-centertext-muted-foreground p-8 text-lg italic">
+            <div className="text-muted-foreground p-8 text-center text-lg italic">
               No {contentType}.
             </div>
           </div>
@@ -233,6 +285,13 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
                     )
                   )
                 })}
+                {contentType === "chats" && data.length > 0 && hasMoreChats && (
+                  <div ref={loaderRef} className="mt-4 flex justify-center">
+                    {isLoadingMore && (
+                      <Loader2 className="text-primary size-4 animate-spin" />
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <div

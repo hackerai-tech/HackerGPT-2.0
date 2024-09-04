@@ -5,6 +5,7 @@ import { updateSystemMessage } from "@/lib/ai-helper"
 
 import {
   filterEmptyAssistantMessages,
+  handleAssistantMessages,
   toVercelChatMessages
 } from "@/lib/build-prompt"
 import { handleErrorResponse } from "@/lib/models/llm/api-error"
@@ -129,12 +130,20 @@ export async function POST(request: Request) {
 
     if (shouldUseMiniModel) {
       selectedModel = "openai/gpt-4o-mini"
-    } else if (detectedModerationLevel >= 0.7) {
-      selectedModel = "mistralai/mistral-nemo"
-      modelTemperature = 0.3
+      filterEmptyAssistantMessages(messages)
+    } else if (
+      detectedModerationLevel >= 0.3 &&
+      detectedModerationLevel <= 0.7 &&
+      !isPentestGPTPro
+    ) {
+      handleAssistantMessages(messages)
+    } else {
+      filterEmptyAssistantMessages(messages)
     }
 
-    filterEmptyAssistantMessages(messages)
+    if (ragUsed) {
+      selectedModel = "perplexity/llama-3.1-sonar-large-128k-online"
+    }
 
     try {
       let provider
@@ -157,20 +166,16 @@ export async function POST(request: Request) {
       data.append({ ragUsed, ragId })
 
       let tools
-      if (selectedModel === "openai/gpt-4o-mini" || isPentestGPTPro) {
+      if (selectedModel === "openai/gpt-4o-mini") {
         const toolSchemas = createToolSchemas({ profile, data })
-        tools = toolSchemas.getSelectedSchemas([
-          "webSearch",
-          "browser",
-          "generateImage"
-        ])
+        tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
       }
 
       const result = await streamText({
         model: provider(selectedModel),
         messages: toVercelChatMessages(messages),
         temperature: modelTemperature,
-        maxTokens: 1024,
+        maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
         experimental_toolCallStreaming: true,

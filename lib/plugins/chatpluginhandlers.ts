@@ -1,7 +1,5 @@
 import { handleCvemapRequest } from "./cvemap/cvemap.content"
 import { handleSubfinderRequest } from "./subfinder/subfinder.content"
-import { handleNucleiRequest } from "./nuclei/nuclei.content"
-import { handleKatanaRequest } from "./katana/katana.content"
 // Tools
 import { handlePortscannerRequest } from "../tools/port-scanner/port-scanner-content"
 import { handleLinkfinderRequest } from "../tools/linkfinder/linkfinder.content"
@@ -37,8 +35,6 @@ type pluginIdToHandlerMapping = {
 export const pluginIdToHandlerMapping: pluginIdToHandlerMapping = {
   cvemap: handleCvemapRequest,
   subfinder: handleSubfinderRequest,
-  nuclei: handleNucleiRequest,
-  katana: handleKatanaRequest,
   // Tools
   portscanner: handlePortscannerRequest,
   linkfinder: handleLinkfinderRequest,
@@ -51,9 +47,7 @@ export const pluginIdToHandlerMapping: pluginIdToHandlerMapping = {
 
 const commandHandlers: CommandHandler = {
   handleCvemapRequest,
-  handleNucleiRequest,
   handleSubfinderRequest,
-  handleKatanaRequest,
   // Tools
   handlePortscannerRequest,
   handleLinkfinderRequest,

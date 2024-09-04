@@ -27,9 +27,7 @@ export interface Plugin {
 export enum PluginID {
   NONE = "none",
   CVEMAP = "cvemap",
-  NUCLEI = "nuclei",
   SUBFINDER = "subfinder",
-  KATANA = "katana",
   ENHANCED_SEARCH = "enhancedsearch",
   PLUGINS_STORE = "pluginselector",
   // Tools
@@ -44,8 +42,8 @@ export enum PluginID {
   WEB_SEARCH = "websearch",
   PYTHON = "python",
   BROWSER = "browser",
-  TERMINAL = "terminal",
-  IMAGE_GENERATOR = "imagegenerator"
+  TERMINAL = "terminal"
+  // IMAGE_GENERATOR = "imagegenerator"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -60,8 +58,6 @@ export const pluginUrls: PluginUrls = {
   PENTESTGPT: "https://github.com/hackerai-tech/PentestGPT",
   CVEMAP: "https://github.com/projectdiscovery/cvemap",
   SUBFINDER: "https://github.com/projectdiscovery/subfinder",
-  NUCLEI: "https://github.com/projectdiscovery/nuclei",
-  KATANA: "https://github.com/projectdiscovery/katana",
   // Tools
   PORTSCANNER: "https://github.com/projectdiscovery/naabu",
   LINKFINDER: "https://github.com/0xsha/GoLinkFinder",

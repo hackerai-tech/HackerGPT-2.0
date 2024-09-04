@@ -195,9 +195,10 @@ export function getRateLimitErrorMessage(
   } else {
     message += `\n\n🔓 Want more? Upgrade to Pro and unlock a world of features:
 - Higher usage limits
-- Exclusive access to PGPT-4 and GPT-4o
-- Advanced features like vision, web browsing, and file uploads
-- Access to pro tools such as Nuclei, SQLi Exploiter, PortScanner, and more`
+- Access to PGPT-4 and GPT-4o
+- Access to file uploads, vision, and code interpreter
+- Access to advanced plugins like DNS Scanner, SQLi Exploiter, PortScanner, and more
+- Terminal access`
   }
 
   return message.trim()

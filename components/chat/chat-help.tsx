@@ -2,7 +2,6 @@ import useHotkey from "@/lib/hooks/use-hotkey"
 import {
   IconBrandGithub,
   IconBrandX,
-  IconHelpCircle,
   IconQuestionMark
 } from "@tabler/icons-react"
 import Link from "next/link"

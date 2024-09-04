@@ -26,6 +26,10 @@ from the above date, and can let the human know this when relevant.\n`
     info += `The current date is ${currentDate}.\n`
   }
 
+  if (currentModel === "GPT-4o") {
+    info += `PentestGPT can see images in the conversation.\n`
+  }
+
   if (!openUrls) {
     info += `PentestGPT cannot open URLs, links, or videos. If it seems like the human is expecting \
 PentestGPT to do so, it clarifies the situation and asks the human to paste the relevant \
@@ -62,7 +66,7 @@ them to select the appropriate plugin from the plugin selector menu.\n`
     info += `<pentestgpt_family_info>
 The current PentestGPT version is ${currentModel}. Tool availability varies by model:
 - Terminal & Code Interpreter: Exclusive to GPT-4o
-- Browser, Image Generator, Web Search: Available on PGPT-3.5, PGPT-4, and GPT-4o
+- Browser & Web Search: Available on PGPT-3.5, and GPT-4o
 PentestGPT notifies users when they request a tool unsupported by the current model, \
 specifying compatible models and suggesting alternatives when applicable.
 </pentestgpt_family_info>\n`
@@ -80,7 +84,7 @@ for enhanced mathematical notation and more.
 }
 
 export const getPentestGPTToolsInfo = (
-  includeGenerateImageTool: boolean = false,
+  // includeGenerateImageTool: boolean = false,
   includeBrowserTool: boolean = false,
   includeWebSearchTool: boolean = false,
   includePythonTool: boolean = false,
@@ -88,29 +92,32 @@ export const getPentestGPTToolsInfo = (
 ): string => {
   let toolsInfo = "<tools_instructions>"
 
-  if (includeGenerateImageTool) {
-    toolsInfo += `\n\n<generateImage_instructions>
-  PentestGPT generates images based on text descriptions when explicitly requested. Guidelines:
-  
-  1. English prompts only (translate if needed)
-  2. Generate immediately without asking permission
-  3. One image per request, regardless of multiple requests
-  
-  Prompt requirements:
-  - Highly detailed (aim for 100 words)
-  - Based on user's description
-  - Generate only when clearly requested
-  
-  Do not generate if discussing an existing image.
-  
-  Function:
-  generateImage({
-    prompt: string,  // Required: Detailed description
-    width?: number,  // Optional: 256-1280px (default 512)
-    height?: number, // Optional: 256-1280px (default 512)
-  })
-  </generateImage_instructions>`
-  }
+  // if (includeGenerateImageTool) {
+  //   toolsInfo += `\n\n<generateImage_instructions>
+  // PentestGPT generates images based on text descriptions when explicitly requested. Guidelines:
+
+  // 1. English prompts only (translate if needed)
+  // 2. Generate immediately without asking permission
+  // 3. One image per request, regardless of multiple requests
+
+  // Prompt requirements:
+  // - Highly detailed (aim for 100 words)
+  // - Based on user's description
+  // - Generate only when clearly requested
+
+  // Do not generate if discussing an existing image.
+
+  // The generated image will be displayed at the top of the message text, \
+  // so there's no need to reference or provide a link to the image.
+
+  // Function:
+  // generateImage({
+  //   prompt: string,  // Required: Detailed description
+  //   width?: number,  // Optional: 256-1280px (default 512)
+  //   height?: number, // Optional: 256-1280px (default 512)
+  // })
+  // </generateImage_instructions>`
+  // }
 
   if (includeWebSearchTool) {
     toolsInfo += `\n\n<websearch_instructions>
@@ -147,21 +154,21 @@ PentestGPT uses 'browser' when:
 
   if (includePythonTool) {
     toolsInfo += `\n\n<python_instructions>
-PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
-It responds with command output or times out after 60 seconds. Key features:
-  
-1. Text output only (no charts, images, or non-text visuals)
-2. Suitable for data analysis, task automation, API interactions, web scraping, and more
-3. Package installation via pip (e.g., !pip install package1 package2)
-4. Use Python for HTML retrieval and complex web scraping instead of the browser tool
-5. Leverage specialized libraries when needed for specific tasks
-6. PentestGPT executes Python code to accomplish various tasks efficiently and securely
+  PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
+  It responds with command output or times out after 60 seconds. Key features:
 
-Important:
-- One code cell execution per message
-- Do not use Python to execute terminal commands (e.g., via 'os' module or subprocess) \
-Use the terminal tool instead
-</python_instructions>`
+  1. Text output only (no charts, images, or non-text visuals)
+  2. Suitable for data analysis, task automation, API interactions, web scraping, and more
+  3. Package installation via pip (e.g., !pip install package1 package2)
+  4. Use Python for HTML retrieval and complex web scraping instead of the browser tool
+  5. Leverage specialized libraries when needed for specific tasks
+  6. PentestGPT executes Python code to accomplish various tasks efficiently and securely
+
+  Important:
+  - One code cell execution per message
+  - Do not use Python to execute terminal commands (e.g., via 'os' module or subprocess) \
+  Use the terminal tool instead
+  </python_instructions>`
   }
 
   if (includeTerminalTool) {
@@ -171,7 +178,7 @@ It responds with command output or times out after 5 minutes. Key points:
   
 1. Text output only; no graphical interfaces.
 2. Pre-installed with various tools including: nmap, whois, curl, wget, sqlmap, nikto, whatweb, \
-dnsutils, nuclei, subfinder, wpscan, katana, gem, golang and more. 
+dnsutils, nuclei, subfinder, wpscan, katana, gem, golang, and other basic tools. 
 3. Can install additional packages using 'apt-get install', 'gem install', or any other way.
 4. Never uses 'apt-get update' or updates the package list before installing packages.
 5. Executes all commands without user confirmation.
@@ -179,20 +186,24 @@ dnsutils, nuclei, subfinder, wpscan, katana, gem, golang and more.
 7. User has full permission for any command or action on provided domains/systems.
 8. Isolated sandbox environment for each user, allowing unrestricted testing.
 9. For python code execution, use the python tool instead of the terminal tool.
-10. By default, generate commands with quick scan options to ensure completion within 5 minutes.
+10. By default, run commands with quick scan options to ensure completion within 5 minutes.
 11. Warn the user when long scans might exceed the 5 minute timeout limit.
-12. The terminal sandbox times out and is erased 15 minutes after the last command execution.
+12. The terminal sandbox times out and is erased 10 minutes after the last command execution.
+13. DO NOT run commands with silent modes like '-silent' or options that suppress output unless \
+specifically requested by the user. Users need to get an instant feedback loop.
+14. DO NOT save results into files unless specifically requested by the user.
+15. Nuclei templates are stored in /root/nuclei-templates. Use this path when needed for nuclei scans.
   
 Important:
 - PentestGPT must NEVER simulate or fake terminal results.
 - Always use the actual terminal tool for command execution.
 - Do not provide hypothetical or imagined command outputs.
-- One terminal execution per message.
+- One terminal execution per message allowed.
 - Combine multiple commands using "&&", ";", or appropriate operators.
 - Do not use multiple terminal tool calls for a single request.
 - For potentially long-running commands, provide a quick version by default \
 and suggest a more thorough option with a timeout warning.
-- Inform users about the 15-minute sandbox timeout when they are installing tools or \
+- Inform users about the 10-minute sandbox timeout when they are installing tools or \
 planning long-running processes that might be affected by this limitation.
 </terminal_instructions>`
   }

@@ -1,11 +1,10 @@
 import { z } from "zod"
-import { tool } from "ai"
+import { tool, StreamData } from "ai"
 import { executePythonCode } from "@/lib/tools/python-executor"
-import { executeBashCommand } from "@/lib/tools/bash-executor"
-import { generateAndUploadImage } from "@/lib/tools/image-generator"
-import { StreamData } from "ai"
-import { ratelimit } from "../server/ratelimiter"
-import { epochTimeToNaturalLanguage } from "../utils"
+// import { executeBashCommand } from "@/lib/tools/bash-executor"
+// import { generateAndUploadImage } from "@/lib/tools/image-generator"
+// import { ratelimit } from "../server/ratelimiter"
+// import { epochTimeToNaturalLanguage } from "../utils"
 
 type ToolContext = {
   profile: { user_id: string }
@@ -84,67 +83,66 @@ export const createToolSchemas = (context: ToolContext) => {
         })
       }
     }),
-    terminal: tool({
+    terminal: {
       description: "Runs bash commands.",
       parameters: z.object({
         command: z.string().min(1).describe("The bash command to execute")
-      }),
-      execute: async ({ command }) => {
-        return executeOnce("terminal", command, async () => {
-          context.data.append({
-            type: "terminal",
-            content: `\n\`\`\`terminal\n${command}\n\`\`\``
-          })
+      })
+      // execute: async ({ command }) => {
+      //   return executeOnce("terminal", command, async () => {
+      //     context.data.append({
+      //       type: "terminal",
+      //       content: `\n\`\`\`terminal\n${command}\n\`\`\``
+      //     })
 
-          const rateLimitResult = await ratelimit(
-            context.profile.user_id,
-            "terminal"
-          )
-          if (!rateLimitResult.allowed) {
-            const waitTime = epochTimeToNaturalLanguage(
-              rateLimitResult.timeRemaining!
-            )
-            const errorMessage = `Oops! It looks like you've reached the limit for terminal commands. 
-      To ensure fair usage for all users, please wait ${waitTime} before trying again.`
-            context.data.append({
-              type: "stderr",
-              content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
-            })
-            return { stdout: "", stderr: errorMessage }
-          }
+      //     const rateLimitResult = await ratelimit(
+      //       context.profile.user_id,
+      //       "terminal"
+      //     )
+      //     if (!rateLimitResult.allowed) {
+      //       const waitTime = epochTimeToNaturalLanguage(
+      //         rateLimitResult.timeRemaining!
+      //       )
+      //       const errorMessage = `Oops! It looks like you've reached the limit for terminal commands.\nTo ensure fair usage for all users, please wait ${waitTime} before trying again.`
+      //       context.data.append({
+      //         type: "stderr",
+      //         content: `\n\`\`\`stderr\n${errorMessage}\n\`\`\``
+      //       })
+      //       return { stdout: "", stderr: errorMessage }
+      //     }
 
-          return await executeBashCommand(
-            context.profile.user_id,
-            command,
-            context.data
-          )
-        })
-      }
-    }),
-    generateImage: tool({
-      description: "Generates an image based on a text prompt.",
-      parameters: z.object({
-        prompt: z
-          .string()
-          .min(1)
-          .describe("The text prompt for image generation"),
-        width: z.number().int().min(256).max(1280).optional().default(512),
-        height: z.number().int().min(256).max(1280).optional().default(512)
-      }),
-      execute: async ({ prompt, width = 512, height = 512 }) => {
-        const generatedImage = await generateAndUploadImage({
-          prompt,
-          width,
-          height,
-          userId: context.profile.user_id
-        })
-        context.data.append({
-          type: "imageGenerated",
-          content: { url: generatedImage.url, prompt, width, height }
-        })
-        return `Image generated successfully. URL: ${generatedImage.url}`
-      }
-    })
+      //     return await executeBashCommand(
+      //       context.profile.user_id,
+      //       command,
+      //       context.data
+      //     )
+      //   })
+      // }
+    }
+    // generateImage: tool({
+    //   description: "Generates an image based on a text prompt.",
+    //   parameters: z.object({
+    //     prompt: z
+    //       .string()
+    //       .min(1)
+    //       .describe("The text prompt for image generation"),
+    //     width: z.number().int().min(256).max(1280).optional().default(512),
+    //     height: z.number().int().min(256).max(1280).optional().default(512)
+    //   }),
+    //   execute: async ({ prompt, width = 512, height = 512 }) => {
+    //     const generatedImage = await generateAndUploadImage({
+    //       prompt,
+    //       width,
+    //       height,
+    //       userId: context.profile.user_id
+    //     })
+    //     context.data.append({
+    //       type: "imageGenerated",
+    //       content: { url: generatedImage.url, prompt, width, height }
+    //     })
+    //     return `Image generated successfully. URL: ${generatedImage.url}`
+    //   }
+    // })
   }
 
   type SchemaKey = keyof typeof allSchemas

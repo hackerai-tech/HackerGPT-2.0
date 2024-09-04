@@ -10,7 +10,6 @@ import { TabsList } from "../ui/tabs"
 import { WithTooltip } from "../ui/with-tooltip"
 import { Settings } from "../utility/settings"
 import { SidebarSwitchItem } from "./sidebar-switch-item"
-import { PlanDialog } from "../utility/plan-dialog"
 import { PentestGPTContext } from "@/context/context"
 import PluginStoreModal from "@/components/chat/plugin-store"
 import { availablePlugins } from "@/lib/plugins/available-plugins"
@@ -19,6 +18,7 @@ import {
   ActionTypes,
   getInstalledPlugins
 } from "@/components/chat/chat-hooks/PluginProvider"
+import { useRouter } from "next/navigation"
 
 export const SIDEBAR_ICON_SIZE = 28
 
@@ -31,6 +31,7 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
   onContentTypeChange,
   handleToggleSidebar
 }) => {
+  const router = useRouter()
   const { subscription } = useContext(PentestGPTContext)
   const [isPluginStoreModalOpen, setIsPluginStoreModalOpen] = useState(false)
   const { state: pluginState, dispatch: pluginDispatch } = usePluginContext()
@@ -104,8 +105,6 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
       </TabsList>
 
       <div className="flex flex-col items-center space-y-4">
-        {!subscription && <PlanDialog />}
-
         <WithTooltip display={<div>Settings</div>} trigger={<Settings />} />
       </div>
     </div>
