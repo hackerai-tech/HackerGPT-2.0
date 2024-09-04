@@ -17,7 +17,6 @@ import {
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { FC, useContext, useState } from "react"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
-import ConversationalAI from "../conversation/conversational-ai"
 import { toast } from "sonner"
 
 export const SIDEBAR_WIDTH = 350
@@ -122,10 +121,6 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
   return (
     <div className="flex size-full">
-      {isConversationalAIOpen && (
-        <ConversationalAI onClose={() => setIsConversationalAIOpen(false)} />
-      )}
-
       {showConfirmationDialog && pendingFiles.length > 0 && (
         <UnsupportedFilesDialog
           isOpen={showConfirmationDialog}
