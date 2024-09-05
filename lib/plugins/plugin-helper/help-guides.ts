@@ -62,31 +62,6 @@ export const displayHelpGuideForCvemap = () => {
      `
 }
 
-export const displayHelpGuideForLinkFinder = () => {
-  return endent`
-    [Link Finder](${pluginUrls.LINKFINDER}) is a minimalistic JavaScript endpoint extractor that efficiently pulls endpoints from HTML and embedded JavaScript files. 
-  
-    ## Interaction Methods
-  
-    **Conversational AI Requests:**
-    Interact with LinkFinder using plain language to describe your endpoint extraction needs. The AI will understand your input and automatically execute the corresponding command with LinkFinder, simplifying the process for intuitive use.
-    
-    **Direct Commands:**
-    For precise and specific tasks, use direct commands. Begin your command with "/" and include necessary flags to control the extraction process effectively.
-    
-    \`\`\`
-      Usage:
-         /linkfinder --domain [domain]
-  
-      Flags:
-      CONFIGURATION:
-         -d --domain string   Input a URL.
-
-      OUTPUT:  
-         --output string  write output to a file
-    \`\`\``
-}
-
 // TOOLS
 export const displayHelpGuideForPortScanner = () => {
   return endent`

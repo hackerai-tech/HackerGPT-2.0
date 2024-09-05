@@ -111,33 +111,6 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 5,
-    name: "Link Finder",
-    selectorName: "Link Finder",
-    value: PluginID.LINKFINDER,
-    categories: ["recon"],
-    icon: "https://cdn-icons-png.flaticon.com/128/9465/9465808.png",
-    invertInDarkMode: true,
-    description: "Fast and minimal JS endpoint extractor",
-    githubRepoUrl: pluginUrls.LINKFINDER,
-    isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-03-26",
-    starters: [
-      {
-        title: "Extract URLs",
-        description: "from https://www.hackerone.com/product/...",
-        chatMessage:
-          "Extract URLs from https://www.hackerone.com/product/overview"
-      },
-      {
-        title: "Link Finder Help",
-        description: "How does the Link Finder plugin work?",
-        chatMessage: "/linkfinder -help"
-      }
-    ]
-  },
-  {
     id: 6,
     name: "Enhanced Search",
     selectorName: "Enhanced Search",

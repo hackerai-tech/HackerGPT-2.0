@@ -28,11 +28,7 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
     if (!chatSettings) return
 
     setChatSettings({
-      ...chatSettings,
-      contextLength: Math.min(
-        chatSettings.contextLength,
-        CHAT_SETTING_LIMITS[chatSettings.model]?.MAX_CONTEXT_LENGTH || 4096
-      )
+      ...chatSettings
     })
   }, [chatSettings?.model])
 

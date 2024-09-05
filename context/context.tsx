@@ -16,8 +16,8 @@ interface PentestGPTContext {
   setProfile: Dispatch<SetStateAction<Tables<"profiles"> | null>>
 
   // USER ROLE STORE
-  userRole: Tables<"user_role"> | null
-  setUserRole: Dispatch<SetStateAction<Tables<"user_role"> | null>>
+  // userRole: Tables<"user_role"> | null
+  // setUserRole: Dispatch<SetStateAction<Tables<"user_role"> | null>>
 
   // SUBSCRIPTION STORE
   subscription: Tables<"subscriptions"> | null
@@ -129,8 +129,8 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
   setProfile: () => {},
 
   // USER ROLE STORE
-  userRole: null,
-  setUserRole: () => {},
+  // userRole: null,
+  // setUserRole: () => {},
 
   // SUBSCRIPTION STORE
   subscription: null,

@@ -159,9 +159,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       setSelectedChat(chat)
       setChatSettings({
         model: chat.model as LLMID,
-        contextLength: chat.context_length,
         includeProfileContext: chat.include_profile_context,
-        embeddingsProvider: chat.embeddings_provider as "openai" | "local"
+        embeddingsProvider: "openai"
       })
     } catch (error) {
       console.error("Error fetching chat:", error)

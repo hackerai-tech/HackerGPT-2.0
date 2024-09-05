@@ -23,7 +23,7 @@ import { PluginID } from "@/types/plugins"
 import { useRouter } from "next/navigation"
 import { FC, useEffect, useState } from "react"
 import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
-import { getUserRole } from "@/db/user-role"
+// import { getUserRole } from "@/db/user-role"
 
 interface GlobalStateProps {
   children: React.ReactNode
@@ -36,7 +36,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null)
 
   // User Role
-  const [userRole, setUserRole] = useState<Tables<"user_role"> | null>(null)
+  // const [userRole, setUserRole] = useState<Tables<"user_role"> | null>(null)
 
   // SUBSCRIPTION STORE
   const [subscription, setSubscription] =
@@ -61,7 +61,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [chatSettings, setChatSettings] = useState<ChatSettings>({
     model: "mistral-medium",
-    contextLength: 1024,
     includeProfileContext: false,
     embeddingsProvider: "openai"
   })
@@ -164,8 +163,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
       const profile = await getProfileByUserId(user.id)
       setProfile(profile)
 
-      const userRole = await getUserRole(user.id)
-      setUserRole(userRole)
+      // const userRole = await getUserRole(user.id)
+      // setUserRole(userRole)
 
       if (!profile.has_onboarded) {
         return router.push("/setup")
@@ -214,8 +213,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setProfile,
 
         // USER ROLE STORE
-        userRole,
-        setUserRole,
+        // userRole,
+        // setUserRole,
 
         // SUBSCRIPTION STORE
         subscription,

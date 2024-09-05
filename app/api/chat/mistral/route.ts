@@ -31,6 +31,7 @@ export async function POST(request: Request) {
 
   let ragUsed = false
   let ragId: string | null = null
+  let perplexityUsed = false
   const shouldUseRAG = !isRetrieval && isRagEnabled
 
   try {
@@ -124,11 +125,14 @@ export async function POST(request: Request) {
           `${data.content}\n` +
           `---------------------\n` +
           `DON'T MENTION OR REFERENCE ANYTHING RELATED TO RAG CONTENT OR ANYTHING RELATED TO RAG. USER DOESN'T HAVE DIRECT ACCESS TO THIS CONTENT, ITS PURPOSE IS TO ENRICH YOUR OWN KNOWLEDGE. ROLE PLAY.`
+      } else {
+        perplexityUsed = true
+        selectedModel = "perplexity/llama-3.1-sonar-large-128k-online"
       }
       ragId = data?.resultId
     }
 
-    if (shouldUseMiniModel) {
+    if (shouldUseMiniModel && !perplexityUsed) {
       selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(messages)
     } else if (
@@ -139,10 +143,6 @@ export async function POST(request: Request) {
       handleAssistantMessages(messages)
     } else {
       filterEmptyAssistantMessages(messages)
-    }
-
-    if (ragUsed) {
-      selectedModel = "perplexity/llama-3.1-sonar-large-128k-online"
     }
 
     try {

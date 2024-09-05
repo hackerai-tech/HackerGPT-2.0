@@ -53,7 +53,7 @@ export async function buildFinalMessages(
     selectedPlugin
   )
 
-  let CHUNK_SIZE = chatSettings.contextLength
+  let CHUNK_SIZE = 8000
   if (chatSettings.model === GPT4o.modelId) {
     CHUNK_SIZE = 14000
   } else if (chatSettings.model === "mistral-large") {
@@ -67,7 +67,6 @@ export async function buildFinalMessages(
     selectedPlugin === PluginID.CVEMAP ||
     selectedPlugin === PluginID.SUBFINDER ||
     // Tools
-    selectedPlugin === PluginID.LINKFINDER ||
     selectedPlugin === PluginID.PORTSCANNER ||
     selectedPlugin === PluginID.SSLSCANNER ||
     selectedPlugin === PluginID.DNSSCANNER ||

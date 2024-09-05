@@ -2,7 +2,6 @@ import { handleCvemapRequest } from "./cvemap/cvemap.content"
 import { handleSubfinderRequest } from "./subfinder/subfinder.content"
 // Tools
 import { handlePortscannerRequest } from "../tools/port-scanner/port-scanner-content"
-import { handleLinkfinderRequest } from "../tools/linkfinder/linkfinder.content"
 import { handleSslscannerRequest } from "../tools/ssl-scanner/ssl-scanner-content"
 import { handleSqliexploiterRequest } from "../tools/sqli-exploiter/sqli-exploiter-content"
 import { handleWhoisRequest } from "../tools/whois-lookup/whois-lookup-content"
@@ -37,7 +36,6 @@ export const pluginIdToHandlerMapping: pluginIdToHandlerMapping = {
   subfinder: handleSubfinderRequest,
   // Tools
   portscanner: handlePortscannerRequest,
-  linkfinder: handleLinkfinderRequest,
   sslscanner: handleSslscannerRequest,
   sqliexploiter: handleSqliexploiterRequest,
   whois: handleWhoisRequest,
@@ -50,7 +48,6 @@ const commandHandlers: CommandHandler = {
   handleSubfinderRequest,
   // Tools
   handlePortscannerRequest,
-  handleLinkfinderRequest,
   handleSslscannerRequest,
   handleSqliexploiterRequest,
   handleWhoisRequest,

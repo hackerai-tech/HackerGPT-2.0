@@ -32,7 +32,6 @@ export enum PluginID {
   PLUGINS_STORE = "pluginselector",
   // Tools
   PORTSCANNER = "portscanner",
-  LINKFINDER = "linkfinder",
   SSLSCANNER = "sslscanner",
   SQLIEXPLOITER = "sqliexploiter",
   WHOIS = "whois",
@@ -60,7 +59,6 @@ export const pluginUrls: PluginUrls = {
   SUBFINDER: "https://github.com/projectdiscovery/subfinder",
   // Tools
   PORTSCANNER: "https://github.com/projectdiscovery/naabu",
-  LINKFINDER: "https://github.com/0xsha/GoLinkFinder",
   SSLSCANNER: "https://github.com/drwetter/testssl.sh/",
   SQLIEXPLOITER: "https://github.com/sqlmapproject/sqlmap",
   WHOIS: "https://www.whois.com/whois/",

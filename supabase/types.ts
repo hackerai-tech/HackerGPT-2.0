@@ -590,61 +590,37 @@ export type Database = {
       }
       profiles: {
         Row: {
-          azure_openai_embeddings_id: string | null
-          bio: string
           created_at: string
-          display_name: string
           has_onboarded: boolean
           id: string
           image_path: string
           image_url: string
-          mistral_api_key: string | null
-          openai_api_key: string | null
-          openai_organization_id: string | null
-          openrouter_api_key: string | null
           profile_context: string
           role: string
           updated_at: string | null
           user_id: string
-          username: string
         }
         Insert: {
-          azure_openai_embeddings_id?: string | null
-          bio: string
           created_at?: string
-          display_name: string
           has_onboarded?: boolean
           id?: string
           image_path: string
           image_url: string
-          mistral_api_key?: string | null
-          openai_api_key?: string | null
-          openai_organization_id?: string | null
-          openrouter_api_key?: string | null
           profile_context: string
           role?: string
           updated_at?: string | null
           user_id: string
-          username: string
         }
         Update: {
-          azure_openai_embeddings_id?: string | null
-          bio?: string
           created_at?: string
-          display_name?: string
           has_onboarded?: boolean
           id?: string
           image_path?: string
           image_url?: string
-          mistral_api_key?: string | null
-          openai_api_key?: string | null
-          openai_organization_id?: string | null
-          openrouter_api_key?: string | null
           profile_context?: string
           role?: string
           updated_at?: string | null
           user_id?: string
-          username?: string
         }
         Relationships: [
           {
@@ -765,12 +741,7 @@ export type Database = {
       workspaces: {
         Row: {
           created_at: string
-          default_context_length: number
           default_model: string
-          default_prompt: string
-          default_temperature: number
-          description: string
-          embeddings_provider: string
           id: string
           image_path: string
           include_profile_context: boolean
@@ -782,12 +753,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          default_context_length: number
           default_model: string
-          default_prompt: string
-          default_temperature: number
-          description: string
-          embeddings_provider: string
           id?: string
           image_path?: string
           include_profile_context: boolean
@@ -799,12 +765,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          default_context_length?: number
           default_model?: string
-          default_prompt?: string
-          default_temperature?: number
-          description?: string
-          embeddings_provider?: string
           id?: string
           image_path?: string
           include_profile_context?: boolean
@@ -1015,6 +976,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -1028,6 +990,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -1041,6 +1004,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -1062,6 +1026,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -1072,6 +1037,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -1082,6 +1048,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -1218,6 +1185,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       search: {
         Args: {
           prefix: string
@@ -1329,4 +1300,3 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
-
