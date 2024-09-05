@@ -37,45 +37,45 @@ export async function getServerProfile() {
   return profileWithKeys
 }
 
-export async function getServerProfileWithUserRole() {
-  const cookieStore = cookies()
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        }
-      }
-    }
-  )
+// export async function getServerProfileWithUserRole() {
+//   const cookieStore = cookies()
+//   const supabase = createServerClient<Database>(
+//     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+//     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+//     {
+//       cookies: {
+//         get(name: string) {
+//           return cookieStore.get(name)?.value
+//         }
+//       }
+//     }
+//   )
 
-  const user = (await supabase.auth.getUser()).data.user
-  if (!user) {
-    throw new Error("User not found")
-  }
+//   const user = (await supabase.auth.getUser()).data.user
+//   if (!user) {
+//     throw new Error("User not found")
+//   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("user_id", user.id)
-    .single()
+//   const { data: profile } = await supabase
+//     .from("profiles")
+//     .select("*")
+//     .eq("user_id", user.id)
+//     .single()
 
-  const { data: userRole } = await supabase
-    .from("user_role")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle()
+//   const { data: userRole } = await supabase
+//     .from("user_role")
+//     .select("*")
+//     .eq("user_id", user.id)
+//     .maybeSingle()
 
-  if (!profile) {
-    throw new Error("Profile not found")
-  }
+//   if (!profile) {
+//     throw new Error("Profile not found")
+//   }
 
-  const profileWithKeys = addApiKeysToProfile(profile)
+//   const profileWithKeys = addApiKeysToProfile(profile)
 
-  return { ...profileWithKeys, user_role: userRole }
-}
+//   return { ...profileWithKeys, user_role: userRole }
+// }
 
 export async function getAIProfile() {
   const cookieStore = cookies()
