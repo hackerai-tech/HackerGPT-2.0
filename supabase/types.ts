@@ -590,42 +590,33 @@ export type Database = {
       }
       profiles: {
         Row: {
-          azure_openai_embeddings_id: string | null
-          bio: string
           created_at: string
           has_onboarded: boolean
           id: string
           image_path: string
           image_url: string
-          openrouter_api_key: string | null
           profile_context: string
           role: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
-          azure_openai_embeddings_id?: string | null
-          bio: string
           created_at?: string
           has_onboarded?: boolean
           id?: string
           image_path: string
           image_url: string
-          openrouter_api_key?: string | null
           profile_context: string
           role?: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
-          azure_openai_embeddings_id?: string | null
-          bio?: string
           created_at?: string
           has_onboarded?: boolean
           id?: string
           image_path?: string
           image_url?: string
-          openrouter_api_key?: string | null
           profile_context?: string
           role?: string
           updated_at?: string | null
@@ -751,8 +742,6 @@ export type Database = {
         Row: {
           created_at: string
           default_model: string
-          default_prompt: string
-          embeddings_provider: string
           id: string
           image_path: string
           include_profile_context: boolean
@@ -765,8 +754,6 @@ export type Database = {
         Insert: {
           created_at?: string
           default_model: string
-          default_prompt: string
-          embeddings_provider: string
           id?: string
           image_path?: string
           include_profile_context: boolean
@@ -779,8 +766,6 @@ export type Database = {
         Update: {
           created_at?: string
           default_model?: string
-          default_prompt?: string
-          embeddings_provider?: string
           id?: string
           image_path?: string
           include_profile_context?: boolean

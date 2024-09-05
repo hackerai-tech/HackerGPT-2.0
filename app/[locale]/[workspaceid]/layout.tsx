@@ -90,8 +90,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
       setChatSettings({
         model: "mistral-medium" as LLMID,
         includeProfileContext: workspace?.include_profile_context || true,
-        embeddingsProvider:
-          (workspace?.embeddings_provider as "openai" | "local") || "openai"
+        embeddingsProvider: "openai"
       })
     } catch (error) {
       console.error("Error fetching workspace data:", error)

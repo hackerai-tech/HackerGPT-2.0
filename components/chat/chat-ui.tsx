@@ -160,7 +160,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       setChatSettings({
         model: chat.model as LLMID,
         includeProfileContext: chat.include_profile_context,
-        embeddingsProvider: chat.embeddings_provider as "openai" | "local"
+        embeddingsProvider: "openai"
       })
     } catch (error) {
       console.error("Error fetching chat:", error)

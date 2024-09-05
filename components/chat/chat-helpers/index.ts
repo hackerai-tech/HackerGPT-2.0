@@ -779,7 +779,7 @@ export const handleCreateChat = async (
     include_profile_context: chatSettings.includeProfileContext,
     model: chatSettings.model,
     name: messageContent.substring(0, 100),
-    embeddings_provider: chatSettings.embeddingsProvider,
+    embeddings_provider: "openai",
     finish_reason: finishReason
   })
 
