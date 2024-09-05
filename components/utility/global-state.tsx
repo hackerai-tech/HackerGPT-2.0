@@ -61,7 +61,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [chatSettings, setChatSettings] = useState<ChatSettings>({
     model: "mistral-medium",
-    contextLength: 1024,
     includeProfileContext: false,
     embeddingsProvider: "openai"
   })

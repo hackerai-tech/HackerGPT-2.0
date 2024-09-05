@@ -3,7 +3,6 @@ import { ChatMessage, LLMID } from "."
 
 export interface ChatSettings {
   model: LLMID
-  contextLength: number
   includeProfileContext: boolean
   embeddingsProvider: "openai" | "local"
 }
