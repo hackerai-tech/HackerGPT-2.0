@@ -67,7 +67,6 @@ export async function buildFinalMessages(
     selectedPlugin === PluginID.CVEMAP ||
     selectedPlugin === PluginID.SUBFINDER ||
     // Tools
-    selectedPlugin === PluginID.LINKFINDER ||
     selectedPlugin === PluginID.PORTSCANNER ||
     selectedPlugin === PluginID.SSLSCANNER ||
     selectedPlugin === PluginID.DNSSCANNER ||

@@ -27,7 +27,6 @@ export async function POST(request: Request) {
   const freePlugins: PluginID[] = [
     PluginID.CVEMAP,
     PluginID.SUBFINDER,
-    PluginID.LINKFINDER,
     PluginID.WHOIS,
     PluginID.WAFDETECTOR
   ]
