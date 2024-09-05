@@ -14,13 +14,10 @@ export async function getCheckoutUrl(
 ): Promise<Result<string>> {
   const supabase = createSupabaseAppServerClient()
   const user = (await supabase.auth.getUser()).data.user
-  if (!user) {
-    return errStr("User not found")
-  }
+  if (!user) return errStr("User not found")
+
   const productId = process.env.STRIPE_PRODUCT_ID
-  if (typeof productId !== "string") {
-    return errStr("Missing Stripe product ID")
-  }
+  if (typeof productId !== "string") return errStr("Missing Stripe product ID")
 
   const stripe = getStripe()
 
@@ -81,13 +78,13 @@ export async function getCheckoutUrl(
     ],
     // allow_promotion_codes: true,
     success_url: process.env.STRIPE_SUCCESS_URL,
-    cancel_url: process.env.STRIPE_RETURN_URL
+    cancel_url: process.env.STRIPE_RETURN_URL,
+    metadata: {
+      supabaseUUID: user.id
+    }
   })
-  if (session.url === null) {
-    return errStr("Missing checkout URL")
-  }
 
-  return ok(session.url)
+  return session.url ? ok(session.url) : errStr("Missing checkout URL")
 }
 
 export async function retrievePriceAndValidation(

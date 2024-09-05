@@ -80,13 +80,14 @@ export async function POST(request: Request) {
 }
 
 // Retry configuration
-const MAX_RETRY_ATTEMPTS = 5 // Maximum number of retry attempts
+const MAX_RETRY_ATTEMPTS = 3 // Maximum number of retry attempts
 const RETRY_DELAY_MS = 2000 // Delay between retries in milliseconds
 
 // Modified upsertSubscription function with retry mechanism
 async function upsertSubscription(
   subscriptionId: string,
   customerId: string,
+  userId?: string,
   attempt = 0
 ) {
   const supabaseAdmin = createClient(
@@ -100,22 +101,16 @@ async function upsertSubscription(
     throw new Error("No customer found. customerId: " + customerId)
   }
 
-  // Attempt to fetch the user profile
-  const userId = customer.metadata.userId
-  const { data: profile, error } = await supabaseAdmin
-    .from("profiles")
-    .select("*")
-    .eq("user_id", userId)
-    .single()
+  const finalUserId = userId || customer.metadata.supabaseUUID
 
   // If profile is found, proceed as normal
-  if (profile) {
+  if (finalUserId) {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
 
     const result = await supabaseAdmin.from("subscriptions").upsert(
       {
         subscription_id: subscriptionId,
-        user_id: profile.user_id,
+        user_id: finalUserId,
         customer_id: customerId,
         status: subscription.status,
         start_date: unixToDateString(subscription.start_date),
@@ -132,7 +127,7 @@ async function upsertSubscription(
   } else if (attempt < MAX_RETRY_ATTEMPTS) {
     // If profile is not found and maximum retry attempts are not reached, retry after a delay
     setTimeout(
-      () => upsertSubscription(subscriptionId, customerId, attempt + 1),
+      () => upsertSubscription(subscriptionId, customerId, userId, attempt + 1),
       RETRY_DELAY_MS
     )
   } else {
