@@ -50,7 +50,7 @@ const llmConfig = {
   },
   models: {
     pentestgpt_default_openrouter:
-      process.env.OPENROUTER_PENTESTGPT_DEFUALT_MODEL,
+      process.env.OPENROUTER_PENTESTGPT_DEFAULT_MODEL,
     pentestgpt_standalone_question_openrouter:
       process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
     pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
