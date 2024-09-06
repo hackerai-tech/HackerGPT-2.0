@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { notFound } from "next/navigation"
 import { SharedMessage } from "@/components/chat/shared-message"
+import { Tables } from "@/supabase/types"
 
 const MAX_CHAT_NAME_LENGTH = 100
 
@@ -20,6 +21,8 @@ export default async function SharedChatPage({
 }) {
   const supabase = createClient(cookies())
 
+  let messages: Tables<"messages">[] = []
+
   const { data: chatData } = await supabase
     .from("chats")
     .select("*")
@@ -31,17 +34,24 @@ export default async function SharedChatPage({
     return notFound()
   }
 
-  const { data: messages, error: messagesError } = await supabase
+  const { data: messagesData, error: messagesError } = await supabase
     .from("messages")
     .select("*")
     .eq("chat_id", chatData.id)
     .order("created_at", { ascending: true })
-    .lte("id", params.share_id)
 
   if (messagesError) {
     console.error("messagesError", messagesError)
     return notFound()
   }
+
+  messages = messagesData
+
+  const lastSharedMessageIndex = messages.findIndex(
+    message => message.id === params.share_id
+  )
+
+  messages = messages.slice(0, lastSharedMessageIndex + 1)
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {

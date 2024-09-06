@@ -160,7 +160,7 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
                 : "Generate a public link to share your chat."}
             </p>
             <div className="flex items-center space-x-2">
-              <Input value={shareUrl} readOnly className="grow" />
+              {shareUrl && <Input value={shareUrl} readOnly className="grow" />}
               <Button
                 loading={isLoading}
                 variant="outline"
