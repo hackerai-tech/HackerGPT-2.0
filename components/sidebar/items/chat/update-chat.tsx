@@ -21,20 +21,15 @@ interface UpdateChatProps {
 
 export const UpdateChat: FC<UpdateChatProps> = ({ chat }) => {
   const { setChats } = useContext(PentestGPTContext)
-
   const buttonRef = useRef<HTMLButtonElement>(null)
-
   const [showChatDialog, setShowChatDialog] = useState(false)
   const [name, setName] = useState(chat.name)
 
   const handleUpdateChat = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    const updatedChat = await updateChat(chat.id, {
-      name
-    })
+    const updatedChat = await updateChat(chat.id, { name })
     setChats(prevState =>
       prevState.map(c => (c.id === chat.id ? updatedChat : c))
     )
-
     setShowChatDialog(false)
   }
 
@@ -47,7 +42,12 @@ export const UpdateChat: FC<UpdateChatProps> = ({ chat }) => {
   return (
     <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
       <DialogTrigger asChild>
-        <IconEdit className="hover:opacity-50" size={18} />
+        <div className="w-full cursor-pointer">
+          <div className="flex items-center p-3 hover:opacity-50">
+            <IconEdit size={20} className="mr-2" />
+            <span>Rename</span>
+          </div>
+        </div>
       </DialogTrigger>
 
       <DialogContent onKeyDown={handleKeyDown}>
@@ -57,7 +57,6 @@ export const UpdateChat: FC<UpdateChatProps> = ({ chat }) => {
 
         <div className="space-y-1">
           <Label>Name</Label>
-
           <Input value={name} onChange={e => setName(e.target.value)} />
         </div>
 
@@ -65,7 +64,6 @@ export const UpdateChat: FC<UpdateChatProps> = ({ chat }) => {
           <Button variant="ghost" onClick={() => setShowChatDialog(false)}>
             Cancel
           </Button>
-
           <Button ref={buttonRef} onClick={handleUpdateChat}>
             Save
           </Button>

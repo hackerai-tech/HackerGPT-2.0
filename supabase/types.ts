@@ -89,8 +89,11 @@ export type Database = {
           folder_id: string | null
           id: string
           include_profile_context: boolean
+          last_shared_message_id: string | null
           model: string
           name: string
+          shared_at: string | null
+          shared_by: string | null
           sharing: string
           updated_at: string | null
           user_id: string
@@ -104,8 +107,11 @@ export type Database = {
           folder_id?: string | null
           id?: string
           include_profile_context: boolean
+          last_shared_message_id?: string | null
           model: string
           name: string
+          shared_at?: string | null
+          shared_by?: string | null
           sharing?: string
           updated_at?: string | null
           user_id: string
@@ -119,8 +125,11 @@ export type Database = {
           folder_id?: string | null
           id?: string
           include_profile_context?: boolean
+          last_shared_message_id?: string | null
           model?: string
           name?: string
+          shared_at?: string | null
+          shared_by?: string | null
           sharing?: string
           updated_at?: string | null
           user_id?: string
@@ -132,6 +141,20 @@ export type Database = {
             columns: ["folder_id"]
             isOneToOne: false
             referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_last_shared_message_id_fkey"
+            columns: ["last_shared_message_id"]
+            isOneToOne: true
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_shared_by_fkey"
+            columns: ["shared_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {

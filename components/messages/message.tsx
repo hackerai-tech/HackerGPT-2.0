@@ -15,8 +15,8 @@ import {
   IconFileTypePdf,
   IconDatabaseSearch,
   IconCode,
-  IconTerminal2,
-  IconPhoto
+  IconTerminal2
+  // IconPhoto
 } from "@tabler/icons-react"
 import Image from "next/image"
 import { FC, useContext, useEffect, useRef, useState } from "react"

@@ -1,5 +1,4 @@
 import { PentestGPTContext } from "@/context/context"
-import { CHAT_SETTING_LIMITS } from "@/lib/chat-setting-limits"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { IconChevronDown } from "@tabler/icons-react"
