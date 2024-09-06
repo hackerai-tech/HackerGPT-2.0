@@ -2,8 +2,8 @@ import React, { useContext, useState, useEffect } from "react"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
-  DropdownMenuContentTop,
-  DropdownMenuItem
+  DropdownMenuItem,
+  DropdownMenuContent
 } from "../ui/dropdown-menu"
 import {
   IconChevronDown,
@@ -139,14 +139,13 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
             </button>
           </div>
         </DropdownMenuTrigger>
-        <div className="flex">
-          <DropdownMenuContentTop
-            side="top"
-            className="bg-secondary mx-14 mb-3 sm:mx-0"
-          >
-            {renderPluginOptions()}
-          </DropdownMenuContentTop>
-        </div>
+        <DropdownMenuContent
+          side="top"
+          align="start"
+          className="bg-secondary z-50 min-w-32 overflow-hidden rounded-md border p-1 shadow-md"
+        >
+          {renderPluginOptions()}
+        </DropdownMenuContent>
       </DropdownMenu>
       <PluginStoreModal
         isOpen={isPluginStoreModalOpen}
