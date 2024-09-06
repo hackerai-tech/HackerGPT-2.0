@@ -24,7 +24,13 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { toast } from "sonner"
 import { getMessagesByChatId } from "@/db/messages"
 
-export const ShareChatButton: React.FC = () => {
+interface ShareChatButtonProps {
+  children?: React.ReactNode
+}
+
+export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
+  children
+}) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState("")
@@ -120,14 +126,18 @@ export const ShareChatButton: React.FC = () => {
     <>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          <Button
-            size="icon"
-            variant={"ghost"}
-            onClick={handleOpenDialog}
-            title={shareUrl ? "Manage shared chat" : "Share chat"}
-          >
-            <IconShare2 stroke={2} />
-          </Button>
+          {children ? (
+            <div onClick={handleOpenDialog}>{children}</div>
+          ) : (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={handleOpenDialog}
+              title={shareUrl ? "Manage shared chat" : "Share chat"}
+            >
+              <IconShare2 stroke={2} />
+            </Button>
+          )}
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>

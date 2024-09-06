@@ -8,14 +8,14 @@ import { ShareChatButton } from "./chat-share-button"
 interface ChatSecondaryButtonsProps {}
 
 export const ChatSecondaryButtons: FC<ChatSecondaryButtonsProps> = ({}) => {
-  const { selectedChat } = useContext(PentestGPTContext)
+  const { selectedChat, isMobile } = useContext(PentestGPTContext)
   const { handleNewChat } = useChatHandler()
 
   if (!selectedChat) return null
 
   return (
     <div className="flex items-center space-x-4">
-      <ShareChatButton />
+      {!isMobile && <ShareChatButton />}
 
       <WithTooltip
         delayDuration={200}
