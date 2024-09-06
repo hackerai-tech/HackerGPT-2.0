@@ -25,7 +25,8 @@ export const UpgradePlan: FC = () => {
   const router = useRouter()
   const { profile, isMobile } = useContext(PentestGPTContext)
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  // const [isLoading, setIsLoading] = useState(true)
+  const [isUrlLoading, setIsUrlLoading] = useState(true)
   const [isButtonLoading, setIsButtonLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
     "monthly"
@@ -35,7 +36,7 @@ export const UpgradePlan: FC = () => {
   useEffect(() => {
     const initialize = async () => {
       if (!profile) {
-        setIsLoading(false)
+        setIsUrlLoading(false)
         return
       }
 
@@ -57,14 +58,14 @@ export const UpgradePlan: FC = () => {
         setCheckoutUrl(result.value)
       }
 
-      setIsLoading(false)
+      setIsUrlLoading(false)
     }
 
     initialize()
   }, [profile, router])
 
   const handleUpgradeClick = async () => {
-    if (!isLoading && profile) {
+    if (!isUrlLoading && profile) {
       setIsButtonLoading(true)
       const result = await getCheckoutUrl(
         selectedPlan === "yearly" ? YEARLY_PRO_PRICE_ID : undefined
@@ -82,9 +83,9 @@ export const UpgradePlan: FC = () => {
     }
   }
 
-  if (isLoading) {
-    return <Loading />
-  }
+  // if (isLoading) {
+  //   return <Loading />
+  // }
 
   if (!profile) {
     return null
@@ -178,6 +179,7 @@ export const UpgradePlan: FC = () => {
             buttonLoading={isButtonLoading}
             onButtonClick={handleUpgradeClick}
             savingsNote={getYearlySavingsNote()}
+            buttonDisabled={isUrlLoading}
           >
             <PlanStatement>Early access to new features</PlanStatement>
             <PlanStatement>Access to PGPT-4, GPT-4o, PGPT-3.5</PlanStatement>
