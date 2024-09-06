@@ -28,7 +28,8 @@ export const ShareChatButton: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState("")
-  const { profile, selectedWorkspace, selectedChat } = useContext(PentestGPTContext)
+  const { profile, selectedWorkspace, selectedChat } =
+    useContext(PentestGPTContext)
 
   useEffect(() => {
     if (isDialogOpen) {

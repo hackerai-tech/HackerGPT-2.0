@@ -81,7 +81,7 @@ export default async function SharedChatPage({
       </div>
       <div className="mb-4 mt-8 flex justify-center">
         <Link href={`/login`}>
-          <Button className="rounded-full bg-primary px-6 py-3 text-primary-foreground transition-colors hover:bg-primary/90">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 py-3 transition-colors">
             Get started with PentestGPT
           </Button>
         </Link>
