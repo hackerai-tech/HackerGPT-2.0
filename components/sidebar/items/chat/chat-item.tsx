@@ -10,7 +10,6 @@ import { IconDots, IconShare2 } from "@tabler/icons-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { ShareChatButton } from "@/components/chat/chat-share-button"
@@ -51,37 +50,42 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
     >
       <div className="flex-1 truncate text-sm">{chat.name}</div>
 
-      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-        <DropdownMenuTrigger asChild>
-          <button
-            onClick={e => {
-              e.stopPropagation()
-              e.preventDefault()
-              setIsOpen(true)
-            }}
-            className={cn(
-              "hover:bg-accent-hover ml-2 flex items-center justify-center rounded p-1",
-              isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-            )}
-          >
-            <IconDots size={16} />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" sideOffset={5} className="py-2">
-          {isMobile && (
-            <ShareChatButton>
-              <div className="w-full cursor-pointer">
-                <div className="flex items-center p-3 hover:opacity-50">
-                  <IconShare2 size={20} className="mr-2" />
-                  <span>Share</span>
+      <div
+        className={cn(
+          "w-0 shrink-0 overflow-hidden",
+          (isActive || isOpen) && "w-6",
+          "group-hover:w-6"
+        )}
+      >
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+          <DropdownMenuTrigger asChild>
+            <button
+              onClick={e => {
+                e.stopPropagation()
+                e.preventDefault()
+                setIsOpen(true)
+              }}
+              className="flex size-6 items-center justify-center rounded"
+            >
+              <IconDots size={16} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" sideOffset={5} className="py-2">
+            {isMobile && (
+              <ShareChatButton chat={chat}>
+                <div className="w-full cursor-pointer">
+                  <div className="flex items-center p-3 hover:opacity-50">
+                    <IconShare2 size={20} className="mr-2" />
+                    <span>Share</span>
+                  </div>
                 </div>
-              </div>
-            </ShareChatButton>
-          )}
-          <UpdateChat chat={chat} />
-          <DeleteChat chat={chat} />
-        </DropdownMenuContent>
-      </DropdownMenu>
+              </ShareChatButton>
+            )}
+            <UpdateChat chat={chat} />
+            <DeleteChat chat={chat} />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   )
 }

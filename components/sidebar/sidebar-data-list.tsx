@@ -233,7 +233,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
           <div
             className={`h-full ${
               isOverflowing ? "w-[calc(100%-8px)]" : "w-full"
-            } space-y-2 pt-2 ${isOverflowing ? "mr-2" : ""}`}
+            } space-y-3 pt-4 ${isOverflowing ? "mr-2" : ""}`}
           >
             {contentType === "chats" ? (
               <>

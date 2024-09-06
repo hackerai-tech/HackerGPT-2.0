@@ -23,13 +23,16 @@ import { updateChat } from "@/db/chats"
 import { CopyButton } from "@/components/ui/copy-button"
 import { toast } from "sonner"
 import { getMessagesByChatId } from "@/db/messages"
+import { Tables } from "@/supabase/types"
 
 interface ShareChatButtonProps {
   children?: React.ReactNode
+  chat?: Tables<"chats">
 }
 
 export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
-  children
+  children,
+  chat
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -37,19 +40,21 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
   const { profile, selectedWorkspace, selectedChat } =
     useContext(PentestGPTContext)
 
+  const chatToShare = chat || selectedChat
+
   useEffect(() => {
     if (isDialogOpen) {
       checkIfShared()
     }
-  }, [isDialogOpen, selectedChat])
+  }, [isDialogOpen, chatToShare])
 
   const checkIfShared = async () => {
-    if (!selectedChat) return
+    if (!chatToShare) return
 
     const { data, error } = await supabase
       .from("chats")
       .select("last_shared_message_id")
-      .eq("id", selectedChat.id)
+      .eq("id", chatToShare.id)
       .eq("sharing", "public")
       .single()
 
@@ -63,12 +68,12 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
   }
 
   const handleShareChat = async () => {
-    if (!selectedChat || !profile?.user_id || !selectedWorkspace?.id) return
+    if (!chatToShare || !profile?.user_id || !selectedWorkspace?.id) return
 
     try {
       setIsLoading(true)
 
-      const messages = await getMessagesByChatId(selectedChat.id)
+      const messages = await getMessagesByChatId(chatToShare.id)
 
       if (messages.length === 0) {
         setIsLoading(false)
@@ -77,7 +82,7 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
 
       const lastMessage = messages[messages.length - 1]
 
-      await updateChat(selectedChat.id, {
+      await updateChat(chatToShare.id, {
         sharing: "public",
         last_shared_message_id: lastMessage.id,
         shared_by: profile.user_id,
@@ -120,7 +125,7 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
     await checkIfShared()
   }
 
-  if (!selectedChat) return null
+  if (!chatToShare) return null
 
   return (
     <>
