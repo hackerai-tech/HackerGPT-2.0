@@ -36,7 +36,7 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 3,
+    id: 1,
     name: "CVEMap",
     selectorName: "CVEMap",
     value: PluginID.CVEMAP,
@@ -74,7 +74,7 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 4,
+    id: 2,
     name: "Subdomain Finder",
     selectorName: "Subdomain Finder",
     categories: ["recon"],
@@ -111,7 +111,7 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 6,
+    id: 3,
     name: "Enhanced Search",
     selectorName: "Enhanced Search",
     value: PluginID.ENHANCED_SEARCH,
@@ -145,6 +145,69 @@ export const availablePlugins: PluginSummary[] = [
         title: "List Popular Vulnerabel",
         description: "ports to exploit",
         chatMessage: "List popular vulnerabel ports to exploit."
+      }
+    ]
+  },
+  {
+    id: 4,
+    name: "WAF Detector",
+    selectorName: "WAF Detector",
+    value: PluginID.WAFDETECTOR,
+    categories: ["recon"],
+    icon: "https://cdn-icons-png.flaticon.com/128/6993/6993518.png",
+    invertInDarkMode: true,
+    description: "Fingerprint the Web Application Firewall behind target app",
+    githubRepoUrl: pluginUrls.WAFDETECTOR,
+    isInstalled: false,
+    isPremium: false,
+    createdAt: "2024-08-03",
+    starters: [
+      {
+        title: "Detect the WAF",
+        description: "used by hackerone.com",
+        chatMessage: "Detect the WAF used by hackerone.com"
+      },
+      {
+        title: "WAF Detector Help",
+        description: "How does the WAF Detector plugin work?",
+        chatMessage: "/wafdetector -help"
+      }
+    ]
+  },
+  {
+    id: 5,
+    name: "Whois Lookup",
+    selectorName: "Whois Lookup",
+    categories: [],
+    value: PluginID.WHOIS,
+    icon: "https://cdn-icons-png.flaticon.com/128/15226/15226100.png",
+    invertInDarkMode: true,
+    description:
+      "Retrieve ownership and registration details for domains and IP addresses",
+    githubRepoUrl: pluginUrls.WHOIS,
+    isInstalled: false,
+    isPremium: false,
+    createdAt: "2024-07-28",
+    starters: [
+      {
+        title: "Domain Whois Lookup",
+        description: "for owasp.org",
+        chatMessage: "Perform a Whois lookup for owasp.org"
+      },
+      {
+        title: "Check Registration Info",
+        description: "of hackerone.com",
+        chatMessage: "Check the registration information for hackerone.com"
+      },
+      {
+        title: "IP Address Whois Lookup",
+        description: "for 8.8.8.8",
+        chatMessage: "Perform a Whois lookup for IP address 8.8.8.8"
+      },
+      {
+        title: "Whois Lookup Help",
+        description: "How does the Whois Lookup plugin work?",
+        chatMessage: "/whois -help"
       }
     ]
   },
@@ -251,69 +314,6 @@ export const availablePlugins: PluginSummary[] = [
         title: "SSL/TLS Scanner Help",
         description: "Display usage instructions and available options",
         chatMessage: "/sslscanner -help"
-      }
-    ]
-  },
-  {
-    id: 15,
-    name: "WAF Detector",
-    selectorName: "WAF Detector",
-    value: PluginID.WAFDETECTOR,
-    categories: ["recon"],
-    icon: "https://cdn-icons-png.flaticon.com/128/6993/6993518.png",
-    invertInDarkMode: true,
-    description: "Fingerprint the Web Application Firewall behind target app",
-    githubRepoUrl: pluginUrls.WAFDETECTOR,
-    isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-08-03",
-    starters: [
-      {
-        title: "Detect the WAF",
-        description: "used by hackerone.com",
-        chatMessage: "Detect the WAF used by hackerone.com"
-      },
-      {
-        title: "WAF Detector Help",
-        description: "How does the WAF Detector plugin work?",
-        chatMessage: "/wafdetector -help"
-      }
-    ]
-  },
-  {
-    id: 18,
-    name: "Whois Lookup",
-    selectorName: "Whois Lookup",
-    categories: [],
-    value: PluginID.WHOIS,
-    icon: "https://cdn-icons-png.flaticon.com/128/15226/15226100.png",
-    invertInDarkMode: true,
-    description:
-      "Retrieve ownership and registration details for domains and IP addresses",
-    githubRepoUrl: pluginUrls.WHOIS,
-    isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-07-28",
-    starters: [
-      {
-        title: "Domain Whois Lookup",
-        description: "for owasp.org",
-        chatMessage: "Perform a Whois lookup for owasp.org"
-      },
-      {
-        title: "Check Registration Info",
-        description: "of hackerone.com",
-        chatMessage: "Check the registration information for hackerone.com"
-      },
-      {
-        title: "IP Address Whois Lookup",
-        description: "for 8.8.8.8",
-        chatMessage: "Perform a Whois lookup for IP address 8.8.8.8"
-      },
-      {
-        title: "Whois Lookup Help",
-        description: "How does the Whois Lookup plugin work?",
-        chatMessage: "/whois -help"
       }
     ]
   },
