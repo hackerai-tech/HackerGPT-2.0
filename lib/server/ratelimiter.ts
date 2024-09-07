@@ -197,7 +197,7 @@ export function getRateLimitErrorMessage(
 - Higher usage limits
 - Access to PGPT-4 and GPT-4o
 - Access to file uploads, vision, and code interpreter
-- Access to advanced plugins like DNS Scanner, SSL/TLS Scanner, PortScanner, and more
+- Access to advanced plugins like DNS Scanner, PortScanner, and more
 - Terminal access`
   }
 
