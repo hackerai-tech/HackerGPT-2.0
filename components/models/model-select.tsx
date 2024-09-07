@@ -2,9 +2,10 @@ import { PentestGPTContext } from "@/context/context"
 import { LLM, LLMID } from "@/types"
 import { IconCircle, IconCircleCheck, IconLock } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
-import { DropdownMenu, DropdownMenuTrigger } from "../ui/dropdown-menu"
 import { ModelOption } from "./model-option"
 import { useRouter } from "next/navigation"
+import { ModelIcon } from "./model-icon"
+import { Button } from "../ui/button"
 
 interface ModelSelectProps {
   selectedModelId: string
@@ -23,8 +24,6 @@ export const ModelSelect: FC<ModelSelectProps> = ({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [isOpen, setIsOpen] = useState(false)
-  const [search, setSearch] = useState("")
-  const [tab, setTab] = useState<"hosted" | "local">("hosted")
 
   useEffect(() => {
     if (isOpen) {
@@ -76,72 +75,97 @@ export const ModelSelect: FC<ModelSelectProps> = ({
     router.push("/upgrade")
   }
 
+  const freeUserModels = [
+    {
+      modelId: "gpt-4-turbo-preview" as LLMID,
+      modelName: "PentestGPT Pro",
+      description: "Our smartest model & more",
+      isUpgrade: true
+    },
+    {
+      modelId: "mistral-medium" as LLMID,
+      modelName: "PentestGPT",
+      description: "Great for everyday tasks",
+      provider: "mistral"
+    }
+  ]
+
   return (
-    <DropdownMenu
-      open={isOpen}
-      onOpenChange={isOpen => {
-        setIsOpen(isOpen)
-        setSearch("")
-      }}
-    >
-      <DropdownMenuTrigger
-        className="bg-background w-full justify-start"
-        asChild
-        disabled={allModels.length === 0}
-      >
-        <div className="max-h-[300px] overflow-auto">
-          {Object.entries(groupedSortedModels).map(([provider, models]) => {
-            const filteredModels = models
-              .filter(model => model.provider !== "openrouter")
-              .filter(model => {
-                if (tab === "hosted") return true
-                if (tab === "local") return false
-                if (tab === "openrouter") return model.provider === "openrouter"
-              })
-              .filter(model =>
-                model.modelName.toLowerCase().includes(search.toLowerCase())
-              )
-
-            if (filteredModels.length === 0) return null
-
-            return (
-              <div key={provider}>
-                <div className="">
-                  {filteredModels.map(model => (
-                    <div
-                      key={model.modelId}
-                      className="hover:bg-accent flex w-full cursor-not-allowed items-center justify-between space-x-3 truncate rounded p-1"
-                      onClick={() => {
-                        if (!isPremium && model.provider === "openai") {
-                          handleUpgradeClick() // Show dialog for non-premium users trying to select an OpenAI model
-                        } else if (
-                          model.modelId === "mistral-large" &&
-                          !isPremium
-                        ) {
-                          handleUpgradeClick() // Show dialog for non-premium users trying to select a Mistral Large model
-                        } else {
-                          handleSelectModel(model.modelId) // Allow selection for premium users or non-OpenAI models
-                        }
-                      }}
-                    >
-                      <ModelOption model={model} onSelect={() => {}} />
-                      {selectedModelId === model.modelId ? (
-                        <IconCircleCheck className="" size={28} />
-                      ) : !isPremium &&
-                        (model.provider === "openai" ||
-                          model.modelId === "mistral-large") ? (
-                        <IconLock className="opacity-50" size={28} />
-                      ) : (
-                        <IconCircle className="opacity-50" size={28} />
-                      )}
+    <div className="flex size-full flex-col">
+      <div className="space-y-1 overflow-y-auto p-3">
+        {!isPremium
+          ? freeUserModels.map(model => (
+              <div
+                key={model.modelId}
+                className="hover:bg-select flex cursor-pointer items-center justify-between space-x-2 rounded-md p-2"
+                onClick={() =>
+                  model.isUpgrade
+                    ? handleUpgradeClick()
+                    : handleSelectModel(model.modelId)
+                }
+              >
+                <div className="flex items-center space-x-2">
+                  <ModelIcon modelId={model.modelId} height={28} width={28} />
+                  <div>
+                    <div className="text-sm font-medium">{model.modelName}</div>
+                    <div className="text-muted-foreground text-xs">
+                      {model.description}
                     </div>
-                  ))}
+                  </div>
                 </div>
+                {model.isUpgrade ? (
+                  <Button variant="default" size="sm" className="h-7 text-xs">
+                    Upgrade
+                  </Button>
+                ) : selectedModelId === model.modelId ? (
+                  <IconCircleCheck size={18} />
+                ) : (
+                  <IconCircle size={18} className="text-muted-foreground" />
+                )}
               </div>
-            )
-          })}
-        </div>
-      </DropdownMenuTrigger>
-    </DropdownMenu>
+            ))
+          : Object.entries(groupedSortedModels).map(([provider, models]) => {
+              const filteredModels = models
+
+              if (filteredModels.length === 0) return null
+
+              return (
+                <div key={provider}>
+                  <div className="">
+                    {filteredModels.map(model => (
+                      <div
+                        key={model.modelId}
+                        className="hover:bg-accent flex w-full cursor-not-allowed items-center justify-between space-x-3 truncate rounded p-1"
+                        onClick={() => {
+                          if (!isPremium && model.provider === "openai") {
+                            handleUpgradeClick() // Show dialog for non-premium users trying to select an OpenAI model
+                          } else if (
+                            model.modelId === "mistral-large" &&
+                            !isPremium
+                          ) {
+                            handleUpgradeClick() // Show dialog for non-premium users trying to select a Mistral Large model
+                          } else {
+                            handleSelectModel(model.modelId) // Allow selection for premium users or non-OpenAI models
+                          }
+                        }}
+                      >
+                        <ModelOption model={model} onSelect={() => {}} />
+                        {selectedModelId === model.modelId ? (
+                          <IconCircleCheck className="" size={28} />
+                        ) : !isPremium &&
+                          (model.provider === "openai" ||
+                            model.modelId === "mistral-large") ? (
+                          <IconLock className="opacity-50" size={28} />
+                        ) : (
+                          <IconCircle className="opacity-50" size={28} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+      </div>
+    </div>
   )
 }

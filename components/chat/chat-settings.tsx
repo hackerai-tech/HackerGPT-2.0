@@ -4,15 +4,15 @@ import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { IconChevronDown } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef } from "react"
 import { Button } from "../ui/button"
-import { ChatSettingsForm } from "../ui/chat-settings-form"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { ModelSelect } from "../models/model-select"
 
 interface ChatSettingsProps {}
 
 export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
   useHotkey("i", () => handleClick())
 
-  const { chatSettings, setChatSettings, isMobile } =
+  const { chatSettings, setChatSettings, isMobile, profile } =
     useContext(PentestGPTContext)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -31,7 +31,7 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
     })
   }, [chatSettings?.model])
 
-  if (!chatSettings) return null
+  if (!chatSettings || !profile) return null
 
   const fullModel = LLM_LIST.find(llm => llm.modelId === chatSettings.model)
 
@@ -52,12 +52,14 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
       </PopoverTrigger>
 
       <PopoverContent
-        className="bg-background border-input relative flex max-h-[calc(100vh-60px)] w-[300px] flex-col space-y-4 overflow-auto rounded-lg border-2 p-3 dark:border-none"
+        className="bg-secondary relative flex max-h-[calc(100vh-120px)] w-full min-w-[340px] max-w-xs flex-col overflow-hidden p-0"
         align={isMobile ? "center" : "start"}
       >
-        <ChatSettingsForm
-          chatSettings={chatSettings}
-          onChangeChatSettings={setChatSettings}
+        <ModelSelect
+          selectedModelId={chatSettings.model}
+          onSelectModel={model => {
+            setChatSettings({ ...chatSettings, model })
+          }}
         />
       </PopoverContent>
     </Popover>
