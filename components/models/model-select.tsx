@@ -118,9 +118,9 @@ export const ModelSelect: FC<ModelSelectProps> = ({
                     Upgrade
                   </Button>
                 ) : selectedModelId === model.modelId ? (
-                  <IconCircleCheck size={18} />
+                  <IconCircleCheck size={24} />
                 ) : (
-                  <IconCircle size={18} className="text-muted-foreground" />
+                  <IconCircle size={24} className="text-muted-foreground" />
                 )}
               </div>
             ))
