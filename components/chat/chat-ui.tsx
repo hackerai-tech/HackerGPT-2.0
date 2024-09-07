@@ -51,11 +51,9 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     messagesEndRef,
     handleScroll,
     scrollToBottom,
-    setIsAtBottom,
     isAtBottom,
     isOverflowing,
-    scrollToBottomOnce,
-    setInitialScrollDone
+    scrollToBottomAfterFetch
   } = useScroll()
 
   const [loading, setLoading] = useState(true)
@@ -63,8 +61,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   useEffect(() => {
     const fetchData = async () => {
       await Promise.all([fetchMessages(), fetchChat()])
-      setIsAtBottom(true)
-      scrollToBottomOnce()
+      scrollToBottomAfterFetch()
     }
 
     if ((chatMessages?.length === 0 && !params.chatid) || params.chatid) {
@@ -77,10 +74,6 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     } else {
       setLoading(false)
       setIsReadyToChat(true)
-    }
-
-    return () => {
-      setInitialScrollDone(false) // Reset for next mount
     }
   }, [])
 
