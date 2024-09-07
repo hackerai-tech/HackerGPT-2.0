@@ -53,7 +53,9 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     scrollToBottom,
     setIsAtBottom,
     isAtBottom,
-    isOverflowing
+    isOverflowing,
+    initialScrollDone,
+    setInitialScrollDone
   } = useScroll()
 
   const [loading, setLoading] = useState(true)
@@ -62,12 +64,19 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     const fetchData = async () => {
       await Promise.all([fetchMessages(), fetchChat()])
 
-      scrollToBottom(true)
-      setIsAtBottom(true)
+      // Delay the scroll to ensure the content is rendered
+      setTimeout(() => {
+        if (!initialScrollDone) {
+          scrollToBottom(true)
+          setIsAtBottom(true)
+          setInitialScrollDone(true)
+        }
+      }, 100)
     }
 
     if ((chatMessages?.length === 0 && !params.chatid) || params.chatid) {
       setIsReadyToChat(false)
+      setInitialScrollDone(false)
       fetchData().then(() => {
         handleFocusChatInput()
         setLoading(false)
@@ -77,7 +86,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       setLoading(false)
       setIsReadyToChat(true)
     }
-  }, [])
+  }, [params.chatid, scrollToBottom, setIsAtBottom, setInitialScrollDone])
 
   const fetchMessages = async () => {
     const fetchedMessages = await getMessagesByChatId(params.chatid as string)

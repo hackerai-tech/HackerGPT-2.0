@@ -19,6 +19,8 @@ export const useScroll = () => {
   const [userScrolled, setUserScrolled] = useState(false)
   const [isOverflowing, setIsOverflowing] = useState(false)
 
+  const [initialScrollDone, setInitialScrollDone] = useState(false)
+
   useEffect(() => {
     if (isGenerating) {
       setUserScrolled(false)
@@ -57,14 +59,17 @@ export const useScroll = () => {
       if (!userScrolled || forced) {
         isAutoScrolling.current = true
         messagesEndRef.current?.scrollIntoView({
-          behavior: forced ? "smooth" : "auto"
+          behavior: forced ? "smooth" : "auto",
+          block: "end"
         })
         setTimeout(() => {
           isAutoScrolling.current = false
+          setInitialScrollDone(true)
+          setIsAtBottom(true)
         }, 100)
       }
     },
-    [userScrolled]
+    [userScrolled, setInitialScrollDone, setIsAtBottom]
   )
 
   return {
@@ -75,6 +80,8 @@ export const useScroll = () => {
     isOverflowing,
     handleScroll,
     scrollToBottom,
-    setIsAtBottom
+    setIsAtBottom,
+    initialScrollDone,
+    setInitialScrollDone
   }
 }
