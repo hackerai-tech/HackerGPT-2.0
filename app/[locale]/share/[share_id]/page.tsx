@@ -34,6 +34,7 @@ export default async function SharedChatPage({
     .select("*")
     .eq("chat_id", chatData.id)
     .order("created_at", { ascending: true })
+    .limit(50)
 
   if (messagesError) {
     console.error("messagesError", messagesError)
@@ -44,7 +45,7 @@ export default async function SharedChatPage({
     message => message.id === params.share_id
   )
 
-  const messages = messagesData.slice(0, lastSharedMessageIndex + 1)
+  const messages = messagesData.slice(0, lastSharedMessageIndex + 2)
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
