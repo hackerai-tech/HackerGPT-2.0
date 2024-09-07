@@ -15,29 +15,19 @@ export const getMessageById = async (messageId: string) => {
   return message
 }
 
-export const getMessagesByChatId = async (chatId: string) => {
+export const getMessagesByChatId = async (chatId: string, limit = 50) => {
   const { data: messages } = await supabase
     .from("messages")
     .select("*, feedback(*), file_items (*)")
     .eq("chat_id", chatId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
 
   if (!messages) {
     throw new Error("Messages not found")
   }
 
-  return messages
-}
-
-export const getMessagesByFeedbackId = async (feedbackId: string) => {
-  const { data: messages, error } = await supabase
-    .rpc("get_chat_messages_by_feedback_id", { p_feedback_id: feedbackId })
-    .select("*")
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return messages
+  return messages.reverse()
 }
 
 export const createMessage = async (message: TablesInsert<"messages">) => {
