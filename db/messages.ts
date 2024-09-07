@@ -20,7 +20,7 @@ export const getMessagesByChatId = async (chatId: string, limit = 50) => {
     .from("messages")
     .select("*, feedback(*), file_items (*)")
     .eq("chat_id", chatId)
-    .order('created_at', { ascending: false })
+    .order("created_at", { ascending: false })
     .limit(limit)
 
   if (!messages) {
