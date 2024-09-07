@@ -25,8 +25,10 @@ export const UpgradePlan: FC = () => {
   const router = useRouter()
   const { profile, isMobile } = useContext(PentestGPTContext)
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
-  // const [isLoading, setIsLoading] = useState(true)
-  const [isUrlLoading, setIsUrlLoading] = useState(true)
+  const [prefetchedPlan, setPrefetchedPlan] = useState<"monthly" | "yearly">(
+    "monthly"
+  )
+  const [isLoading, setIsLoading] = useState(true)
   const [isButtonLoading, setIsButtonLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
     "monthly"
@@ -36,7 +38,7 @@ export const UpgradePlan: FC = () => {
   useEffect(() => {
     const initialize = async () => {
       if (!profile) {
-        setIsUrlLoading(false)
+        setIsLoading(false)
         return
       }
 
@@ -56,36 +58,44 @@ export const UpgradePlan: FC = () => {
         toast.error(result.error.message)
       } else {
         setCheckoutUrl(result.value)
+        setPrefetchedPlan("monthly")
       }
 
-      setIsUrlLoading(false)
+      setIsLoading(false)
     }
 
     initialize()
   }, [profile, router])
 
   const handleUpgradeClick = async () => {
-    if (!isUrlLoading && profile) {
+    if (!isLoading && profile) {
       setIsButtonLoading(true)
-      const result = await getCheckoutUrl(
-        selectedPlan === "yearly" ? YEARLY_PRO_PRICE_ID : undefined
-      )
-      setIsButtonLoading(false)
-      if (result.type === "error") {
-        Sentry.withScope(scope => {
-          scope.setExtras({ userId: profile.user_id })
-          scope.captureMessage(result.error.message)
-        })
-        toast.error(result.error.message)
+
+      if (checkoutUrl && selectedPlan === prefetchedPlan) {
+        // Use the prefetched URL if it matches the selected plan
+        router.push(checkoutUrl)
       } else {
-        router.push(result.value)
+        // Fetch a new URL if plans don't match or no prefetched URL
+        const result = await getCheckoutUrl(
+          selectedPlan === "yearly" ? YEARLY_PRO_PRICE_ID : undefined
+        )
+        setIsButtonLoading(false)
+        if (result.type === "error") {
+          Sentry.withScope(scope => {
+            scope.setExtras({ userId: profile.user_id })
+            scope.captureMessage(result.error.message)
+          })
+          toast.error(result.error.message)
+        } else {
+          router.push(result.value)
+        }
       }
     }
   }
 
-  // if (isLoading) {
-  //   return <Loading />
-  // }
+  if (isLoading) {
+    return <Loading />
+  }
 
   if (!profile) {
     return null
@@ -179,7 +189,6 @@ export const UpgradePlan: FC = () => {
             buttonLoading={isButtonLoading}
             onButtonClick={handleUpgradeClick}
             savingsNote={getYearlySavingsNote()}
-            buttonDisabled={isUrlLoading}
           >
             <PlanStatement>Early access to new features</PlanStatement>
             <PlanStatement>Access to PGPT-4, GPT-4o, PGPT-3.5</PlanStatement>
@@ -187,8 +196,7 @@ export const UpgradePlan: FC = () => {
               Access to file uploads, vision, and code interpreter
             </PlanStatement>
             <PlanStatement>
-              Access to advanced plugins like DNS Scanner, SQLi Exploiter,
-              PortScanner, and more
+              Access to advanced plugins like DNS Scanner, PortScanner, and more
             </PlanStatement>
             <PlanStatement>Terminal access</PlanStatement>
           </PlanCard>

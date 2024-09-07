@@ -3,9 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { cookies } from "next/headers"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { notFound } from "next/navigation"
 import { SharedMessage } from "@/components/chat/shared-message"
-import { Tables } from "@/supabase/types"
 
 const MAX_CHAT_NAME_LENGTH = 100
 
@@ -21,8 +19,6 @@ export default async function SharedChatPage({
 }) {
   const supabase = createClient(cookies())
 
-  let messages: Tables<"messages">[] = []
-
   const { data: chatData } = await supabase
     .from("chats")
     .select("*")
@@ -30,8 +26,7 @@ export default async function SharedChatPage({
     .single()
 
   if (!chatData) {
-    console.error("chatData not found")
-    return notFound()
+    return <ErrorUI error="Chat not found" />
   }
 
   const { data: messagesData, error: messagesError } = await supabase
@@ -39,19 +34,18 @@ export default async function SharedChatPage({
     .select("*")
     .eq("chat_id", chatData.id)
     .order("created_at", { ascending: true })
+    .limit(50)
 
   if (messagesError) {
     console.error("messagesError", messagesError)
-    return notFound()
+    return <ErrorUI error={messagesError.message} />
   }
 
-  messages = messagesData
-
-  const lastSharedMessageIndex = messages.findIndex(
+  const lastSharedMessageIndex = messagesData.findIndex(
     message => message.id === params.share_id
   )
 
-  messages = messages.slice(0, lastSharedMessageIndex + 1)
+  const messages = messagesData.slice(0, lastSharedMessageIndex + 2)
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -94,6 +88,22 @@ export default async function SharedChatPage({
             </Button>
           </Link>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function ErrorUI({ error }: { error: string }) {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center">
+      <div className="text-center">
+        <h1 className="mb-4 text-3xl font-bold">Oops, Something went wrong!</h1>
+        <p className="mb-8 text-xl">{error}</p>
+        <Link href="/">
+          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6 py-3 font-semibold transition-colors">
+            Go back to home
+          </Button>
+        </Link>
       </div>
     </div>
   )

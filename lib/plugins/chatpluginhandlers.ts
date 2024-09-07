@@ -3,7 +3,6 @@ import { handleSubfinderRequest } from "./subfinder/subfinder.content"
 // Tools
 import { handlePortscannerRequest } from "../tools/port-scanner/port-scanner-content"
 import { handleSslscannerRequest } from "../tools/ssl-scanner/ssl-scanner-content"
-import { handleSqliexploiterRequest } from "../tools/sqli-exploiter/sqli-exploiter-content"
 import { handleWhoisRequest } from "../tools/whois-lookup/whois-lookup-content"
 import { handleWafdetectorRequest } from "../tools/waf-detector/waf-detector-content"
 import { handleDnsscannerRequest } from "../tools/dns-scanner/dns-scanner-content"
@@ -37,7 +36,6 @@ export const pluginIdToHandlerMapping: pluginIdToHandlerMapping = {
   // Tools
   portscanner: handlePortscannerRequest,
   sslscanner: handleSslscannerRequest,
-  sqliexploiter: handleSqliexploiterRequest,
   whois: handleWhoisRequest,
   wafdetector: handleWafdetectorRequest,
   dnsscanner: handleDnsscannerRequest
@@ -49,7 +47,6 @@ const commandHandlers: CommandHandler = {
   // Tools
   handlePortscannerRequest,
   handleSslscannerRequest,
-  handleSqliexploiterRequest,
   handleWhoisRequest,
   handleWafdetectorRequest,
   handleDnsscannerRequest

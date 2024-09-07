@@ -70,7 +70,6 @@ export async function buildFinalMessages(
     selectedPlugin === PluginID.PORTSCANNER ||
     selectedPlugin === PluginID.SSLSCANNER ||
     selectedPlugin === PluginID.DNSSCANNER ||
-    selectedPlugin === PluginID.SQLIEXPLOITER ||
     selectedPlugin === PluginID.WHOIS ||
     selectedPlugin === PluginID.WAFDETECTOR
   ) {

@@ -82,11 +82,8 @@ export type Database = {
       }
       chats: {
         Row: {
-          context_length: number
           created_at: string
-          embeddings_provider: string
           finish_reason: string | null
-          folder_id: string | null
           id: string
           include_profile_context: boolean
           last_shared_message_id: string | null
@@ -100,11 +97,8 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
-          context_length: number
           created_at?: string
-          embeddings_provider: string
           finish_reason?: string | null
-          folder_id?: string | null
           id?: string
           include_profile_context: boolean
           last_shared_message_id?: string | null
@@ -118,11 +112,8 @@ export type Database = {
           workspace_id: string
         }
         Update: {
-          context_length?: number
           created_at?: string
-          embeddings_provider?: string
           finish_reason?: string | null
-          folder_id?: string | null
           id?: string
           include_profile_context?: boolean
           last_shared_message_id?: string | null
@@ -136,13 +127,6 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "chats_folder_id_fkey"
-            columns: ["folder_id"]
-            isOneToOne: false
-            referencedRelation: "folders"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "chats_last_shared_message_id_fkey"
             columns: ["last_shared_message_id"]
@@ -399,7 +383,6 @@ export type Database = {
           created_at: string
           description: string
           file_path: string
-          folder_id: string | null
           id: string
           name: string
           sharing: string
@@ -413,7 +396,6 @@ export type Database = {
           created_at?: string
           description: string
           file_path: string
-          folder_id?: string | null
           id?: string
           name: string
           sharing?: string
@@ -427,7 +409,6 @@ export type Database = {
           created_at?: string
           description?: string
           file_path?: string
-          folder_id?: string | null
           id?: string
           name?: string
           sharing?: string
@@ -439,65 +420,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "files_folder_id_fkey"
-            columns: ["folder_id"]
-            isOneToOne: false
-            referencedRelation: "folders"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "files_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      folders: {
-        Row: {
-          created_at: string
-          description: string
-          id: string
-          name: string
-          type: string
-          updated_at: string | null
-          user_id: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          description: string
-          id?: string
-          name: string
-          type: string
-          updated_at?: string | null
-          user_id: string
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          id?: string
-          name?: string
-          type?: string
-          updated_at?: string | null
-          user_id?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "folders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "folders_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]

@@ -35,13 +35,7 @@ function PluginStoreModal({
   installPlugin,
   uninstallPlugin
 }: PluginStoreModalProps) {
-  const filters = [
-    "Free",
-    "Recon tools",
-    "Vulnerability scanners",
-    "All",
-    "Installed"
-  ]
+  const filters = ["Free", "Pro", "All", "Installed"]
   const [selectedFilter, setSelectedFilter] = useState("Free")
   const { isMobile } = useContext(PentestGPTContext)
   const [searchTerm, setSearchTerm] = useState("")
@@ -89,10 +83,8 @@ function PluginStoreModal({
         return plugin.isInstalled
       } else if (selectedFilter === "Free") {
         return !plugin.isPremium
-      } else if (selectedFilter === "Recon tools") {
-        return plugin.categories.includes("recon")
-      } else if (selectedFilter === "Vulnerability scanners") {
-        return plugin.categories.includes("vuln-scanners")
+      } else if (selectedFilter === "Pro") {
+        return plugin.isPremium
       } else if (selectedFilter === "All") {
         return true
       }

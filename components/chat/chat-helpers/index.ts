@@ -775,11 +775,9 @@ export const handleCreateChat = async (
   const createdChat = await createChat({
     user_id: profile.user_id,
     workspace_id: selectedWorkspace.id,
-    context_length: 8000,
     include_profile_context: chatSettings.includeProfileContext,
     model: chatSettings.model,
     name: messageContent.substring(0, 100),
-    embeddings_provider: "openai",
     finish_reason: finishReason
   })
 

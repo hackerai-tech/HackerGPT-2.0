@@ -33,7 +33,6 @@ export enum PluginID {
   // Tools
   PORTSCANNER = "portscanner",
   SSLSCANNER = "sslscanner",
-  SQLIEXPLOITER = "sqliexploiter",
   WHOIS = "whois",
   WAFDETECTOR = "wafdetector",
   DNSSCANNER = "dnsscanner",
@@ -60,7 +59,6 @@ export const pluginUrls: PluginUrls = {
   // Tools
   PORTSCANNER: "https://github.com/projectdiscovery/naabu",
   SSLSCANNER: "https://github.com/drwetter/testssl.sh/",
-  SQLIEXPLOITER: "https://github.com/sqlmapproject/sqlmap",
   WHOIS: "https://www.whois.com/whois/",
   WAFDETECTOR: "https://github.com/EnableSecurity/wafw00f",
   DNSSCANNER: "https://github.com/darkoperator/dnsrecon"
