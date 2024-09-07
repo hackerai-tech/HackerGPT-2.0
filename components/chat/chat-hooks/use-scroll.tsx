@@ -19,6 +19,8 @@ export const useScroll = () => {
   const [userScrolled, setUserScrolled] = useState(false)
   const [isOverflowing, setIsOverflowing] = useState(false)
 
+  const [initialScrollDone, setInitialScrollDone] = useState(false)
+
   useEffect(() => {
     if (isGenerating) {
       setUserScrolled(false)
@@ -67,6 +69,16 @@ export const useScroll = () => {
     [userScrolled]
   )
 
+  const scrollToBottomOnce = useCallback(() => {
+    if (!initialScrollDone) {
+      const container = messagesEndRef.current?.parentElement
+      if (container && container.scrollHeight > container.clientHeight) {
+        scrollToBottom(true)
+        setInitialScrollDone(true)
+      }
+    }
+  }, [initialScrollDone, scrollToBottom])
+
   return {
     messagesEndRef,
     messagesStartRef,
@@ -75,6 +87,8 @@ export const useScroll = () => {
     isOverflowing,
     handleScroll,
     scrollToBottom,
-    setIsAtBottom
+    setIsAtBottom,
+    scrollToBottomOnce,
+    setInitialScrollDone
   }
 }
