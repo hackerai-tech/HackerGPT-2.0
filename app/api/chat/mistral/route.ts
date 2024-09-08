@@ -156,7 +156,7 @@ export async function POST(request: Request) {
       } else if (selectedModel.startsWith("accounts/fireworks")) {
         provider = createOpenAI({
           apiKey: llmConfig.fireworks.apiKey,
-          baseURL: llmConfig.fireworks.baseUrl,
+          baseURL: llmConfig.fireworks.baseUrl
         })
       } else {
         provider = createOpenAI({
@@ -182,10 +182,12 @@ export async function POST(request: Request) {
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
-        ...(selectedModel === "openai/gpt-4o-mini" ? {
-          experimental_toolCallStreaming: true,
-          tools,
-        } : {}),
+        ...(selectedModel === "openai/gpt-4o-mini"
+          ? {
+              experimental_toolCallStreaming: true,
+              tools
+            }
+          : {}),
         onFinish: () => {
           data.close()
         }
