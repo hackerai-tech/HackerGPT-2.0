@@ -60,12 +60,8 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
   const toggleButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    if (isMobile) {
-      if (selectedChat) {
-        setShowSidebar(false)
-      }
-    } else {
-      setShowSidebar(true)
+    if (isMobile && selectedChat) {
+      setShowSidebar(false)
     }
   }, [isMobile, selectedChat, setShowSidebar])
 
