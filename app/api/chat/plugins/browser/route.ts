@@ -9,7 +9,7 @@ import {
 } from "@/lib/build-prompt"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 import { PGPT4 } from "@/lib/models/llm/hackerai-llm-list"
-import { createOpenAI as createOpenRouterClient } from "@ai-sdk/openai"
+import { createOpenAI } from "@ai-sdk/openai"
 import { streamText } from "ai"
 
 export const runtime: ServerRuntime = "edge"
@@ -39,8 +39,10 @@ export async function POST(request: Request) {
   try {
     const profile = await getAIProfile()
 
-    let { providerHeaders, selectedModel, rateLimitCheckResult } =
-      await getProviderConfig(chatSettings, profile)
+    let { selectedModel, rateLimitCheckResult } = await getProviderConfig(
+      chatSettings,
+      profile
+    )
 
     if (rateLimitCheckResult !== null) {
       return rateLimitCheckResult.response
@@ -57,14 +59,13 @@ export async function POST(request: Request) {
     const lastUserMessage = getLastUserMessage(messages)
     const browserPrompt = createBrowserPrompt(browserResult, lastUserMessage)
 
-    const openrouter = createOpenRouterClient({
-      baseUrl: llmConfig.openrouter.baseUrl,
-      apiKey: llmConfig.openrouter.apiKey,
-      headers: providerHeaders
+    const openai = createOpenAI({
+      baseUrl: llmConfig.openai.baseUrl,
+      apiKey: llmConfig.openai.apiKey
     })
 
     const result = await streamText({
-      model: openrouter(selectedModel),
+      model: openai(selectedModel),
       messages: [
         ...toVercelChatMessages(messages.slice(0, -1)),
         { role: "user", content: browserPrompt }
@@ -90,13 +91,8 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   const isProModel =
     chatSettings.model === PGPT4.modelId || chatSettings.model === GPT4o.modelId
 
-  const defaultModel = "openai/gpt-4o-mini"
-  const proModel = "openai/gpt-4o-mini"
-
-  const providerHeaders = {
-    "HTTP-Referer": "https://pentestgpt.com/browser",
-    "X-Title": "browser"
-  }
+  const defaultModel = "gpt-4o-mini"
+  const proModel = "gpt-4o-mini"
 
   let selectedModel = isProModel ? proModel : defaultModel
 
@@ -115,7 +111,6 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   )
 
   return {
-    providerHeaders,
     selectedModel,
     rateLimitCheckResult,
     isProModel
