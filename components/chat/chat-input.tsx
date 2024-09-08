@@ -268,7 +268,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
             accept={filesToAccept}
           />
 
-          {isMobile && optionsCollapsed && (
+          {isMobile && subscription && optionsCollapsed ? (
             <div className="flex flex-row items-center">
               <IconCirclePlus
                 className="cursor-pointer p-1 hover:opacity-50"
@@ -276,9 +276,9 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
                 size={34}
               />
             </div>
+          ) : (
+            <ToolOptions />
           )}
-
-          {(!isMobile || !optionsCollapsed) && <ToolOptions />}
         </div>
 
         <TextareaAutosize

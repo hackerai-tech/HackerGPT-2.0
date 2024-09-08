@@ -15,7 +15,15 @@ import {
   IconLayoutSidebarLeftExpand
 } from "@tabler/icons-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { FC, useContext, useState } from "react"
+import {
+  FC,
+  useContext,
+  useCallback,
+  useRef,
+  useState,
+  useMemo,
+  useEffect
+} from "react"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
 import { toast } from "sonner"
 
@@ -26,16 +34,14 @@ interface DashboardProps {
 }
 
 export const Dashboard: FC<DashboardProps> = ({ children }) => {
-  useHotkey("s", () => setShowSidebar(prevState => !prevState))
   const {
     subscription,
     chatSettings,
     isReadyToChat,
     isMobile,
-    isConversationalAIOpen,
-    setIsConversationalAIOpen,
     showSidebar,
-    setShowSidebar
+    setShowSidebar,
+    selectedChat
   } = useContext(PentestGPTContext)
 
   const pathname = usePathname()
@@ -48,10 +54,28 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     tabValue as ContentType
   )
   const [isDragging, setIsDragging] = useState(false)
-  const [showConfirmationDialog, setShowConfirmationDialog] =
-    useState<boolean>(false)
-
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
+
+  const toggleButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (isMobile) {
+      if (selectedChat) {
+        setShowSidebar(false)
+      }
+    } else {
+      setShowSidebar(true)
+    }
+  }, [isMobile, selectedChat, setShowSidebar])
+
+  useHotkey("s", () => setShowSidebar(prev => !prev))
+
+  const handleOverlayClick = useCallback(() => {
+    if (isMobile && showSidebar) {
+      setShowSidebar(false)
+    }
+  }, [isMobile, showSidebar, setShowSidebar])
 
   const onFileDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault()
@@ -119,6 +143,15 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     setShowSidebar(prevState => !prevState)
   }
 
+  const sidebarStyle = useMemo(
+    () => ({
+      minWidth: showSidebar ? `${SIDEBAR_WIDTH}px` : "0px",
+      maxWidth: showSidebar ? `${SIDEBAR_WIDTH}px` : "0px",
+      width: showSidebar ? `${SIDEBAR_WIDTH}px` : "0px"
+    }),
+    [showSidebar]
+  )
+
   return (
     <div className="flex size-full">
       {showConfirmationDialog && pendingFiles.length > 0 && (
@@ -132,6 +165,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
       {!showSidebar && (
         <Button
+          ref={toggleButtonRef}
           className={cn(
             `absolute left-[16px] ${showSidebar && isMobile ? "top-1/2" : "top-3"} z-20 size-[32px] cursor-pointer`
           )}
@@ -147,16 +181,18 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
         </Button>
       )}
 
+      {isMobile && showSidebar && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50"
+          onClick={handleOverlayClick}
+        />
+      )}
+
       <div
         className={cn(
           "bg-tertiary absolute z-50 h-full border-r-2 duration-200 lg:relative"
         )}
-        style={{
-          // Sidebar
-          minWidth: showSidebar ? `${SIDEBAR_WIDTH}px` : "0px",
-          maxWidth: showSidebar ? `${SIDEBAR_WIDTH}px` : "0px",
-          width: showSidebar ? `${SIDEBAR_WIDTH}px` : "0px"
-        }}
+        style={sidebarStyle}
       >
         {showSidebar && (
           <Tabs

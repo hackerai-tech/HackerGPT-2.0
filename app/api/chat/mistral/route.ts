@@ -137,8 +137,7 @@ export async function POST(request: Request) {
       filterEmptyAssistantMessages(messages)
     } else if (
       detectedModerationLevel >= 0.3 &&
-      detectedModerationLevel <= 0.7 &&
-      !isPentestGPTPro
+      detectedModerationLevel <= 0.8
     ) {
       handleAssistantMessages(messages)
     } else {
@@ -153,6 +152,11 @@ export async function POST(request: Request) {
           apiKey: providerApiKey,
           baseURL: providerBaseUrl,
           headers: providerHeaders
+        })
+      } else if (selectedModel.startsWith("accounts/fireworks")) {
+        provider = createOpenAI({
+          apiKey: llmConfig.fireworks.apiKey,
+          baseURL: llmConfig.fireworks.baseUrl
         })
       } else {
         provider = createOpenAI({
@@ -178,8 +182,12 @@ export async function POST(request: Request) {
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
-        experimental_toolCallStreaming: true,
-        tools,
+        ...(selectedModel === "openai/gpt-4o-mini"
+          ? {
+              experimental_toolCallStreaming: true,
+              tools
+            }
+          : {}),
         onFinish: () => {
           data.close()
         }
@@ -203,7 +211,7 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   const isPentestGPTPro = chatSettings.model === "mistral-large"
 
   const defaultModel = llmConfig.models.pentestgpt_default_openrouter
-  const proModel = llmConfig.models.pentestgpt_pro_openrouter
+  const proModel = llmConfig.models.pentestgpt_pro_fireworks
 
   const selectedStandaloneQuestionModel =
     llmConfig.models.pentestgpt_standalone_question_openrouter

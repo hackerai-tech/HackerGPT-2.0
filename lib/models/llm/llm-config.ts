@@ -28,6 +28,10 @@ const llmConfig = {
     url: "https://api.openai.com/v1/chat/completions",
     apiKey: process.env.OPENAI_API_KEY
   },
+  fireworks: {
+    baseUrl: "https://api.fireworks.ai/inference/v1",
+    apiKey: process.env.FIREWORKS_API_KEY
+  },
   systemPrompts: {
     // For question generator
     pentestgptCurrentDateOnly: `${initialSystemPrompt}\n${currentDate}`,
@@ -53,7 +57,7 @@ const llmConfig = {
       process.env.OPENROUTER_PENTESTGPT_DEFAULT_MODEL,
     pentestgpt_standalone_question_openrouter:
       process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
-    pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
+    pentestgpt_pro_fireworks: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
   },
   hackerRAG: {
     enabled:
