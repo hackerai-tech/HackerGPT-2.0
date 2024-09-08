@@ -15,7 +15,15 @@ import {
   IconLayoutSidebarLeftExpand
 } from "@tabler/icons-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { FC, useContext, useCallback, useRef, useState, useMemo } from "react"
+import {
+  FC,
+  useContext,
+  useCallback,
+  useRef,
+  useState,
+  useMemo,
+  useEffect
+} from "react"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
 import { toast } from "sonner"
 
@@ -32,7 +40,8 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     isReadyToChat,
     isMobile,
     showSidebar,
-    setShowSidebar
+    setShowSidebar,
+    selectedChat
   } = useContext(PentestGPTContext)
 
   const pathname = usePathname()
@@ -49,6 +58,16 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
 
   const toggleButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (isMobile) {
+      if (selectedChat) {
+        setShowSidebar(false)
+      }
+    } else {
+      setShowSidebar(true)
+    }
+  }, [isMobile, selectedChat, setShowSidebar])
 
   useHotkey("s", () => setShowSidebar(prev => !prev))
 
