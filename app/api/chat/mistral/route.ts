@@ -137,8 +137,7 @@ export async function POST(request: Request) {
       filterEmptyAssistantMessages(messages)
     } else if (
       detectedModerationLevel >= 0.3 &&
-      detectedModerationLevel <= 0.7 &&
-      !isPentestGPTPro
+      detectedModerationLevel <= 0.8
     ) {
       handleAssistantMessages(messages)
     } else {

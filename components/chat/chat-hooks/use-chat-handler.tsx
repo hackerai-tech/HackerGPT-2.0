@@ -301,8 +301,7 @@ export const useChatHandler = () => {
         (selectedPlugin === PluginID.NONE ||
           selectedPlugin === PluginID.ENHANCED_SEARCH ||
           selectedPlugin === PluginID.WEB_SEARCH) &&
-        modelData?.provider !== "openai" &&
-        modelData?.modelId !== "mistral-large"
+        modelData?.provider !== "openai"
       ) {
         const result = await handleDetectPlugin(payload, selectedPlugin)
         if (result === null) {
