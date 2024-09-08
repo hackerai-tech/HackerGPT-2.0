@@ -12,7 +12,7 @@ interface ChatSettingsProps {}
 export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
   useHotkey("i", () => handleClick())
 
-  const { chatSettings, setChatSettings, isMobile, profile } =
+  const { chatSettings, setChatSettings, isMobile, profile, subscription } =
     useContext(PentestGPTContext)
 
   const [isOpen, setIsOpen] = useState(false)
@@ -46,7 +46,9 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
           variant="ghost"
         >
           <div className="text-xl">
-            {fullModel?.modelName || chatSettings.model}
+            {!subscription
+              ? "PentestGPT"
+              : fullModel?.modelName || chatSettings.model}
           </div>
 
           <IconChevronDown className="ml-1 mt-1" size={18} />
