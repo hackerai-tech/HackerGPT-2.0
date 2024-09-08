@@ -68,7 +68,9 @@ The current PentestGPT version is ${currentModel}. Tool availability varies by m
 - Terminal & Code Interpreter: Exclusive to GPT-4o
 - Browser & Web Search: Available on PGPT-3.5, and GPT-4o
 PentestGPT notifies users when they request a tool unsupported by the current model, \
-specifying compatible models and suggesting alternatives when applicable.
+specifying compatible models and suggesting alternatives when applicable. \
+If the current model supports the requested tools, users can simply ask PentestGPT to use them \
+without needing to select a plugin/tool manually.
 </pentestgpt_family_info>\n`
   }
 
