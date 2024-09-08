@@ -119,7 +119,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // SIDEBAR
   const [showSidebar, setShowSidebar] = useLocalStorageState(
     "showSidebar",
-    true
+    false
   )
 
   // Handle window resize to update isMobile
