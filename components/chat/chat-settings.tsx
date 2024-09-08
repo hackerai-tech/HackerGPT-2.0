@@ -2,7 +2,7 @@ import { PentestGPTContext } from "@/context/context"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { IconChevronDown } from "@tabler/icons-react"
-import { FC, useContext, useEffect, useRef } from "react"
+import { FC, useContext, useEffect, useRef, useState } from "react"
 import { Button } from "../ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { ModelSelect } from "../models/model-select"
@@ -14,6 +14,8 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
 
   const { chatSettings, setChatSettings, isMobile, profile } =
     useContext(PentestGPTContext)
+
+  const [isOpen, setIsOpen] = useState(false)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -36,11 +38,11 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
   const fullModel = LLM_LIST.find(llm => llm.modelId === chatSettings.model)
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger>
         <Button
           ref={buttonRef}
-          className="flex items-center space-x-1"
+          className={`flex items-center space-x-1 ${isOpen ? "bg-accent" : ""}`}
           variant="ghost"
         >
           <div className="text-xl">
@@ -52,7 +54,7 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
       </PopoverTrigger>
 
       <PopoverContent
-        className="bg-secondary relative flex max-h-[calc(100vh-120px)] w-full min-w-[340px] max-w-xs flex-col overflow-hidden p-0"
+        className="bg-secondary relative mt-1 flex max-h-[calc(100vh-120px)] w-full min-w-[340px] max-w-xs flex-col overflow-hidden p-0"
         align={isMobile ? "center" : "start"}
       >
         <ModelSelect
