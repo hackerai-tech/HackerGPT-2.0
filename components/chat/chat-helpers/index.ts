@@ -592,11 +592,11 @@ export const processResponse = async (
 
                 fullText += webSearchResult.fullText
                 break
-              case "python":
-                setToolInUse(PluginID.PYTHON)
-                toolCallId = streamPart.value.toolCallId
-                updatedPlugin = PluginID.PYTHON
-                break
+              // case "python":
+              //   setToolInUse(PluginID.PYTHON)
+              //   toolCallId = streamPart.value.toolCallId
+              //   updatedPlugin = PluginID.PYTHON
+              //   break
               case "browser":
                 setToolInUse(PluginID.BROWSER)
                 updatedPlugin = PluginID.BROWSER
