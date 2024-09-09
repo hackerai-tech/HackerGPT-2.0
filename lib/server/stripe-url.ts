@@ -76,7 +76,7 @@ export async function getCheckoutUrl(
         quantity: 1
       }
     ],
-    allow_promotion_codes: true,
+    // allow_promotion_codes: true,
     success_url: process.env.STRIPE_SUCCESS_URL,
     cancel_url: process.env.STRIPE_RETURN_URL,
     metadata: {
