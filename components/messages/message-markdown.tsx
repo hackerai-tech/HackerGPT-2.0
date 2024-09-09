@@ -33,8 +33,8 @@ export const MessageMarkdown: FC<MessageMarkdownProps> = ({
 
   if (!isAssistant) {
     return (
-      <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 w-[80vw] min-w-full justify-end break-words sm:w-[90%] md:w-full">
-        <p className="bg-secondary mb-2 whitespace-pre-wrap rounded border p-2">
+      <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 w-full max-w-full justify-end break-words sm:w-auto">
+        <p className="bg-secondary mb-2 inline-block max-w-full whitespace-pre-wrap rounded border p-2">
           {content}
         </p>
       </div>
