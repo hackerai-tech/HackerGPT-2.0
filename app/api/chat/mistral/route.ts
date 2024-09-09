@@ -135,10 +135,7 @@ export async function POST(request: Request) {
     if (shouldUseMiniModel && !perplexityUsed) {
       selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(messages)
-    } else if (
-      detectedModerationLevel >= 0.3 &&
-      detectedModerationLevel <= 0.8
-    ) {
+    } else if (detectedModerationLevel >= 0.3 && detectedModerationLevel <= 1) {
       handleAssistantMessages(messages)
     } else {
       filterEmptyAssistantMessages(messages)
