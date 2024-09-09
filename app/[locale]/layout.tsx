@@ -16,7 +16,8 @@ import { PluginProvider } from "@/components/chat/chat-hooks/PluginProvider"
 
 const inter = Inter({ subsets: ["latin"] })
 const APP_NAME = "PentestGPT"
-const APP_DEFAULT_TITLE = "PentestGPT: AI-Powered Penetration Testing Toolkit"
+const APP_DEFAULT_TITLE =
+  "PentestGPT: AI-Powered Automated Penetration Testing Tool"
 const APP_TITLE_TEMPLATE = "%s - PentestGPT"
 const APP_DESCRIPTION =
   "PentestGPT provides advanced AI and integrated tools to help security teams conduct comprehensive penetration tests effortlessly. Scan, exploit, and analyze web applications, networks, and cloud environments with ease and precision, without needing expert skills."
