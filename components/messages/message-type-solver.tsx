@@ -4,7 +4,7 @@ import { FC } from "react"
 import { MessageMarkdown } from "./message-markdown"
 import { MessagePluginFile } from "./message-plugin-file"
 // import { MessageImageGenerator } from "./message-image-generator"
-import { MessageCodeInterpreter } from "./e2b-messages/message-code-interpreter"
+// import { MessageCodeInterpreter } from "./e2b-messages/message-code-interpreter"
 import { MessageTerminal } from "./e2b-messages/message-terminal"
 
 interface MessageTypeResolverProps {
@@ -41,18 +41,18 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   //   role: message.role
   // })
 
-  if (
-    (isPluginOutput && message.plugin === PluginID.PYTHON.toString()) ||
-    toolInUse === PluginID.PYTHON
-  ) {
-    return (
-      <MessageCodeInterpreter
-        content={message.content}
-        messageId={message.id}
-        isAssistant={message.role === "assistant"}
-      />
-    )
-  }
+  // if (
+  //   (isPluginOutput && message.plugin === PluginID.PYTHON.toString()) ||
+  //   toolInUse === PluginID.PYTHON
+  // ) {
+  //   return (
+  //     <MessageCodeInterpreter
+  //       content={message.content}
+  //       messageId={message.id}
+  //       isAssistant={message.role === "assistant"}
+  //     />
+  //   )
+  // }
 
   if (
     (isPluginOutput && message.plugin === PluginID.TERMINAL.toString()) ||

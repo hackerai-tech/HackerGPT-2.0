@@ -41,18 +41,18 @@ export const ModelSelect: FC<ModelSelectProps> = ({
   const allModels = [...availableHostedModels]
 
   const sortedModels = [...allModels].sort((a, b) => {
-    // Prioritize 'mistral' to appear first
-    if (a.provider === "mistral" && b.provider !== "mistral") return -1
-    if (b.provider === "mistral" && a.provider !== "mistral") return 1
-
-    // Then prioritize 'openai'
+    // Prioritize 'openai' to appear first (reverse of previous order)
     if (a.provider === "openai" && b.provider !== "openai") return -1
     if (b.provider === "openai" && a.provider !== "openai") return 1
 
-    // Finally, sort alphabetically by provider name, or any other criteria you see fit
+    // Then prioritize 'mistral'
+    if (a.provider === "mistral" && b.provider !== "mistral") return -1
+    if (b.provider === "mistral" && a.provider !== "mistral") return 1
+
+    // Finally, sort alphabetically by provider name in reverse order
     return (
-      a.provider.localeCompare(b.provider) ||
-      a.modelName.localeCompare(b.modelName)
+      b.provider.localeCompare(a.provider) ||
+      b.modelName.localeCompare(a.modelName)
     )
   })
 
@@ -90,6 +90,12 @@ export const ModelSelect: FC<ModelSelectProps> = ({
     }
   ]
 
+  const modelDescriptions: Record<string, string> = {
+    "gpt-4-turbo-preview": "Advanced model with terminal access",
+    "mistral-large": "Advanced model for complex tasks",
+    "mistral-medium": "Great for everyday tasks"
+  }
+
   return (
     <div className="flex size-full flex-col">
       <div className="space-y-1 overflow-y-auto p-3">
@@ -118,9 +124,9 @@ export const ModelSelect: FC<ModelSelectProps> = ({
                     Upgrade
                   </Button>
                 ) : selectedModelId === model.modelId ? (
-                  <IconCircleCheck size={24} />
+                  <IconCircleCheck size={22} />
                 ) : (
-                  <IconCircle size={24} className="text-muted-foreground" />
+                  <IconCircle size={22} className="text-muted-foreground" />
                 )}
               </div>
             ))
@@ -131,34 +137,36 @@ export const ModelSelect: FC<ModelSelectProps> = ({
 
               return (
                 <div key={provider}>
-                  <div className="">
+                  <div className="space-y-2">
                     {filteredModels.map(model => (
                       <div
                         key={model.modelId}
-                        className="hover:bg-accent flex w-full cursor-not-allowed items-center justify-between space-x-3 truncate rounded p-1"
-                        onClick={() => {
-                          if (!isPremium && model.provider === "openai") {
-                            handleUpgradeClick() // Show dialog for non-premium users trying to select an OpenAI model
-                          } else if (
-                            model.modelId === "mistral-large" &&
-                            !isPremium
-                          ) {
-                            handleUpgradeClick() // Show dialog for non-premium users trying to select a Mistral Large model
-                          } else {
-                            handleSelectModel(model.modelId) // Allow selection for premium users or non-OpenAI models
-                          }
-                        }}
+                        className="hover:bg-accent flex w-full cursor-pointer items-center space-x-3 truncate rounded p-2"
+                        onClick={() => handleSelectModel(model.modelId)}
                       >
-                        <ModelOption model={model} onSelect={() => {}} />
-                        {selectedModelId === model.modelId ? (
-                          <IconCircleCheck className="" size={28} />
-                        ) : !isPremium &&
-                          (model.provider === "openai" ||
-                            model.modelId === "mistral-large") ? (
-                          <IconLock className="opacity-50" size={28} />
-                        ) : (
-                          <IconCircle className="opacity-50" size={28} />
-                        )}
+                        <div className="flex min-w-0 flex-1 items-center space-x-3">
+                          <ModelIcon
+                            modelId={model.modelId}
+                            height={28}
+                            width={28}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-medium">
+                              {model.modelName}
+                            </div>
+                            <div className="text-muted-foreground truncate text-xs">
+                              {modelDescriptions[model.modelId] ||
+                                "Advanced AI model"}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="shrink-0">
+                          {selectedModelId === model.modelId ? (
+                            <IconCircleCheck size={22} />
+                          ) : (
+                            <IconCircle size={22} className="opacity-50" />
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
