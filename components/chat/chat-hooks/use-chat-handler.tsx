@@ -289,32 +289,11 @@ export const useChatHandler = () => {
       let ragUsed = false
       let ragId = null
       let assistantGeneratedImages: string[] = []
-      let detectedModerationLevel = -1
 
       // Always update the assistant message, even if it's empty
       sentChatMessages[sentChatMessages.length - 1].message.content =
         generatedText
       setChatMessages(sentChatMessages)
-
-      if (
-        !isContinuation &&
-        (selectedPlugin === PluginID.NONE ||
-          selectedPlugin === PluginID.ENHANCED_SEARCH ||
-          selectedPlugin === PluginID.WEB_SEARCH) &&
-        modelData?.provider !== "openai"
-      ) {
-        const result = await handleDetectPlugin(payload, selectedPlugin)
-        if (result === null) {
-          // If handleDetectPlugin returns null, it means a 429 error occurred
-          // We've already shown the alert, so we should exit the function
-          setIsGenerating(false)
-          setFirstTokenReceived(false)
-          setChatMessages(chatMessages)
-          return
-        }
-        selectedPlugin = result.detectedPlugin
-        detectedModerationLevel = result.moderationLevel
-      }
 
       if (
         selectedPlugin.length > 0 &&
@@ -413,8 +392,7 @@ export const useChatHandler = () => {
           setChatMessages,
           setToolInUse,
           alertDispatch,
-          selectedPlugin,
-          detectedModerationLevel
+          selectedPlugin
         )
         generatedText = fullText
         finishReasonFromResponse = finishReason
@@ -491,51 +469,6 @@ export const useChatHandler = () => {
     if (!selectedChat) return
 
     handleSendMessage(editedContent, chatMessages, false, false, sequenceNumber)
-  }
-
-  const handleDetectPlugin = async (
-    payload: ChatPayload,
-    selectedPlugin: PluginID
-  ): Promise<{ detectedPlugin: PluginID; moderationLevel: number } | null> => {
-    const response = await fetch("/api/v2/chat/plugin-detector", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ payload, selectedPlugin })
-    })
-
-    if (response.status === 429) {
-      const errorData = await response.json()
-      if (errorData && errorData.timeRemaining) {
-        alertDispatch({
-          type: "SHOW",
-          payload: {
-            message:
-              errorData.message ||
-              "Rate limit exceeded. Please try again later.",
-            title: "Usage Cap Error"
-          }
-        })
-        return null
-      }
-    }
-
-    if (response.ok) {
-      const { plugin: detectedPlugin, moderationLevel } = await response.json()
-      return {
-        detectedPlugin:
-          detectedPlugin && detectedPlugin !== "None"
-            ? detectedPlugin
-            : selectedPlugin,
-        moderationLevel: moderationLevel
-      }
-    }
-
-    return {
-      detectedPlugin: selectedPlugin,
-      moderationLevel: -1
-    }
   }
 
   return {

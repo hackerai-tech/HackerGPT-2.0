@@ -171,8 +171,7 @@ export const handleHostedChat = async (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
-  selectedPlugin: PluginID,
-  detectedModerationLevel: number
+  selectedPlugin: PluginID
 ) => {
   let { provider } = modelData
   let apiEndpoint = `/api/chat/${provider}`
@@ -198,13 +197,11 @@ export const handleHostedChat = async (
     provider === "openai"
       ? {
           messages: formattedMessages,
-          chatSettings,
-          detectedModerationLevel
+          chatSettings
         }
       : {
           messages: formattedMessages,
           chatSettings: chatSettings,
-          detectedModerationLevel: detectedModerationLevel,
           isRetrieval:
             payload.messageFileItems && payload.messageFileItems.length > 0,
           isContinuation,

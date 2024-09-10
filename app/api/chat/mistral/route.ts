@@ -16,18 +16,13 @@ import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { createToolSchemas } from "@/lib/tools/toolSchemas"
+import { detectCategoryAndModeration } from "@/lib/server/moderation"
 
 export const runtime: ServerRuntime = "edge"
 
 export async function POST(request: Request) {
-  const {
-    messages,
-    chatSettings,
-    detectedModerationLevel,
-    isRetrieval,
-    isContinuation,
-    isRagEnabled
-  } = await request.json()
+  const { messages, chatSettings, isRetrieval, isContinuation, isRagEnabled } =
+    await request.json()
 
   let ragUsed = false
   let ragId: string | null = null
@@ -57,11 +52,21 @@ export async function POST(request: Request) {
       throw new Error("Selected model is undefined")
     }
 
+    const detectionMessages = messages.slice(1, -1).slice(-4)
+
+    const { hazardCategory, moderationLevel } =
+      await detectCategoryAndModeration(
+        detectionMessages,
+        detectionMessages[detectionMessages.length - 1].content,
+        llmConfig.openrouter.url,
+        providerHeaders
+      )
+
     const shouldUseMiniModel =
       !isPentestGPTPro &&
-      (detectedModerationLevel === -1 ||
-        detectedModerationLevel === 0 ||
-        (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1))
+      (moderationLevel === -1 ||
+        moderationLevel === 0 ||
+        (moderationLevel >= 0.0 && moderationLevel <= 0.1))
 
     updateSystemMessage(
       messages,
@@ -132,10 +137,19 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
+    const highRiskCategories = ["S4", "S12", "S3", "S9", "S11"]
+    const isHighRiskCategory = highRiskCategories.includes(
+      hazardCategory.toUpperCase()
+    )
+
     if (shouldUseMiniModel && !perplexityUsed) {
       selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(messages)
-    } else if (detectedModerationLevel >= 0.3 && detectedModerationLevel <= 1) {
+    } else if (
+      moderationLevel >= 0.3 &&
+      moderationLevel <= 1 &&
+      !isHighRiskCategory
+    ) {
       handleAssistantMessages(messages)
     } else {
       filterEmptyAssistantMessages(messages)
@@ -162,7 +176,6 @@ export async function POST(request: Request) {
         })
       }
 
-      // Send custom data to the client
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
