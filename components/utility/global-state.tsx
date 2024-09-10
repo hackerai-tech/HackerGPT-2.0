@@ -15,6 +15,7 @@ import {
   ChatFile,
   ChatMessage,
   ChatSettings,
+  ContentType,
   LLM,
   MessageImage,
   WorkspaceImage
@@ -34,6 +35,9 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
   // PROFILE STORE
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null)
+
+  // CONTENT TYPE STORE
+  const [contentType, setContentType] = useState<ContentType>("chats")
 
   // User Role
   // const [userRole, setUserRole] = useState<Tables<"user_role"> | null>(null)
@@ -211,6 +215,10 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         // PROFILE STORE
         profile,
         setProfile,
+
+        // CONTENT TYPE STORE
+        contentType,
+        setContentType,
 
         // USER ROLE STORE
         // userRole,

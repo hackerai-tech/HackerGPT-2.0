@@ -84,6 +84,9 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
       case "files":
         return <FileItem key={item.id} file={item as Tables<"files">} />
 
+      case "gpts":
+        return null
+
       default:
         return null
     }
