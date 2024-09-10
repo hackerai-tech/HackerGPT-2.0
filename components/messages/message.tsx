@@ -14,7 +14,7 @@ import {
   IconFileText,
   IconFileTypePdf,
   IconDatabaseSearch,
-  IconCode,
+  // IconCode,
   IconTerminal2
   // IconPhoto
 } from "@tabler/icons-react"

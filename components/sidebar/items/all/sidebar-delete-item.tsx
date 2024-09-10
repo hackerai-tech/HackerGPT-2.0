@@ -38,12 +38,14 @@ export const SidebarDeleteItem: FC<SidebarDeleteItemProps> = ({
     files: async (file: Tables<"files">) => {
       await deleteFileFromStorage(file.file_path)
       await deleteFile(file.id)
-    }
+    },
+    gpts: null
   }
 
   const stateUpdateFunctions = {
     chats: setChats,
-    files: setFiles
+    files: setFiles,
+    gpts: null
   }
 
   const handleDelete = async () => {
