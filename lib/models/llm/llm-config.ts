@@ -18,9 +18,6 @@ const llmConfig = {
   openrouter: {
     baseUrl: "https://openrouter.ai/api/v1",
     url: `https://openrouter.ai/api/v1/chat/completions`,
-    providerRouting: {
-      order: [`${process.env.OPENROUTER_FIRST_PROVIDER}`]
-    },
     apiKey: process.env.OPENROUTER_API_KEY
   },
   openai: {
