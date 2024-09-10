@@ -1,28 +1,38 @@
 import React, { useState, useEffect, useContext, useRef } from "react"
-import { Tab } from "@headlessui/react"
 import {
   IconSearch,
   IconCode,
   IconCircleX,
-  IconCloudDownload
+  IconCloudDownload,
+  IconMessagePlus
 } from "@tabler/icons-react"
 import Image from "next/image"
 import { PentestGPTContext } from "@/context/context"
 import { PluginSummary } from "@/types/plugins"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
+import { useRouter } from "next/navigation"
+import { ContentType } from "@/types"
+import { useChatHandler } from "../chat/chat-hooks/use-chat-handler"
 
 interface PluginStorePageProps {
   pluginsData: PluginSummary[]
   installPlugin: (id: number) => void
   uninstallPlugin: (id: number) => void
+  setContentType: (contentType: ContentType) => void
 }
 
 function GPTsStorePage({
   pluginsData,
   installPlugin,
-  uninstallPlugin
+  uninstallPlugin,
+  setContentType
 }: PluginStorePageProps) {
+  const router = useRouter()
+  const { handleNewChat } = useChatHandler()
+
+  const { setSelectedPlugin } = useContext(PentestGPTContext)
+
   const filters = [
     // "All",
     "Free",
@@ -31,7 +41,6 @@ function GPTsStorePage({
     "Installed"
   ]
   const [selectedFilter, setSelectedFilter] = useState("All")
-  const { isMobile } = useContext(PentestGPTContext)
   const [searchTerm, setSearchTerm] = useState("")
   const categoryRefs = useRef<{
     [key: string]: React.RefObject<HTMLDivElement>
@@ -76,12 +85,19 @@ function GPTsStorePage({
     {} as { [key: string]: PluginSummary[] }
   )
 
+  const startChatWithPlugin = (plugin: PluginSummary) => {
+    handleNewChat()
+    setSelectedPlugin(plugin.value)
+    setContentType("chats")
+    router.replace(`chat?tab=chats`)
+  }
+
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-3xl overflow-x-clip px-4 pt-16">
         <div className="mb-6">
           <h1 className="text-primary mb-4 text-center text-3xl font-bold md:my-4 md:text-5xl">
-            GPTs
+            Plugins
           </h1>
           <div className="mx-auto mb-8 w-full md:max-w-xl lg:max-w-2xl">
             <p className="text-primary/70 text-center text-sm md:text-lg md:leading-tight">
@@ -135,7 +151,7 @@ function GPTsStorePage({
                 categorizedPlugins[filter].map(plugin => (
                   <div
                     key={plugin.id}
-                    className="border-pgpt-light-gray flex h-[200px] w-full flex-col justify-between rounded-lg border p-4 shadow"
+                    className="border-pgpt-light-gray flex h-[200px] w-full flex-col justify-between rounded-lg border p-4 shadow transition-shadow duration-200 hover:shadow-md"
                   >
                     <div className="flex items-center">
                       <div className="mr-4 size-[60px] shrink-0">
@@ -155,7 +171,7 @@ function GPTsStorePage({
                         />
                       </div>
 
-                      <div className="flex flex-col justify-between">
+                      <div className="flex flex-1 flex-col justify-between">
                         <h4 className="text-primary flex items-center text-lg">
                           <span className="font-medium">{plugin.name}</span>
                           {plugin.isPremium && (
@@ -164,36 +180,50 @@ function GPTsStorePage({
                             </span>
                           )}
                         </h4>
-                        <button
-                          className={`mt-2 inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-sm ${
-                            plugin.isInstalled
-                              ? "bg-red-500 text-white hover:bg-red-600"
-                              : "bg-blue-500 text-white hover:bg-blue-600"
-                          }`}
-                          onClick={() =>
-                            plugin.isInstalled
-                              ? uninstallPlugin(plugin.id)
-                              : installPlugin(plugin.id)
-                          }
-                        >
-                          {plugin.isInstalled ? (
-                            <>
-                              Uninstall
-                              <IconCircleX
-                                className="ml-1 size-4"
-                                aria-hidden="true"
-                              />
-                            </>
-                          ) : (
-                            <>
-                              Install
-                              <IconCloudDownload
-                                className="ml-1 size-4"
-                                aria-hidden="true"
-                              />
-                            </>
-                          )}
-                        </button>
+                        <div className="mt-2 flex items-center space-x-2">
+                          <Button
+                            variant={
+                              plugin.isInstalled ? "destructive" : "default"
+                            }
+                            size="sm"
+                            className="flex w-[140px] items-center justify-center"
+                            onClick={() =>
+                              plugin.isInstalled
+                                ? uninstallPlugin(plugin.id)
+                                : installPlugin(plugin.id)
+                            }
+                          >
+                            <span className="flex items-center">
+                              {plugin.isInstalled ? (
+                                <>
+                                  <span className="mr-1">Uninstall</span>
+                                  <IconCircleX
+                                    className="size-4"
+                                    aria-hidden="true"
+                                  />
+                                </>
+                              ) : (
+                                <>
+                                  <span className="mr-1">Install</span>
+                                  <IconCloudDownload
+                                    className="size-4"
+                                    aria-hidden="true"
+                                  />
+                                </>
+                              )}
+                            </span>
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            onClick={() => startChatWithPlugin(plugin)}
+                          >
+                            <IconMessagePlus
+                              className="size-5"
+                              aria-hidden="true"
+                            />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     {/* Description and Premium badge */}

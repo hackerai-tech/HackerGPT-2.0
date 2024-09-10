@@ -7,17 +7,23 @@ interface SidebarSwitchItemProps {
   contentType: ContentType
   icon: React.ReactNode
   onContentTypeChange: (contentType: ContentType) => void
+  display?: string
 }
 
 export const SidebarSwitchItem: FC<SidebarSwitchItemProps> = ({
   contentType,
   icon,
-  onContentTypeChange
+  onContentTypeChange,
+  display
 }) => {
   return (
     <WithTooltip
       display={
-        <div>{contentType[0].toUpperCase() + contentType.substring(1)}</div>
+        <div>
+          {display
+            ? display
+            : contentType[0].toUpperCase() + contentType.substring(1)}
+        </div>
       }
       trigger={
         <TabsTrigger

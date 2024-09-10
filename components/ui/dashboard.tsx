@@ -111,6 +111,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
             pluginsData={updatedAvailablePlugins}
             installPlugin={installPlugin}
             uninstallPlugin={uninstallPlugin}
+            setContentType={setContentType}
           />
         )
       case "chats":

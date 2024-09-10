@@ -58,6 +58,7 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
           icon={<IconPuzzle size={SIDEBAR_ICON_SIZE} />}
           contentType="gpts"
           onContentTypeChange={onContentTypeChange}
+          display="Plugins"
         />
       </TabsList>
 
