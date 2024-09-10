@@ -150,7 +150,8 @@ export async function POST(request: Request) {
       moderationLevel <= 1 &&
       !isHighRiskCategory
     ) {
-      handleAssistantMessages(messages)
+      // handleAssistantMessages(messages)
+      filterEmptyAssistantMessages(messages)
     } else {
       filterEmptyAssistantMessages(messages)
     }
