@@ -48,7 +48,9 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     isMobile,
     showSidebar,
     setShowSidebar,
-    selectedChat
+    selectedChat,
+    contentType,
+    setContentType
   } = useContext(PentestGPTContext)
 
   const pathname = usePathname()
@@ -56,10 +58,11 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
   const searchParams = useSearchParams()
   const tabValue = searchParams.get("tab") || "chats"
 
+  useEffect(() => {
+    setContentType(tabValue as ContentType)
+  }, [])
+
   const { handleSelectDeviceFile } = useSelectFileHandler()
-  const [contentType, setContentType] = useState<ContentType>(
-    tabValue as ContentType
-  )
   const [isDragging, setIsDragging] = useState(false)
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
@@ -111,7 +114,6 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
             pluginsData={updatedAvailablePlugins}
             installPlugin={installPlugin}
             uninstallPlugin={uninstallPlugin}
-            setContentType={setContentType}
           />
         )
       case "chats":
