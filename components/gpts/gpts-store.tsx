@@ -20,7 +20,8 @@ function GPTsStorePage({
   const router = useRouter()
   const { handleNewChat } = useChatHandler()
 
-  const { setSelectedPlugin, setContentType } = useContext(PentestGPTContext)
+  const { setSelectedPlugin, setContentType, subscription } =
+    useContext(PentestGPTContext)
 
   const filters = ["Free", "Recon tools", "Vulnerability scanners", "Installed"]
   const [selectedFilter, setSelectedFilter] = useState("All")
@@ -55,7 +56,6 @@ function GPTsStorePage({
   const categorizedPlugins = filters.reduce(
     (acc, filter) => {
       acc[filter] = filteredPlugins.filter(plugin => {
-        // if (filter === "All") return true
         if (filter === "Installed") return plugin.isInstalled
         if (filter === "Free") return !plugin.isPremium
         if (filter === "Recon tools") return plugin.categories.includes("recon")
@@ -73,6 +73,10 @@ function GPTsStorePage({
     setSelectedPlugin(pluginValue)
     setContentType("chats")
     router.replace(`chat?tab=chats`)
+  }
+
+  const handleUpgrade = () => {
+    router.push("/upgrade")
   }
 
   const hasPlugins = Object.values(categorizedPlugins).some(
@@ -107,6 +111,7 @@ function GPTsStorePage({
                         installPlugin={installPlugin}
                         uninstallPlugin={uninstallPlugin}
                         startChatWithPlugin={startChatWithPlugin}
+                        hasSubscription={!!subscription}
                       />
                     ))}
                   </div>
