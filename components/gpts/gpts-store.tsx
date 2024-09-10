@@ -75,10 +75,6 @@ function GPTsStorePage({
     router.replace(`chat?tab=chats`)
   }
 
-  const handleUpgrade = () => {
-    router.push("/upgrade")
-  }
-
   const hasPlugins = Object.values(categorizedPlugins).some(
     category => category.length > 0
   )
