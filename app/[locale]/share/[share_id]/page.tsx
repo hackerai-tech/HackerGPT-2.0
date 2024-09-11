@@ -34,7 +34,7 @@ export default async function SharedChatPage({
     .select("*")
     .eq("chat_id", chatData.id)
     .order("created_at", { ascending: true })
-    .limit(50)
+    .order("sequence_number", { ascending: true })
 
   if (messagesError) {
     console.error("messagesError", messagesError)
@@ -45,7 +45,15 @@ export default async function SharedChatPage({
     message => message.id === params.share_id
   )
 
-  const messages = messagesData.slice(0, lastSharedMessageIndex + 2)
+  let messages = messagesData.slice(0, lastSharedMessageIndex + 1)
+
+  // Include all messages up to and including the next assistant message
+  for (let i = lastSharedMessageIndex + 1; i < messagesData.length; i++) {
+    messages.push(messagesData[i])
+    if (messagesData[i].role === "assistant") {
+      break
+    }
+  }
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
