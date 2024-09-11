@@ -70,10 +70,11 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
   const toggleButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    if (isMobile && selectedChat) {
+    setContentType(tabValue as ContentType)
+    if (isMobile && tabValue === "gpts") {
       setShowSidebar(false)
     }
-  }, [isMobile, selectedChat, setShowSidebar])
+  }, [tabValue, isMobile, setShowSidebar])
 
   useHotkey("s", () => setShowSidebar(prev => !prev))
 
