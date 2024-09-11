@@ -69,10 +69,10 @@ function GPTsStorePage({
   )
 
   const startChatWithPlugin = (pluginValue: PluginID) => {
-    handleNewChat()
-    setSelectedPlugin(pluginValue)
     setContentType("chats")
     router.replace(`chat?tab=chats`)
+    setSelectedPlugin(pluginValue)
+    handleNewChat()
   }
 
   const hasPlugins = Object.values(categorizedPlugins).some(
