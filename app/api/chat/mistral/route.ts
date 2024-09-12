@@ -130,8 +130,10 @@ export async function POST(request: Request) {
     const isHighRiskCategory = highRiskCategories.includes(
       hazardCategory.toUpperCase()
     )
-
-    if (
+    if ((moderationLevel === 0 || moderationLevel === -1) && !isPentestGPTPro) {
+      selectedModel = "openai/gpt-4o-mini"
+      filterEmptyAssistantMessages(messages)
+    } else if (
       moderationLevel >= 0.3 &&
       moderationLevel <= 0.8 &&
       !isHighRiskCategory
