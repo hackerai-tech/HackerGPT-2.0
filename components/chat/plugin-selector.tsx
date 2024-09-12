@@ -56,7 +56,7 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
       plugin => plugin.value === selectedPlugin
     )
     if (foundPlugin) {
-      setSelectedPluginName(foundPlugin.selectorName)
+      setSelectedPluginName(foundPlugin.name)
     }
 
     // Check if GPT-4 is selected and ENHANCE_SEARCH is active
@@ -101,7 +101,7 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
               handleOpenGPTsStore()
             } else {
               onPluginSelect(plugin.value)
-              setSelectedPluginName(plugin.selectorName)
+              setSelectedPluginName(plugin.name)
               setSelectedPlugin(plugin.value)
             }
           } else {
@@ -111,7 +111,7 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
         }}
         className={`flex items-center justify-between ${plugin.isPremium && !isPremium ? "cursor-not-allowed opacity-50" : ""}`}
       >
-        <span>{plugin.selectorName}</span>
+        <span>{plugin.name}</span>
         {plugin.isPremium && !isPremium ? (
           <IconLock size={18} className="ml-2" />
         ) : plugin.value === PluginID.PLUGINS_STORE ? (

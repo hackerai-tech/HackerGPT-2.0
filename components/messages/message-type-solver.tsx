@@ -23,6 +23,8 @@ const extractOutputFilename = (content: string) => {
   return filenameMatch ? filenameMatch[1].trim() : undefined
 }
 
+const terminalPlugins = [PluginID.TERMINAL, PluginID.SQLI_EXPLOITER]
+
 export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   previousMessage,
   message,
@@ -55,8 +57,8 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   // }
 
   if (
-    (isPluginOutput && message.plugin === PluginID.TERMINAL.toString()) ||
-    toolInUse === PluginID.TERMINAL
+    (isPluginOutput && terminalPlugins.includes(message.plugin as PluginID)) ||
+    terminalPlugins.includes(toolInUse as PluginID)
   ) {
     return (
       <MessageTerminal

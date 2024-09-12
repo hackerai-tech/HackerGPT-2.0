@@ -7,7 +7,6 @@ export interface ChatStarter {
 export interface PluginSummary {
   id: number
   name: string
-  selectorName: string
   categories: string[]
   value: PluginID
   icon?: string
@@ -40,8 +39,11 @@ export enum PluginID {
   WEB_SEARCH = "websearch",
   // PYTHON = "python",
   BROWSER = "browser",
-  TERMINAL = "terminal"
+  TERMINAL = "terminal",
   // IMAGE_GENERATOR = "imagegenerator"
+
+  // GPTs
+  SQLI_EXPLOITER = "sqliexploiter"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -61,5 +63,7 @@ export const pluginUrls: PluginUrls = {
   SSLSCANNER: "https://github.com/drwetter/testssl.sh/",
   WHOIS: "https://www.whois.com/whois/",
   WAFDETECTOR: "https://github.com/EnableSecurity/wafw00f",
-  DNSSCANNER: "https://github.com/darkoperator/dnsrecon"
+  DNSSCANNER: "https://github.com/darkoperator/dnsrecon",
+  // GPTs
+  SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap"
 }

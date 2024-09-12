@@ -255,7 +255,7 @@ export const handleHostedPluginsChat = async (
   selectedPlugin: PluginID,
   fileData?: { fileName: string; fileContent: string }[]
 ) => {
-  const apiEndpoint = "/api/v2/chat/plugins"
+  const apiEndpoint = "/api/chat/plugins"
 
   const requestBody: any = {
     payload: payload,
