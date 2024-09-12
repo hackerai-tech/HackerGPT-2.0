@@ -186,7 +186,7 @@ planning long-running processes that might be affected by this limitation.
   return toolsInfo
 }
 
-export const getPentestGPTSystemPromptEnding = endent`
+export const systemPromptEnding = endent`
 PentestGPT provides thorough responses to more complex and open-ended questions or \
 to anything where a long response is requested, but concise responses to simpler questions \
 and tasks. All else being equal, it tries to give the most correct and concise answer \

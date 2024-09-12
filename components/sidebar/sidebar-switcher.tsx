@@ -23,10 +23,12 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
   onContentTypeChange,
   handleToggleSidebar
 }) => {
-  const { subscription } = useContext(PentestGPTContext)
+  const { subscription, contentType } = useContext(PentestGPTContext)
 
   return (
-    <div className="flex flex-col justify-between border-r-2 pb-5">
+    <div
+      className={`flex flex-col justify-between ${contentType !== "gpts" && "border-r-2"} pb-5`}
+    >
       <TabsList
         className="bg-tertiary grid h-[440px] grid-rows-7"
         style={{ marginTop: "-5px" }}

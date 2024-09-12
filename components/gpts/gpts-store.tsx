@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from "react"
 import { PentestGPTContext } from "@/context/context"
 import { PluginID, PluginSummary } from "@/types/plugins"
-import { useRouter } from "next/navigation"
 import { useChatHandler } from "../chat/chat-hooks/use-chat-handler"
 import { Header, SearchBar, CategorySelection } from "./gpts-header"
 import { PluginCard } from "./gpts-card"
@@ -17,11 +16,15 @@ function GPTsStorePage({
   installPlugin,
   uninstallPlugin
 }: PluginStorePageProps) {
-  const router = useRouter()
   const { handleNewChat } = useChatHandler()
 
-  const { setSelectedPlugin, setContentType, subscription } =
-    useContext(PentestGPTContext)
+  const {
+    setSelectedPlugin,
+    setContentType,
+    subscription,
+    isEnhancedMenuOpen,
+    setIsEnhancedMenuOpen
+  } = useContext(PentestGPTContext)
 
   const filters = ["Free", "Recon tools", "Vulnerability scanners", "Installed"]
   const [selectedFilter, setSelectedFilter] = useState("All")
@@ -68,11 +71,13 @@ function GPTsStorePage({
     {} as { [key: string]: PluginSummary[] }
   )
 
-  const startChatWithPlugin = (pluginValue: PluginID) => {
+  const startChatWithPlugin = async (pluginValue: PluginID) => {
     setContentType("chats")
-    router.replace(`chat?tab=chats`)
+    await handleNewChat()
+    if (!isEnhancedMenuOpen) {
+      setIsEnhancedMenuOpen(true)
+    }
     setSelectedPlugin(pluginValue)
-    handleNewChat()
   }
 
   const hasPlugins = Object.values(categorizedPlugins).some(

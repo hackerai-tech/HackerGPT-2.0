@@ -3,8 +3,7 @@ import { PluginID, pluginUrls, PluginSummary } from "@/types/plugins"
 export const availablePlugins: PluginSummary[] = [
   {
     id: 0,
-    name: "None",
-    selectorName: "No plugin selected",
+    name: "No plugin selected",
     value: PluginID.NONE,
     categories: [],
     isInstalled: false,
@@ -38,7 +37,6 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 1,
     name: "CVEMap",
-    selectorName: "CVEMap",
     value: PluginID.CVEMAP,
     categories: [],
     icon: "https://avatars.githubusercontent.com/u/50994705",
@@ -76,7 +74,6 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 2,
     name: "Subdomain Finder",
-    selectorName: "Subdomain Finder",
     categories: ["recon"],
     value: PluginID.SUBFINDER,
     icon: "https://cdn-icons-png.flaticon.com/128/3138/3138297.png",
@@ -113,7 +110,6 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 3,
     name: "Enhanced Search",
-    selectorName: "Enhanced Search",
     value: PluginID.ENHANCED_SEARCH,
     categories: [],
     icon: "https://cdn-icons-png.flaticon.com/128/11751/11751689.png",
@@ -151,7 +147,6 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 4,
     name: "WAF Detector",
-    selectorName: "WAF Detector",
     value: PluginID.WAFDETECTOR,
     categories: ["recon"],
     icon: "https://cdn-icons-png.flaticon.com/128/6993/6993518.png",
@@ -177,7 +172,6 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 5,
     name: "Whois Lookup",
-    selectorName: "Whois Lookup",
     categories: [],
     value: PluginID.WHOIS,
     icon: "https://cdn-icons-png.flaticon.com/128/15226/15226100.png",
@@ -214,7 +208,6 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 10,
     name: "Port Scanner",
-    selectorName: "Port Scanner",
     value: PluginID.PORTSCANNER,
     categories: ["recon"],
     icon: "https://cdn-icons-png.flaticon.com/128/7338/7338907.png",
@@ -251,7 +244,6 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 11,
     name: "DNS Scanner",
-    selectorName: "DNS Scanner",
     value: PluginID.DNSSCANNER,
     categories: ["vuln-scanners"],
     icon: "https://cdn-icons-png.flaticon.com/128/1183/1183697.png",
@@ -283,7 +275,6 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 14,
     name: "SSL/TLS Scanner",
-    selectorName: "SSL/TLS Scanner",
     value: PluginID.SSLSCANNER,
     categories: ["vuln-scanners"],
     icon: "https://cdn-icons-png.flaticon.com/128/1034/1034605.png",
@@ -318,39 +309,52 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
+    id: 12,
+    name: "SQLi Exploiter",
+    value: PluginID.SQLI_EXPLOITER,
+    categories: ["vuln-scanners"],
+    icon: "https://cdn-icons-png.flaticon.com/128/6843/6843633.png",
+    invertInDarkMode: true,
+    description: "Exploit SQL injection in web apps to extract data",
+    githubRepoUrl: pluginUrls.SQLI_EXPLOITER,
+    isInstalled: false,
+    isPremium: true,
+    createdAt: "2024-07-18",
+    starters: [
+      {
+        title: "Perform Basic SQLi Scan",
+        description: "on testphp.vulnweb.com search page",
+        chatMessage:
+          "Perform a basic SQLi scan on http://testphp.vulnweb.com/search.php?test=1"
+      },
+      {
+        title: "Conduct Advanced SQLi Analysis",
+        description: "using all techniques with elevated risk",
+        chatMessage:
+          "Conduct an advanced SQLi analysis on http://testphp.vulnweb.com/search.php?test=1 using all techniques and risk level 2"
+      },
+      {
+        title: "Execute Deep SQLi Scan",
+        description: "with crawling and evasion techniques",
+        chatMessage:
+          "Execute a deep SQLi scan on http://testphp.vulnweb.com/search.php?test=1 with crawling enabled, using space2comment evasion, and level 3 testing"
+      },
+      {
+        title: "SQLi Exploiter Help",
+        description: "Display usage instructions and available options",
+        chatMessage:
+          "Display usage instructions and available options for sqlmap"
+      }
+    ]
+  },
+  {
     id: 99,
     name: "Plugins Store",
-    selectorName: "Plugins Store",
     categories: [],
     value: PluginID.PLUGINS_STORE,
     isInstalled: false,
     isPremium: false,
     createdAt: "2023-01-01",
     starters: []
-  }
-]
-
-export const generalPlugins = [
-  {
-    name: "websearch",
-    priority: "Low",
-    description:
-      "Information retrieval tool accessing a pre-indexed web dataset. Provides data from periodically crawled web pages, which may be days to months old. Best used for recent/real-time information needs.",
-    usageScenarios: [
-      "Researching recent/current cybersecurity trends",
-      "Gathering information on recent developments in AI",
-      "Exploring established tech industry innovations"
-    ]
-  },
-  {
-    name: "basellm",
-    priority: "High",
-    description:
-      "Handles a wide range of tasks and provides comprehensive information on various fields, including cybersecurity and programming. Uses the base language model's extensive knowledge for queries that don't require real-time data or specialized tools.",
-    usageScenarios: [
-      "Answering general and specific knowledge questions on established topics",
-      "Providing detailed explanations, methodologies, and code examples for technical concepts",
-      "Assisting with tasks that require in-depth understanding of cybersecurity, programming, or other technical fields"
-    ]
   }
 ]
