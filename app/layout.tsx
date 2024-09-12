@@ -81,9 +81,7 @@ export const viewport: Viewport = {
   themeColor: "#000000"
 }
 
-export default async function RootLayout({
-  children,
-}: RootLayoutProps) {
+export default async function RootLayout({ children }: RootLayoutProps) {
   const cookieStore = cookies()
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
