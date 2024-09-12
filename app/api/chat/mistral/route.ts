@@ -63,10 +63,7 @@ export async function POST(request: Request) {
       )
 
     const shouldUseMiniModel =
-      !isPentestGPTPro &&
-      (moderationLevel === -1 ||
-        moderationLevel === 0 ||
-        (moderationLevel >= 0.0 && moderationLevel <= 0.1))
+      !isPentestGPTPro && (moderationLevel === -1 || moderationLevel === 0)
 
     updateSystemMessage(
       messages,
