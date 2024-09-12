@@ -1,6 +1,6 @@
 "use client"
 
-import Loading from "@/app/[locale]/loading"
+import Loading from "@/app/loading"
 import { Button } from "@/components/ui/button"
 import { PentestGPTContext } from "@/context/context"
 import { getCheckoutUrl } from "@/lib/server/stripe-url"

@@ -13,7 +13,6 @@ import {
   IconHeadphones
 } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
-import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Input } from "../ui/input"
 import { TextareaAutosize } from "../ui/textarea-autosize"
@@ -30,7 +29,6 @@ import { UnsupportedFilesDialog } from "./unsupported-files-dialog"
 interface ChatInputProps {}
 
 export const ChatInput: FC<ChatInputProps> = ({}) => {
-  const { t } = useTranslation()
   const TOOLTIP_DELAY = 1000
 
   useHotkey("l", () => {
@@ -288,9 +286,9 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
           } focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
           placeholder={
             isMobile
-              ? t(`Message`) + (!subscription ? "" : t(`. Type "#" for files.`))
-              : t(`Message PentestGPT`) +
-                (!subscription ? "" : t(`. Type "#" for files.`))
+              ? `Message` + (!subscription ? "" : `. Type "#" for files.`)
+              : `Message PentestGPT` +
+                (!subscription ? "" : `. Type "#" for files.`)
           }
           onValueChange={handleInputChange} // This function updates the userInput state
           value={userInput} // This state should display the transcribed text
