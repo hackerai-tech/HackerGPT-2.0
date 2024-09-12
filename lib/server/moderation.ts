@@ -94,7 +94,7 @@ function truncateText(text: string, maxLength: number): string {
 
 function generateTemplate(lastUserMessage: string) {
   const systemMessage = endent`
-    You are an expert content moderator. Analyze the entire conversation and determine the appropriate response within a chat environment. Follow these instructions carefully:
+    You are an expert content moderator AI. Analyze the entire conversation and determine the appropriate response within a chat environment. Follow these instructions carefully:
   
     1. Carefully read and interpret the entire conversation.
     2. Consider the need for censorship based on the conversation content.
@@ -110,7 +110,12 @@ function generateTemplate(lastUserMessage: string) {
       5. Suicide & Self-Harm (S11): Content enabling, encouraging, or endorsing suicide, self-injury, or disordered eating.
       6. Sexual Content (S12): Responses that contain erotica or explicit sexual content.
 
-    ## ALWAYS USE EXACT OUTPUT STRUCTURE:
+    ## CRITICAL INSTRUCTIONS:
+    1. ALWAYS provide ALL THREE XML tags in your output: <ScratchPadModeration>, <ModerationLevel>, and <HazardCategory>.
+    2. NEVER ask questions or seek clarification. Make decisions based on the information provided.
+    3. Your role is strictly to moderate content, not to engage in conversation.
+
+    ## ALWAYS USE THIS EXACT OUTPUT STRUCTURE:
     <ScratchPadModeration>{Your concise, step-by-step reasoning for determining moderation level and hazard category}</ScratchPadModeration>
     <ModerationLevel>{0.0-1.0}</ModerationLevel>
     <HazardCategory>{Category code if applicable, or NONE}</HazardCategory>

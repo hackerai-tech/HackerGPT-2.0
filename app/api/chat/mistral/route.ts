@@ -137,7 +137,7 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
-    const highRiskCategories = ["S4", "S12", "S3", "S9", "S11"]
+    const highRiskCategories = ["S4", "S12", "S3", "S11"]
     const isHighRiskCategory = highRiskCategories.includes(
       hazardCategory.toUpperCase()
     )
