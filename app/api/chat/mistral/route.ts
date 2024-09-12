@@ -15,7 +15,6 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
-import { createToolSchemas } from "@/lib/tools/toolSchemas"
 import { detectCategoryAndModeration } from "@/lib/server/moderation"
 
 export const runtime: ServerRuntime = "edge"
@@ -26,7 +25,6 @@ export async function POST(request: Request) {
 
   let ragUsed = false
   let ragId: string | null = null
-  let perplexityUsed = false
   const shouldUseRAG = !isRetrieval && isRagEnabled
 
   try {
@@ -62,19 +60,11 @@ export async function POST(request: Request) {
         providerHeaders
       )
 
-    const shouldUseMiniModel =
-      !isPentestGPTPro &&
-      (moderationLevel === -1 ||
-        moderationLevel === 0 ||
-        (moderationLevel >= 0.0 && moderationLevel <= 0.1))
-
     updateSystemMessage(
       messages,
       isPentestGPTPro
         ? llmConfig.systemPrompts.pgpt4
-        : shouldUseMiniModel
-          ? llmConfig.systemPrompts.pgpt35
-          : llmConfig.systemPrompts.pentestGPTChat,
+        : llmConfig.systemPrompts.pgpt35,
       profile.profile_context
     )
 
@@ -131,7 +121,6 @@ export async function POST(request: Request) {
           `---------------------\n` +
           `DON'T MENTION OR REFERENCE ANYTHING RELATED TO RAG CONTENT OR ANYTHING RELATED TO RAG. USER DOESN'T HAVE DIRECT ACCESS TO THIS CONTENT, ITS PURPOSE IS TO ENRICH YOUR OWN KNOWLEDGE. ROLE PLAY.`
       } else {
-        perplexityUsed = true
         selectedModel = "perplexity/llama-3.1-sonar-large-128k-online"
       }
       ragId = data?.resultId
@@ -142,10 +131,7 @@ export async function POST(request: Request) {
       hazardCategory.toUpperCase()
     )
 
-    if (shouldUseMiniModel && !perplexityUsed) {
-      selectedModel = "openai/gpt-4o-mini"
-      filterEmptyAssistantMessages(messages)
-    } else if (
+    if (
       moderationLevel >= 0.3 &&
       moderationLevel <= 0.8 &&
       !isHighRiskCategory
@@ -179,11 +165,11 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
-      let tools
-      if (selectedModel === "openai/gpt-4o-mini") {
-        const toolSchemas = createToolSchemas({ profile, data })
-        tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
-      }
+      // let tools
+      // if (selectedModel === "openai/gpt-4o-mini") {
+      //   const toolSchemas = createToolSchemas({ profile, data })
+      //   tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
+      // }
 
       const result = await streamText({
         model: provider(selectedModel),
@@ -192,12 +178,12 @@ export async function POST(request: Request) {
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
-        ...(selectedModel === "openai/gpt-4o-mini"
-          ? {
-              experimental_toolCallStreaming: true,
-              tools
-            }
-          : {}),
+        // ...(selectedModel === "openai/gpt-4o-mini"
+        //   ? {
+        //       experimental_toolCallStreaming: true,
+        //       tools
+        //     }
+        //   : {}),
         onFinish: () => {
           data.close()
         }

@@ -176,9 +176,9 @@ export const UpgradePlan: FC = () => {
           >
             <PlanStatement>Limited access to PGPT-3.5</PlanStatement>
             <PlanStatement>Limited access to plugins</PlanStatement>
-            <PlanStatement>
+            {/* <PlanStatement>
               Limited access to web search and browsing
-            </PlanStatement>
+            </PlanStatement> */}
           </PlanCard>
 
           {/* Pro Plan */}
@@ -193,11 +193,12 @@ export const UpgradePlan: FC = () => {
             <PlanStatement>Early access to new features</PlanStatement>
             <PlanStatement>Access to PGPT-4, GPT-4o, PGPT-3.5</PlanStatement>
             <PlanStatement>
-              Access to file uploads, vision, and terminal
+              Access to file uploads, vision, web search and browsing
             </PlanStatement>
             <PlanStatement>
               Access to advanced plugins like DNS Scanner, PortScanner, and more
             </PlanStatement>
+            <PlanStatement>Access to terminal</PlanStatement>
           </PlanCard>
         </div>
       </div>
