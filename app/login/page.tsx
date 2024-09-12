@@ -9,7 +9,7 @@ import { get } from "@vercel/edge-config"
 import { Metadata } from "next"
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
-import { IconBrandGoogle, IconAlertCircle } from "@tabler/icons-react"
+import { IconBrandGoogle } from "@tabler/icons-react"
 
 export const metadata: Metadata = {
   title: "Login"
