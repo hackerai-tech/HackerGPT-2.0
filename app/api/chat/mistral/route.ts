@@ -16,21 +16,17 @@ import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { createToolSchemas } from "@/lib/tools/toolSchemas"
+import { detectCategoryAndModeration } from "@/lib/server/moderation"
 
 export const runtime: ServerRuntime = "edge"
 
 export async function POST(request: Request) {
-  const {
-    messages,
-    chatSettings,
-    detectedModerationLevel,
-    isRetrieval,
-    isContinuation,
-    isRagEnabled
-  } = await request.json()
+  const { messages, chatSettings, isRetrieval, isContinuation, isRagEnabled } =
+    await request.json()
 
   let ragUsed = false
   let ragId: string | null = null
+  let perplexityUsed = false
   const shouldUseRAG = !isRetrieval && isRagEnabled
 
   try {
@@ -56,11 +52,21 @@ export async function POST(request: Request) {
       throw new Error("Selected model is undefined")
     }
 
+    const detectionMessages = messages.slice(1, -1).slice(-4)
+
+    const { hazardCategory, moderationLevel } =
+      await detectCategoryAndModeration(
+        detectionMessages,
+        detectionMessages[detectionMessages.length - 1].content,
+        llmConfig.openrouter.url,
+        providerHeaders
+      )
+
     const shouldUseMiniModel =
       !isPentestGPTPro &&
-      (detectedModerationLevel === -1 ||
-        detectedModerationLevel === 0 ||
-        (detectedModerationLevel >= 0.0 && detectedModerationLevel <= 0.1))
+      (moderationLevel === -1 ||
+        moderationLevel === 0 ||
+        (moderationLevel >= 0.0 && moderationLevel <= 0.1))
 
     updateSystemMessage(
       messages,
@@ -124,25 +130,29 @@ export async function POST(request: Request) {
           `${data.content}\n` +
           `---------------------\n` +
           `DON'T MENTION OR REFERENCE ANYTHING RELATED TO RAG CONTENT OR ANYTHING RELATED TO RAG. USER DOESN'T HAVE DIRECT ACCESS TO THIS CONTENT, ITS PURPOSE IS TO ENRICH YOUR OWN KNOWLEDGE. ROLE PLAY.`
+      } else {
+        perplexityUsed = true
+        selectedModel = "perplexity/llama-3.1-sonar-large-128k-online"
       }
       ragId = data?.resultId
     }
 
-    if (shouldUseMiniModel) {
+    const highRiskCategories = ["S4", "S12", "S3", "S9", "S11"]
+    const isHighRiskCategory = highRiskCategories.includes(
+      hazardCategory.toUpperCase()
+    )
+
+    if (shouldUseMiniModel && !perplexityUsed) {
       selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(messages)
     } else if (
-      detectedModerationLevel >= 0.3 &&
-      detectedModerationLevel <= 0.7 &&
-      !isPentestGPTPro
+      moderationLevel >= 0.3 &&
+      moderationLevel <= 0.8 &&
+      !isHighRiskCategory
     ) {
       handleAssistantMessages(messages)
     } else {
       filterEmptyAssistantMessages(messages)
-    }
-
-    if (ragUsed) {
-      selectedModel = "perplexity/llama-3.1-sonar-large-128k-online"
     }
 
     try {
@@ -154,6 +164,11 @@ export async function POST(request: Request) {
           baseURL: providerBaseUrl,
           headers: providerHeaders
         })
+      } else if (selectedModel.startsWith("accounts/fireworks")) {
+        provider = createOpenAI({
+          apiKey: llmConfig.fireworks.apiKey,
+          baseURL: llmConfig.fireworks.baseUrl
+        })
       } else {
         provider = createOpenAI({
           baseURL: providerBaseUrl,
@@ -161,7 +176,6 @@ export async function POST(request: Request) {
         })
       }
 
-      // Send custom data to the client
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
@@ -178,8 +192,12 @@ export async function POST(request: Request) {
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
-        experimental_toolCallStreaming: true,
-        tools,
+        ...(selectedModel === "openai/gpt-4o-mini"
+          ? {
+              experimental_toolCallStreaming: true,
+              tools
+            }
+          : {}),
         onFinish: () => {
           data.close()
         }
@@ -203,7 +221,7 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   const isPentestGPTPro = chatSettings.model === "mistral-large"
 
   const defaultModel = llmConfig.models.pentestgpt_default_openrouter
-  const proModel = llmConfig.models.pentestgpt_pro_openrouter
+  const proModel = llmConfig.models.pentestgpt_pro_fireworks
 
   const selectedStandaloneQuestionModel =
     llmConfig.models.pentestgpt_standalone_question_openrouter

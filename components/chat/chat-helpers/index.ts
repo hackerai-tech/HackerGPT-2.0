@@ -171,8 +171,7 @@ export const handleHostedChat = async (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
-  selectedPlugin: PluginID,
-  detectedModerationLevel: number
+  selectedPlugin: PluginID
 ) => {
   let { provider } = modelData
   let apiEndpoint = `/api/chat/${provider}`
@@ -198,13 +197,11 @@ export const handleHostedChat = async (
     provider === "openai"
       ? {
           messages: formattedMessages,
-          chatSettings,
-          detectedModerationLevel
+          chatSettings
         }
       : {
           messages: formattedMessages,
           chatSettings: chatSettings,
-          detectedModerationLevel: detectedModerationLevel,
           isRetrieval:
             payload.messageFileItems && payload.messageFileItems.length > 0,
           isContinuation,
@@ -258,7 +255,7 @@ export const handleHostedPluginsChat = async (
   selectedPlugin: PluginID,
   fileData?: { fileName: string; fileContent: string }[]
 ) => {
-  const apiEndpoint = "/api/v2/chat/plugins"
+  const apiEndpoint = "/api/chat/plugins"
 
   const requestBody: any = {
     payload: payload,
@@ -592,11 +589,11 @@ export const processResponse = async (
 
                 fullText += webSearchResult.fullText
                 break
-              case "python":
-                setToolInUse(PluginID.PYTHON)
-                toolCallId = streamPart.value.toolCallId
-                updatedPlugin = PluginID.PYTHON
-                break
+              // case "python":
+              //   setToolInUse(PluginID.PYTHON)
+              //   toolCallId = streamPart.value.toolCallId
+              //   updatedPlugin = PluginID.PYTHON
+              //   break
               case "browser":
                 setToolInUse(PluginID.BROWSER)
                 updatedPlugin = PluginID.BROWSER
@@ -775,11 +772,9 @@ export const handleCreateChat = async (
   const createdChat = await createChat({
     user_id: profile.user_id,
     workspace_id: selectedWorkspace.id,
-    context_length: chatSettings.contextLength,
     include_profile_context: chatSettings.includeProfileContext,
     model: chatSettings.model,
     name: messageContent.substring(0, 100),
-    embeddings_provider: chatSettings.embeddingsProvider,
     finish_reason: finishReason
   })
 

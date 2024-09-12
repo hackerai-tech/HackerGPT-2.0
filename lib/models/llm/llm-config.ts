@@ -1,6 +1,6 @@
 import {
   getPentestGPTInfo,
-  getPentestGPTSystemPromptEnding,
+  systemPromptEnding,
   getPentestGPTToolsInfo
 } from "./llm-prompting"
 
@@ -18,15 +18,16 @@ const llmConfig = {
   openrouter: {
     baseUrl: "https://openrouter.ai/api/v1",
     url: `https://openrouter.ai/api/v1/chat/completions`,
-    providerRouting: {
-      order: [`${process.env.OPENROUTER_FIRST_PROVIDER}`]
-    },
     apiKey: process.env.OPENROUTER_API_KEY
   },
   openai: {
     baseUrl: "https://api.openai.com/v1",
     url: "https://api.openai.com/v1/chat/completions",
     apiKey: process.env.OPENAI_API_KEY
+  },
+  fireworks: {
+    baseUrl: "https://api.fireworks.ai/inference/v1",
+    apiKey: process.env.FIREWORKS_API_KEY
   },
   systemPrompts: {
     // For question generator
@@ -36,24 +37,24 @@ const llmConfig = {
     // For Hacker RAG
     RAG: `${initialSystemPrompt} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
     // For PGPT
-    pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${getPentestGPTSystemPromptEnding}`,
+    pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${systemPromptEnding}`,
     // For PGPT-3.5
-    pgpt35: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${getPentestGPTToolsInfo(true, true)}\n${getPentestGPTSystemPromptEnding}`,
+    pgpt35: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${getPentestGPTToolsInfo(true, true)}\n${systemPromptEnding}`,
     // For PGPT-4
-    pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-4")}\n${getPentestGPTSystemPromptEnding}`,
+    pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-4")}\n${systemPromptEnding}`,
     // For GPT-4o
-    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true)}\n${getPentestGPTSystemPromptEnding}`,
+    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true)}\n${systemPromptEnding}`,
     // For browser tool
-    pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${getPentestGPTSystemPromptEnding}`,
+    pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${systemPromptEnding}`,
     // For webSearch tool
-    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${getPentestGPTSystemPromptEnding}`
+    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`
   },
   models: {
     pentestgpt_default_openrouter:
-      process.env.OPENROUTER_PENTESTGPT_DEFUALT_MODEL,
+      process.env.OPENROUTER_PENTESTGPT_DEFAULT_MODEL,
     pentestgpt_standalone_question_openrouter:
       process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
-    pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
+    pentestgpt_pro_fireworks: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
   },
   hackerRAG: {
     enabled:

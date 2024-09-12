@@ -3,8 +3,7 @@ import { PluginID, pluginUrls, PluginSummary } from "@/types/plugins"
 export const availablePlugins: PluginSummary[] = [
   {
     id: 0,
-    name: "None",
-    selectorName: "No plugin selected",
+    name: "No plugin selected",
     value: PluginID.NONE,
     categories: [],
     isInstalled: false,
@@ -36,9 +35,8 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 3,
+    id: 1,
     name: "CVEMap",
-    selectorName: "CVEMap",
     value: PluginID.CVEMAP,
     categories: [],
     icon: "https://avatars.githubusercontent.com/u/50994705",
@@ -74,9 +72,8 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 4,
+    id: 2,
     name: "Subdomain Finder",
-    selectorName: "Subdomain Finder",
     categories: ["recon"],
     value: PluginID.SUBFINDER,
     icon: "https://cdn-icons-png.flaticon.com/128/3138/3138297.png",
@@ -111,36 +108,8 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 5,
-    name: "Link Finder",
-    selectorName: "Link Finder",
-    value: PluginID.LINKFINDER,
-    categories: ["recon"],
-    icon: "https://cdn-icons-png.flaticon.com/128/9465/9465808.png",
-    invertInDarkMode: true,
-    description: "Fast and minimal JS endpoint extractor",
-    githubRepoUrl: pluginUrls.LINKFINDER,
-    isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-03-26",
-    starters: [
-      {
-        title: "Extract URLs",
-        description: "from https://www.hackerone.com/product/...",
-        chatMessage:
-          "Extract URLs from https://www.hackerone.com/product/overview"
-      },
-      {
-        title: "Link Finder Help",
-        description: "How does the Link Finder plugin work?",
-        chatMessage: "/linkfinder -help"
-      }
-    ]
-  },
-  {
-    id: 6,
+    id: 3,
     name: "Enhanced Search",
-    selectorName: "Enhanced Search",
     value: PluginID.ENHANCED_SEARCH,
     categories: [],
     icon: "https://cdn-icons-png.flaticon.com/128/11751/11751689.png",
@@ -176,9 +145,69 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
+    id: 4,
+    name: "WAF Detector",
+    value: PluginID.WAFDETECTOR,
+    categories: ["recon"],
+    icon: "https://cdn-icons-png.flaticon.com/128/6993/6993518.png",
+    invertInDarkMode: true,
+    description: "Fingerprint the Web Application Firewall behind target app",
+    githubRepoUrl: pluginUrls.WAFDETECTOR,
+    isInstalled: false,
+    isPremium: false,
+    createdAt: "2024-08-03",
+    starters: [
+      {
+        title: "Detect the WAF",
+        description: "used by hackerone.com",
+        chatMessage: "Detect the WAF used by hackerone.com"
+      },
+      {
+        title: "WAF Detector Help",
+        description: "How does the WAF Detector plugin work?",
+        chatMessage: "/wafdetector -help"
+      }
+    ]
+  },
+  {
+    id: 5,
+    name: "Whois Lookup",
+    categories: [],
+    value: PluginID.WHOIS,
+    icon: "https://cdn-icons-png.flaticon.com/128/15226/15226100.png",
+    invertInDarkMode: true,
+    description:
+      "Retrieve ownership and registration details for domains and IP addresses",
+    githubRepoUrl: pluginUrls.WHOIS,
+    isInstalled: false,
+    isPremium: false,
+    createdAt: "2024-07-28",
+    starters: [
+      {
+        title: "Domain Whois Lookup",
+        description: "for owasp.org",
+        chatMessage: "Perform a Whois lookup for owasp.org"
+      },
+      {
+        title: "Check Registration Info",
+        description: "of hackerone.com",
+        chatMessage: "Check the registration information for hackerone.com"
+      },
+      {
+        title: "IP Address Whois Lookup",
+        description: "for 8.8.8.8",
+        chatMessage: "Perform a Whois lookup for IP address 8.8.8.8"
+      },
+      {
+        title: "Whois Lookup Help",
+        description: "How does the Whois Lookup plugin work?",
+        chatMessage: "/whois -help"
+      }
+    ]
+  },
+  {
     id: 10,
     name: "Port Scanner",
-    selectorName: "Port Scanner",
     value: PluginID.PORTSCANNER,
     categories: ["recon"],
     icon: "https://cdn-icons-png.flaticon.com/128/7338/7338907.png",
@@ -215,7 +244,6 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 11,
     name: "DNS Scanner",
-    selectorName: "DNS Scanner",
     value: PluginID.DNSSCANNER,
     categories: ["vuln-scanners"],
     icon: "https://cdn-icons-png.flaticon.com/128/1183/1183697.png",
@@ -245,48 +273,8 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 12,
-    name: "SQLi Exploiter",
-    selectorName: "SQLi Exploiter",
-    value: PluginID.SQLIEXPLOITER,
-    categories: ["vuln-scanners"],
-    icon: "https://cdn-icons-png.flaticon.com/128/6843/6843633.png",
-    invertInDarkMode: true,
-    description: "Exploit SQL injection in web apps to extract data",
-    githubRepoUrl: pluginUrls.SQLIEXPLOITER,
-    isInstalled: false,
-    isPremium: true,
-    createdAt: "2024-07-18",
-    starters: [
-      {
-        title: "Perform Basic SQLi Scan",
-        description: "on testphp.vulnweb.com search page",
-        chatMessage:
-          "Perform a basic SQLi scan on http://testphp.vulnweb.com/search.php?test=1"
-      },
-      {
-        title: "Conduct Advanced SQLi Analysis",
-        description: "using all techniques with elevated risk",
-        chatMessage:
-          "Conduct an advanced SQLi analysis on http://testphp.vulnweb.com/search.php?test=1 using all techniques and risk level 2"
-      },
-      {
-        title: "Execute Deep SQLi Scan",
-        description: "with crawling and evasion techniques",
-        chatMessage:
-          "Execute a deep SQLi scan on http://testphp.vulnweb.com/search.php?test=1 with crawling enabled, using space2comment evasion, and level 3 testing"
-      },
-      {
-        title: "SQLi Exploiter Help",
-        description: "Display usage instructions and available options",
-        chatMessage: "/sqliexploiter -help"
-      }
-    ]
-  },
-  {
     id: 14,
     name: "SSL/TLS Scanner",
-    selectorName: "SSL/TLS Scanner",
     value: PluginID.SSLSCANNER,
     categories: ["vuln-scanners"],
     icon: "https://cdn-icons-png.flaticon.com/128/1034/1034605.png",
@@ -321,102 +309,52 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 15,
-    name: "WAF Detector",
-    selectorName: "WAF Detector",
-    value: PluginID.WAFDETECTOR,
-    categories: ["recon"],
-    icon: "https://cdn-icons-png.flaticon.com/128/6993/6993518.png",
+    id: 12,
+    name: "SQLi Exploiter",
+    value: PluginID.SQLI_EXPLOITER,
+    categories: ["vuln-scanners"],
+    icon: "https://cdn-icons-png.flaticon.com/128/6843/6843633.png",
     invertInDarkMode: true,
-    description: "Fingerprint the Web Application Firewall behind target app",
-    githubRepoUrl: pluginUrls.WAFDETECTOR,
+    description: "Exploit SQL injection in web apps to extract data",
+    githubRepoUrl: pluginUrls.SQLI_EXPLOITER,
     isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-08-03",
+    isPremium: true,
+    createdAt: "2024-07-18",
     starters: [
       {
-        title: "Detect the WAF",
-        description: "used by hackerone.com",
-        chatMessage: "Detect the WAF used by hackerone.com"
+        title: "Perform Basic SQLi Scan",
+        description: "on testphp.vulnweb.com search page",
+        chatMessage:
+          "Perform a basic SQLi scan on http://testphp.vulnweb.com/search.php?test=1"
       },
       {
-        title: "WAF Detector Help",
-        description: "How does the WAF Detector plugin work?",
-        chatMessage: "/wafdetector -help"
-      }
-    ]
-  },
-  {
-    id: 18,
-    name: "Whois Lookup",
-    selectorName: "Whois Lookup",
-    categories: [],
-    value: PluginID.WHOIS,
-    icon: "https://cdn-icons-png.flaticon.com/128/15226/15226100.png",
-    invertInDarkMode: true,
-    description:
-      "Retrieve ownership and registration details for domains and IP addresses",
-    githubRepoUrl: pluginUrls.WHOIS,
-    isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-07-28",
-    starters: [
-      {
-        title: "Domain Whois Lookup",
-        description: "for owasp.org",
-        chatMessage: "Perform a Whois lookup for owasp.org"
+        title: "Conduct Advanced SQLi Analysis",
+        description: "using all techniques with elevated risk",
+        chatMessage:
+          "Conduct an advanced SQLi analysis on http://testphp.vulnweb.com/search.php?test=1 using all techniques and risk level 2"
       },
       {
-        title: "Check Registration Info",
-        description: "of hackerone.com",
-        chatMessage: "Check the registration information for hackerone.com"
+        title: "Execute Deep SQLi Scan",
+        description: "with crawling and evasion techniques",
+        chatMessage:
+          "Execute a deep SQLi scan on http://testphp.vulnweb.com/search.php?test=1 with crawling enabled, using space2comment evasion, and level 3 testing"
       },
       {
-        title: "IP Address Whois Lookup",
-        description: "for 8.8.8.8",
-        chatMessage: "Perform a Whois lookup for IP address 8.8.8.8"
-      },
-      {
-        title: "Whois Lookup Help",
-        description: "How does the Whois Lookup plugin work?",
-        chatMessage: "/whois -help"
+        title: "SQLi Exploiter Help",
+        description: "Display usage instructions and available options",
+        chatMessage:
+          "Display usage instructions and available options for sqlmap"
       }
     ]
   },
   {
     id: 99,
     name: "Plugins Store",
-    selectorName: "Plugins Store",
     categories: [],
     value: PluginID.PLUGINS_STORE,
     isInstalled: false,
     isPremium: false,
     createdAt: "2023-01-01",
     starters: []
-  }
-]
-
-export const generalPlugins = [
-  {
-    name: "websearch",
-    priority: "Low",
-    description:
-      "Information retrieval tool accessing a pre-indexed web dataset. Provides data from periodically crawled web pages, which may be days to months old. Best used for recent/real-time information needs.",
-    usageScenarios: [
-      "Researching recent/current cybersecurity trends",
-      "Gathering information on recent developments in AI",
-      "Exploring established tech industry innovations"
-    ]
-  },
-  {
-    name: "basellm",
-    priority: "High",
-    description:
-      "Handles a wide range of tasks and provides comprehensive information on various fields, including cybersecurity and programming. Uses the base language model's extensive knowledge for queries that don't require real-time data or specialized tools.",
-    usageScenarios: [
-      "Answering general and specific knowledge questions on established topics",
-      "Providing detailed explanations, methodologies, and code examples for technical concepts",
-      "Assisting with tasks that require in-depth understanding of cybersecurity, programming, or other technical fields"
-    ]
   }
 ]

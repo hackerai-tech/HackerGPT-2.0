@@ -51,9 +51,9 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     messagesEndRef,
     handleScroll,
     scrollToBottom,
-    setIsAtBottom,
     isAtBottom,
-    isOverflowing
+    isOverflowing,
+    scrollToBottomAfterFetch
   } = useScroll()
 
   const [loading, setLoading] = useState(true)
@@ -61,9 +61,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   useEffect(() => {
     const fetchData = async () => {
       await Promise.all([fetchMessages(), fetchChat()])
-
-      scrollToBottom(true)
-      setIsAtBottom(true)
+      scrollToBottomAfterFetch()
     }
 
     if ((chatMessages?.length === 0 && !params.chatid) || params.chatid) {
@@ -159,9 +157,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       setSelectedChat(chat)
       setChatSettings({
         model: chat.model as LLMID,
-        contextLength: chat.context_length,
         includeProfileContext: chat.include_profile_context,
-        embeddingsProvider: chat.embeddings_provider as "openai" | "local"
+        embeddingsProvider: "openai"
       })
     } catch (error) {
       console.error("Error fetching chat:", error)

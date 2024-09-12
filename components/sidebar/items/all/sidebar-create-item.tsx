@@ -52,16 +52,18 @@ export const SidebarCreateItem: FC<SidebarCreateItemProps> = ({
         file,
         rest,
         workspaceId,
-        selectedWorkspace.embeddings_provider as "openai" | "local"
+        "openai"
       )
 
       return createdFile
-    }
+    },
+    gpts: null
   }
 
   const stateUpdateFunctions = {
     chats: setChats,
-    files: setFiles
+    files: setFiles,
+    gpts: null
   }
 
   const handleCreate = async () => {

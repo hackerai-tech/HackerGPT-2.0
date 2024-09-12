@@ -4,10 +4,7 @@ import { ServerRuntime } from "next"
 import { updateOrAddSystemMessage } from "@/lib/ai-helper"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
-import {
-  filterEmptyAssistantMessages,
-  handleAssistantMessages
-} from "@/lib/build-prompt"
+import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 import { PGPT4 } from "@/lib/models/llm/hackerai-llm-list"
 import { createOpenAI as createOpenRouterClient } from "@ai-sdk/openai"
@@ -17,8 +14,7 @@ import { toVercelChatMessages } from "@/lib/build-prompt"
 export const runtime: ServerRuntime = "edge"
 
 export async function POST(request: Request) {
-  const { messages, chatSettings, detectedModerationLevel } =
-    await request.json()
+  const { messages, chatSettings } = await request.json()
 
   try {
     const profile = await getAIProfile()
@@ -35,11 +31,7 @@ export async function POST(request: Request) {
       llmConfig.systemPrompts.pentestGPTWebSearch
     )
 
-    if (detectedModerationLevel > 0.3 && detectedModerationLevel < 0.8) {
-      handleAssistantMessages(messages)
-    } else {
-      filterEmptyAssistantMessages(messages)
-    }
+    filterEmptyAssistantMessages(messages)
 
     const openrouter = createOpenRouterClient({
       baseUrl: llmConfig.openrouter.baseUrl,

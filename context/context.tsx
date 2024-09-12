@@ -9,15 +9,20 @@ import {
 } from "@/types"
 import { PluginID } from "@/types/plugins"
 import { Dispatch, SetStateAction, createContext } from "react"
+import { ContentType } from "@/types"
 
 interface PentestGPTContext {
   // PROFILE STORE
   profile: Tables<"profiles"> | null
   setProfile: Dispatch<SetStateAction<Tables<"profiles"> | null>>
 
+  // CONTENT TYPE STORE
+  contentType: ContentType
+  setContentType: React.Dispatch<React.SetStateAction<ContentType>>
+
   // USER ROLE STORE
-  userRole: Tables<"user_role"> | null
-  setUserRole: Dispatch<SetStateAction<Tables<"user_role"> | null>>
+  // userRole: Tables<"user_role"> | null
+  // setUserRole: Dispatch<SetStateAction<Tables<"user_role"> | null>>
 
   // SUBSCRIPTION STORE
   subscription: Tables<"subscriptions"> | null
@@ -128,9 +133,13 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
   profile: null,
   setProfile: () => {},
 
+  // CONTENT TYPE STORE
+  contentType: "chats",
+  setContentType: () => {},
+
   // USER ROLE STORE
-  userRole: null,
-  setUserRole: () => {},
+  // userRole: null,
+  // setUserRole: () => {},
 
   // SUBSCRIPTION STORE
   subscription: null,

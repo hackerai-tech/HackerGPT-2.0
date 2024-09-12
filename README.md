@@ -4,7 +4,7 @@ PentestGPT provides advanced AI and integrated tools to help security teams cond
 
 ## A Special Note of Thanks
 
-Thank you so much, [@fkesheh](https://github.com/fkesheh), [@Fx64b](https://github.com/Fx64b) and [@josegranadosm](https://github.com/josegranadosm), for your amazing work and dedication to this project. 
+Thank you so much, [@fkesheh](https://github.com/fkesheh) and [@Fx64b](https://github.com/Fx64b), for your amazing work and dedication to this project. 
 
 Thank you for being part of the HackerAI family.
 

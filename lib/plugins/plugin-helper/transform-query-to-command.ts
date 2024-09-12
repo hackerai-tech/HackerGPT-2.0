@@ -1,45 +1,6 @@
 import { Message } from "@/types/chat"
 import endent from "endent"
 
-export const transformUserQueryToLinkFinderCommand = (lastMessage: Message) => {
-  const answerMessage = endent`
-    Query: "${lastMessage.content}"
-  
-    Based on this query, generate a command for the 'LinkFinder' tool, tailored to efficiently extract URLs from HTML content. Ensure to utilize the most pertinent flag, '--domain', to specify the target website. Include the '-help' flag if a help guide or a full list of flags is requested. The command should follow this structured format for clarity and accuracy:
-  
-    ALWAYS USE THIS FORMAT:
-    \`\`\`json
-    { "command": "linkfinder --domain [target-domain]" }
-    \`\`\`
-    Substitute '[target-domain]' with the actual domain you intend to investigate. It's crucial to directly incorporate the target domain within the command, bypassing the need for external file references.
-  
-    **Command Construction Guidelines for LinkFinder**:
-    1. **Single Domain Focus**: Direct inclusion of the target domain in the command is mandatory. 
-        - --domain (string): Specify the target website URL. (required)
-        - -output (string): write output to a file. Don't put name of file in quotes (optional)
-    Note: **Selective Flag Application**: Choose flags that directly contribute to the scope of your query. The key flags include:
-        - --help: Display a help guide or a full list of available commands and flags.
-    Note: **Limitation on Command and Domain Quantity**: 'LinkFinder' is designed to process a single command and domain simultaneously. Should there be attempts to include multiple domains or generate multiple commands by user query, respond with the tool's functionality restricting such operations. 
-    Note: **Use full URL**: Always use the full URL in the command.
-
-    **Example Commands**:
-    - For extracting URLs from a specific domain:
-    \`\`\`json
-    { "command": "linkfinder --domain example.com" }
-    \`\`\`
-  
-    - For a request for help or all flags or if the user asked about how the plugin works:
-    \`\`\`json
-    { "command": "linkfinder --help" }
-    \`\`\`
-  
-    Please adjust the command based on your specific requirements or inquire further if assistance with additional flags is needed.
-    
-    Response:`
-
-  return answerMessage
-}
-
 export const transformUserQueryToCvemapCommand = (lastMessage: Message) => {
   const answerMessage = endent`
     Query: "${lastMessage.content}"
@@ -242,60 +203,6 @@ export const transformUserQueryToSSLScannerCommand = (lastMessage: Message) => {
     For a request for help:
     \`\`\`json
     { "command": "sslscanner -help" }
-    \`\`\`
-  
-    Response:`
-
-  return answerMessage
-}
-
-export const transformUserQueryToSQLIExploiterCommand = (
-  lastMessage: Message
-) => {
-  const answerMessage = endent`
-    Query: "${lastMessage.content}"
-
-    Based on this query, generate a command for the 'sqliexploiter' tool, focusing on SQL injection vulnerability detection. By default, use only the '-u' flag for a simple scan. Include additional flags only if specifically mentioned or clearly implied in the query. The command should follow this structured format:
-    
-    ALWAYS USE THIS FORMAT:
-    \`\`\`json
-    { "command": "sqliexploiter -u [target URL] [additional flags if specified]" }
-    \`\`\`
-    Replace '[target URL]' with the actual target URL. Ensure the command is properly escaped to be valid JSON.
-
-    After the command, provide a very brief explanation ONLY if it adds value to the user's understanding. This explanation should be concise, clear, and enhance the user's comprehension of why certain flags were used or what the command does. Omit the explanation for simple or self-explanatory commands.
-
-    Command Construction Guidelines:
-    1. **Target URL Specification** (Required):
-      - -u string: Specifies the target URL to scan. Must start with http:// or https://.
-    2. **Additional Options** (Include only if specifically requested):
-      - -method string: Specifies the HTTP method (GET or POST).
-      - -data string: Specifies the POST data when using POST method.
-      - -enum string[]: Specifies which data to extract (current-user, current-db, hostname).
-      - -crawl: Enables light crawling.
-      - -cookie string: Specifies the HTTP Cookie header.
-      - -p string[]: Specifies parameters to be tested.
-      - -dbms string: Forces a specific database type.
-      - -tamper string: Specifies a script to modify payloads.
-      - -level int: Sets the level of tests (1-5).
-      - -risk int: Sets the risk of tests (1-3).
-      - -technique string: Specifies which SQLi techniques to use (BEUSTQ).
-
-    IMPORTANT: 
-    - By default, use only the -u flag for a simple scan.
-    - Include additional flags only when explicitly mentioned or clearly implied in the query.
-    - Use -help flag when the user asks for help or information about the tool.
-    - Provide explanations only when they add value to the user's understanding.
-
-    Example Commands:
-    For a basic scan:
-    \`\`\`json
-    { "command": "sqliexploiter -u http://example.com/page.php?id=1" }
-    \`\`\`
-
-    For a request for help:
-    \`\`\`json
-    { "command": "sqliexploiter -help" }
     \`\`\`
   
     Response:`

@@ -22,12 +22,9 @@ interface DeleteChatProps {
 
 export const DeleteChat: FC<DeleteChatProps> = ({ chat }) => {
   useHotkey("Backspace", () => setShowChatDialog(true))
-
   const { setChats } = useContext(PentestGPTContext)
   const { handleNewChat } = useChatHandler()
-
   const buttonRef = useRef<HTMLButtonElement>(null)
-
   const [showChatDialog, setShowChatDialog] = useState(false)
 
   const handleDeleteChat = async () => {
@@ -49,7 +46,12 @@ export const DeleteChat: FC<DeleteChatProps> = ({ chat }) => {
   return (
     <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
       <DialogTrigger asChild>
-        <IconTrash className="hover:opacity-50" size={18} />
+        <div className="w-full cursor-pointer">
+          <div className="text-error flex items-center p-3 hover:opacity-50">
+            <IconTrash className="mr-2" size={20} />
+            <span>Delete</span>
+          </div>
+        </div>
       </DialogTrigger>
 
       <DialogContent onKeyDown={handleKeyDown}>
@@ -66,7 +68,6 @@ export const DeleteChat: FC<DeleteChatProps> = ({ chat }) => {
           <Button variant="ghost" onClick={() => setShowChatDialog(false)}>
             Cancel
           </Button>
-
           <Button
             ref={buttonRef}
             variant="destructive"

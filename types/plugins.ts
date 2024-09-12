@@ -7,7 +7,6 @@ export interface ChatStarter {
 export interface PluginSummary {
   id: number
   name: string
-  selectorName: string
   categories: string[]
   value: PluginID
   icon?: string
@@ -32,18 +31,19 @@ export enum PluginID {
   PLUGINS_STORE = "pluginselector",
   // Tools
   PORTSCANNER = "portscanner",
-  LINKFINDER = "linkfinder",
   SSLSCANNER = "sslscanner",
-  SQLIEXPLOITER = "sqliexploiter",
   WHOIS = "whois",
   WAFDETECTOR = "wafdetector",
   DNSSCANNER = "dnsscanner",
   // Default tools
   WEB_SEARCH = "websearch",
-  PYTHON = "python",
+  // PYTHON = "python",
   BROWSER = "browser",
-  TERMINAL = "terminal"
+  TERMINAL = "terminal",
   // IMAGE_GENERATOR = "imagegenerator"
+
+  // GPTs
+  SQLI_EXPLOITER = "sqliexploiter"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -60,10 +60,10 @@ export const pluginUrls: PluginUrls = {
   SUBFINDER: "https://github.com/projectdiscovery/subfinder",
   // Tools
   PORTSCANNER: "https://github.com/projectdiscovery/naabu",
-  LINKFINDER: "https://github.com/0xsha/GoLinkFinder",
   SSLSCANNER: "https://github.com/drwetter/testssl.sh/",
-  SQLIEXPLOITER: "https://github.com/sqlmapproject/sqlmap",
   WHOIS: "https://www.whois.com/whois/",
   WAFDETECTOR: "https://github.com/EnableSecurity/wafw00f",
-  DNSSCANNER: "https://github.com/darkoperator/dnsrecon"
+  DNSSCANNER: "https://github.com/darkoperator/dnsrecon",
+  // GPTs
+  SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap"
 }

@@ -67,6 +67,13 @@ export const useScroll = () => {
     [userScrolled]
   )
 
+  const scrollToBottomAfterFetch = useCallback(() => {
+    setTimeout(() => {
+      scrollToBottom(true)
+      setIsAtBottom(true)
+    }, 100)
+  }, [scrollToBottom])
+
   return {
     messagesEndRef,
     messagesStartRef,
@@ -75,6 +82,7 @@ export const useScroll = () => {
     isOverflowing,
     handleScroll,
     scrollToBottom,
-    setIsAtBottom
+    setIsAtBottom,
+    scrollToBottomAfterFetch
   }
 }

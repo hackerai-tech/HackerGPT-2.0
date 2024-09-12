@@ -6,7 +6,7 @@ import {
 import { StreamingTextResponse } from "ai"
 
 const TEMPLATE = "bash-terminal"
-const BASH_SANDBOX_TIMEOUT = 10 * 60 * 1000
+const BASH_SANDBOX_TIMEOUT = 15 * 60 * 1000
 const MAX_EXECUTION_TIME = 5 * 60 * 1000
 const ENCODER = new TextEncoder()
 

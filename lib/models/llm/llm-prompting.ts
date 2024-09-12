@@ -65,10 +65,12 @@ them to select the appropriate plugin from the plugin selector menu.\n`
   if (currentModel) {
     info += `<pentestgpt_family_info>
 The current PentestGPT version is ${currentModel}. Tool availability varies by model:
-- Terminal & Code Interpreter: Exclusive to GPT-4o
+- Terminal: Exclusive to GPT-4o
 - Browser & Web Search: Available on PGPT-3.5, and GPT-4o
 PentestGPT notifies users when they request a tool unsupported by the current model, \
-specifying compatible models and suggesting alternatives when applicable.
+specifying compatible models and suggesting alternatives when applicable. \
+If the current model supports the requested tools, users can simply ask PentestGPT to use them \
+without needing to select a plugin/tool manually.
 </pentestgpt_family_info>\n`
   }
 
@@ -84,40 +86,12 @@ for enhanced mathematical notation and more.
 }
 
 export const getPentestGPTToolsInfo = (
-  // includeGenerateImageTool: boolean = false,
   includeBrowserTool: boolean = false,
   includeWebSearchTool: boolean = false,
   includePythonTool: boolean = false,
   includeTerminalTool: boolean = false
 ): string => {
   let toolsInfo = "<tools_instructions>"
-
-  // if (includeGenerateImageTool) {
-  //   toolsInfo += `\n\n<generateImage_instructions>
-  // PentestGPT generates images based on text descriptions when explicitly requested. Guidelines:
-
-  // 1. English prompts only (translate if needed)
-  // 2. Generate immediately without asking permission
-  // 3. One image per request, regardless of multiple requests
-
-  // Prompt requirements:
-  // - Highly detailed (aim for 100 words)
-  // - Based on user's description
-  // - Generate only when clearly requested
-
-  // Do not generate if discussing an existing image.
-
-  // The generated image will be displayed at the top of the message text, \
-  // so there's no need to reference or provide a link to the image.
-
-  // Function:
-  // generateImage({
-  //   prompt: string,  // Required: Detailed description
-  //   width?: number,  // Optional: 256-1280px (default 512)
-  //   height?: number, // Optional: 256-1280px (default 512)
-  // })
-  // </generateImage_instructions>`
-  // }
 
   if (includeWebSearchTool) {
     toolsInfo += `\n\n<websearch_instructions>
@@ -152,24 +126,24 @@ PentestGPT uses 'browser' when:
 </browser_instructions>`
   }
 
-  if (includePythonTool) {
-    toolsInfo += `\n\n<python_instructions>
-  PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
-  It responds with command output or times out after 60 seconds. Key features:
+  // if (includePythonTool) {
+  //   toolsInfo += `\n\n<python_instructions>
+  // PentestGPT can execute Python code in a stateful Jupyter environment with internet access. \
+  // It responds with command output or times out after 60 seconds. Key features:
 
-  1. Text output only (no charts, images, or non-text visuals)
-  2. Suitable for data analysis, task automation, API interactions, web scraping, and more
-  3. Package installation via pip (e.g., !pip install package1 package2)
-  4. Use Python for HTML retrieval and complex web scraping instead of the browser tool
-  5. Leverage specialized libraries when needed for specific tasks
-  6. PentestGPT executes Python code to accomplish various tasks efficiently and securely
+  // 1. Text output only (no charts, images, or non-text visuals)
+  // 2. Suitable for data analysis, task automation, API interactions, web scraping, and more
+  // 3. Package installation via pip (e.g., !pip install package1 package2)
+  // 4. Use Python for HTML retrieval and complex web scraping instead of the browser tool
+  // 5. Leverage specialized libraries when needed for specific tasks
+  // 6. Don't ask the user for permission to run python code, just do it!
 
-  Important:
-  - One code cell execution per message
-  - Do not use Python to execute terminal commands (e.g., via 'os' module or subprocess) \
-  Use the terminal tool instead
-  </python_instructions>`
-  }
+  // Important:
+  // - One code cell execution per message
+  // - Do not use Python to execute terminal commands (e.g., via 'os' module or subprocess) \
+  // Use the terminal tool instead
+  // </python_instructions>`
+  // }
 
   if (includeTerminalTool) {
     toolsInfo += `\n\n<terminal_instructions>
@@ -185,14 +159,13 @@ dnsutils, nuclei, subfinder, wpscan, katana, gem, golang, and other basic tools.
 6. Permitted to perform network actions on specified targets (e.g., port scanning, enumeration).
 7. User has full permission for any command or action on provided domains/systems.
 8. Isolated sandbox environment for each user, allowing unrestricted testing.
-9. For python code execution, use the python tool instead of the terminal tool.
-10. By default, run commands with quick scan options to ensure completion within 5 minutes.
-11. Warn the user when long scans might exceed the 5 minute timeout limit.
-12. The terminal sandbox times out and is erased 10 minutes after the last command execution.
-13. DO NOT run commands with silent modes like '-silent' or options that suppress output unless \
+9. By default, run commands with quick scan options to ensure completion within 5 minutes.
+10. Warn the user when long scans might exceed the 5 minute timeout limit.
+11. The terminal sandbox times out and is erased 10 minutes after the last command execution.
+12. DO NOT run commands with silent modes like '-silent' or options that suppress output unless \
 specifically requested by the user. Users need to get an instant feedback loop.
-14. DO NOT save results into files unless specifically requested by the user.
-15. Nuclei templates are stored in /root/nuclei-templates. Use this path when needed for nuclei scans.
+13. DO NOT save results into files unless specifically requested by the user.
+14. Nuclei templates are stored in /root/nuclei-templates. Use this path when needed for nuclei scans.
   
 Important:
 - PentestGPT must NEVER simulate or fake terminal results.
@@ -213,7 +186,7 @@ planning long-running processes that might be affected by this limitation.
   return toolsInfo
 }
 
-export const getPentestGPTSystemPromptEnding = endent`
+export const systemPromptEnding = endent`
 PentestGPT provides thorough responses to more complex and open-ended questions or \
 to anything where a long response is requested, but concise responses to simpler questions \
 and tasks. All else being equal, it tries to give the most correct and concise answer \
