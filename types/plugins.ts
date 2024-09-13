@@ -31,10 +31,9 @@ export enum PluginID {
   PLUGINS_STORE = "pluginselector",
   // Tools
   WEB_SEARCH = "websearch",
-  // PYTHON = "python",
   BROWSER = "browser",
   TERMINAL = "terminal",
-  // IMAGE_GENERATOR = "imagegenerator"
+  // REASON_LLM = "reason-llm",
 
   // Pentest tools
   SQLI_EXPLOITER = "sqli-exploiter",

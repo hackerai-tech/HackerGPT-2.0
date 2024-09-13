@@ -285,14 +285,6 @@ export const Message: FC<MessageProps> = ({
                           <div>Using Enhanced Search...</div>
                         </div>
                       )
-                    // case PluginID.PYTHON:
-                    //   return (
-                    //     <div className="flex animate-pulse items-center space-x-2">
-                    //       <IconCode size={20} />
-
-                    //       <div>Using Code Interpreter...</div>
-                    //     </div>
-                    //   )
                     case PluginID.TERMINAL:
                       return (
                         <div className="flex animate-pulse items-center space-x-2">
@@ -300,11 +292,10 @@ export const Message: FC<MessageProps> = ({
                           <div>Executing command in Terminal...</div>
                         </div>
                       )
-                    // case PluginID.IMAGE_GENERATOR:
+                    // case PluginID.REASON_LLM:
                     //   return (
                     //     <div className="flex animate-pulse items-center space-x-2">
-                    //       <IconPhoto size={20} />
-                    //       <div>Generating image...</div>
+                    //       <div>Thinking...</div>
                     //     </div>
                     //   )
                     default:
