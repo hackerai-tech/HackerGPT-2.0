@@ -47,7 +47,7 @@ const llmConfig = {
     // For browser tool
     pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${systemPromptEnding}`,
     // For webSearch tool
-    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`,
+    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`
     // For reasonLLM
     // reasonLLM: `${getPentestGPTInfo(initialSystemPrompt)}\n${systemPromptEnding}`
   },
