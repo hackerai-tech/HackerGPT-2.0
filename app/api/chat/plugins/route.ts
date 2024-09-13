@@ -81,7 +81,8 @@ export async function POST(request: Request) {
     const terminalPlugins = [
       PluginID.SQLI_EXPLOITER,
       PluginID.SSL_SCANNER,
-      PluginID.DNS_SCANNER
+      PluginID.DNS_SCANNER,
+      PluginID.PORT_SCANNER
     ]
 
     if (terminalPlugins.includes(selectedPlugin as PluginID)) {

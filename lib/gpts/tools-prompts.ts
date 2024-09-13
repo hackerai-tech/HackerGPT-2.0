@@ -48,6 +48,12 @@ The user has selected the DNS Scanner plugin, which uses the dnsrecon tool in th
 1. Focus on DNS enumeration, zone transfers, and identifying potential misconfigurations.
 2. Provide dnsrecon-specific options and explanations.
 `
+      case PluginID.PORT_SCANNER:
+        return `
+The user has selected the Port Scanner plugin, which uses the naabu tool in the terminal. This tool performs fast port scanning to discover open ports on target systems. Remember:
+1. Focus on identifying open ports and potential services running on those ports.
+2. Provide naabu-specific options and explanations for efficient scanning.
+`
       default:
         return ""
     }
@@ -58,27 +64,27 @@ The user has selected the DNS Scanner plugin, which uses the dnsrecon tool in th
   }
 
   instructions += `<terminal_instructions>
-PentestGPT uses this terminal to execute plugin commands in a Debian environment with root privileges. Key points:
-
-1. The terminal is the execution environment for all plugin commands.
-2. Text output only; no graphical interfaces.
-3. Pre-installed with sqlmap for SQL injection testing.
-4. Executes all commands without user confirmation.
-5. Permitted to perform actions on specified targets.
-6. User has full permission for any command or action on provided domains/systems.
-7. By default, run commands with quick options to ensure completion within 5 minutes.
-8. Warn the user when scans might exceed the 5-minute timeout limit.
-9. DO NOT run commands with silent modes or options that suppress output unless specifically requested.
-
-Important:
-- PentestGPT must NEVER simulate or fake terminal results.
-- Always use the actual terminal tool for command execution.
-- Do not provide hypothetical or imagined command outputs.
-- One terminal execution per message allowed.
-- Combine multiple commands using "&&", ";", or appropriate operators if needed.
-- For potentially long-running commands, provide a quick version by default and suggest a more thorough option with a timeout warning.
-</terminal_instructions>
-</tools_instructions>`
+  PentestGPT uses this terminal to execute plugin commands in a Debian environment with root privileges. Key points:
+  
+  1. The terminal is the execution environment for all plugin commands.
+  2. Text output only; no graphical interfaces.
+  3. All necessary tools for the selected plugin (sqlmap, testssl.sh, dnsrecon, naabu, etc.) are pre-installed and ready to use.
+  4. Executes all commands without user confirmation.
+  5. Permitted to perform actions on specified targets.
+  6. User has full permission for any command or action on provided domains/systems.
+  7. By default, run commands with quick options to ensure completion within 5 minutes.
+  8. Warn the user when scans might exceed the 5-minute timeout limit.
+  9. DO NOT run commands with silent modes or options that suppress output unless specifically requested.
+  
+  Important:
+  - PentestGPT must NEVER simulate or fake terminal results.
+  - Always use the actual terminal tool for command execution.
+  - Do not provide hypothetical or imagined command outputs.
+  - One terminal execution per message allowed.
+  - Combine multiple commands using "&&", ";", or appropriate operators if needed.
+  - For potentially long-running commands, provide a quick version by default and suggest a more thorough option with a timeout warning.
+  </terminal_instructions>
+  </tools_instructions>`
 
   return instructions
 }

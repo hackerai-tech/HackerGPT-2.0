@@ -1,11 +1,8 @@
 import { handleCvemapRequest } from "./cvemap/cvemap.content"
 import { handleSubfinderRequest } from "./subfinder/subfinder.content"
 // Tools
-import { handlePortscannerRequest } from "../tools/port-scanner/port-scanner-content"
-import { handleSslscannerRequest } from "../tools/ssl-scanner/ssl-scanner-content"
 import { handleWhoisRequest } from "../tools/whois-lookup/whois-lookup-content"
 import { handleWafdetectorRequest } from "../tools/waf-detector/waf-detector-content"
-import { handleDnsscannerRequest } from "../tools/dns-scanner/dns-scanner-content"
 
 import { OpenRouterStream } from "@/lib/plugins/openrouterstream"
 
@@ -34,22 +31,16 @@ export const pluginIdToHandlerMapping: pluginIdToHandlerMapping = {
   cvemap: handleCvemapRequest,
   subfinder: handleSubfinderRequest,
   // Tools
-  portscanner: handlePortscannerRequest,
-  sslscanner: handleSslscannerRequest,
   whois: handleWhoisRequest,
-  wafdetector: handleWafdetectorRequest,
-  dnsscanner: handleDnsscannerRequest
+  wafdetector: handleWafdetectorRequest
 }
 
 const commandHandlers: CommandHandler = {
   handleCvemapRequest,
   handleSubfinderRequest,
   // Tools
-  handlePortscannerRequest,
-  handleSslscannerRequest,
   handleWhoisRequest,
-  handleWafdetectorRequest,
-  handleDnsscannerRequest
+  handleWafdetectorRequest
 }
 
 export const isCommand = (commandName: string, message: string) => {

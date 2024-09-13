@@ -27,7 +27,8 @@ const terminalPlugins = [
   PluginID.TERMINAL,
   PluginID.SQLI_EXPLOITER,
   PluginID.SSL_SCANNER,
-  PluginID.DNS_SCANNER
+  PluginID.DNS_SCANNER,
+  PluginID.PORT_SCANNER
 ]
 
 export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({

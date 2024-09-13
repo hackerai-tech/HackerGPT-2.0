@@ -208,12 +208,12 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 10,
     name: "Port Scanner",
-    value: PluginID.PORTSCANNER,
+    value: PluginID.PORT_SCANNER,
     categories: ["recon"],
     icon: "https://cdn-icons-png.flaticon.com/128/7338/7338907.png",
     invertInDarkMode: true,
     description: "Detect open ports and fingerprint services",
-    githubRepoUrl: pluginUrls.PORTSCANNER,
+    githubRepoUrl: pluginUrls.PORT_SCANNER,
     isInstalled: false,
     isPremium: true,
     createdAt: "2024-06-29",
@@ -237,7 +237,8 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "Port Scanner Help",
         description: "Display usage instructions and available options",
-        chatMessage: "/portscanner -help"
+        chatMessage:
+          "Display usage instructions and available options for naabu"
       }
     ]
   },
