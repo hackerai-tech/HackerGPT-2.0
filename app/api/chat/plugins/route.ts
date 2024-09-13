@@ -28,8 +28,7 @@ export async function POST(request: Request) {
   const freePlugins: PluginID[] = [
     PluginID.CVEMAP,
     PluginID.SUBFINDER,
-    PluginID.WHOIS,
-    PluginID.WAFDETECTOR
+    PluginID.WHOIS
   ]
 
   try {
@@ -82,7 +81,8 @@ export async function POST(request: Request) {
       PluginID.SQLI_EXPLOITER,
       PluginID.SSL_SCANNER,
       PluginID.DNS_SCANNER,
-      PluginID.PORT_SCANNER
+      PluginID.PORT_SCANNER,
+      PluginID.WAF_DETECTOR
     ]
 
     if (terminalPlugins.includes(selectedPlugin as PluginID)) {

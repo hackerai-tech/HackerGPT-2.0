@@ -68,12 +68,12 @@ export async function buildFinalMessages(
     selectedPlugin === PluginID.SUBFINDER ||
     // Tools
     selectedPlugin === PluginID.WHOIS ||
-    selectedPlugin === PluginID.WAFDETECTOR ||
     // Pentest tools
     selectedPlugin === PluginID.SSL_SCANNER ||
     selectedPlugin === PluginID.SQLI_EXPLOITER ||
     selectedPlugin === PluginID.DNS_SCANNER ||
-    selectedPlugin === PluginID.PORT_SCANNER
+    selectedPlugin === PluginID.PORT_SCANNER ||
+    selectedPlugin === PluginID.WAF_DETECTOR
   ) {
     CHUNK_SIZE = 4096
   }

@@ -54,6 +54,12 @@ The user has selected the Port Scanner plugin, which uses the naabu tool in the 
 1. Focus on identifying open ports and potential services running on those ports.
 2. Provide naabu-specific options and explanations for efficient scanning.
 `
+      case PluginID.WAF_DETECTOR:
+        return `
+The user has selected the WAF Detector plugin, which uses the wafw00f tool in the terminal. This tool fingerprints Web Application Firewalls (WAFs) behind target applications. Remember:
+1. Focus on identifying and fingerprinting WAFs protecting the target web application.
+2. Provide wafw00f-specific options and explanations for effective WAF detection.
+`
       default:
         return ""
     }

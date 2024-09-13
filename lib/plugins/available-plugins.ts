@@ -147,14 +147,14 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 4,
     name: "WAF Detector",
-    value: PluginID.WAFDETECTOR,
+    value: PluginID.WAF_DETECTOR,
     categories: ["recon"],
     icon: "https://cdn-icons-png.flaticon.com/128/6993/6993518.png",
     invertInDarkMode: true,
     description: "Fingerprint the Web Application Firewall behind target app",
-    githubRepoUrl: pluginUrls.WAFDETECTOR,
+    githubRepoUrl: pluginUrls.WAF_DETECTOR,
     isInstalled: false,
-    isPremium: false,
+    isPremium: true,
     createdAt: "2024-08-03",
     starters: [
       {
@@ -165,7 +165,7 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "WAF Detector Help",
         description: "How does the WAF Detector plugin work?",
-        chatMessage: "/wafdetector -help"
+        chatMessage: "How does the WAF Detector plugin work?"
       }
     ]
   },
