@@ -33,7 +33,6 @@ export enum PluginID {
   PORTSCANNER = "portscanner",
   WHOIS = "whois",
   WAFDETECTOR = "wafdetector",
-  DNSSCANNER = "dnsscanner",
   // Default tools
   WEB_SEARCH = "websearch",
   // PYTHON = "python",
@@ -43,7 +42,8 @@ export enum PluginID {
 
   // Pentest tools
   SQLI_EXPLOITER = "sqliexploiter",
-  SSL_SCANNER = "sslscanner"
+  SSL_SCANNER = "sslscanner",
+  DNS_SCANNER = "dnsscanner"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -62,8 +62,8 @@ export const pluginUrls: PluginUrls = {
   PORTSCANNER: "https://github.com/projectdiscovery/naabu",
   WHOIS: "https://www.whois.com/whois/",
   WAFDETECTOR: "https://github.com/EnableSecurity/wafw00f",
-  DNSSCANNER: "https://github.com/darkoperator/dnsrecon",
   // Pentest tools
   SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap",
-  SSL_SCANNER: "https://github.com/drwetter/testssl.sh/"
+  SSL_SCANNER: "https://github.com/drwetter/testssl.sh/",
+  DNS_SCANNER: "https://github.com/darkoperator/dnsrecon"
 }

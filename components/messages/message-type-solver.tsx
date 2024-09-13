@@ -26,7 +26,8 @@ const extractOutputFilename = (content: string) => {
 const terminalPlugins = [
   PluginID.TERMINAL,
   PluginID.SQLI_EXPLOITER,
-  PluginID.SSL_SCANNER
+  PluginID.SSL_SCANNER,
+  PluginID.DNS_SCANNER
 ]
 
 export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({

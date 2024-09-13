@@ -78,7 +78,11 @@ export async function POST(request: Request) {
       selectedPlugin as PluginID
     )) as any
 
-    const terminalPlugins = [PluginID.SQLI_EXPLOITER, PluginID.SSL_SCANNER]
+    const terminalPlugins = [
+      PluginID.SQLI_EXPLOITER,
+      PluginID.SSL_SCANNER,
+      PluginID.DNS_SCANNER
+    ]
 
     if (terminalPlugins.includes(selectedPlugin as PluginID)) {
       return await commandGeneratorHandler({

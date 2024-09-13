@@ -244,13 +244,13 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 11,
     name: "DNS Scanner",
-    value: PluginID.DNSSCANNER,
+    value: PluginID.DNS_SCANNER,
     categories: ["vuln-scanners"],
     icon: "https://cdn-icons-png.flaticon.com/128/1183/1183697.png",
     invertInDarkMode: true,
     description:
       "Perform DNS recon and discover misconfigurations in DNS servers",
-    githubRepoUrl: pluginUrls.DNSSCANNER,
+    githubRepoUrl: pluginUrls.DNS_SCANNER,
     isInstalled: false,
     isPremium: true,
     createdAt: "2024-08-05",
@@ -268,7 +268,8 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "DNS Scanner Help",
         description: "Display usage instructions and available options",
-        chatMessage: "/dnsscanner -help"
+        chatMessage:
+          "Display usage instructions and available options for dnsrecon"
       }
     ]
   },

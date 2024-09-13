@@ -11,7 +11,7 @@ const getPluginSpecificInstructions = (pluginID: PluginID): string => {
 Common instructions for all plugins:
 1. Use the correct syntax for the selected tool's commands.
 2. Interpret user requests and proactively execute appropriate commands.
-3. Explain each command's purpose and potential impact before and after execution.
+3. Explain each command's purpose and potential impact before if needed.
 4. All commands will be executed through the terminal without asking for permission.
 5. Automatically run '--help' or similar commands to get options when needed.
 6. Provide relevant options and explanations based on the user's intent.
@@ -26,13 +26,13 @@ Common instructions for all plugins:
     switch (pluginID) {
       case PluginID.SQLI_EXPLOITER:
         return `
-The user has selected the SQL Injection Exploiter plugin using sqlmap. This tool identifies and exploits SQL injection vulnerabilities. Remember:
-1. Focus on SQL injection vulnerabilities and exploitation techniques.
-2. Provide sqlmap-specific options and explanations.
-`
+  The user has selected the SQL Injection Exploiter plugin, which uses the sqlmap tool in the terminal. This tool identifies and exploits SQL injection vulnerabilities. Remember:
+  1. Focus on SQL injection vulnerabilities and exploitation techniques.
+  2. Provide sqlmap-specific options and explanations.
+  `
       case PluginID.SSL_SCANNER:
         return `
-The user has selected the SSL Scanner plugin using testssl.sh to find SSL/TLS issues like POODLE, Heartbleed, DROWN, ROBOT, etc. Remember:
+The user has selected the SSL Scanner plugin, which uses the testssl.sh tool in the terminal to find SSL/TLS issues like POODLE, Heartbleed, DROWN, ROBOT, etc. Remember:
 1. Focus on SSL/TLS vulnerabilities and scanning techniques.
 2. Pay special attention to well-known vulnerabilities like POODLE, Heartbleed, DROWN, and ROBOT.
 3. Provide clear explanations of any SSL/TLS issues discovered during the scan.
@@ -41,6 +41,12 @@ The user has selected the SSL Scanner plugin using testssl.sh to find SSL/TLS is
    - '-U' or '--vulnerable' to test for all applicable vulnerabilities
    - '-p' or '--protocols' to check TLS/SSL protocols
    - '-S' or '--server-defaults' to display the server's default picks and certificate info
+`
+      case PluginID.DNS_SCANNER:
+        return `
+The user has selected the DNS Scanner plugin, which uses the dnsrecon tool in the terminal. This tool performs DNS reconnaissance and discovers misconfigurations in DNS servers. Remember:
+1. Focus on DNS enumeration, zone transfers, and identifying potential misconfigurations.
+2. Provide dnsrecon-specific options and explanations.
 `
       default:
         return ""
