@@ -31,7 +31,6 @@ export enum PluginID {
   PLUGINS_STORE = "pluginselector",
   // Tools
   PORTSCANNER = "portscanner",
-  SSLSCANNER = "sslscanner",
   WHOIS = "whois",
   WAFDETECTOR = "wafdetector",
   DNSSCANNER = "dnsscanner",
@@ -42,8 +41,9 @@ export enum PluginID {
   TERMINAL = "terminal",
   // IMAGE_GENERATOR = "imagegenerator"
 
-  // GPTs
-  SQLI_EXPLOITER = "sqliexploiter"
+  // Pentest tools
+  SQLI_EXPLOITER = "sqliexploiter",
+  SSL_SCANNER = "sslscanner"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -60,10 +60,10 @@ export const pluginUrls: PluginUrls = {
   SUBFINDER: "https://github.com/projectdiscovery/subfinder",
   // Tools
   PORTSCANNER: "https://github.com/projectdiscovery/naabu",
-  SSLSCANNER: "https://github.com/drwetter/testssl.sh/",
   WHOIS: "https://www.whois.com/whois/",
   WAFDETECTOR: "https://github.com/EnableSecurity/wafw00f",
   DNSSCANNER: "https://github.com/darkoperator/dnsrecon",
-  // GPTs
-  SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap"
+  // Pentest tools
+  SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap",
+  SSL_SCANNER: "https://github.com/drwetter/testssl.sh/"
 }

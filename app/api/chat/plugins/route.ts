@@ -78,12 +78,14 @@ export async function POST(request: Request) {
       selectedPlugin as PluginID
     )) as any
 
-    if (selectedPlugin === PluginID.SQLI_EXPLOITER) {
+    const terminalPlugins = [PluginID.SQLI_EXPLOITER, PluginID.SSL_SCANNER]
+
+    if (terminalPlugins.includes(selectedPlugin as PluginID)) {
       return await commandGeneratorHandler({
         userID: profile.user_id,
         profile_context: profile.profile_context,
         messages: formattedMessages,
-        pluginID: selectedPlugin
+        pluginID: selectedPlugin as PluginID
       })
     }
 

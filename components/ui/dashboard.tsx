@@ -25,7 +25,7 @@ import {
   useEffect
 } from "react"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
-import GPTsStorePage from "@/components/gpts/gpts-store"
+import ToolsStorePage from "@/components/gpts/tools-store"
 import {
   ActionTypes,
   getInstalledPlugins,
@@ -111,7 +111,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     switch (contentType) {
       case "gpts":
         return (
-          <GPTsStorePage
+          <ToolsStorePage
             pluginsData={updatedAvailablePlugins}
             installPlugin={installPlugin}
             uninstallPlugin={uninstallPlugin}

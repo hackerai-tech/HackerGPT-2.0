@@ -275,13 +275,13 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 14,
     name: "SSL/TLS Scanner",
-    value: PluginID.SSLSCANNER,
+    value: PluginID.SSL_SCANNER,
     categories: ["vuln-scanners"],
     icon: "https://cdn-icons-png.flaticon.com/128/1034/1034605.png",
     invertInDarkMode: true,
     description:
       "Find SSL/TLS issues like POODLE, Heartbleed, DROWN, ROBOT, etc",
-    githubRepoUrl: pluginUrls.SSLSCANNER,
+    githubRepoUrl: pluginUrls.SSL_SCANNER,
     isInstalled: false,
     isPremium: true,
     createdAt: "2024-07-11",
@@ -304,7 +304,8 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "SSL/TLS Scanner Help",
         description: "Display usage instructions and available options",
-        chatMessage: "/sslscanner -help"
+        chatMessage:
+          "Display usage instructions and available options for testssl.sh"
       }
     ]
   },

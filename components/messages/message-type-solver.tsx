@@ -23,7 +23,11 @@ const extractOutputFilename = (content: string) => {
   return filenameMatch ? filenameMatch[1].trim() : undefined
 }
 
-const terminalPlugins = [PluginID.TERMINAL, PluginID.SQLI_EXPLOITER]
+const terminalPlugins = [
+  PluginID.TERMINAL,
+  PluginID.SQLI_EXPLOITER,
+  PluginID.SSL_SCANNER
+]
 
 export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   previousMessage,

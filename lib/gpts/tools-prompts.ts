@@ -7,18 +7,40 @@ import { PluginID } from "@/types/plugins"
 const getPluginSpecificInstructions = (pluginID: PluginID): string => {
   let instructions = "<tools_instructions>\n\n"
 
+  const commonInstructions = `
+Common instructions for all plugins:
+1. Use the correct syntax for the selected tool's commands.
+2. Interpret user requests and proactively execute appropriate commands.
+3. Explain each command's purpose and potential impact before and after execution.
+4. All commands will be executed through the terminal without asking for permission.
+5. Automatically run '--help' or similar commands to get options when needed.
+6. Provide relevant options and explanations based on the user's intent.
+7. Assume the user wants to use the selected plugin - proceed with operations unless told otherwise.
+8. Warn users when scans might exceed the 5-minute timeout limit.
+9. Always provide the full command being executed for transparency.
+`
+
+  instructions += `<common_instructions>\n${commonInstructions}</common_instructions>\n\n`
+
   const pluginPrompt = (() => {
     switch (pluginID) {
       case PluginID.SQLI_EXPLOITER:
         return `
-The user has selected the SQL Injection Exploiter plugin and wants to use it. This tool identifies and exploits SQL injection vulnerabilities. Remember:
-1. Use sqlmap syntax for commands.
-2. Interpret user requests and proactively execute appropriate sqlmap commands.
-3. Explain each command's purpose and potential impact before and after execution.
-4. All sqlmap commands will be executed through the terminal without asking for permission.
-5. Automatically run 'sqlmap --help' or similar commands to get options when needed.
-6. Provide relevant sqlmap options and explanations based on the user's intent.
-7. Assume the user wants to use this plugin - proceed with sqlmap operations unless told otherwise.
+The user has selected the SQL Injection Exploiter plugin using sqlmap. This tool identifies and exploits SQL injection vulnerabilities. Remember:
+1. Focus on SQL injection vulnerabilities and exploitation techniques.
+2. Provide sqlmap-specific options and explanations.
+`
+      case PluginID.SSL_SCANNER:
+        return `
+The user has selected the SSL Scanner plugin using testssl.sh to find SSL/TLS issues like POODLE, Heartbleed, DROWN, ROBOT, etc. Remember:
+1. Focus on SSL/TLS vulnerabilities and scanning techniques.
+2. Pay special attention to well-known vulnerabilities like POODLE, Heartbleed, DROWN, and ROBOT.
+3. Provide clear explanations of any SSL/TLS issues discovered during the scan.
+4. For deep scans, use a combination of options to provide comprehensive results, such as:
+   - '--full' for including tests for implementation bugs and cipher per protocol
+   - '-U' or '--vulnerable' to test for all applicable vulnerabilities
+   - '-p' or '--protocols' to check TLS/SSL protocols
+   - '-S' or '--server-defaults' to display the server's default picks and certificate info
 `
       default:
         return ""
