@@ -60,6 +60,12 @@ The user has selected the WAF Detector plugin, which uses the wafw00f tool in th
 1. Focus on identifying and fingerprinting WAFs protecting the target web application.
 2. Provide wafw00f-specific options and explanations for effective WAF detection.
 `
+      case PluginID.WHOIS_LOOKUP:
+        return `
+The user has selected the WHOIS Lookup plugin, which uses the whois tool in the terminal. This tool retrieves domain registration information and network details. Remember:
+1. Focus on gathering domain ownership, registration dates, name servers, and other relevant information.
+2. Provide whois-specific options and explanations for effective domain information retrieval.
+`
       default:
         return ""
     }
@@ -74,7 +80,7 @@ The user has selected the WAF Detector plugin, which uses the wafw00f tool in th
   
   1. The terminal is the execution environment for all plugin commands.
   2. Text output only; no graphical interfaces.
-  3. All necessary tools for the selected plugin (sqlmap, testssl.sh, dnsrecon, naabu, etc.) are pre-installed and ready to use.
+  3. All necessary tools for the selected plugin (sqlmap, testssl.sh, dnsrecon, naabu, wafw00f, whois, etc.) are pre-installed and ready to use.
   4. Executes all commands without user confirmation.
   5. Permitted to perform actions on specified targets.
   6. User has full permission for any command or action on provided domains/systems.

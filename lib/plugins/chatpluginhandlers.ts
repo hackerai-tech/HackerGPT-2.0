@@ -1,7 +1,5 @@
 import { handleCvemapRequest } from "./cvemap/cvemap.content"
 import { handleSubfinderRequest } from "./subfinder/subfinder.content"
-// Tools
-import { handleWhoisRequest } from "../tools/whois-lookup/whois-lookup-content"
 
 import { OpenRouterStream } from "@/lib/plugins/openrouterstream"
 
@@ -28,16 +26,12 @@ type pluginIdToHandlerMapping = {
 
 export const pluginIdToHandlerMapping: pluginIdToHandlerMapping = {
   cvemap: handleCvemapRequest,
-  subfinder: handleSubfinderRequest,
-  // Tools
-  whois: handleWhoisRequest
+  subfinder: handleSubfinderRequest
 }
 
 const commandHandlers: CommandHandler = {
   handleCvemapRequest,
-  handleSubfinderRequest,
-  // Tools
-  handleWhoisRequest
+  handleSubfinderRequest
 }
 
 export const isCommand = (commandName: string, message: string) => {

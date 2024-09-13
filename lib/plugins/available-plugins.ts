@@ -172,15 +172,15 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 5,
     name: "Whois Lookup",
-    categories: [],
-    value: PluginID.WHOIS,
+    categories: ["recon"],
+    value: PluginID.WHOIS_LOOKUP,
     icon: "https://cdn-icons-png.flaticon.com/128/15226/15226100.png",
     invertInDarkMode: true,
     description:
       "Retrieve ownership and registration details for domains and IP addresses",
-    githubRepoUrl: pluginUrls.WHOIS,
+    githubRepoUrl: pluginUrls.WHOIS_LOOKUP,
     isInstalled: false,
-    isPremium: false,
+    isPremium: true,
     createdAt: "2024-07-28",
     starters: [
       {
@@ -201,7 +201,7 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "Whois Lookup Help",
         description: "How does the Whois Lookup plugin work?",
-        chatMessage: "/whois -help"
+        chatMessage: "How does the Whois Lookup plugin work?"
       }
     ]
   },
@@ -236,9 +236,8 @@ export const availablePlugins: PluginSummary[] = [
       },
       {
         title: "Port Scanner Help",
-        description: "Display usage instructions and available options",
-        chatMessage:
-          "Display usage instructions and available options for naabu"
+        description: "How does the Port Scanner plugin work?",
+        chatMessage: "How does the Port Scanner plugin work?"
       }
     ]
   },
@@ -268,9 +267,8 @@ export const availablePlugins: PluginSummary[] = [
       },
       {
         title: "DNS Scanner Help",
-        description: "Display usage instructions and available options",
-        chatMessage:
-          "Display usage instructions and available options for dnsrecon"
+        description: "How does the DNS Scanner plugin work?",
+        chatMessage: "How does the DNS Scanner plugin work?"
       }
     ]
   },
@@ -305,9 +303,8 @@ export const availablePlugins: PluginSummary[] = [
       },
       {
         title: "SSL/TLS Scanner Help",
-        description: "Display usage instructions and available options",
-        chatMessage:
-          "Display usage instructions and available options for testssl.sh"
+        description: "How does the SSL/TLS Scanner plugin work?",
+        chatMessage: "How does the SSL/TLS Scanner plugin work?"
       }
     ]
   },
@@ -344,9 +341,8 @@ export const availablePlugins: PluginSummary[] = [
       },
       {
         title: "SQLi Exploiter Help",
-        description: "Display usage instructions and available options",
-        chatMessage:
-          "Display usage instructions and available options for sqlmap"
+        description: "How does the SQLi Exploiter plugin work?",
+        chatMessage: "How does the SQLi Exploiter plugin work?"
       }
     ]
   },
