@@ -6,7 +6,7 @@ import {
   filterEmptyAssistantMessages,
   toVercelChatMessages
 } from "@/lib/build-prompt"
-import { terminalExecutor } from "./gpts-terminal"
+import { terminalExecutor } from "./tools-terminal"
 import { z } from "zod"
 import { APIError } from "@/lib/models/llm/api-error"
 import {
@@ -14,7 +14,7 @@ import {
   updateSystemMessage,
   wordReplacements
 } from "../ai-helper"
-import { getCustomGPTPrompt } from "./gpts-prompts"
+import { getCustomGPTPrompt } from "./tools-prompts"
 import { PluginID } from "@/types/plugins"
 
 const ENCODER = new TextEncoder()

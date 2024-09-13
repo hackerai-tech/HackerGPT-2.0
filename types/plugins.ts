@@ -30,20 +30,18 @@ export enum PluginID {
   ENHANCED_SEARCH = "enhancedsearch",
   PLUGINS_STORE = "pluginselector",
   // Tools
-  PORTSCANNER = "portscanner",
-  SSLSCANNER = "sslscanner",
-  WHOIS = "whois",
-  WAFDETECTOR = "wafdetector",
-  DNSSCANNER = "dnsscanner",
-  // Default tools
   WEB_SEARCH = "websearch",
-  // PYTHON = "python",
   BROWSER = "browser",
   TERMINAL = "terminal",
-  // IMAGE_GENERATOR = "imagegenerator"
+  // REASON_LLM = "reason-llm",
 
-  // GPTs
-  SQLI_EXPLOITER = "sqliexploiter"
+  // Pentest tools
+  SQLI_EXPLOITER = "sqli-exploiter",
+  SSL_SCANNER = "ssl-scanner",
+  DNS_SCANNER = "dns-scanner",
+  PORT_SCANNER = "port-scanner",
+  WAF_DETECTOR = "waf-detector",
+  WHOIS_LOOKUP = "whois-lookup"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -58,12 +56,11 @@ export const pluginUrls: PluginUrls = {
   PENTESTGPT: "https://github.com/hackerai-tech/PentestGPT",
   CVEMAP: "https://github.com/projectdiscovery/cvemap",
   SUBFINDER: "https://github.com/projectdiscovery/subfinder",
-  // Tools
-  PORTSCANNER: "https://github.com/projectdiscovery/naabu",
-  SSLSCANNER: "https://github.com/drwetter/testssl.sh/",
-  WHOIS: "https://www.whois.com/whois/",
-  WAFDETECTOR: "https://github.com/EnableSecurity/wafw00f",
-  DNSSCANNER: "https://github.com/darkoperator/dnsrecon",
-  // GPTs
-  SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap"
+  // Pentest tools
+  SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap",
+  SSL_SCANNER: "https://github.com/drwetter/testssl.sh/",
+  DNS_SCANNER: "https://github.com/darkoperator/dnsrecon",
+  PORT_SCANNER: "https://github.com/projectdiscovery/naabu",
+  WAF_DETECTOR: "https://github.com/EnableSecurity/wafw00f",
+  WHOIS_LOOKUP: "https://www.whois.com/whois/"
 }

@@ -25,12 +25,7 @@ export async function POST(request: Request) {
     fileData?: { fileName: string; fileContent: string }[]
   }
 
-  const freePlugins: PluginID[] = [
-    PluginID.CVEMAP,
-    PluginID.SUBFINDER,
-    PluginID.WHOIS,
-    PluginID.WAFDETECTOR
-  ]
+  const freePlugins: PluginID[] = [PluginID.CVEMAP, PluginID.SUBFINDER]
 
   try {
     const profile = await getAIProfile()
@@ -78,12 +73,21 @@ export async function POST(request: Request) {
       selectedPlugin as PluginID
     )) as any
 
-    if (selectedPlugin === PluginID.SQLI_EXPLOITER) {
+    const terminalPlugins = [
+      PluginID.SQLI_EXPLOITER,
+      PluginID.SSL_SCANNER,
+      PluginID.DNS_SCANNER,
+      PluginID.PORT_SCANNER,
+      PluginID.WAF_DETECTOR,
+      PluginID.WHOIS_LOOKUP
+    ]
+
+    if (terminalPlugins.includes(selectedPlugin as PluginID)) {
       return await commandGeneratorHandler({
         userID: profile.user_id,
         profile_context: profile.profile_context,
         messages: formattedMessages,
-        pluginID: selectedPlugin
+        pluginID: selectedPlugin as PluginID
       })
     }
 

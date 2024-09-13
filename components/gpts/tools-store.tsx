@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext, useRef } from "react"
 import { PentestGPTContext } from "@/context/context"
 import { PluginID, PluginSummary } from "@/types/plugins"
 import { useChatHandler } from "../chat/chat-hooks/use-chat-handler"
-import { Header, SearchBar, CategorySelection } from "./gpts-header"
-import { PluginCard } from "./gpts-card"
+import { Header, SearchBar, CategorySelection } from "./tools"
+import { PluginCard } from "./tools-card"
 
 interface PluginStorePageProps {
   pluginsData: PluginSummary[]
@@ -11,7 +11,7 @@ interface PluginStorePageProps {
   uninstallPlugin: (id: number) => void
 }
 
-function GPTsStorePage({
+function ToolsStorePage({
   pluginsData,
   installPlugin,
   uninstallPlugin
@@ -132,4 +132,4 @@ function GPTsStorePage({
   )
 }
 
-export default GPTsStorePage
+export default ToolsStorePage

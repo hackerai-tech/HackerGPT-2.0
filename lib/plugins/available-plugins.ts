@@ -147,14 +147,14 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 4,
     name: "WAF Detector",
-    value: PluginID.WAFDETECTOR,
+    value: PluginID.WAF_DETECTOR,
     categories: ["recon"],
     icon: "https://cdn-icons-png.flaticon.com/128/6993/6993518.png",
     invertInDarkMode: true,
     description: "Fingerprint the Web Application Firewall behind target app",
-    githubRepoUrl: pluginUrls.WAFDETECTOR,
+    githubRepoUrl: pluginUrls.WAF_DETECTOR,
     isInstalled: false,
-    isPremium: false,
+    isPremium: true,
     createdAt: "2024-08-03",
     starters: [
       {
@@ -165,22 +165,22 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "WAF Detector Help",
         description: "How does the WAF Detector plugin work?",
-        chatMessage: "/wafdetector -help"
+        chatMessage: "How does the WAF Detector plugin work?"
       }
     ]
   },
   {
     id: 5,
     name: "Whois Lookup",
-    categories: [],
-    value: PluginID.WHOIS,
+    categories: ["recon"],
+    value: PluginID.WHOIS_LOOKUP,
     icon: "https://cdn-icons-png.flaticon.com/128/15226/15226100.png",
     invertInDarkMode: true,
     description:
       "Retrieve ownership and registration details for domains and IP addresses",
-    githubRepoUrl: pluginUrls.WHOIS,
+    githubRepoUrl: pluginUrls.WHOIS_LOOKUP,
     isInstalled: false,
-    isPremium: false,
+    isPremium: true,
     createdAt: "2024-07-28",
     starters: [
       {
@@ -201,19 +201,19 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "Whois Lookup Help",
         description: "How does the Whois Lookup plugin work?",
-        chatMessage: "/whois -help"
+        chatMessage: "How does the Whois Lookup plugin work?"
       }
     ]
   },
   {
     id: 10,
     name: "Port Scanner",
-    value: PluginID.PORTSCANNER,
+    value: PluginID.PORT_SCANNER,
     categories: ["recon"],
     icon: "https://cdn-icons-png.flaticon.com/128/7338/7338907.png",
     invertInDarkMode: true,
     description: "Detect open ports and fingerprint services",
-    githubRepoUrl: pluginUrls.PORTSCANNER,
+    githubRepoUrl: pluginUrls.PORT_SCANNER,
     isInstalled: false,
     isPremium: true,
     createdAt: "2024-06-29",
@@ -236,21 +236,21 @@ export const availablePlugins: PluginSummary[] = [
       },
       {
         title: "Port Scanner Help",
-        description: "Display usage instructions and available options",
-        chatMessage: "/portscanner -help"
+        description: "How does the Port Scanner plugin work?",
+        chatMessage: "How does the Port Scanner plugin work?"
       }
     ]
   },
   {
     id: 11,
     name: "DNS Scanner",
-    value: PluginID.DNSSCANNER,
+    value: PluginID.DNS_SCANNER,
     categories: ["vuln-scanners"],
     icon: "https://cdn-icons-png.flaticon.com/128/1183/1183697.png",
     invertInDarkMode: true,
     description:
       "Perform DNS recon and discover misconfigurations in DNS servers",
-    githubRepoUrl: pluginUrls.DNSSCANNER,
+    githubRepoUrl: pluginUrls.DNS_SCANNER,
     isInstalled: false,
     isPremium: true,
     createdAt: "2024-08-05",
@@ -267,21 +267,21 @@ export const availablePlugins: PluginSummary[] = [
       },
       {
         title: "DNS Scanner Help",
-        description: "Display usage instructions and available options",
-        chatMessage: "/dnsscanner -help"
+        description: "How does the DNS Scanner plugin work?",
+        chatMessage: "How does the DNS Scanner plugin work?"
       }
     ]
   },
   {
     id: 14,
     name: "SSL/TLS Scanner",
-    value: PluginID.SSLSCANNER,
+    value: PluginID.SSL_SCANNER,
     categories: ["vuln-scanners"],
     icon: "https://cdn-icons-png.flaticon.com/128/1034/1034605.png",
     invertInDarkMode: true,
     description:
       "Find SSL/TLS issues like POODLE, Heartbleed, DROWN, ROBOT, etc",
-    githubRepoUrl: pluginUrls.SSLSCANNER,
+    githubRepoUrl: pluginUrls.SSL_SCANNER,
     isInstalled: false,
     isPremium: true,
     createdAt: "2024-07-11",
@@ -303,8 +303,8 @@ export const availablePlugins: PluginSummary[] = [
       },
       {
         title: "SSL/TLS Scanner Help",
-        description: "Display usage instructions and available options",
-        chatMessage: "/sslscanner -help"
+        description: "How does the SSL/TLS Scanner plugin work?",
+        chatMessage: "How does the SSL/TLS Scanner plugin work?"
       }
     ]
   },
@@ -341,9 +341,8 @@ export const availablePlugins: PluginSummary[] = [
       },
       {
         title: "SQLi Exploiter Help",
-        description: "Display usage instructions and available options",
-        chatMessage:
-          "Display usage instructions and available options for sqlmap"
+        description: "How does the SQLi Exploiter plugin work?",
+        chatMessage: "How does the SQLi Exploiter plugin work?"
       }
     ]
   },

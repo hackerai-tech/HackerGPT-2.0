@@ -61,12 +61,13 @@ export async function buildFinalMessages(
   if (
     selectedPlugin === PluginID.CVEMAP ||
     selectedPlugin === PluginID.SUBFINDER ||
-    // Tools
-    selectedPlugin === PluginID.PORTSCANNER ||
-    selectedPlugin === PluginID.SSLSCANNER ||
-    selectedPlugin === PluginID.DNSSCANNER ||
-    selectedPlugin === PluginID.WHOIS ||
-    selectedPlugin === PluginID.WAFDETECTOR
+    // Pentest tools
+    selectedPlugin === PluginID.SSL_SCANNER ||
+    selectedPlugin === PluginID.SQLI_EXPLOITER ||
+    selectedPlugin === PluginID.DNS_SCANNER ||
+    selectedPlugin === PluginID.PORT_SCANNER ||
+    selectedPlugin === PluginID.WAF_DETECTOR ||
+    selectedPlugin === PluginID.WHOIS_LOOKUP
   ) {
     CHUNK_SIZE = 4096
   }

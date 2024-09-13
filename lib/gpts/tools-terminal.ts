@@ -4,7 +4,7 @@ import {
   OutputMessage
 } from "@e2b/code-interpreter"
 
-const TEMPLATE = "bash-terminal"
+const TEMPLATE = "terminal-for-tools"
 const DEFAULT_BASH_SANDBOX_TIMEOUT = 5 * 60 * 1000
 const MAX_EXECUTION_TIME = 5 * 60 * 1000
 const ENCODER = new TextEncoder()
