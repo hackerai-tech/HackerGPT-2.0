@@ -35,7 +35,6 @@ export async function POST(request: Request) {
       providerHeaders,
       providerApiKey,
       selectedModel,
-      selectedStandaloneQuestionModel,
       rateLimitCheckResult,
       similarityTopK,
       modelTemperature,
@@ -88,9 +87,6 @@ export async function POST(request: Request) {
         await generateStandaloneQuestion(
           messages,
           targetStandAloneMessage,
-          providerBaseUrl,
-          providerHeaders,
-          selectedStandaloneQuestionModel,
           llmConfig.systemPrompts.pentestgptCurrentDateOnly,
           true,
           similarityTopK
@@ -130,7 +126,14 @@ export async function POST(request: Request) {
     const isHighRiskCategory = highRiskCategories.includes(
       hazardCategory.toUpperCase()
     )
-    if ((moderationLevel === 0 || moderationLevel === -1) && !isPentestGPTPro) {
+
+    const shouldUseMiniModel =
+      !isPentestGPTPro &&
+      (moderationLevel === -1 ||
+        moderationLevel === 0 ||
+        (moderationLevel >= 0.0 && moderationLevel <= 0.1))
+
+    if (shouldUseMiniModel) {
       selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(messages)
     } else if (
@@ -211,9 +214,6 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   const defaultModel = llmConfig.models.pentestgpt_default_openrouter
   const proModel = llmConfig.models.pentestgpt_pro_fireworks
 
-  const selectedStandaloneQuestionModel =
-    llmConfig.models.pentestgpt_standalone_question_openrouter
-
   const providerUrl = llmConfig.openrouter.url
   const providerBaseUrl = llmConfig.openrouter.baseUrl
   const providerApiKey = llmConfig.openrouter.apiKey
@@ -239,7 +239,6 @@ async function getProviderConfig(chatSettings: any, profile: any) {
     providerApiKey,
     providerHeaders,
     selectedModel,
-    selectedStandaloneQuestionModel,
     rateLimitCheckResult,
     similarityTopK,
     isPentestGPTPro,

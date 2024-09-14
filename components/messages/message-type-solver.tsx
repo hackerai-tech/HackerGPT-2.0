@@ -30,7 +30,9 @@ const terminalPlugins = [
   PluginID.DNS_SCANNER,
   PluginID.PORT_SCANNER,
   PluginID.WAF_DETECTOR,
-  PluginID.WHOIS_LOOKUP
+  PluginID.WHOIS_LOOKUP,
+  PluginID.SUBDOMAIN_FINDER,
+  PluginID.CVE_MAP
 ]
 
 export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({

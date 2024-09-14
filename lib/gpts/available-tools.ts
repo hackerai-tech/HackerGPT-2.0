@@ -36,79 +36,6 @@ export const availablePlugins: PluginSummary[] = [
   },
   {
     id: 1,
-    name: "CVEMap",
-    value: PluginID.CVEMAP,
-    categories: [],
-    icon: "https://avatars.githubusercontent.com/u/50994705",
-    description: "Navigate the CVE jungle with ease",
-    githubRepoUrl: pluginUrls.CVEMAP,
-    isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-03-13",
-    starters: [
-      {
-        title: "Provide Me With",
-        description: "the latest CVEs with the severity of critical",
-        chatMessage:
-          "Provide me with the latest CVEs with the severity of critical."
-      },
-      {
-        title: "Provide Me With",
-        description: "the CVEs for Microsoft that have nuclei templates",
-        chatMessage:
-          "Provide me with the CVEs for Microsoft that have nuclei templates."
-      },
-      {
-        title: "Provide Information About",
-        description: "CVE-2024-23897 (critical LFI in Jenkins)",
-        chatMessage:
-          "Provide information about CVE-2024-23897 (critical LFI in Jenkins)."
-      },
-      {
-        title: "CVEMap Help",
-        description: "How does the CVEMap plugin work?",
-        chatMessage: "/cvemap -help"
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: "Subdomain Finder",
-    categories: ["recon"],
-    value: PluginID.SUBFINDER,
-    icon: "https://cdn-icons-png.flaticon.com/128/3138/3138297.png",
-    invertInDarkMode: true,
-    description: "Discover subdomains of a domain",
-    githubRepoUrl: pluginUrls.SUBFINDER,
-    isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-02-27",
-    starters: [
-      {
-        title: "Start Subdomain Discovery",
-        description: "for bugcrowd.com",
-        chatMessage: "Start subdomain discovery for bugcrowd.com"
-      },
-      {
-        title: "Scan For Active-Only",
-        description: "subdomains of hackthebox.com",
-        chatMessage: "Scan for active-only subdomains of hackthebox.com"
-      },
-      {
-        title: "Scan For Subdomains",
-        description: "of intigriti.com including their host IPs",
-        chatMessage:
-          "Scan for subdomains of intigriti.com including their host IPs."
-      },
-      {
-        title: "Subfinder Help",
-        description: "How does the Subfinder plugin work?",
-        chatMessage: "/subfinder -help"
-      }
-    ]
-  },
-  {
-    id: 3,
     name: "Enhanced Search",
     value: PluginID.ENHANCED_SEARCH,
     categories: [],
@@ -145,6 +72,80 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
+    id: 2,
+    name: "Subdomain Finder",
+    categories: ["recon"],
+    value: PluginID.SUBDOMAIN_FINDER,
+    icon: "https://cdn-icons-png.flaticon.com/128/3138/3138297.png",
+    invertInDarkMode: true,
+    description: "Discover subdomains of a domain",
+    githubRepoUrl: pluginUrls.SUBDOMAIN_FINDER,
+    isInstalled: false,
+    isPremium: false,
+    createdAt: "2024-02-27",
+    starters: [
+      {
+        title: "Start Subdomain Discovery",
+        description: "for bugcrowd.com",
+        chatMessage: "Start subdomain discovery for bugcrowd.com"
+      },
+      {
+        title: "Scan For Active-Only",
+        description: "subdomains of hackthebox.com",
+        chatMessage: "Scan for active-only subdomains of hackthebox.com"
+      },
+      {
+        title: "Scan For Subdomains",
+        description: "of intigriti.com including their host IPs",
+        chatMessage:
+          "Scan for subdomains of intigriti.com including their host IPs."
+      },
+      {
+        title: "Subfinder Help",
+        description: "How does the Subfinder plugin work?",
+        chatMessage: "How does the Subfinder plugin work?"
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: "CVE Map",
+    value: PluginID.CVE_MAP,
+    categories: [],
+    icon: "https://cdn-icons-png.flaticon.com/128/4337/4337922.png",
+    invertInDarkMode: true,
+    description: "Navigate the CVE jungle with ease",
+    githubRepoUrl: pluginUrls.CVE_MAP,
+    isInstalled: false,
+    isPremium: false,
+    createdAt: "2024-03-13",
+    starters: [
+      {
+        title: "Provide Me With",
+        description: "the latest CVEs with the severity of critical",
+        chatMessage:
+          "Provide me with the latest CVEs with the severity of critical."
+      },
+      {
+        title: "Provide Me With",
+        description: "the CVEs for Microsoft that have nuclei templates",
+        chatMessage:
+          "Provide me with the CVEs for Microsoft that have nuclei templates."
+      },
+      {
+        title: "Provide Information About",
+        description: "CVE-2024-23897 (critical LFI in Jenkins)",
+        chatMessage:
+          "Provide information about CVE-2024-23897 (critical LFI in Jenkins)."
+      },
+      {
+        title: "CVEMap Help",
+        description: "How does the CVEMap plugin work?",
+        chatMessage: "How does the CVEMap plugin work?"
+      }
+    ]
+  },
+  {
     id: 4,
     name: "WAF Detector",
     value: PluginID.WAF_DETECTOR,
@@ -154,7 +155,7 @@ export const availablePlugins: PluginSummary[] = [
     description: "Fingerprint the Web Application Firewall behind target app",
     githubRepoUrl: pluginUrls.WAF_DETECTOR,
     isInstalled: false,
-    isPremium: true,
+    isPremium: false,
     createdAt: "2024-08-03",
     starters: [
       {
@@ -180,7 +181,7 @@ export const availablePlugins: PluginSummary[] = [
       "Retrieve ownership and registration details for domains and IP addresses",
     githubRepoUrl: pluginUrls.WHOIS_LOOKUP,
     isInstalled: false,
-    isPremium: true,
+    isPremium: false,
     createdAt: "2024-07-28",
     starters: [
       {

@@ -3,18 +3,31 @@ import { ServerRuntime } from "next"
 
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 
-import {
-  pluginIdToHandlerMapping,
-  isCommand,
-  handleCommand
-} from "@/lib/plugins/chatpluginhandlers"
-import { OpenRouterStream } from "@/lib/plugins/openrouterstream"
-import { PluginID, pluginUrls } from "@/types/plugins"
+import { PluginID } from "@/types/plugins"
 import { isPremiumUser } from "@/lib/server/subscription-utils"
 import { buildFinalMessages } from "@/lib/build-prompt"
 import { commandGeneratorHandler } from "@/lib/gpts/command-generator-handler"
 
 export const runtime: ServerRuntime = "edge"
+export const preferredRegion = [
+  "iad1",
+  "arn1",
+  "bom1",
+  "cdg1",
+  "cle1",
+  "cpt1",
+  "dub1",
+  "fra1",
+  "gru1",
+  "hnd1",
+  "icn1",
+  "kix1",
+  "lhr1",
+  "pdx1",
+  "sfo1",
+  "sin1",
+  "syd1"
+]
 
 export async function POST(request: Request) {
   const json = await request.json()
@@ -25,7 +38,12 @@ export async function POST(request: Request) {
     fileData?: { fileName: string; fileContent: string }[]
   }
 
-  const freePlugins: PluginID[] = [PluginID.CVEMAP, PluginID.SUBFINDER]
+  const freePlugins: PluginID[] = [
+    PluginID.CVE_MAP,
+    PluginID.SUBDOMAIN_FINDER,
+    PluginID.WAF_DETECTOR,
+    PluginID.WHOIS_LOOKUP
+  ]
 
   try {
     const profile = await getAIProfile()
@@ -79,7 +97,9 @@ export async function POST(request: Request) {
       PluginID.DNS_SCANNER,
       PluginID.PORT_SCANNER,
       PluginID.WAF_DETECTOR,
-      PluginID.WHOIS_LOOKUP
+      PluginID.WHOIS_LOOKUP,
+      PluginID.SUBDOMAIN_FINDER,
+      PluginID.CVE_MAP
     ]
 
     if (terminalPlugins.includes(selectedPlugin as PluginID)) {
@@ -89,76 +109,6 @@ export async function POST(request: Request) {
         messages: formattedMessages,
         pluginID: selectedPlugin as PluginID
       })
-    }
-
-    let invokedByPluginId = false
-    const cleanMessages = formattedMessages.slice(1, -1)
-    let latestUserMessage = cleanMessages[cleanMessages.length - 1]
-
-    let latestUserMessageContent = ""
-    if (Array.isArray(latestUserMessage.content)) {
-      latestUserMessage.content.forEach((item: any) => {
-        if (item.type === "text") {
-          latestUserMessageContent += item.text + " "
-        }
-      })
-      latestUserMessage = {
-        role: latestUserMessage.role,
-        content: latestUserMessageContent
-      }
-    } else {
-      latestUserMessageContent = latestUserMessage.content
-    }
-
-    if (latestUserMessageContent.startsWith("/")) {
-      const commandPlugin = Object.keys(pluginUrls)
-        .find(plugin =>
-          isCommand(plugin.toLowerCase(), latestUserMessageContent)
-        )
-        ?.toLowerCase()
-
-      if (!commandPlugin) {
-        return new Response(
-          "Error: Command not recognized. Please check the command and try again."
-        )
-      }
-
-      if (
-        commandPlugin &&
-        !freePlugins.includes(selectedPlugin as PluginID) &&
-        !isPremium
-      ) {
-        return new Response(
-          "Access Denied to " +
-            commandPlugin +
-            ": The plugin you are trying to use is exclusive to Pro members. Please upgrade to a Pro account to access this plugin."
-        )
-      }
-
-      for (const plugin of Object.keys(pluginUrls)) {
-        if (isCommand(plugin.toLowerCase(), latestUserMessageContent)) {
-          return await handleCommand(
-            plugin.toLowerCase(),
-            latestUserMessage,
-            cleanMessages
-          )
-        }
-      }
-    } else if (pluginIdToHandlerMapping.hasOwnProperty(selectedPlugin)) {
-      invokedByPluginId = true
-
-      const toolHandler = pluginIdToHandlerMapping[selectedPlugin]
-      const response = await toolHandler(
-        latestUserMessage,
-        process.env[`ENABLE_${selectedPlugin.toUpperCase()}_PLUGIN`] !==
-          "FALSE",
-        OpenRouterStream,
-        cleanMessages,
-        invokedByPluginId,
-        fileData && fileData.length > 0 ? fileData : undefined
-      )
-
-      return response
     }
   } catch (error: any) {
     let errorMessage = error.message || "An unexpected error occurred"

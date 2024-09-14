@@ -101,7 +101,7 @@ export const MessageTooLong: FC<MessageTooLongProps> = ({
             style={{ maxHeight: "90vh" }}
             onClick={e => e.stopPropagation()}
           >
-            <div className="message-content-scrollable grow overflow-y-auto  p-4">
+            <div className="message-content-scrollable grow overflow-y-auto p-4">
               <MessageMarkdown content={content} isAssistant={true} />
             </div>
             <div className="flex justify-between space-x-2 pt-4">

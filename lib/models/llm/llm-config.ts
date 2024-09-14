@@ -43,19 +43,19 @@ const llmConfig = {
     // For PGPT-4
     pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-4")}\n${systemPromptEnding}`,
     // For GPT-4o
-    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true)}\n${systemPromptEnding}`,
+    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true)}\n${systemPromptEnding}`,
     // For browser tool
     pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${systemPromptEnding}`,
     // For webSearch tool
-    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`,
+    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`
     // For reasonLLM
     // reasonLLM: `${getPentestGPTInfo(initialSystemPrompt)}\n${systemPromptEnding}`
   },
   models: {
     pentestgpt_default_openrouter:
       process.env.OPENROUTER_PENTESTGPT_DEFAULT_MODEL,
-    pentestgpt_standalone_question_openrouter:
-      process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
+    pentestgpt_standalone_question_fireworks:
+      process.env.FIREWORKS_STANDALONE_QUESTION_MODEL,
     pentestgpt_pro_fireworks: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
   },
   hackerRAG: {

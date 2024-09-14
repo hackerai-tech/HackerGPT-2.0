@@ -59,15 +59,15 @@ export async function buildFinalMessages(
 
   // Lower chunk size for plugins that don't need to handle long inputs
   if (
-    selectedPlugin === PluginID.CVEMAP ||
-    selectedPlugin === PluginID.SUBFINDER ||
     // Pentest tools
     selectedPlugin === PluginID.SSL_SCANNER ||
     selectedPlugin === PluginID.SQLI_EXPLOITER ||
     selectedPlugin === PluginID.DNS_SCANNER ||
     selectedPlugin === PluginID.PORT_SCANNER ||
     selectedPlugin === PluginID.WAF_DETECTOR ||
-    selectedPlugin === PluginID.WHOIS_LOOKUP
+    selectedPlugin === PluginID.WHOIS_LOOKUP ||
+    selectedPlugin === PluginID.SUBDOMAIN_FINDER ||
+    selectedPlugin === PluginID.CVE_MAP
   ) {
     CHUNK_SIZE = 4096
   }
