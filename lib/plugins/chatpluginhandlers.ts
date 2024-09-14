@@ -1,5 +1,4 @@
 import { handleCvemapRequest } from "./cvemap/cvemap.content"
-import { handleSubfinderRequest } from "./subfinder/subfinder.content"
 
 import { OpenRouterStream } from "@/lib/plugins/openrouterstream"
 
@@ -25,13 +24,11 @@ type pluginIdToHandlerMapping = {
 }
 
 export const pluginIdToHandlerMapping: pluginIdToHandlerMapping = {
-  cvemap: handleCvemapRequest,
-  subfinder: handleSubfinderRequest
+  cvemap: handleCvemapRequest
 }
 
 const commandHandlers: CommandHandler = {
-  handleCvemapRequest,
-  handleSubfinderRequest
+  handleCvemapRequest
 }
 
 export const isCommand = (commandName: string, message: string) => {

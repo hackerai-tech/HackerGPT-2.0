@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     fileData?: { fileName: string; fileContent: string }[]
   }
 
-  const freePlugins: PluginID[] = [PluginID.CVEMAP, PluginID.SUBFINDER]
+  const freePlugins: PluginID[] = [PluginID.CVEMAP]
 
   try {
     const profile = await getAIProfile()
@@ -98,7 +98,8 @@ export async function POST(request: Request) {
       PluginID.DNS_SCANNER,
       PluginID.PORT_SCANNER,
       PluginID.WAF_DETECTOR,
-      PluginID.WHOIS_LOOKUP
+      PluginID.WHOIS_LOOKUP,
+      PluginID.SUBDOMAIN_FINDER
     ]
 
     if (terminalPlugins.includes(selectedPlugin as PluginID)) {

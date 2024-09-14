@@ -66,6 +66,12 @@ The user has selected the WHOIS Lookup plugin, which uses the whois tool in the 
 1. Focus on gathering domain ownership, registration dates, name servers, and other relevant information.
 2. Provide whois-specific options and explanations for effective domain information retrieval.
 `
+      case PluginID.SUBDOMAIN_FINDER:
+        return `
+The user has selected the Subdomain Finder plugin, which uses the subfinder tool in the terminal. This tool discovers subdomains of a given domain. Remember:
+1. Focus on efficiently enumerating subdomains of the target domain.
+2. Provide subfinder-specific options and explanations for effective subdomain discovery.
+`
       default:
         return ""
     }

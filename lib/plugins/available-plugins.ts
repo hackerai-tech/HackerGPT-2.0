@@ -75,11 +75,11 @@ export const availablePlugins: PluginSummary[] = [
     id: 2,
     name: "Subdomain Finder",
     categories: ["recon"],
-    value: PluginID.SUBFINDER,
+    value: PluginID.SUBDOMAIN_FINDER,
     icon: "https://cdn-icons-png.flaticon.com/128/3138/3138297.png",
     invertInDarkMode: true,
     description: "Discover subdomains of a domain",
-    githubRepoUrl: pluginUrls.SUBFINDER,
+    githubRepoUrl: pluginUrls.SUBDOMAIN_FINDER,
     isInstalled: false,
     isPremium: false,
     createdAt: "2024-02-27",
@@ -103,7 +103,7 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "Subfinder Help",
         description: "How does the Subfinder plugin work?",
-        chatMessage: "/subfinder -help"
+        chatMessage: "How does the Subfinder plugin work?"
       }
     ]
   },

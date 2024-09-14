@@ -57,39 +57,3 @@ export const displayHelpGuideForCvemap = () => {
      These examples demonstrate various ways to use CVEMap for targeted CVE searches. Adjust the flags and values according to your specific needs.
      `
 }
-
-export const displayHelpGuideForSubdomainFinder = () => {
-  return endent`
-    [Subdomain Finder](${pluginUrls.SUBFINDER}) is a powerful subdomain discovery tool designed to enumerate and uncover valid subdomains of websites efficiently through passive online sources. 
-  
-    ## Interaction Methods
-  
-    **Conversational AI Requests:**
-    Engage with Subfinder by describing your subdomain discovery needs in plain language. The AI will interpret your request and automatically execute the relevant command with Subfinder, offering a user-friendly interface for those who prefer intuitive interactions.
-    
-    **Direct Commands:**
-    Utilize direct commands for granular control over subdomain discovery. Start your command with "/" followed by the necessary flags to specify detailed parameters for the scan.
-    
-    \`\`\`
-    Usage:
-    /subfinder [flags]
- 
-   Flags:
-   INPUT:
-      -d, -domain string[]   domains to find subdomains for (comma-separated)
-
-   CONFIGURATION:
-      -nW, -active           display active subdomains only
-
-   OUTPUT:
-      -oJ, -json             write output in JSONL(ines) format
-      -output string         write output to a file
-      -oI, -ip               include host IP in output (-active only)
-   
-   Examples:
-      /subfinder -d example.com
-      /subfinder -d example.com -output subdomains.txt
-      /subfinder -d example.com,example.org -active
-      /subfinder -d example.com -json -active -ip
-    \`\`\``
-}
