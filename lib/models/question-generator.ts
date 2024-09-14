@@ -2,27 +2,15 @@ import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
 import { createOpenAI } from "@ai-sdk/openai"
 import { generateText } from "ai"
 import endent from "endent"
+import llmConfig from "./llm/llm-config"
 
 export async function generateStandaloneQuestion(
   messages: any[],
   latestUserMessage: any,
-  openRouterBaseUrl: string | undefined,
-  openRouterHeaders: any,
-  selectedStandaloneQuestionModel: string | undefined,
   systemMessageContent: string,
   generateAtomicQuestions: boolean = false,
   numAtomicQuestions: number = 4
 ) {
-  if (!openRouterBaseUrl || !selectedStandaloneQuestionModel) {
-    console.error(
-      "Missing openRouterBaseUrl or selectedStandaloneQuestionModel"
-    )
-    return {
-      standaloneQuestion: latestUserMessage,
-      atomicQuestions: [latestUserMessage]
-    }
-  }
-
   filterEmptyAssistantMessages(messages)
 
   let chatHistory = messages
@@ -63,18 +51,14 @@ export async function generateStandaloneQuestion(
   }
 
   try {
-    const openai = createOpenAI({
-      baseURL: openRouterBaseUrl,
-      headers: {
-        ...openRouterHeaders,
-        "HTTP-Referer": "https://pentestgpt.com/question-generator",
-        "X-Title": "question-generator"
-      }
+    const fireworks = createOpenAI({
+      apiKey: llmConfig.fireworks.apiKey,
+      baseURL: llmConfig.fireworks.baseUrl
     })
 
     const result = await generateText({
-      model: openai(selectedStandaloneQuestionModel),
-      temperature: 0.4,
+      model: fireworks("accounts/fireworks/models/mixtral-8x7b-instruct"),
+      temperature: 0.5,
       maxTokens: 1024,
       messages: [
         { role: "system", content: systemMessageContent },

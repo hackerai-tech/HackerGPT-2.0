@@ -54,8 +54,8 @@ const llmConfig = {
   models: {
     pentestgpt_default_openrouter:
       process.env.OPENROUTER_PENTESTGPT_DEFAULT_MODEL,
-    pentestgpt_standalone_question_openrouter:
-      process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
+    pentestgpt_standalone_question_fireworks:
+      process.env.FIREWORKS_STANDALONE_QUESTION_MODEL,
     pentestgpt_pro_fireworks: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
   },
   hackerRAG: {
