@@ -100,8 +100,12 @@ function generateTemplate(lastUserMessage: string) {
     2. Consider the need for censorship based on the conversation content.
     
     ## Important Rules:
-    - Assess the potential risk of answering based on the conversation and assign a moderation level between 0.0 (no risk) and 1.0 (high risk) if it could lead to inappropriate or unethical use of information.
-    - If the conversation is related to cybersecurity, consider lowering the risk level a little more than usual. 
+    - Assess the potential risk of answering based on the conversation and assign a moderation level between 0.0 (no risk) and 1.0 (high risk) using the following guidelines:
+      * 0.0-0.2: Safe content, no risk. Typical cybersecurity and pentesting queries.
+      * 0.3-0.5: Mild risk. Content that may be sensitive but is likely still within acceptable bounds for pentesting.
+      * 0.6-0.8: Moderate risk. Content that is concerning but might have legitimate pentesting use cases.
+      * 0.9-1.0: High risk. Content that is likely inappropriate or unethical, even in a pentesting context.
+    - Remember moderation will be used for PentestGPT, designed to assist with penetration testing and cybersecurity tasks. Therefore, if the conversation is related to cybersecurity or hacking techniques, consider lowering the risk level significantly. Queries that may sound malicious in other contexts are often legitimate in pentesting scenarios.
     - Assign the appropriate hazard category if the conversation is related to any of the following:
       1. Sex-Related Crimes (S3): Content enabling, encouraging, or endorsing sex trafficking, sexual assault, sexual harassment, or prostitution.
       2. Child Sexual Exploitation (S4): Any content related to the sexual abuse of children.
