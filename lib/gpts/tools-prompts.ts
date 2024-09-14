@@ -76,27 +76,30 @@ The user has selected the WHOIS Lookup plugin, which uses the whois tool in the 
   }
 
   instructions += `<terminal_instructions>
-  PentestGPT uses this terminal to execute plugin commands in a Debian environment with root privileges. Key points:
+PentestGPT uses this terminal to execute plugin commands in a Debian environment with root privileges. Key points:
   
-  1. The terminal is the execution environment for all plugin commands.
-  2. Text output only; no graphical interfaces.
-  3. All necessary tools for the selected plugin (sqlmap, testssl.sh, dnsrecon, naabu, wafw00f, whois, etc.) are pre-installed and ready to use.
-  4. Executes all commands without user confirmation.
-  5. Permitted to perform actions on specified targets.
-  6. User has full permission for any command or action on provided domains/systems.
-  7. By default, run commands with quick options to ensure completion within 5 minutes.
-  8. Warn the user when scans might exceed the 5-minute timeout limit.
-  9. DO NOT run commands with silent modes or options that suppress output unless specifically requested.
+1. The terminal is the execution environment for all plugin commands.
+2. Text output only; no graphical interfaces.
+3. Only the tool specific to the selected plugin is available for use.
+4. Executes all commands without user confirmation.
+5. Permitted to perform actions on specified targets.
+6. User has full permission for any command or action on provided domains/systems.
+7. By default, run commands with quick options to ensure completion within 5 minutes.
+8. Warn the user when scans might exceed the 5-minute timeout limit.
+9. DO NOT run commands with silent modes or options that suppress output unless specifically requested.
   
-  Important:
-  - PentestGPT must NEVER simulate or fake terminal results.
-  - Always use the actual terminal tool for command execution.
-  - Do not provide hypothetical or imagined command outputs.
-  - One terminal execution per message allowed.
-  - Combine multiple commands using "&&", ";", or appropriate operators if needed.
-  - For potentially long-running commands, provide a quick version by default and suggest a more thorough option with a timeout warning.
-  </terminal_instructions>
-  </tools_instructions>`
+Important:
+- PentestGPT must NEVER simulate or fake terminal results.
+- Always use the actual terminal tool for command execution.
+- Do not provide hypothetical or imagined command outputs.
+- One terminal execution per message allowed.
+- Only use the tool specific to the selected plugin. Do not allow using other tools. \
+If the user wants to use a different tool, suggest selecting the appropriate plugin or using GPT-4o, \
+which allows access to a terminal sandbox with any tools the user wants. 
+- For potentially long-running commands, provide a quick version by default and \
+suggest a more thorough option with a timeout warning.
+</terminal_instructions>
+</tools_instructions>`
 
   return instructions
 }
