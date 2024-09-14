@@ -3,13 +3,9 @@ import { ServerRuntime } from "next"
 
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 
-import {
-  pluginIdToHandlerMapping,
-  isCommand,
-  handleCommand
-} from "@/lib/plugins/chatpluginhandlers"
+import { pluginIdToHandlerMapping } from "@/lib/plugins/chatpluginhandlers"
 import { OpenRouterStream } from "@/lib/plugins/openrouterstream"
-import { PluginID, pluginUrls } from "@/types/plugins"
+import { PluginID } from "@/types/plugins"
 import { isPremiumUser } from "@/lib/server/subscription-utils"
 import { buildFinalMessages } from "@/lib/build-prompt"
 import { commandGeneratorHandler } from "@/lib/gpts/command-generator-handler"
@@ -130,41 +126,7 @@ export async function POST(request: Request) {
       latestUserMessageContent = latestUserMessage.content
     }
 
-    if (latestUserMessageContent.startsWith("/")) {
-      const commandPlugin = Object.keys(pluginUrls)
-        .find(plugin =>
-          isCommand(plugin.toLowerCase(), latestUserMessageContent)
-        )
-        ?.toLowerCase()
-
-      if (!commandPlugin) {
-        return new Response(
-          "Error: Command not recognized. Please check the command and try again."
-        )
-      }
-
-      if (
-        commandPlugin &&
-        !freePlugins.includes(selectedPlugin as PluginID) &&
-        !isPremium
-      ) {
-        return new Response(
-          "Access Denied to " +
-            commandPlugin +
-            ": The plugin you are trying to use is exclusive to Pro members. Please upgrade to a Pro account to access this plugin."
-        )
-      }
-
-      for (const plugin of Object.keys(pluginUrls)) {
-        if (isCommand(plugin.toLowerCase(), latestUserMessageContent)) {
-          return await handleCommand(
-            plugin.toLowerCase(),
-            latestUserMessage,
-            cleanMessages
-          )
-        }
-      }
-    } else if (pluginIdToHandlerMapping.hasOwnProperty(selectedPlugin)) {
+    if (pluginIdToHandlerMapping.hasOwnProperty(selectedPlugin)) {
       invokedByPluginId = true
 
       const toolHandler = pluginIdToHandlerMapping[selectedPlugin]
