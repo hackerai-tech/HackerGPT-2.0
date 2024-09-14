@@ -81,7 +81,7 @@ export const availablePlugins: PluginSummary[] = [
     description: "Discover subdomains of a domain",
     githubRepoUrl: pluginUrls.SUBDOMAIN_FINDER,
     isInstalled: false,
-    isPremium: true,
+    isPremium: false,
     createdAt: "2024-02-27",
     starters: [
       {
@@ -109,12 +109,13 @@ export const availablePlugins: PluginSummary[] = [
   },
   {
     id: 3,
-    name: "CVEMap",
-    value: PluginID.CVEMAP,
+    name: "CVE Map",
+    value: PluginID.CVE_MAP,
     categories: [],
-    icon: "https://avatars.githubusercontent.com/u/50994705",
+    icon: "https://cdn-icons-png.flaticon.com/128/4337/4337922.png",
+    invertInDarkMode: true,
     description: "Navigate the CVE jungle with ease",
-    githubRepoUrl: pluginUrls.CVEMAP,
+    githubRepoUrl: pluginUrls.CVE_MAP,
     isInstalled: false,
     isPremium: false,
     createdAt: "2024-03-13",
@@ -140,7 +141,7 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "CVEMap Help",
         description: "How does the CVEMap plugin work?",
-        chatMessage: "/cvemap -help"
+        chatMessage: "How does the CVEMap plugin work?"
       }
     ]
   },
@@ -154,7 +155,7 @@ export const availablePlugins: PluginSummary[] = [
     description: "Fingerprint the Web Application Firewall behind target app",
     githubRepoUrl: pluginUrls.WAF_DETECTOR,
     isInstalled: false,
-    isPremium: true,
+    isPremium: false,
     createdAt: "2024-08-03",
     starters: [
       {
@@ -180,7 +181,7 @@ export const availablePlugins: PluginSummary[] = [
       "Retrieve ownership and registration details for domains and IP addresses",
     githubRepoUrl: pluginUrls.WHOIS_LOOKUP,
     isInstalled: false,
-    isPremium: true,
+    isPremium: false,
     createdAt: "2024-07-28",
     starters: [
       {

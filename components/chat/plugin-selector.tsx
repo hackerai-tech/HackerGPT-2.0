@@ -16,7 +16,7 @@ import {
   usePluginContext,
   getInstalledPlugins
 } from "./chat-hooks/PluginProvider"
-import { availablePlugins } from "@/lib/plugins/available-plugins"
+import { availablePlugins } from "@/lib/gpts/available-tools"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { DialogPanel } from "@headlessui/react"
 import { usePathname, useRouter } from "next/navigation"

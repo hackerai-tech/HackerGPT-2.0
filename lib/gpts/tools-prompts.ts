@@ -72,6 +72,19 @@ The user has selected the Subdomain Finder plugin, which uses the subfinder tool
 1. Focus on efficiently enumerating subdomains of the target domain.
 2. Provide subfinder-specific options and explanations for effective subdomain discovery.
 `
+      case PluginID.CVE_MAP:
+        return `
+The user has selected the CVEMap plugin, which uses the cvemap tool in the terminal. This tool helps navigate and analyze Common Vulnerabilities and Exposures (CVEs). Remember:
+1. Focus on efficiently searching, filtering, and analyzing CVEs.
+2. Provide cvemap-specific options and explanations for effective CVE exploration.
+3. If the user provides a specific CVE ID, use the '-id' flag:
+-id string[]                    List CVE for given ID(s)
+4. If the user provides a CWE ID, use the '-cwe' or '-cwe-id' flag:
+-cwe, -cwe-id string[]          List CVEs for given CWE ID(s)
+5. Do not use the search flag.
+6. Always use the '-json' flag by default to provide more detailed information about CVEs:
+-json                           Output results in JSON format for more comprehensive details
+`
       default:
         return ""
     }

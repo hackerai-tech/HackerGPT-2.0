@@ -2,7 +2,7 @@
 
 import React, { createContext, useReducer, useContext, useEffect } from "react"
 import { PluginSummary } from "@/types/plugins"
-import { availablePlugins } from "@/lib/plugins/available-plugins"
+import { availablePlugins } from "@/lib/gpts/available-tools"
 
 export enum ActionTypes {
   INSTALL_PLUGIN = "INSTALL_PLUGIN",

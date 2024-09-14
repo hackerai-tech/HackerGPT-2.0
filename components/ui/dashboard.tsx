@@ -31,7 +31,7 @@ import {
   getInstalledPlugins,
   usePluginContext
 } from "../chat/chat-hooks/PluginProvider"
-import { availablePlugins } from "@/lib/plugins/available-plugins"
+import { availablePlugins } from "@/lib/gpts/available-tools"
 import { toast } from "sonner"
 
 export const SIDEBAR_WIDTH = 350
@@ -48,7 +48,6 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     isMobile,
     showSidebar,
     setShowSidebar,
-    selectedChat,
     contentType,
     setContentType
   } = useContext(PentestGPTContext)

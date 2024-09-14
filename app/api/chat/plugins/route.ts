@@ -3,8 +3,6 @@ import { ServerRuntime } from "next"
 
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 
-import { pluginIdToHandlerMapping } from "@/lib/plugins/chatpluginhandlers"
-import { OpenRouterStream } from "@/lib/plugins/openrouterstream"
 import { PluginID } from "@/types/plugins"
 import { isPremiumUser } from "@/lib/server/subscription-utils"
 import { buildFinalMessages } from "@/lib/build-prompt"
@@ -40,7 +38,12 @@ export async function POST(request: Request) {
     fileData?: { fileName: string; fileContent: string }[]
   }
 
-  const freePlugins: PluginID[] = [PluginID.CVEMAP]
+  const freePlugins: PluginID[] = [
+    PluginID.CVE_MAP,
+    PluginID.SUBDOMAIN_FINDER,
+    PluginID.WAF_DETECTOR,
+    PluginID.WHOIS_LOOKUP
+  ]
 
   try {
     const profile = await getAIProfile()
@@ -95,7 +98,8 @@ export async function POST(request: Request) {
       PluginID.PORT_SCANNER,
       PluginID.WAF_DETECTOR,
       PluginID.WHOIS_LOOKUP,
-      PluginID.SUBDOMAIN_FINDER
+      PluginID.SUBDOMAIN_FINDER,
+      PluginID.CVE_MAP
     ]
 
     if (terminalPlugins.includes(selectedPlugin as PluginID)) {
@@ -105,42 +109,6 @@ export async function POST(request: Request) {
         messages: formattedMessages,
         pluginID: selectedPlugin as PluginID
       })
-    }
-
-    let invokedByPluginId = false
-    const cleanMessages = formattedMessages.slice(1, -1)
-    let latestUserMessage = cleanMessages[cleanMessages.length - 1]
-
-    let latestUserMessageContent = ""
-    if (Array.isArray(latestUserMessage.content)) {
-      latestUserMessage.content.forEach((item: any) => {
-        if (item.type === "text") {
-          latestUserMessageContent += item.text + " "
-        }
-      })
-      latestUserMessage = {
-        role: latestUserMessage.role,
-        content: latestUserMessageContent
-      }
-    } else {
-      latestUserMessageContent = latestUserMessage.content
-    }
-
-    if (pluginIdToHandlerMapping.hasOwnProperty(selectedPlugin)) {
-      invokedByPluginId = true
-
-      const toolHandler = pluginIdToHandlerMapping[selectedPlugin]
-      const response = await toolHandler(
-        latestUserMessage,
-        process.env[`ENABLE_${selectedPlugin.toUpperCase()}_PLUGIN`] !==
-          "FALSE",
-        OpenRouterStream,
-        cleanMessages,
-        invokedByPluginId,
-        fileData && fileData.length > 0 ? fileData : undefined
-      )
-
-      return response
     }
   } catch (error: any) {
     let errorMessage = error.message || "An unexpected error occurred"
