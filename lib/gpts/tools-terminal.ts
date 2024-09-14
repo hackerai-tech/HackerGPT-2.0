@@ -54,7 +54,6 @@ export const terminalExecutor = async ({
       } finally {
         if (sbx) {
           await sbx.kill()
-          console.log(`[${userID}] Sandbox killed after command execution`)
         }
         controller.close()
       }
