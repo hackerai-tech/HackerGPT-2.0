@@ -81,7 +81,7 @@ export const availablePlugins: PluginSummary[] = [
     description: "Discover subdomains of a domain",
     githubRepoUrl: pluginUrls.SUBDOMAIN_FINDER,
     isInstalled: false,
-    isPremium: false,
+    isPremium: true,
     createdAt: "2024-02-27",
     starters: [
       {
