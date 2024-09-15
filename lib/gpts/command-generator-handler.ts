@@ -16,6 +16,7 @@ import {
 } from "../ai-helper"
 import { getCustomGPTPrompt } from "./tools-prompts"
 import { PluginID } from "@/types/plugins"
+import { getTerminalTemplate } from "@/lib/gpts/tools-helper"
 
 const ENCODER = new TextEncoder()
 
@@ -59,7 +60,11 @@ export async function commandGeneratorHandler({
             command: z.string().describe("The terminal command to execute")
           }),
           execute: async ({ command }) => {
-            terminalStream = await terminalExecutor({ userID, command })
+            terminalStream = await terminalExecutor({
+              userID,
+              command,
+              sandboxTemplate: getTerminalTemplate(pluginID)
+            })
             return "Command executed successfully"
           }
         })

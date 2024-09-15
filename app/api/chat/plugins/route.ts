@@ -7,6 +7,7 @@ import { PluginID } from "@/types/plugins"
 import { isPremiumUser } from "@/lib/server/subscription-utils"
 import { buildFinalMessages } from "@/lib/build-prompt"
 import { commandGeneratorHandler } from "@/lib/gpts/command-generator-handler"
+import { isFreePlugin, isTerminalPlugin } from "@/lib/gpts/tools-helper"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -31,29 +32,19 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   const json = await request.json()
-  const { payload, chatImages, selectedPlugin, fileData } = json as {
+  const { payload, chatImages, selectedPlugin } = json as {
     payload: any
     chatImages: any[]
     selectedPlugin: string
-    fileData?: { fileName: string; fileContent: string }[]
   }
-
-  const freePlugins: PluginID[] = [
-    PluginID.CVE_MAP,
-    PluginID.SUBDOMAIN_FINDER,
-    PluginID.WAF_DETECTOR,
-    PluginID.WHOIS_LOOKUP
-  ]
 
   try {
     const profile = await getAIProfile()
     const isPremium = await isPremiumUser(profile.user_id)
 
-    if (!freePlugins.includes(selectedPlugin as PluginID) && !isPremium) {
+    if (!isFreePlugin(selectedPlugin as PluginID) && !isPremium) {
       return new Response(
-        "Access Denied to " +
-          selectedPlugin +
-          ": The plugin you are trying to use is exclusive to Pro members. Please upgrade to a Pro account to access this plugin."
+        `Access Denied to ${selectedPlugin}: The plugin you are trying to use is exclusive to Pro members. Please upgrade to a Pro account to access this plugin.`
       )
     }
 
@@ -91,18 +82,7 @@ export async function POST(request: Request) {
       selectedPlugin as PluginID
     )) as any
 
-    const terminalPlugins = [
-      PluginID.SQLI_EXPLOITER,
-      PluginID.SSL_SCANNER,
-      PluginID.DNS_SCANNER,
-      PluginID.PORT_SCANNER,
-      PluginID.WAF_DETECTOR,
-      PluginID.WHOIS_LOOKUP,
-      PluginID.SUBDOMAIN_FINDER,
-      PluginID.CVE_MAP
-    ]
-
-    if (terminalPlugins.includes(selectedPlugin as PluginID)) {
+    if (isTerminalPlugin(selectedPlugin as PluginID)) {
       return await commandGeneratorHandler({
         userID: profile.user_id,
         profile_context: profile.profile_context,

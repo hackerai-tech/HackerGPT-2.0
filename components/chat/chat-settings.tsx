@@ -10,7 +10,7 @@ import { ModelSelect } from "../models/model-select"
 interface ChatSettingsProps {}
 
 export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
-  useHotkey("i", () => handleClick())
+  // useHotkey("i", () => handleClick())
 
   const { chatSettings, setChatSettings, isMobile, profile, subscription } =
     useContext(PentestGPTContext)
@@ -19,11 +19,11 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
 
   const buttonRef = useRef<HTMLButtonElement>(null)
 
-  const handleClick = () => {
-    if (buttonRef.current) {
-      buttonRef.current.click()
-    }
-  }
+  // const handleClick = () => {
+  //   if (buttonRef.current) {
+  //     buttonRef.current.click()
+  //   }
+  // }
 
   useEffect(() => {
     if (!chatSettings) return

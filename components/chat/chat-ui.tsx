@@ -198,38 +198,45 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   }
 
   const loadMoreMessages = useCallback(async () => {
-    if (allMessagesLoaded || isLoadingMore) return
+    if (allMessagesLoaded || isLoadingMore || !chatMessages.length) return
 
     const oldestSequenceNumber = chatMessages[0].message.sequence_number
+    const chatId = params.chatid as string
+
+    if (!chatId) {
+      console.error("Chat ID is undefined")
+      return
+    }
 
     setIsLoadingMore(true)
 
-    const scrollContainer = scrollContainerRef.current
-    if (scrollContainer) {
-      previousHeightRef.current = scrollContainer.scrollHeight
+    try {
+      const scrollContainer = scrollContainerRef.current
+      if (scrollContainer) {
+        previousHeightRef.current = scrollContainer.scrollHeight
+      }
+
+      const olderMessages = await fetchMessagesAndProcess(
+        chatId,
+        MESSAGES_PER_FETCH,
+        oldestSequenceNumber
+      )
+
+      if (olderMessages.length > 0) {
+        setChatMessages(prevMessages => [...olderMessages, ...prevMessages])
+      }
+
+      setAllMessagesLoaded(
+        olderMessages.length < MESSAGES_PER_FETCH ||
+          olderMessages[0].message.sequence_number <= 1
+      )
+    } catch (error) {
+      console.error("Error loading more messages:", error)
+    } finally {
+      setTimeout(() => {
+        setIsLoadingMore(false)
+      }, 200)
     }
-
-    const olderMessages = await fetchMessagesAndProcess(
-      params.chatid as string,
-      MESSAGES_PER_FETCH,
-      oldestSequenceNumber
-    )
-
-    if (olderMessages.length > 0) {
-      setChatMessages(prevMessages => [...olderMessages, ...prevMessages])
-    }
-
-    if (
-      olderMessages.length < MESSAGES_PER_FETCH ||
-      olderMessages[0].message.sequence_number <= 1
-    ) {
-      setAllMessagesLoaded(true)
-    }
-
-    // Timeout ensures that the scroll position is set correctly after complete re-rendering of the chat messages
-    setTimeout(() => {
-      setIsLoadingMore(false)
-    }, 200)
   }, [
     allMessagesLoaded,
     isLoadingMore,

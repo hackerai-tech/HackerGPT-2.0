@@ -4,7 +4,7 @@ import {
   OutputMessage
 } from "@e2b/code-interpreter"
 
-const TEMPLATE = "terminal-for-tools"
+const DEFAULT_TEMPLATE = "terminal-for-tools"
 const DEFAULT_BASH_SANDBOX_TIMEOUT = 5 * 60 * 1000
 const MAX_EXECUTION_TIME = 5 * 60 * 1000
 const ENCODER = new TextEncoder()
@@ -13,12 +13,14 @@ interface TerminalExecutorOptions {
   userID: string
   command: string
   sandboxTimeout?: number
+  sandboxTemplate?: string
 }
 
 export const terminalExecutor = async ({
   userID,
   command,
-  sandboxTimeout = DEFAULT_BASH_SANDBOX_TIMEOUT
+  sandboxTimeout = DEFAULT_BASH_SANDBOX_TIMEOUT,
+  sandboxTemplate = DEFAULT_TEMPLATE
 }: TerminalExecutorOptions): Promise<ReadableStream<Uint8Array>> => {
   let sbx: CodeInterpreter | null = null
   let hasTerminalOutput = false
@@ -29,7 +31,7 @@ export const terminalExecutor = async ({
       console.log(`[${userID}] Executing terminal command: ${command}`)
 
       try {
-        sbx = await createTerminal(userID, TEMPLATE, sandboxTimeout)
+        sbx = await createTerminal(userID, sandboxTemplate, sandboxTimeout)
         const bashID = await sbx.notebook.createKernel({ kernelName: "bash" })
 
         let isOutputStarted = false

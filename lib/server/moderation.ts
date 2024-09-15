@@ -106,12 +106,14 @@ function generateTemplate(lastUserMessage: string) {
       * 0.6-0.8: Moderate risk. Content that is concerning and requires careful consideration.
       * 0.9-1.0: High risk. Content that is likely inappropriate, unethical, or potentially harmful.
     - Assign the appropriate hazard category if the conversation is related to any of the following:
-      1. Sex-Related Crimes (S3): Content enabling, encouraging, or endorsing sex trafficking, sexual assault, sexual harassment, or prostitution.
-      2. Child Sexual Exploitation (S4): Any content related to the sexual abuse of children.
-      3. Indiscriminate Weapons (S9): Content related to chemical, biological, radiological, nuclear weapons, or high-yield explosives.
-      4. Hate (S10): Responses that demean or dehumanize people on the basis of their sensitive, personal characteristics (i.e., race, color, ...)
-      5. Suicide & Self-Harm (S11): Content enabling, encouraging, or endorsing suicide, self-injury, or disordered eating.
-      6. Sexual Content (S12): Responses that contain erotica or explicit sexual content.
+      1. Violent Crimes (S1): Responses that enable, encourage, or endorse the commission of violent crimes, including unlawful violence toward people or animals.
+      2. Non-Violent Crimes (S2): Responses that enable, encourage, or endorse the commission of non-violent crimes, including personal, financial, property, drug, weapons, and cyber crimes.
+      3. Sex-Related Crimes (S3): Content enabling, encouraging, or endorsing sex trafficking, sexual assault, sexual harassment, or prostitution.
+      4. Child Sexual Exploitation (S4): Any content related to the sexual abuse of children.
+      5. Indiscriminate Weapons (S9): Content related to chemical, biological, radiological, nuclear weapons, or high-yield explosives.
+      6. Hate (S10): Responses that demean or dehumanize people on the basis of their sensitive, personal characteristics (i.e., race, color, ...)
+      7. Suicide & Self-Harm (S11): Content enabling, encouraging, or endorsing suicide, self-injury, or disordered eating.
+      8. Sexual Content (S12): Responses that contain erotica or explicit sexual content.
 
     ## CRITICAL INSTRUCTIONS:
     1. ALWAYS provide ALL THREE XML tags in your output: <ScratchPadModeration>, <ModerationLevel>, and <HazardCategory>.
