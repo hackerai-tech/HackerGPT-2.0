@@ -26,8 +26,8 @@ import { dragHelper } from "@/components/chat/chat-helpers/drag"
 interface ChatFilesDisplayProps {}
 
 export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
-  useHotkey("f", () => setShowFilesDisplay(prev => !prev))
-  useHotkey("e", () => setUseRetrieval(prev => !prev))
+  // useHotkey("f", () => setShowFilesDisplay(prev => !prev))
+  // useHotkey("e", () => setUseRetrieval(prev => !prev))
 
   const {
     files,
