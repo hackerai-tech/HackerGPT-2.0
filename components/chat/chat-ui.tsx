@@ -10,7 +10,15 @@ import useHotkey from "@/lib/hooks/use-hotkey"
 import { LLMID, MessageImage } from "@/types"
 import { IconPlayerTrackNext } from "@tabler/icons-react"
 import { useParams, useRouter } from "next/navigation"
-import { FC, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from "react"
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from "react"
 import { Button } from "../ui/button"
 import { ChatHelp } from "./chat-help"
 import { useScroll } from "./chat-hooks/use-scroll"
@@ -20,7 +28,7 @@ import { ChatScrollButtons } from "./chat-scroll-buttons"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
 
-const MESSAGES_PER_FETCH = 10
+const MESSAGES_PER_FETCH = 20
 interface ChatUIProps {}
 
 export const ChatUI: FC<ChatUIProps> = ({}) => {
@@ -60,8 +68,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   const [loading, setLoading] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [allMessagesLoaded, setAllMessagesLoaded] = useState(false)
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const previousHeightRef = useRef<number | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const previousHeightRef = useRef<number | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,8 +90,16 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     }
   }, [])
 
-  const fetchMessagesAndProcess = async (chatId: string, limit?: number, beforeSequenceNumber?: number) => {
-    const fetchedMessages = await getMessagesByChatId(chatId, limit, beforeSequenceNumber)
+  const fetchMessagesAndProcess = async (
+    chatId: string,
+    limit?: number,
+    beforeSequenceNumber?: number
+  ) => {
+    const fetchedMessages = await getMessagesByChatId(
+      chatId,
+      limit,
+      beforeSequenceNumber
+    )
 
     const imagePromises: Promise<MessageImage>[] = fetchedMessages.flatMap(
       message =>
@@ -127,7 +143,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   }
 
   const fetchMessages = async () => {
-    const reformatedMessages = await fetchMessagesAndProcess(params.chatid as string, MESSAGES_PER_FETCH)
+    const reformatedMessages = await fetchMessagesAndProcess(
+      params.chatid as string,
+      MESSAGES_PER_FETCH
+    )
 
     const chatFiles = await getChatFilesByChatId(params.chatid as string)
 
@@ -179,24 +198,31 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   }
 
   const loadMoreMessages = useCallback(async () => {
-    if (allMessagesLoaded || isLoadingMore) return;
+    if (allMessagesLoaded || isLoadingMore) return
 
     const oldestSequenceNumber = chatMessages[0].message.sequence_number
 
     setIsLoadingMore(true)
-  
-    const scrollContainer = scrollContainerRef.current;
+
+    const scrollContainer = scrollContainerRef.current
     if (scrollContainer) {
-      previousHeightRef.current = scrollContainer.scrollHeight;
+      previousHeightRef.current = scrollContainer.scrollHeight
     }
 
-    const olderMessages = await fetchMessagesAndProcess(params.chatid as string, MESSAGES_PER_FETCH, oldestSequenceNumber)
+    const olderMessages = await fetchMessagesAndProcess(
+      params.chatid as string,
+      MESSAGES_PER_FETCH,
+      oldestSequenceNumber
+    )
 
     if (olderMessages.length > 0) {
       setChatMessages(prevMessages => [...olderMessages, ...prevMessages])
     }
 
-    if(olderMessages.length < MESSAGES_PER_FETCH || olderMessages[0].message.sequence_number <= 1) {
+    if (
+      olderMessages.length < MESSAGES_PER_FETCH ||
+      olderMessages[0].message.sequence_number <= 1
+    ) {
       setAllMessagesLoaded(true)
     }
 
@@ -204,37 +230,45 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     setTimeout(() => {
       setIsLoadingMore(false)
     }, 200)
-
-  }, [allMessagesLoaded, isLoadingMore, chatMessages, fetchMessagesAndProcess, params.chatid, setChatMessages])
+  }, [
+    allMessagesLoaded,
+    isLoadingMore,
+    chatMessages,
+    fetchMessagesAndProcess,
+    params.chatid,
+    setChatMessages
+  ])
 
   useLayoutEffect(() => {
     if (isLoadingMore) {
-      const scrollContainer = scrollContainerRef.current;
+      const scrollContainer = scrollContainerRef.current
       if (scrollContainer && previousHeightRef.current !== null) {
-        const newHeight = scrollContainer.scrollHeight;
-        const previousHeight = previousHeightRef.current;
-        const scrollDifference = newHeight - previousHeight;
-        
-        console.log("newHeight", newHeight)
-        console.log("previousHeight", previousHeight) 
-        console.log("scrollDifference", scrollDifference)
-        console.log("scrollContainer.scrollTop", scrollContainer.scrollTop)
+        const newHeight = scrollContainer.scrollHeight
+        const previousHeight = previousHeightRef.current
+        const scrollDifference = newHeight - previousHeight
+
+        // console.log("newHeight", newHeight)
+        // console.log("previousHeight", previousHeight)
+        // console.log("scrollDifference", scrollDifference)
+        // console.log("scrollContainer.scrollTop", scrollContainer.scrollTop)
         // Adjust scroll position
-        scrollContainer.scrollTop = scrollDifference;
+        scrollContainer.scrollTop = scrollDifference
         // Reset previousHeightRef for next load
-        previousHeightRef.current = null;
+        previousHeightRef.current = null
       }
     }
-  }, [chatMessages, isLoadingMore]);
+  }, [chatMessages, isLoadingMore])
 
-  const innerHandleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop } = e.currentTarget
-    if (scrollTop === 0) {
-      loadMoreMessages()
-    }
-    handleScroll(e)
-  }, [loadMoreMessages, handleScroll])
-
+  const innerHandleScroll = useCallback(
+    (e: React.UIEvent<HTMLDivElement>) => {
+      const { scrollTop } = e.currentTarget
+      if (scrollTop === 0) {
+        loadMoreMessages()
+      }
+      handleScroll(e)
+    },
+    [loadMoreMessages, handleScroll]
+  )
 
   if (loading) {
     return <Loading />
@@ -261,7 +295,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       >
         {isLoadingMore && (
           <div className="flex justify-center p-4">
-            <Loading />
+            <Loading size={8} />
           </div>
         )}
         <div ref={messagesStartRef} />

@@ -15,7 +15,11 @@ export const getMessageById = async (messageId: string) => {
   return message
 }
 
-export const getMessagesByChatId = async (chatId: string, limit = 10, lastSequenceNumber?: number) => {
+export const getMessagesByChatId = async (
+  chatId: string,
+  limit = 20,
+  lastSequenceNumber?: number
+) => {
   let query = supabase
     .from("messages")
     .select("*, feedback(*), file_items (*)")
