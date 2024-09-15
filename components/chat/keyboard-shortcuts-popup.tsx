@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
 import { IconX } from "@tabler/icons-react"
 import { Button } from "../ui/button"
@@ -7,12 +7,6 @@ interface ShortcutItem {
   key: string
   description: string
 }
-
-const shortcuts: ShortcutItem[] = [
-  { key: "Ctrl + Shift + O", description: "Open new chat" },
-  { key: "Ctrl + Shift + L", description: "Focus chat input" },
-  { key: "Ctrl + Shift + S", description: "Toggle sidebar" }
-]
 
 interface KeyboardShortcutsPopupProps {
   isOpen: boolean
@@ -23,6 +17,29 @@ export const KeyboardShortcutsPopup: React.FC<KeyboardShortcutsPopupProps> = ({
   isOpen,
   onClose
 }) => {
+  const isMac = useMemo(
+    () => /macintosh|mac os x/i.test(navigator.userAgent),
+    []
+  )
+
+  const shortcuts: ShortcutItem[] = useMemo(
+    () => [
+      {
+        key: isMac ? "⌘ + Shift + O" : "Ctrl + Shift + O",
+        description: "Open new chat"
+      },
+      {
+        key: isMac ? "⌘ + Shift + L" : "Ctrl + Shift + L",
+        description: "Focus chat input"
+      },
+      {
+        key: isMac ? "⌘ + Shift + S" : "Ctrl + Shift + S",
+        description: "Toggle sidebar"
+      }
+    ],
+    [isMac]
+  )
+
   const renderShortcut = (shortcut: ShortcutItem, index: number) => (
     <div
       key={index}
