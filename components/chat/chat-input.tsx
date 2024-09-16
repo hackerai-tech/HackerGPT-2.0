@@ -9,8 +9,7 @@ import {
   IconPlayerStopFilled,
   IconPuzzle,
   IconPuzzleOff,
-  IconArrowUp,
-  IconHeadphones
+  IconArrowUp
 } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -56,8 +55,6 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     setIsEnhancedMenuOpen,
     selectedPlugin,
     subscription,
-    setIsConversationalAIOpen,
-    isMicSupported,
     isMobile
   } = useContext(PentestGPTContext)
 
@@ -281,9 +278,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
 
         <TextareaAutosize
           textareaRef={chatInputRef}
-          className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 pl-2 ${
-            isMicSupported && !userInput && !isGenerating ? "pr-20" : "pr-14"
-          } focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
+          className="ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 pl-2 pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           placeholder={
             isMobile
               ? `Message` + (!subscription ? "" : `. Type "#" for files.`)
@@ -310,10 +305,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
               onClick={handleStopMessage}
               size={30}
             />
-          ) : userInput ||
-            !isMicSupported ||
-            !subscription ||
-            !VOICE_ASSISTANT_ENABLED ? (
+          ) : (
             <IconArrowUp
               className={cn(
                 "bg-primary text-secondary rounded p-1 hover:opacity-50",
@@ -327,15 +319,6 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
               }}
               size={30}
             />
-          ) : (
-            subscription &&
-            VOICE_ASSISTANT_ENABLED && (
-              <IconHeadphones
-                className="bg-primary text-secondary rounded p-1 hover:opacity-50"
-                onClick={() => setIsConversationalAIOpen(true)}
-                size={30}
-              />
-            )
           )}
         </div>
       </div>

@@ -43,7 +43,7 @@ export const KeyboardShortcutsPopup: React.FC<KeyboardShortcutsPopupProps> = ({
   const renderShortcut = (shortcut: ShortcutItem, index: number) => (
     <div
       key={index}
-      className="text-token-text-primary flex items-center justify-between overflow-hidden"
+      className="flex items-center justify-between overflow-hidden"
     >
       <div className="flex shrink items-center overflow-hidden text-sm">
         <div className="truncate">{shortcut.description}</div>
@@ -52,7 +52,7 @@ export const KeyboardShortcutsPopup: React.FC<KeyboardShortcutsPopupProps> = ({
         {shortcut.key.split("+").map((key, keyIndex) => (
           <div
             key={keyIndex}
-            className="border-token-border-light text-token-text-secondary my-2 flex h-8 min-w-[50px] items-center justify-center rounded-md border capitalize"
+            className="my-2 flex h-8 min-w-[50px] items-center justify-center rounded-md border capitalize"
           >
             <span className="text-xs">{key.trim()}</span>
           </div>

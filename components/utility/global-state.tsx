@@ -111,15 +111,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // Define is ready to chat state
   const [isReadyToChat, setIsReadyToChat] = useState<boolean>(true)
 
-  // Audio
-  const [currentPlayingMessageId, setCurrentPlayingMessageId] = useState<
-    string | null
-  >(null)
-  const [isMicSupported, setIsMicSupported] = useState(true)
-
-  // Conversational AI
-  const [isConversationalAIOpen, setIsConversationalAIOpen] = useState(false)
-
   // SIDEBAR
   const [showSidebar, setShowSidebar] = useLocalStorageState(
     "showSidebar",
@@ -313,16 +304,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         // Is ready to chat state
         isReadyToChat,
         setIsReadyToChat,
-
-        // Audio
-        currentPlayingMessageId,
-        setCurrentPlayingMessageId,
-        isMicSupported,
-        setIsMicSupported,
-
-        // Conversational AI
-        isConversationalAIOpen,
-        setIsConversationalAIOpen,
 
         // Sidebar
         showSidebar,
