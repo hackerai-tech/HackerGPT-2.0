@@ -16,6 +16,7 @@ import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { detectCategoryAndModeration } from "@/lib/server/moderation"
+import { createToolSchemas } from "@/lib/tools/toolSchemas"
 
 export const runtime: ServerRuntime = "edge"
 
@@ -170,11 +171,11 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
-      // let tools
-      // if (selectedModel === "openai/gpt-4o-mini") {
-      //   const toolSchemas = createToolSchemas({ profile, data })
-      //   tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
-      // }
+      let tools
+      if (selectedModel === "openai/gpt-4o-mini") {
+        const toolSchemas = createToolSchemas({ profile, data })
+        tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
+      }
 
       const result = await streamText({
         model: provider(selectedModel),
@@ -183,12 +184,12 @@ export async function POST(request: Request) {
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
-        // ...(selectedModel === "openai/gpt-4o-mini"
-        //   ? {
-        //       experimental_toolCallStreaming: true,
-        //       tools
-        //     }
-        //   : {}),
+        ...(selectedModel === "openai/gpt-4o-mini"
+          ? {
+              experimental_toolCallStreaming: true,
+              tools
+            }
+          : {}),
         onFinish: () => {
           data.close()
         }
