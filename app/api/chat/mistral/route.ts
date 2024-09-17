@@ -16,7 +16,7 @@ import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { detectCategoryAndModeration } from "@/lib/server/moderation"
-import { createToolSchemas } from "@/lib/tools/toolSchemas"
+import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 
 export const runtime: ServerRuntime = "edge"
 

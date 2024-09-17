@@ -6,8 +6,11 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { PluginID } from "@/types/plugins"
 import { isPremiumUser } from "@/lib/server/subscription-utils"
 import { buildFinalMessages } from "@/lib/build-prompt"
-import { commandGeneratorHandler } from "@/lib/gpts/command-generator-handler"
-import { isFreePlugin, isTerminalPlugin } from "@/lib/gpts/tools-helper"
+import { commandGeneratorHandler } from "@/lib/tools/tool-store/command-generator-handler"
+import {
+  isFreePlugin,
+  isTerminalPlugin
+} from "@/lib/tools/tool-store/tools-helper"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [

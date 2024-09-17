@@ -67,9 +67,10 @@ export async function buildFinalMessages(
     selectedPlugin === PluginID.WAF_DETECTOR ||
     selectedPlugin === PluginID.WHOIS_LOOKUP ||
     selectedPlugin === PluginID.SUBDOMAIN_FINDER ||
-    selectedPlugin === PluginID.CVE_MAP
+    selectedPlugin === PluginID.CVE_MAP ||
+    selectedPlugin === PluginID.URL_FUZZER
   ) {
-    CHUNK_SIZE = 4096
+    CHUNK_SIZE = 8000
   }
 
   // Adjusting the chunk size for RAG

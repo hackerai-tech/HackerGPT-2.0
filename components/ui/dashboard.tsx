@@ -31,7 +31,7 @@ import {
   getInstalledPlugins,
   usePluginContext
 } from "../chat/chat-hooks/PluginProvider"
-import { availablePlugins } from "@/lib/gpts/available-tools"
+import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { toast } from "sonner"
 
 export const SIDEBAR_WIDTH = 350

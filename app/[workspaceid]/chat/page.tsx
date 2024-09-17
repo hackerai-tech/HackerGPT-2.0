@@ -10,7 +10,7 @@ import { BrandLarge, BrandSmall } from "@/components/ui/brand"
 import { PentestGPTContext } from "@/context/context"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { useContext } from "react"
-import { availablePlugins } from "@/lib/gpts/available-tools"
+import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { ChatPluginInfo } from "@/components/chat/chat-plugin-info"
 
 export default function ChatPage() {

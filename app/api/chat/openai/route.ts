@@ -13,7 +13,7 @@ import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { ServerRuntime } from "next"
-import { createToolSchemas } from "@/lib/tools/toolSchemas"
+import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -66,7 +66,9 @@ export async function POST(request: Request) {
 
     const { getSelectedSchemas } = createToolSchemas({
       profile,
-      data
+      data,
+      openai,
+      messages
     })
 
     const result = await streamText({

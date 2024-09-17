@@ -292,12 +292,12 @@ export const Message: FC<MessageProps> = ({
                           <div>Executing command in Terminal...</div>
                         </div>
                       )
-                    // case PluginID.REASON_LLM:
-                    //   return (
-                    //     <div className="flex animate-pulse items-center space-x-2">
-                    //       <div>Thinking...</div>
-                    //     </div>
-                    //   )
+                    case PluginID.REASON_LLM:
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <div>Thinking with OpenAI o1...</div>
+                        </div>
+                      )
                     default:
                       return (
                         <div className="flex animate-pulse items-center space-x-2">
