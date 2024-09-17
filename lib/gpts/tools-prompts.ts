@@ -18,6 +18,10 @@ Common instructions for all plugins:
 7. Assume the user wants to use the selected plugin - proceed with operations unless told otherwise.
 8. Warn users when scans might exceed the 5-minute timeout limit.
 9. Always provide the full command being executed for transparency.
+10. If the user provides only a domain, URL, or IP address without specific instructions:
+    a. Treat it as the target for the selected plugin.
+    b. Run a basic scan using default or quick options suitable for the plugin.
+    c. Provide a summary of the results and suggest more detailed scans if appropriate.
 `
 
   instructions += `<common_instructions>\n${commonInstructions}</common_instructions>\n\n`
