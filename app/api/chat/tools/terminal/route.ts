@@ -1,5 +1,5 @@
 import { ServerRuntime } from "next"
-import { terminalExecutor } from "@/lib/tools/terminal-executor"
+import { terminalExecutor } from "@/lib/tools/llm/terminal-executor"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { isPremiumUser } from "@/lib/server/subscription-utils"
 import { ratelimit } from "@/lib/server/ratelimiter"

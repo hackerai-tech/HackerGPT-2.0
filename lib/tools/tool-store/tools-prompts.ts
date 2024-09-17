@@ -89,6 +89,20 @@ The user has selected the CVEMap plugin, which uses the cvemap tool in the termi
 6. Always use the '-json' flag by default to provide more detailed information about CVEs:
 -json                           Output results in JSON format for more comprehensive details
 `
+
+      case PluginID.URL_FUZZER:
+        return `
+The user has selected the URL Fuzzer plugin, which uses the ffuf tool in the terminal. This tool performs web fuzzing to discover hidden files, directories, and endpoints. Remember:
+1. Focus on efficiently fuzzing web applications to uncover hidden or sensitive content.
+2. Provide ffuf-specific options and explanations for effective fuzzing.
+3. Use wordlists from SecLists located in /opt/SecLists for comprehensive fuzzing. (e.g., -w /opt/SecLists/Discovery/Web-Content/common.txt)
+4. For quick scans, use smaller wordlists.
+5. Avoid using a very large number of threads or other flags that could generate excessive traffic on the target, potentially resulting in blocks or service disruption.
+6. Always use the '-c' flag by default to colorize output, improving user experience. And don't use the threads flag by default.
+7. When using the '-e' flag for file extensions, do not include the dot (.) before the extension. For example, use '-e php,bak,db' instead of '-e .php,.bak,.db'.
+8. User already has full permission to fuzz target.
+`
+
       default:
         return ""
     }

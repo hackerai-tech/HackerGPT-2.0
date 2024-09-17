@@ -207,6 +207,38 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
+    id: 9,
+    name: "URL Fuzzer",
+    value: PluginID.URL_FUZZER,
+    categories: ["recon"],
+    icon: "https://cdn-icons-png.flaticon.com/128/10423/10423265.png",
+    invertInDarkMode: true,
+    description: "Discover hidden files and directories",
+    githubRepoUrl: pluginUrls.URL_FUZZER,
+    isInstalled: false,
+    isPremium: true,
+    createdAt: "2024-09-17",
+    starters: [
+      {
+        title: "Quick Directory Scan",
+        description: "of google.com using common.txt",
+        chatMessage:
+          "Perform a quick directory scan on google.com using the common.txt wordlist, showing only 200 OK responses"
+      },
+      {
+        title: "Enumerate Subdomains",
+        description: "of google.com using subdomains wordlist",
+        chatMessage:
+          "Enumerate subdomains of FUZZ.google.com using subdomains wordlist, showing only 200 OK responses"
+      },
+      {
+        title: "URL Fuzzer Help",
+        description: "How does the URL Fuzzer plugin work?",
+        chatMessage: "How does the URL Fuzzer plugin work?"
+      }
+    ]
+  },
+  {
     id: 10,
     name: "Port Scanner",
     value: PluginID.PORT_SCANNER,

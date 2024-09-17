@@ -41,7 +41,8 @@ export enum PluginID {
   WAF_DETECTOR = "waf-detector",
   WHOIS_LOOKUP = "whois-lookup",
   SUBDOMAIN_FINDER = "subdomain-finder",
-  CVE_MAP = "cve-map"
+  CVE_MAP = "cve-map",
+  URL_FUZZER = "url-fuzzer"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -62,5 +63,6 @@ export const pluginUrls: PluginUrls = {
   WAF_DETECTOR: "https://github.com/EnableSecurity/wafw00f",
   WHOIS_LOOKUP: "https://www.whois.com/whois/",
   SUBDOMAIN_FINDER: "https://github.com/projectdiscovery/subfinder",
-  CVE_MAP: "https://github.com/projectdiscovery/cvemap"
+  CVE_MAP: "https://github.com/projectdiscovery/cvemap",
+  URL_FUZZER: "https://github.com/ffuf/ffuf"
 }

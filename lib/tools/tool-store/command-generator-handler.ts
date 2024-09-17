@@ -13,10 +13,10 @@ import {
   replaceWordsInLastUserMessage,
   updateSystemMessage,
   wordReplacements
-} from "../ai-helper"
+} from "../../ai-helper"
 import { getCustomGPTPrompt } from "./tools-prompts"
 import { PluginID } from "@/types/plugins"
-import { getTerminalTemplate } from "@/lib/gpts/tools-helper"
+import { getTerminalTemplate } from "@/lib/tools/tool-store/tools-helper"
 
 const ENCODER = new TextEncoder()
 

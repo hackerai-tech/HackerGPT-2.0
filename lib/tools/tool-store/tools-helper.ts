@@ -15,7 +15,8 @@ export const getTerminalPlugins = (): PluginID[] => [
   PluginID.WAF_DETECTOR,
   PluginID.WHOIS_LOOKUP,
   PluginID.SUBDOMAIN_FINDER,
-  PluginID.CVE_MAP
+  PluginID.CVE_MAP,
+  PluginID.URL_FUZZER
 ]
 
 export const isFreePlugin = (plugin: PluginID): boolean =>
@@ -24,5 +25,9 @@ export const isFreePlugin = (plugin: PluginID): boolean =>
 export const isTerminalPlugin = (plugin: PluginID): boolean =>
   getTerminalPlugins().includes(plugin)
 
-export const getTerminalTemplate = (plugin: PluginID): string =>
-  isFreePlugin(plugin) ? "terminal-for-free-tools" : "terminal-for-tools"
+export const getTerminalTemplate = (plugin: PluginID): string => {
+  if (plugin === PluginID.URL_FUZZER) {
+    return "terminal-fuzzing"
+  }
+  return isFreePlugin(plugin) ? "terminal-for-free-tools" : "terminal-for-tools"
+}
