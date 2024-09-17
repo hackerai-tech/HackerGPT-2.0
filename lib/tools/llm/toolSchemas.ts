@@ -13,7 +13,7 @@ export const createToolSchemas = (context: ToolContext) => {
   const allSchemas = {
     reasonLLM: tool({
       description:
-        "Uses OpenAI's o1 model for advanced reasoning in complex scenarios such as mathematical problems, data analysis, cybersecurity challenges, and multi-step logical deductions.",
+        "Uses OpenAI's o1 model for advanced reasoning in complex scenarios.",
       parameters: z.object({
         reason: z
           .boolean()
