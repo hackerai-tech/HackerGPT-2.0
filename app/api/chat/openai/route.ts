@@ -66,7 +66,9 @@ export async function POST(request: Request) {
 
     const { getSelectedSchemas } = createToolSchemas({
       profile,
-      data
+      data,
+      openai,
+      messages
     })
 
     const result = await streamText({

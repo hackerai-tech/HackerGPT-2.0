@@ -393,28 +393,28 @@ export const processResponse = async (
       for await (const streamPart of stream) {
         // console.log(streamPart)
 
-        const isToolCallDelta = (
-          part: any
-        ): part is {
-          type: "tool_call_delta"
-          value: { toolCallId: string; argsTextDelta: string }
-        } =>
-          part.type === "tool_call_delta" &&
-          "toolCallId" in part.value &&
-          "argsTextDelta" in part.value
+        // const isToolCallDelta = (
+        //   part: any
+        // ): part is {
+        //   type: "tool_call_delta"
+        //   value: { toolCallId: string; argsTextDelta: string }
+        // } =>
+        //   part.type === "tool_call_delta" &&
+        //   "toolCallId" in part.value &&
+        //   "argsTextDelta" in part.value
 
-        const isToolResult = (
-          part: any
-        ): part is {
-          type: "tool_result"
-          value: {
-            toolCallId: string
-            result: { results: string; runtimeError: string }
-          }
-        } =>
-          part.type === "tool_result" &&
-          "toolCallId" in part.value &&
-          "result" in part.value
+        // const isToolResult = (
+        //   part: any
+        // ): part is {
+        //   type: "tool_result"
+        //   value: {
+        //     toolCallId: string
+        //     result: { results: string; runtimeError: string }
+        //   }
+        // } =>
+        //   part.type === "tool_result" &&
+        //   "toolCallId" in part.value &&
+        //   "result" in part.value
 
         const isTerminalResult = (
           part: any
@@ -430,6 +430,18 @@ export const processResponse = async (
           part.value[0].type !== "imageGenerated" &&
           "content" in part.value[0]
 
+        const isReasonLLMResult = (
+          part: any
+        ): part is {
+          type: "data"
+          value: Array<{ reason: string }>
+        } =>
+          part.type === "data" &&
+          Array.isArray(part.value) &&
+          part.value.length > 0 &&
+          typeof part.value[0] === "object" &&
+          "reason" in part.value[0]
+
         const processStreamPart = (
           streamPart: any,
           toolCallId: string
@@ -437,29 +449,29 @@ export const processResponse = async (
           if (streamPart.type === "text")
             return { contentToAdd: streamPart.value, newImagePath: null }
 
-          if (
-            isToolCallDelta(streamPart) &&
-            streamPart.value.toolCallId === toolCallId
-          ) {
-            return {
-              contentToAdd: streamPart.value.argsTextDelta,
-              newImagePath: null
-            }
-          }
+          // if (
+          //   isToolCallDelta(streamPart) &&
+          //   streamPart.value.toolCallId === toolCallId
+          // ) {
+          //   return {
+          //     contentToAdd: streamPart.value.argsTextDelta,
+          //     newImagePath: null
+          //   }
+          // }
 
-          if (
-            isToolResult(streamPart) &&
-            streamPart.value.toolCallId === toolCallId
-          ) {
-            const { results, runtimeError } = streamPart.value.result
-            const content = [
-              results && `<results>${results}</results>`,
-              runtimeError && `<runtimeError>${runtimeError}</runtimeError>`
-            ]
-              .filter(Boolean)
-              .join("")
-            return { contentToAdd: content, newImagePath: null }
-          }
+          // if (
+          //   isToolResult(streamPart) &&
+          //   streamPart.value.toolCallId === toolCallId
+          // ) {
+          //   const { results, runtimeError } = streamPart.value.result
+          //   const content = [
+          //     results && `<results>${results}</results>`,
+          //     runtimeError && `<runtimeError>${runtimeError}</runtimeError>`
+          //   ]
+          //     .filter(Boolean)
+          //     .join("")
+          //   return { contentToAdd: content, newImagePath: null }
+          // }
 
           if (isTerminalResult(streamPart)) {
             return {
@@ -469,6 +481,13 @@ export const processResponse = async (
                 )
                 .map(item => item.content)
                 .join(""),
+              newImagePath: null
+            }
+          }
+
+          if (isReasonLLMResult(streamPart)) {
+            return {
+              contentToAdd: streamPart.value[0].reason,
               newImagePath: null
             }
           }
@@ -563,35 +582,10 @@ export const processResponse = async (
                 setToolInUse(PluginID.BROWSER)
                 updatedPlugin = PluginID.BROWSER
                 break
-              // case "reasonLLM":
-              //   setToolInUse(PluginID.REASON_LLM)
-              //   updatedPlugin = PluginID.REASON_LLM
-
-              //   const reasonLLMResponse = await fetchChatResponse(
-              //     "/api/chat/tools/reason-llm",
-              //     requestBody,
-              //     controller,
-              //     setIsGenerating,
-              //     setChatMessages,
-              //     alertDispatch
-              //   )
-
-              //   const reasonLLMResult = await processResponse(
-              //     reasonLLMResponse,
-              //     lastChatMessage,
-              //     controller,
-              //     setFirstTokenReceived,
-              //     setChatMessages,
-              //     setToolInUse,
-              //     requestBody,
-              //     setIsGenerating,
-              //     alertDispatch,
-              //     updatedPlugin
-              //   )
-
-              //   fullText += reasonLLMResult.fullText
-
-              //   break
+              case "reasonLLM":
+                setToolInUse(PluginID.REASON_LLM)
+                updatedPlugin = PluginID.REASON_LLM
+                break
               case "terminal":
                 setToolInUse(PluginID.TERMINAL)
                 updatedPlugin = PluginID.TERMINAL

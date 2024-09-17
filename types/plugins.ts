@@ -31,7 +31,7 @@ export enum PluginID {
   WEB_SEARCH = "websearch",
   BROWSER = "browser",
   TERMINAL = "terminal",
-  // REASON_LLM = "reason-llm",
+  REASON_LLM = "reason-llm",
 
   // Pentest tools
   SQLI_EXPLOITER = "sqli-exploiter",

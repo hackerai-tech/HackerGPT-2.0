@@ -74,7 +74,8 @@ for enhanced mathematical notation and more.
 export const getPentestGPTToolsInfo = (
   includeBrowserTool: boolean = false,
   includeWebSearchTool: boolean = false,
-  includeTerminalTool: boolean = false
+  includeTerminalTool: boolean = false,
+  includeReasonLLM: boolean = false
 ): string => {
   let toolsInfo = "<tools_instructions>"
 
@@ -145,6 +146,21 @@ and suggest a more thorough option with a timeout warning.
 - Inform users about the 10-minute sandbox timeout when they are installing tools or \
 planning long-running processes that might be affected by this limitation.
 </terminal_instructions>`
+  }
+
+  if (includeReasonLLM) {
+    toolsInfo += `\n\n<reason_llm_instructions>
+PentestGPT can use the Reason LLM tool (OpenAI's o1 model) for advanced reasoning. Use only for:
+  
+1. Complex mathematical/scientific/biological/physical problems
+2. Intricate data analysis
+3. Cybersecurity CTF challenges
+4. Multi-step logical deductions
+5. When user explicitly requests reasoning/thinking or OpenAI o1 model
+6. When user asks to think step-by-step or requests "thinking"
+  
+Do NOT use for simple reasoning, code generation, and writing/editing, or tasks PentestGPT can handle alone.
+</reason_llm_instructions>`
   }
 
   toolsInfo += "\n</tools_instructions>"
