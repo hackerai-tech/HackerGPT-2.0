@@ -1,19 +1,18 @@
+import { getAIProfile } from "@/lib/server/server-chat-helpers"
+import { ServerRuntime } from "next"
+
 import {
   replaceWordsInLastUserMessage,
-  updateSystemMessage,
+  //   updateSystemMessage,
   wordReplacements
 } from "@/lib/ai-helper"
-import {
-  filterEmptyAssistantMessages,
-  toVercelChatMessages
-} from "@/lib/build-prompt"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
-import { getAIProfile } from "@/lib/server/server-chat-helpers"
+import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
+import { generateText } from "ai"
+import { toVercelChatMessages } from "@/lib/build-prompt"
+import { isPremiumUser } from "@/lib/server/subscription-utils"
 import { createOpenAI } from "@ai-sdk/openai"
-import { StreamData, streamText } from "ai"
-import { ServerRuntime } from "next"
-import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -41,6 +40,15 @@ export async function POST(request: Request) {
     const { messages } = await request.json()
 
     const profile = await getAIProfile()
+    const isPremium = await isPremiumUser(profile.user_id)
+
+    if (!isPremium) {
+      return new Response(
+        "Access Denied: This feature is exclusive to Pro members. Please upgrade to a Pro account to access the reason LLM.",
+        { status: 403 }
+      )
+    }
+
     const rateLimitCheckResult = await checkRatelimitOnApi(
       profile.user_id,
       "gpt-4"
@@ -49,42 +57,36 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    updateSystemMessage(
-      messages,
-      llmConfig.systemPrompts.gpt4o,
-      profile.profile_context
-    )
+    // OpenAI o1-mini doesn't support system messages
+    // updateSystemMessage(
+    //   messages,
+    //   llmConfig.systemPrompts.reasonLLM,
+    //   profile.profile_context
+    // )
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages, wordReplacements)
+
+    // Remove all system messages
+    const filteredMessages = messages.filter(
+      (msg: { role: string }) => msg.role !== "system"
+    )
 
     const openai = createOpenAI({
       baseUrl: llmConfig.openai.baseUrl,
       apiKey: llmConfig.openai.apiKey
     })
 
-    const data = new StreamData()
-
-    const { getSelectedSchemas } = createToolSchemas({
-      profile,
-      data,
-      openai,
-      messages
+    const { text } = await generateText({
+      model: openai("o1-mini"),
+      messages: toVercelChatMessages(filteredMessages)
     })
 
-    const result = await streamText({
-      model: openai("gpt-4o-2024-08-06"),
-      temperature: 0.5,
-      maxTokens: 2048,
-      messages: toVercelChatMessages(messages, true),
-      abortSignal: request.signal,
-      // experimental_toolCallStreaming: true,
-      tools: getSelectedSchemas("all"),
-      onFinish: () => {
-        data.close()
+    return new Response(`0:${JSON.stringify(text)}\n`, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "x-vercel-ai-data-stream": "v1"
       }
     })
-
-    return result.toDataStreamResponse({ data })
   } catch (error: any) {
     const errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500
