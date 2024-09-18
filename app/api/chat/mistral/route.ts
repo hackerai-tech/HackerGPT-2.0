@@ -139,7 +139,7 @@ export async function POST(request: Request) {
       filterEmptyAssistantMessages(messages)
     } else if (
       moderationLevel >= 0.3 &&
-      moderationLevel <= 0.8 &&
+      moderationLevel <= 0.9 &&
       !isHighRiskCategory
     ) {
       handleAssistantMessages(messages)
