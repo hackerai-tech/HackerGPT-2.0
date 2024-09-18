@@ -103,7 +103,7 @@ export const UpgradePlan: FC = () => {
 
   const planPrices = {
     free: { monthly: "$0", yearly: "$0" },
-    pro: { monthly: "$20", yearly: "$15" }
+    pro: { monthly: "$25", yearly: "$20" }
   }
 
   const getYearlySavingsNote = () => {
