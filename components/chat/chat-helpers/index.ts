@@ -391,30 +391,7 @@ export const processResponse = async (
 
     try {
       for await (const streamPart of stream) {
-        // console.log(streamPart)
-
-        // const isToolCallDelta = (
-        //   part: any
-        // ): part is {
-        //   type: "tool_call_delta"
-        //   value: { toolCallId: string; argsTextDelta: string }
-        // } =>
-        //   part.type === "tool_call_delta" &&
-        //   "toolCallId" in part.value &&
-        //   "argsTextDelta" in part.value
-
-        // const isToolResult = (
-        //   part: any
-        // ): part is {
-        //   type: "tool_result"
-        //   value: {
-        //     toolCallId: string
-        //     result: { results: string; runtimeError: string }
-        //   }
-        // } =>
-        //   part.type === "tool_result" &&
-        //   "toolCallId" in part.value &&
-        //   "result" in part.value
+        console.log(streamPart)
 
         const isTerminalResult = (
           part: any
@@ -497,7 +474,7 @@ export const processResponse = async (
 
         switch (streamPart.type) {
           case "text":
-          case "tool_call_delta":
+          // case "tool_call_delta":
           case "tool_result":
           case "data":
             const { contentToAdd, newImagePath } = processStreamPart(
@@ -546,54 +523,13 @@ export const processResponse = async (
             }
             break
 
-          case "tool_call_streaming_start":
+          case "tool_call":
             const { toolName } = streamPart.value
 
-            switch (toolName) {
-              case "webSearch":
-                setToolInUse(PluginID.WEB_SEARCH)
-                updatedPlugin = PluginID.WEB_SEARCH
+            if (toolName === "browser" && streamPart.value.args.open_url) {
+              setToolInUse(PluginID.BROWSER)
+              updatedPlugin = PluginID.BROWSER
 
-                const webSearchResponse = await fetchChatResponse(
-                  "/api/chat/plugins/web-search",
-                  requestBody,
-                  controller,
-                  setIsGenerating,
-                  setChatMessages,
-                  alertDispatch
-                )
-
-                const webSearchResult = await processResponse(
-                  webSearchResponse,
-                  lastChatMessage,
-                  controller,
-                  setFirstTokenReceived,
-                  setChatMessages,
-                  setToolInUse,
-                  requestBody,
-                  setIsGenerating,
-                  alertDispatch,
-                  updatedPlugin
-                )
-
-                fullText += webSearchResult.fullText
-                break
-              case "browser":
-                setToolInUse(PluginID.BROWSER)
-                updatedPlugin = PluginID.BROWSER
-                break
-              case "terminal":
-                setToolInUse(PluginID.TERMINAL)
-                updatedPlugin = PluginID.TERMINAL
-                break
-            }
-            break
-
-          case "tool_call":
-            if (
-              streamPart.value.toolName === "browser" &&
-              streamPart.value.args.open_url
-            ) {
               const urlToOpen = streamPart.value.args.open_url
 
               const browserRequestBody = {
@@ -626,9 +562,12 @@ export const processResponse = async (
               fullText += browserResult.fullText
               break
             } else if (
-              streamPart.value.toolName === "terminal" &&
+              toolName === "terminal" &&
               streamPart.value.args.command
             ) {
+              setToolInUse(PluginID.TERMINAL)
+              updatedPlugin = PluginID.TERMINAL
+
               const command = streamPart.value.args.command
 
               const terminalRequestBody = {
@@ -656,7 +595,36 @@ export const processResponse = async (
 
               fullText += terminalResult.fullText
               break
-            } else if (streamPart.value.toolName === "reasonLLM") {
+            } else if (toolName === "webSearch") {
+              setToolInUse(PluginID.WEB_SEARCH)
+              updatedPlugin = PluginID.WEB_SEARCH
+
+              const webSearchResponse = await fetchChatResponse(
+                "/api/chat/plugins/web-search",
+                requestBody,
+                controller,
+                setIsGenerating,
+                setChatMessages,
+                alertDispatch
+              )
+
+              const webSearchResult = await processResponse(
+                webSearchResponse,
+                lastChatMessage,
+                controller,
+                setFirstTokenReceived,
+                setChatMessages,
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
+              )
+
+              fullText += webSearchResult.fullText
+
+              break
+            } else if (toolName === "reasonLLM") {
               setToolInUse(PluginID.REASON_LLM)
               updatedPlugin = PluginID.REASON_LLM
               break
