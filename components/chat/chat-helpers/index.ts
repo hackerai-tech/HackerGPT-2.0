@@ -582,10 +582,6 @@ export const processResponse = async (
                 setToolInUse(PluginID.BROWSER)
                 updatedPlugin = PluginID.BROWSER
                 break
-              case "reasonLLM":
-                setToolInUse(PluginID.REASON_LLM)
-                updatedPlugin = PluginID.REASON_LLM
-                break
               case "terminal":
                 setToolInUse(PluginID.TERMINAL)
                 updatedPlugin = PluginID.TERMINAL
@@ -659,6 +655,10 @@ export const processResponse = async (
               )
 
               fullText += terminalResult.fullText
+              break
+            } else if (streamPart.value.toolName === "reasonLLM") {
+              setToolInUse(PluginID.REASON_LLM)
+              updatedPlugin = PluginID.REASON_LLM
               break
             }
             break
