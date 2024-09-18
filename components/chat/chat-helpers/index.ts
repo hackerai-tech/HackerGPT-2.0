@@ -572,6 +572,30 @@ export const processResponse = async (
             } else if (toolName === "reasonLLM") {
               setToolInUse(PluginID.REASON_LLM)
               updatedPlugin = PluginID.REASON_LLM
+
+              const reasonLLMResponse = await fetchChatResponse(
+                "/api/chat/tools/reason-llm",
+                requestBody,
+                controller,
+                setIsGenerating,
+                setChatMessages,
+                alertDispatch
+              )
+
+              const reasonLLMResult = await processResponse(
+                reasonLLMResponse,
+                lastChatMessage,
+                controller,
+                setFirstTokenReceived,
+                setChatMessages,
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
+              )
+
+              fullText += reasonLLMResult.fullText
             }
             break
 

@@ -1,6 +1,5 @@
 import { z } from "zod"
-import { tool, StreamData, generateText } from "ai"
-import { toVercelChatMessages } from "@/lib/build-prompt"
+import { StreamData } from "ai"
 
 type ToolContext = {
   profile: { user_id: string }
@@ -11,7 +10,7 @@ type ToolContext = {
 
 export const createToolSchemas = (context: ToolContext) => {
   const allSchemas = {
-    reasonLLM: tool({
+    reasonLLM: {
       description:
         "Uses OpenAI's o1 model for advanced reasoning in complex scenarios.",
       parameters: z.object({
@@ -20,20 +19,8 @@ export const createToolSchemas = (context: ToolContext) => {
           .describe(
             "Set to true to use the advanced reasoning engine for complex problems"
           )
-      }),
-      execute: async ({}) => {
-        // Remove system message
-        const slicedMessages = context.messages.slice(1)
-
-        const { text } = await generateText({
-          model: context.openai("o1-mini"),
-          messages: toVercelChatMessages(slicedMessages)
-        })
-
-        context.data.append({ reason: text })
-        return "Reason LLM tool call successfully completed"
-      }
-    }),
+      })
+    },
     webSearch: {
       description: "Search the web for latest information",
       parameters: z.object({ search: z.boolean() })
