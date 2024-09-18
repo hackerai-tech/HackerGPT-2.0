@@ -422,14 +422,6 @@ export const processResponse = async (
           return { contentToAdd: "", newImagePath: null }
         }
 
-        function isReasonLLMObject(
-          value: any
-        ): value is { reasonLLM: boolean } {
-          return (
-            typeof value === "object" && value !== null && "reasonLLM" in value
-          )
-        }
-
         switch (streamPart.type) {
           case "text":
           case "tool_result":
@@ -477,14 +469,6 @@ export const processResponse = async (
                 streamPart.value.ragId !== null
                   ? String(streamPart.value.ragId)
                   : null
-            } else if (
-              streamPart.type === "data" &&
-              Array.isArray(streamPart.value) &&
-              streamPart.value.length > 0 &&
-              isReasonLLMObject(streamPart.value[0])
-            ) {
-              setToolInUse(PluginID.REASON_LLM)
-              updatedPlugin = PluginID.REASON_LLM
             }
             break
 
@@ -585,6 +569,9 @@ export const processResponse = async (
               )
 
               fullText += webSearchResult.fullText
+            } else if (toolName === "reasonLLM") {
+              setToolInUse(PluginID.REASON_LLM)
+              updatedPlugin = PluginID.REASON_LLM
             }
             break
 
