@@ -393,19 +393,19 @@ export const processResponse = async (
       for await (const streamPart of stream) {
         console.log(streamPart)
 
-        const isTerminalResult = (
-          part: any
-        ): part is {
-          type: "data"
-          value: Array<{ type: string; content: string }>
-        } =>
-          part.type === "data" &&
-          Array.isArray(part.value) &&
-          part.value.length > 0 &&
-          typeof part.value[0] === "object" &&
-          "type" in part.value[0] &&
-          part.value[0].type !== "imageGenerated" &&
-          "content" in part.value[0]
+        // const isTerminalResult = (
+        //   part: any
+        // ): part is {
+        //   type: "data"
+        //   value: Array<{ type: string; content: string }>
+        // } =>
+        //   part.type === "data" &&
+        //   Array.isArray(part.value) &&
+        //   part.value.length > 0 &&
+        //   typeof part.value[0] === "object" &&
+        //   "type" in part.value[0] &&
+        //   part.value[0].type !== "imageGenerated" &&
+        //   "content" in part.value[0]
 
         const isReasonLLMResult = (
           part: any
@@ -450,17 +450,17 @@ export const processResponse = async (
           //   return { contentToAdd: content, newImagePath: null }
           // }
 
-          if (isTerminalResult(streamPart)) {
-            return {
-              contentToAdd: streamPart.value
-                .filter(item =>
-                  ["terminal", "stdout", "stderr"].includes(item.type)
-                )
-                .map(item => item.content)
-                .join(""),
-              newImagePath: null
-            }
-          }
+          // if (isTerminalResult(streamPart)) {
+          //   return {
+          //     contentToAdd: streamPart.value
+          //       .filter(item =>
+          //         ["terminal", "stdout", "stderr"].includes(item.type)
+          //       )
+          //       .map(item => item.content)
+          //       .join(""),
+          //     newImagePath: null
+          //   }
+          // }
 
           if (isReasonLLMResult(streamPart)) {
             return {

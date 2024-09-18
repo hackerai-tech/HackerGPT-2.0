@@ -186,7 +186,6 @@ export async function POST(request: Request) {
         abortSignal: request.signal,
         ...(selectedModel === "openai/gpt-4o-mini"
           ? {
-              experimental_toolCallStreaming: true,
               tools
             }
           : {}),

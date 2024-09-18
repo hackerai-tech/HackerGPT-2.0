@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       maxTokens: 2048,
       messages: toVercelChatMessages(messages, true),
       abortSignal: request.signal,
-      experimental_toolCallStreaming: true,
+      // experimental_toolCallStreaming: true,
       tools: getSelectedSchemas("all"),
       onFinish: () => {
         data.close()
