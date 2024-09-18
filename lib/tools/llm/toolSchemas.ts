@@ -22,6 +22,7 @@ export const createToolSchemas = (context: ToolContext) => {
           )
       }),
       execute: async ({}) => {
+        context.data.append({ reasonLLM: true })
         // Remove system message
         const slicedMessages = context.messages.slice(1)
 

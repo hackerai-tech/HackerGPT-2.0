@@ -391,21 +391,7 @@ export const processResponse = async (
 
     try {
       for await (const streamPart of stream) {
-        console.log(streamPart)
-
-        // const isTerminalResult = (
-        //   part: any
-        // ): part is {
-        //   type: "data"
-        //   value: Array<{ type: string; content: string }>
-        // } =>
-        //   part.type === "data" &&
-        //   Array.isArray(part.value) &&
-        //   part.value.length > 0 &&
-        //   typeof part.value[0] === "object" &&
-        //   "type" in part.value[0] &&
-        //   part.value[0].type !== "imageGenerated" &&
-        //   "content" in part.value[0]
+        // console.log(streamPart)
 
         const isReasonLLMResult = (
           part: any
@@ -426,42 +412,6 @@ export const processResponse = async (
           if (streamPart.type === "text")
             return { contentToAdd: streamPart.value, newImagePath: null }
 
-          // if (
-          //   isToolCallDelta(streamPart) &&
-          //   streamPart.value.toolCallId === toolCallId
-          // ) {
-          //   return {
-          //     contentToAdd: streamPart.value.argsTextDelta,
-          //     newImagePath: null
-          //   }
-          // }
-
-          // if (
-          //   isToolResult(streamPart) &&
-          //   streamPart.value.toolCallId === toolCallId
-          // ) {
-          //   const { results, runtimeError } = streamPart.value.result
-          //   const content = [
-          //     results && `<results>${results}</results>`,
-          //     runtimeError && `<runtimeError>${runtimeError}</runtimeError>`
-          //   ]
-          //     .filter(Boolean)
-          //     .join("")
-          //   return { contentToAdd: content, newImagePath: null }
-          // }
-
-          // if (isTerminalResult(streamPart)) {
-          //   return {
-          //     contentToAdd: streamPart.value
-          //       .filter(item =>
-          //         ["terminal", "stdout", "stderr"].includes(item.type)
-          //       )
-          //       .map(item => item.content)
-          //       .join(""),
-          //     newImagePath: null
-          //   }
-          // }
-
           if (isReasonLLMResult(streamPart)) {
             return {
               contentToAdd: streamPart.value[0].reason,
@@ -472,9 +422,16 @@ export const processResponse = async (
           return { contentToAdd: "", newImagePath: null }
         }
 
+        function isReasonLLMObject(
+          value: any
+        ): value is { reasonLLM: boolean } {
+          return (
+            typeof value === "object" && value !== null && "reasonLLM" in value
+          )
+        }
+
         switch (streamPart.type) {
           case "text":
-          // case "tool_call_delta":
           case "tool_result":
           case "data":
             const { contentToAdd, newImagePath } = processStreamPart(
@@ -520,6 +477,14 @@ export const processResponse = async (
                 streamPart.value.ragId !== null
                   ? String(streamPart.value.ragId)
                   : null
+            } else if (
+              streamPart.type === "data" &&
+              Array.isArray(streamPart.value) &&
+              streamPart.value.length > 0 &&
+              isReasonLLMObject(streamPart.value[0])
+            ) {
+              setToolInUse(PluginID.REASON_LLM)
+              updatedPlugin = PluginID.REASON_LLM
             }
             break
 
@@ -560,7 +525,6 @@ export const processResponse = async (
               )
 
               fullText += browserResult.fullText
-              break
             } else if (
               toolName === "terminal" &&
               streamPart.value.args.command
@@ -594,7 +558,6 @@ export const processResponse = async (
               )
 
               fullText += terminalResult.fullText
-              break
             } else if (toolName === "webSearch") {
               setToolInUse(PluginID.WEB_SEARCH)
               updatedPlugin = PluginID.WEB_SEARCH
@@ -622,12 +585,6 @@ export const processResponse = async (
               )
 
               fullText += webSearchResult.fullText
-
-              break
-            } else if (toolName === "reasonLLM") {
-              setToolInUse(PluginID.REASON_LLM)
-              updatedPlugin = PluginID.REASON_LLM
-              break
             }
             break
 
