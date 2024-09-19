@@ -55,8 +55,8 @@ The user has selected the DNS Scanner plugin, which uses the dnsrecon tool in th
 1. Focus on DNS enumeration, zone transfers, and identifying potential misconfigurations.
 2. Provide dnsrecon-specific options and explanations.
 `
-case PluginID.PORT_SCANNER:
-  return `
+      case PluginID.PORT_SCANNER:
+        return `
 The user has selected the Port Scanner plugin, which uses the naabu tool in the terminal. This tool performs fast port scanning to discover open ports on target systems. Remember:
 1. Focus on identifying open ports and potential services running on those ports.
 2. Provide naabu-specific options and explanations for efficient scanning.

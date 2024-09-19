@@ -233,7 +233,8 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "Enumerate WordPress Users",
         description: "for example.com",
-        chatMessage: "Enumerate WordPress users on example.com and assess user enumeration vulnerability"
+        chatMessage:
+          "Enumerate WordPress users on example.com and assess user enumeration vulnerability"
       },
       {
         title: "WordPress Scanner Help",
