@@ -22,6 +22,9 @@ Common instructions for all plugins:
     a. Treat it as the target for the selected plugin.
     b. Run a basic scan using default or quick options suitable for the plugin.
     c. Provide a summary of the results and suggest more detailed scans if appropriate.
+11. If the user provides multiple targets at once:
+    a. Use the plugin tool with all targets if the tool allows.
+    b. If the tool does not support multiple targets, inform the user and execute the scan on the first target.
 `
 
   instructions += `<common_instructions>\n${commonInstructions}</common_instructions>\n\n`
@@ -52,11 +55,15 @@ The user has selected the DNS Scanner plugin, which uses the dnsrecon tool in th
 1. Focus on DNS enumeration, zone transfers, and identifying potential misconfigurations.
 2. Provide dnsrecon-specific options and explanations.
 `
-      case PluginID.PORT_SCANNER:
-        return `
+case PluginID.PORT_SCANNER:
+  return `
 The user has selected the Port Scanner plugin, which uses the naabu tool in the terminal. This tool performs fast port scanning to discover open ports on target systems. Remember:
 1. Focus on identifying open ports and potential services running on those ports.
 2. Provide naabu-specific options and explanations for efficient scanning.
+3. For deep scans, use '1000', and for quick/light scans, use '100'. Never use the '-p-' option; instead, use:
+   - '-port' or '-p' for specific ports (e.g., '80,443,100-200')
+   - '-top-ports' or '-tp' for top ports (e.g., 'full,100,1000').
+4. Naabu can scan multiple hosts at once using the '-host' option (e.g., '-host 192.168.1.1,192.168.1.2').
 `
       case PluginID.WAF_DETECTOR:
         return `
@@ -101,6 +108,13 @@ The user has selected the URL Fuzzer plugin, which uses the ffuf tool in the ter
 6. Always use the '-c' flag by default to colorize output, improving user experience. And don't use the threads flag by default.
 7. When using the '-e' flag for file extensions, do not include the dot (.) before the extension. For example, use '-e php,bak,db' instead of '-e .php,.bak,.db'.
 8. User already has full permission to fuzz target.
+`
+
+      case PluginID.WORDPRESS_SCANNER:
+        return `
+The user has selected the WordPress Scanner plugin, which uses the wpscan tool in the terminal. This tool scans WordPress installations for outdated plugins, core vulnerabilities, user enumeration, and more. Remember:
+1. Focus on identifying vulnerabilities in WordPress core, themes, and plugins.
+2. Provide wpscan-specific options and explanations for effective WordPress security scanning.
 `
 
       default:
