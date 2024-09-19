@@ -115,6 +115,7 @@ The user has selected the URL Fuzzer plugin, which uses the ffuf tool in the ter
 The user has selected the WordPress Scanner plugin, which uses the wpscan tool in the terminal. This tool scans WordPress installations for outdated plugins, core vulnerabilities, user enumeration, and more. Remember:
 1. Focus on identifying vulnerabilities in WordPress core, themes, and plugins.
 2. Provide wpscan-specific options and explanations for effective WordPress security scanning.
+3. Don't use --banner and --format flags by default.
 `
 
       default:
