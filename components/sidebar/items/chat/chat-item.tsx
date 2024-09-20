@@ -71,16 +71,14 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" sideOffset={5} className="py-2">
-            {isMobile && (
-              <ShareChatButton chat={chat}>
-                <div className="w-full cursor-pointer">
-                  <div className="flex items-center p-3 hover:opacity-50">
-                    <IconShare2 size={20} className="mr-2" />
-                    <span>Share</span>
-                  </div>
+            <ShareChatButton chat={chat}>
+              <div className="w-full cursor-pointer">
+                <div className="flex items-center p-3 hover:opacity-50">
+                  <IconShare2 size={20} className="mr-2" />
+                  <span>Share</span>
                 </div>
-              </ShareChatButton>
-            )}
+              </div>
+            </ShareChatButton>
             <UpdateChat chat={chat} />
             <DeleteChat chat={chat} />
           </DropdownMenuContent>
