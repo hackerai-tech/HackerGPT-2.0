@@ -24,6 +24,7 @@ import { CopyButton } from "@/components/ui/copy-button"
 import { toast } from "sonner"
 import { getMessagesByChatId } from "@/db/messages"
 import { Tables } from "@/supabase/types"
+import { WithTooltip } from "../ui/with-tooltip"
 
 interface ShareChatButtonProps {
   children?: React.ReactNode
@@ -134,14 +135,19 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
           {children ? (
             <div onClick={handleOpenDialog}>{children}</div>
           ) : (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={handleOpenDialog}
-              title={shareUrl ? "Manage shared chat" : "Share chat"}
-            >
-              <IconShare2 stroke={2} />
-            </Button>
+            <WithTooltip
+              delayDuration={200}
+              display={"Share chat"}
+              trigger={
+                <IconShare2
+                  className="mr-2 cursor-pointer hover:opacity-50"
+                  size={24}
+                  stroke={2}
+                  onClick={handleOpenDialog}
+                />
+              }
+              side="bottomRight"
+            />
           )}
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg">
