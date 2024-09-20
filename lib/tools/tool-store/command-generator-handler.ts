@@ -46,13 +46,13 @@ export async function commandGeneratorHandler({
 
   try {
     let terminalStream: ReadableStream<string> | null = null
+    let terminalResults: string | null = null
 
     const { textStream } = await streamText({
       model: openai("gpt-4o-2024-08-06"),
       temperature: 0.5,
       maxTokens: 1024,
       messages: toVercelChatMessages(messages, true),
-      experimental_toolCallStreaming: true,
       tools: {
         terminal: tool({
           description: "Generate and execute a terminal command",
@@ -71,18 +71,53 @@ export async function commandGeneratorHandler({
       }
     })
 
-    const stream = new ReadableStream<string>({
+    const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
+        const encoder = new TextEncoder()
+
+        const enqueueChunk = (chunk: string) => {
+          controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
+        }
+
         for await (const chunk of textStream) {
-          controller.enqueue(`0:${JSON.stringify(chunk)}\n`)
+          enqueueChunk(chunk)
         }
 
         if (terminalStream) {
           const reader = terminalStream.getReader()
+          let terminalOutput = ""
           while (true) {
             const { done, value } = await reader.read()
             if (done) break
-            controller.enqueue(`0:${JSON.stringify(value)}\n`)
+            terminalOutput += value
+            enqueueChunk(value)
+          }
+          terminalResults = terminalOutput
+        }
+
+        if (terminalResults) {
+          const systemMessage = {
+            role: "system",
+            content: "Answer user question with terminal output"
+          }
+          const lastThreeMessages = messages.slice(-3)
+          const additionalContext = [
+            ...lastThreeMessages,
+            { role: "assistant", content: terminalResults }
+          ]
+
+          const { textStream: followUpStream } = await streamText({
+            model: openai("gpt-4o-2024-08-06"),
+            temperature: 0.5,
+            maxTokens: 512,
+            messages: toVercelChatMessages(
+              [systemMessage, ...additionalContext],
+              true
+            )
+          })
+
+          for await (const chunk of followUpStream) {
+            enqueueChunk(chunk)
           }
         }
 
