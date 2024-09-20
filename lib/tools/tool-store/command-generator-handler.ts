@@ -50,6 +50,7 @@ export async function commandGeneratorHandler({
   try {
     let terminalStream: ReadableStream<string> | null = null
     let terminalResults: string | null = null
+    let terminalExecuted = false
 
     const { textStream } = await streamText({
       model: openai("gpt-4o-2024-08-06"),
@@ -63,6 +64,10 @@ export async function commandGeneratorHandler({
             command: z.string().describe("The terminal command to execute")
           }),
           execute: async ({ command }) => {
+            if (terminalExecuted) {
+              return
+            }
+            terminalExecuted = true
             terminalStream = await terminalExecutor({
               userID,
               command,
