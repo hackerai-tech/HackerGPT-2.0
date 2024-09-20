@@ -45,7 +45,7 @@ export async function commandGeneratorHandler({
   })
 
   try {
-    let terminalStream: ReadableStream<Uint8Array> | null = null
+    let terminalStream: ReadableStream<string> | null = null
 
     const { textStream } = await streamText({
       model: openai("gpt-4o-2024-08-06"),
@@ -66,16 +66,15 @@ export async function commandGeneratorHandler({
               pluginID,
               sandboxTemplate: getTerminalTemplate(pluginID)
             })
-            return "Command executed successfully"
           }
         })
       }
     })
 
-    const stream = new ReadableStream<Uint8Array>({
+    const stream = new ReadableStream<string>({
       async start(controller) {
         for await (const chunk of textStream) {
-          controller.enqueue(ENCODER.encode(chunk))
+          controller.enqueue(`0:${JSON.stringify(chunk)}\n`)
         }
 
         if (terminalStream) {
@@ -83,7 +82,7 @@ export async function commandGeneratorHandler({
           while (true) {
             const { done, value } = await reader.read()
             if (done) break
-            controller.enqueue(value)
+            controller.enqueue(`0:${JSON.stringify(value)}\n`)
           }
         }
 
@@ -91,7 +90,12 @@ export async function commandGeneratorHandler({
       }
     })
 
-    return new StreamingTextResponse(stream)
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Transfer-Encoding": "chunked"
+      }
+    })
   } catch (error) {
     console.error(`[${userID}] commandGeneratorHandler error:`, error)
     const errorMessage =
