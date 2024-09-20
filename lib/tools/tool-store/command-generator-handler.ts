@@ -63,6 +63,7 @@ export async function commandGeneratorHandler({
             terminalStream = await terminalExecutor({
               userID,
               command,
+              pluginID,
               sandboxTemplate: getTerminalTemplate(pluginID)
             })
             return "Command executed successfully"

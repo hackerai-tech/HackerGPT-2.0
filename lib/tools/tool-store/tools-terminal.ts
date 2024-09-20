@@ -12,6 +12,7 @@ const ENCODER = new TextEncoder()
 interface TerminalExecutorOptions {
   userID: string
   command: string
+  pluginID: string
   sandboxTimeout?: number
   sandboxTemplate?: string
 }
@@ -19,6 +20,7 @@ interface TerminalExecutorOptions {
 export const terminalExecutor = async ({
   userID,
   command,
+  pluginID,
   sandboxTimeout = DEFAULT_BASH_SANDBOX_TIMEOUT,
   sandboxTemplate = DEFAULT_TEMPLATE
 }: TerminalExecutorOptions): Promise<ReadableStream<Uint8Array>> => {
@@ -28,7 +30,9 @@ export const terminalExecutor = async ({
   return new ReadableStream({
     async start(controller) {
       controller.enqueue(ENCODER.encode(`\n\`\`\`terminal\n${command}\n\`\`\``))
-      console.log(`[${userID}] Executing terminal command: ${command}`)
+      console.log(
+        `[${userID}] Executing terminal command (${pluginID}): ${command}`
+      )
 
       try {
         sbx = await createTerminal(userID, sandboxTemplate, sandboxTimeout)
