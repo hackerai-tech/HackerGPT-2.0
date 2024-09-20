@@ -1,4 +1,4 @@
-import { StreamingTextResponse, tool } from "ai"
+import { tool } from "ai"
 import { createOpenAI } from "@ai-sdk/openai"
 import { streamText } from "ai"
 import llmConfig from "@/lib/models/llm/llm-config"
@@ -14,11 +14,12 @@ import {
   updateSystemMessage,
   wordReplacements
 } from "../../ai-helper"
-import { getCustomGPTPrompt } from "./tools-prompts"
+import {
+  getCustomGPTPrompt,
+  getAnswerToolPrompt
+} from "./prompts/system-prompt"
 import { PluginID } from "@/types/plugins"
 import { getTerminalTemplate } from "@/lib/tools/tool-store/tools-helper"
-
-const ENCODER = new TextEncoder()
 
 interface CommandGeneratorHandlerOptions {
   userID: string
@@ -33,8 +34,10 @@ export async function commandGeneratorHandler({
   messages,
   pluginID
 }: CommandGeneratorHandlerOptions) {
-  const initialSystemPrompt = process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || ""
-  const customPrompt = getCustomGPTPrompt(initialSystemPrompt, pluginID)
+  const customPrompt = getCustomGPTPrompt(
+    process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || "",
+    pluginID
+  )
   updateSystemMessage(messages, customPrompt, profile_context)
   filterEmptyAssistantMessages(messages)
   replaceWordsInLastUserMessage(messages, wordReplacements)
@@ -74,11 +77,10 @@ export async function commandGeneratorHandler({
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         const encoder = new TextEncoder()
-
-        const enqueueChunk = (chunk: string) => {
+        const enqueueChunk = (chunk: string) =>
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
-        }
 
+        // Process initial text stream
         for await (const chunk of textStream) {
           enqueueChunk(chunk)
         }
@@ -95,13 +97,20 @@ export async function commandGeneratorHandler({
           terminalResults = terminalOutput
         }
 
+        // Process follow-up stream if terminal results are available
         if (terminalResults) {
-          const systemMessage = {
+          const answerSystemPrompt = {
             role: "system",
-            content: "Answer user question with terminal output"
+            content: getAnswerToolPrompt(
+              process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || ""
+            )
           }
-          const lastThreeMessages = messages.slice(-3)
-          const additionalContext = [
+
+          const lastThreeMessages = messages
+            .filter(message => message.role !== "system")
+            .slice(-3)
+          const answerMessages = [
+            answerSystemPrompt,
             ...lastThreeMessages,
             { role: "assistant", content: terminalResults }
           ]
@@ -110,10 +119,7 @@ export async function commandGeneratorHandler({
             model: openai("gpt-4o-2024-08-06"),
             temperature: 0.5,
             maxTokens: 512,
-            messages: toVercelChatMessages(
-              [systemMessage, ...additionalContext],
-              true
-            )
+            messages: toVercelChatMessages(answerMessages, true)
           })
 
           for await (const chunk of followUpStream) {
@@ -133,9 +139,9 @@ export async function commandGeneratorHandler({
     })
   } catch (error) {
     console.error(`[${userID}] commandGeneratorHandler error:`, error)
-    const errorMessage =
+    const { statusCode, message } = getErrorDetails(
       error instanceof Error ? error.message : "An unexpected error occurred"
-    const { statusCode, message } = getErrorDetails(errorMessage)
+    )
     throw new APIError(`Command Generator Error: ${message}`, statusCode)
   }
 }
@@ -182,9 +188,7 @@ function getErrorDetails(errorMessage: string): {
   }
 
   for (const [key, value] of Object.entries(errorMap)) {
-    if (errorMessage.includes(key)) {
-      return value
-    }
+    if (errorMessage.includes(key)) return value
   }
 
   return { statusCode: 500, message: "An unexpected error occurred" }

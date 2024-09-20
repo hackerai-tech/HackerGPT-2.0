@@ -127,12 +127,6 @@ export const availablePlugins: PluginSummary[] = [
           "Provide me with the latest CVEs with the severity of critical."
       },
       {
-        title: "Provide Me With",
-        description: "the CVEs for Microsoft that have nuclei templates",
-        chatMessage:
-          "Provide me with the CVEs for Microsoft that have nuclei templates."
-      },
-      {
         title: "Provide Information About",
         description: "CVE-2024-23897 (critical LFI in Jenkins)",
         chatMessage:
