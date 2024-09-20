@@ -12,6 +12,7 @@ const ENCODER = new TextEncoder()
 interface TerminalExecutorOptions {
   userID: string
   command: string
+  pluginID: string
   sandboxTimeout?: number
   sandboxTemplate?: string
 }
@@ -19,16 +20,19 @@ interface TerminalExecutorOptions {
 export const terminalExecutor = async ({
   userID,
   command,
+  pluginID,
   sandboxTimeout = DEFAULT_BASH_SANDBOX_TIMEOUT,
   sandboxTemplate = DEFAULT_TEMPLATE
-}: TerminalExecutorOptions): Promise<ReadableStream<Uint8Array>> => {
+}: TerminalExecutorOptions): Promise<ReadableStream<string>> => {
   let sbx: CodeInterpreter | null = null
   let hasTerminalOutput = false
 
   return new ReadableStream({
     async start(controller) {
-      controller.enqueue(ENCODER.encode(`\n\`\`\`terminal\n${command}\n\`\`\``))
-      console.log(`[${userID}] Executing terminal command: ${command}`)
+      controller.enqueue(`\n\`\`\`terminal\n${command}\n\`\`\``)
+      console.log(
+        `[${userID}] Executing terminal command (${pluginID}): ${command}`
+      )
 
       try {
         sbx = await createTerminal(userID, sandboxTemplate, sandboxTimeout)
@@ -41,14 +45,14 @@ export const terminalExecutor = async ({
           onStdout: (out: OutputMessage) => {
             hasTerminalOutput = true
             if (!isOutputStarted) {
-              controller.enqueue(ENCODER.encode("\n```stdout\n"))
+              controller.enqueue("\n```stdout\n")
               isOutputStarted = true
             }
-            controller.enqueue(ENCODER.encode(out.line))
+            controller.enqueue(`${out.line}`)
           }
         })
 
-        if (isOutputStarted) controller.enqueue(ENCODER.encode("\n```"))
+        if (isOutputStarted) controller.enqueue("\n```")
 
         handleExecutionResult(execution, controller, userID, hasTerminalOutput)
       } catch (error) {
@@ -65,7 +69,7 @@ export const terminalExecutor = async ({
 
 function handleExecutionResult(
   execution: any,
-  controller: ReadableStreamDefaultController,
+  controller: ReadableStreamDefaultController<string>,
   userID: string,
   hasTerminalOutput: boolean
 ) {
@@ -75,23 +79,21 @@ function handleExecutionResult(
       const errorMessage = execution.error.name.includes("TimeoutError")
         ? `Command timed out after ${MAX_EXECUTION_TIME / 1000} seconds. Try a shorter command or split it.`
         : `Execution failed: ${execution.error.value || "Unknown error"}`
-      controller.enqueue(
-        ENCODER.encode(`\n\`\`\`stderr\n${errorMessage}\n\`\`\``)
-      )
+      controller.enqueue(`\n\`\`\`stderr\n${errorMessage}\n\`\`\``)
     }
 
     const stderr = Array.isArray(execution.logs.stderr)
       ? execution.logs.stderr.join("\n")
       : execution.logs.stderr || ""
     if (stderr) {
-      controller.enqueue(ENCODER.encode(`\n\`\`\`stderr\n${stderr}\n\`\`\``))
+      controller.enqueue(`\n\`\`\`stderr\n${stderr}\n\`\`\``)
     }
 
     const stdout = Array.isArray(execution.logs.stdout)
       ? execution.logs.stdout.join("\n")
       : execution.logs.stdout || ""
     if (stdout) {
-      controller.enqueue(ENCODER.encode(`\n\`\`\`stdout\n${stdout}\n\`\`\``))
+      controller.enqueue(`\n\`\`\`stdout\n${stdout}\n\`\`\``)
     }
   }
 }

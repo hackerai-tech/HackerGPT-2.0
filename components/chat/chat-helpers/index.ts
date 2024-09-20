@@ -271,7 +271,7 @@ export const handleHostedPluginsChat = async (
     setToolInUse(selectedPlugin)
   }
 
-  const response = await fetchChatResponse(
+  const chatResponse = await fetchChatResponse(
     apiEndpoint,
     requestBody,
     newAbortController,
@@ -280,15 +280,21 @@ export const handleHostedPluginsChat = async (
     alertDispatch
   )
 
-  return await processResponsePlugins(
-    response,
-    isRegeneration
-      ? payload.chatMessages[payload.chatMessages.length - 1]
-      : tempAssistantChatMessage,
+  const lastMessage = isRegeneration
+    ? payload.chatMessages[payload.chatMessages.length - 1]
+    : tempAssistantChatMessage
+
+  return processResponse(
+    chatResponse,
+    lastMessage,
     newAbortController,
     setFirstTokenReceived,
     setChatMessages,
-    setToolInUse
+    setToolInUse,
+    requestBody,
+    setIsGenerating,
+    alertDispatch,
+    selectedPlugin
   )
 }
 

@@ -73,7 +73,8 @@ export async function buildFinalMessages(
     selectedPlugin === PluginID.WHOIS_LOOKUP ||
     selectedPlugin === PluginID.SUBDOMAIN_FINDER ||
     selectedPlugin === PluginID.CVE_MAP ||
-    selectedPlugin === PluginID.URL_FUZZER
+    selectedPlugin === PluginID.URL_FUZZER ||
+    selectedPlugin === PluginID.WORDPRESS_SCANNER
   ) {
     CHUNK_SIZE = 8000
   }

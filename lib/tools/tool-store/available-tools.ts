@@ -127,12 +127,6 @@ export const availablePlugins: PluginSummary[] = [
           "Provide me with the latest CVEs with the severity of critical."
       },
       {
-        title: "Provide Me With",
-        description: "the CVEs for Microsoft that have nuclei templates",
-        chatMessage:
-          "Provide me with the CVEs for Microsoft that have nuclei templates."
-      },
-      {
         title: "Provide Information About",
         description: "CVE-2024-23897 (critical LFI in Jenkins)",
         chatMessage:
@@ -203,6 +197,43 @@ export const availablePlugins: PluginSummary[] = [
         title: "Whois Lookup Help",
         description: "How does the Whois Lookup plugin work?",
         chatMessage: "How does the Whois Lookup plugin work?"
+      }
+    ]
+  },
+  {
+    id: 8,
+    name: "WordPress Scanner",
+    value: PluginID.WORDPRESS_SCANNER,
+    categories: ["vuln-scanners"],
+    icon: "https://cdn-icons-png.flaticon.com/128/49/49006.png",
+    invertInDarkMode: true,
+    description:
+      "Scan WordPress for outdated plugins, core vulnerabilities, user enumeration and more",
+    githubRepoUrl: pluginUrls.WORDPRESS_SCANNER,
+    isInstalled: false,
+    isPremium: true,
+    createdAt: "2024-09-19",
+    starters: [
+      {
+        title: "Perform Basic WordPress Scan",
+        description: "on example.com",
+        chatMessage: "Perform a basic WordPress scan on example.com"
+      },
+      {
+        title: "Enumerate themes",
+        description: "for example.com",
+        chatMessage: "Check for vulnerable plugins for example.com"
+      },
+      {
+        title: "Enumerate WordPress Users",
+        description: "for example.com",
+        chatMessage:
+          "Enumerate WordPress users on example.com and assess user enumeration vulnerability"
+      },
+      {
+        title: "WordPress Scanner Help",
+        description: "How does the WordPress Scanner plugin work?",
+        chatMessage: "How does the WordPress Scanner plugin work?"
       }
     ]
   },
