@@ -71,7 +71,9 @@ export const terminalExecutor = async ({
 }
 
 function shouldProcessOutput(line: string, pluginID: string): boolean {
-  return !(pluginID === PluginID.PORT_SCANNER && line.includes("could not setup ip6:"))
+  return !(
+    pluginID === PluginID.PORT_SCANNER && line.includes("could not setup ip6:")
+  )
 }
 
 function handleExecutionResult(
