@@ -6,7 +6,7 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { PluginID } from "@/types/plugins"
 import { isPremiumUser } from "@/lib/server/subscription-utils"
 import { buildFinalMessages } from "@/lib/build-prompt"
-import { commandGeneratorHandler } from "@/lib/tools/tool-store/command-generator-handler"
+import { commandGeneratorHandler } from "@/lib/tools/tool-store/tools-handler"
 import {
   isFreePlugin,
   isTerminalPlugin
