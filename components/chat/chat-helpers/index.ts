@@ -197,7 +197,8 @@ export const handleHostedChat = async (
     provider === "openai"
       ? {
           messages: formattedMessages,
-          chatSettings
+          chatSettings,
+          isContinuation
         }
       : {
           messages: formattedMessages,

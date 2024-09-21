@@ -1,3 +1,4 @@
+import { PluginID } from "@/types/plugins"
 import {
   CodeInterpreter,
   ProcessExitError,
@@ -43,12 +44,14 @@ export const terminalExecutor = async ({
           kernelID: bashID,
           timeoutMs: MAX_EXECUTION_TIME,
           onStdout: (out: OutputMessage) => {
-            hasTerminalOutput = true
-            if (!isOutputStarted) {
-              controller.enqueue("\n```stdout\n")
-              isOutputStarted = true
+            if (shouldProcessOutput(out.line, pluginID)) {
+              hasTerminalOutput = true
+              if (!isOutputStarted) {
+                controller.enqueue("\n```stdout\n")
+                isOutputStarted = true
+              }
+              controller.enqueue(`${out.line}`)
             }
-            controller.enqueue(`${out.line}`)
           }
         })
 
@@ -65,6 +68,12 @@ export const terminalExecutor = async ({
       }
     }
   })
+}
+
+function shouldProcessOutput(line: string, pluginID: string): boolean {
+  return !(
+    pluginID === PluginID.PORT_SCANNER && line.includes("could not setup ip6:")
+  )
 }
 
 function handleExecutionResult(

@@ -17,6 +17,7 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { detectCategoryAndModeration } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
+import { CONTINUE_PROMPT_BACKEND } from "@/lib/models/llm/llm-prompting"
 
 export const runtime: ServerRuntime = "edge"
 
@@ -67,6 +68,12 @@ export async function POST(request: Request) {
         : llmConfig.systemPrompts.pgpt35,
       profile.profile_context
     )
+
+    if (isContinuation) {
+      messages[messages.length - 1].content = CONTINUE_PROMPT_BACKEND(
+        messages[messages.length - 2].content.slice(-25)
+      )
+    }
 
     // On normal chat, the last user message is the target standalone message
     // On continuation, the tartget is the last generated message by the system
