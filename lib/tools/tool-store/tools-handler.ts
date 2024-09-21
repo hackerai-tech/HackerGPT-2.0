@@ -121,7 +121,7 @@ export async function commandGeneratorHandler({
           ]
 
           const { textStream: followUpStream } = await streamText({
-            model: openai("gpt-4o-2024-08-06"),
+            model: openai("gpt-4o-mini"),
             temperature: 0.5,
             maxTokens: 512,
             messages: toVercelChatMessages(answerMessages, true)
