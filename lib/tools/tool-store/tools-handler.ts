@@ -14,10 +14,7 @@ import {
   updateSystemMessage,
   wordReplacements
 } from "../../ai-helper"
-import {
-  getCustomGPTPrompt,
-  getAnswerToolPrompt
-} from "./prompts/system-prompt"
+import { getCustomGPTPrompt } from "./prompts/system-prompt"
 import { PluginID } from "@/types/plugins"
 import { getTerminalTemplate } from "@/lib/tools/tool-store/tools-helper"
 
@@ -58,7 +55,7 @@ export async function commandGeneratorHandler({
       const { textStream, finishReason } = await streamText({
         model: openai("gpt-4o-2024-08-06"),
         temperature: 0.5,
-        maxTokens: 1024,
+        maxTokens: loopCount === 0 ? 1024 : 512,
         messages: toVercelChatMessages(messages, true),
         tools: {
           terminal: tool({

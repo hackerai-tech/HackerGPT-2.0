@@ -3,7 +3,7 @@ import {
   systemPromptEnding
 } from "@/lib/models/llm/llm-prompting"
 import { PluginID } from "@/types/plugins"
-import { getPluginPrompt, getAnswerTool } from "./tools-prompts"
+import { getPluginPrompt } from "./tools-prompts"
 import endent from "endent"
 
 const getPluginSpecificInstructions = (pluginID: PluginID): string => {
@@ -74,6 +74,6 @@ export const getCustomGPTPrompt = (
   return `${getPentestGPTInfo(initialSystemPrompt, true)}\n${getPluginSpecificInstructions(pluginID)}\n${systemPromptEnding}`
 }
 
-export const getAnswerToolPrompt = (initialSystemPrompt: string): string => {
-  return `${getPentestGPTInfo(initialSystemPrompt, true)}\n${getAnswerTool()}\n${systemPromptEnding}`
-}
+// export const getAnswerToolPrompt = (initialSystemPrompt: string): string => {
+//   return `${getPentestGPTInfo(initialSystemPrompt, true)}\n${getAnswerTool()}\n${systemPromptEnding}`
+// }
