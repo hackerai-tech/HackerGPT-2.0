@@ -14,7 +14,10 @@ import {
   updateSystemMessage,
   wordReplacements
 } from "../../ai-helper"
-import { getCustomGPTPrompt } from "./prompts/system-prompt"
+import {
+  getToolsPrompt,
+  getToolsWithAnswerPrompt
+} from "./prompts/system-prompt"
 import { PluginID } from "@/types/plugins"
 import { getTerminalTemplate } from "@/lib/tools/tool-store/tools-helper"
 
@@ -31,7 +34,7 @@ export async function commandGeneratorHandler({
   messages,
   pluginID
 }: CommandGeneratorHandlerOptions) {
-  const customPrompt = getCustomGPTPrompt(
+  const customPrompt = getToolsPrompt(
     process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || "",
     pluginID
   )
@@ -50,12 +53,26 @@ export async function commandGeneratorHandler({
     let loopCount = 0
     const maxLoops = 3
     let combinedResponse = ""
+    let assistantMessage: { role: "assistant"; content: string } | null = null
 
     const processIteration = async () => {
+      const customPrompt =
+        loopCount === 0
+          ? getToolsPrompt(
+              process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || "",
+              pluginID
+            )
+          : getToolsWithAnswerPrompt(
+              process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || "",
+              pluginID
+            )
+
+      updateSystemMessage(messages, customPrompt, profile_context)
+
       const { textStream, finishReason } = await streamText({
         model: openai("gpt-4o-2024-08-06"),
         temperature: 0.5,
-        maxTokens: loopCount === 0 ? 1024 : 512,
+        maxTokens: 1024,
         messages: toVercelChatMessages(messages, true),
         tools: {
           terminal: tool({
@@ -88,16 +105,14 @@ export async function commandGeneratorHandler({
         const enqueueChunk = (chunk: string) =>
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
 
-        // Create an initial assistant message
-        const assistantMessage = { role: "assistant", content: "" }
-        messages.push(assistantMessage)
-
         while (loopCount < maxLoops) {
           const { textStream, finishReason } = await processIteration()
 
+          let iterationResponse = ""
+
           // Process text stream
           for await (const chunk of textStream) {
-            combinedResponse += chunk
+            iterationResponse += chunk
             enqueueChunk(chunk)
           }
 
@@ -110,11 +125,23 @@ export async function commandGeneratorHandler({
               terminalOutput += value
               enqueueChunk(value)
             }
-            combinedResponse += terminalOutput
+            iterationResponse += terminalOutput
           }
 
-          // Update the existing assistant message
-          assistantMessage.content = combinedResponse.trim()
+          // Update or create the assistant message
+          if (iterationResponse.trim()) {
+            if (!assistantMessage) {
+              assistantMessage = {
+                role: "assistant",
+                content: iterationResponse.trim()
+              }
+              messages.push(assistantMessage)
+            } else {
+              assistantMessage.content += "\n" + iterationResponse.trim()
+            }
+          }
+
+          combinedResponse += iterationResponse
 
           // Check if terminal was executed
           const reason = await finishReason
