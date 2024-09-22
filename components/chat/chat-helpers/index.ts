@@ -101,21 +101,29 @@ export const handleRetrieval = async (
   return results
 }
 
-export const createTempMessages = (
-  messageContent: string | null,
-  chatMessages: ChatMessage[],
-  chatSettings: ChatSettings,
-  b64Images: string[],
-  isContinuation: boolean,
-  selectedPlugin: PluginID | null,
+export const createTempMessages = ({
+  messageContent,
+  chatMessages,
+  chatSettings,
+  b64Images,
+  isContinuation,
+  selectedPlugin,
+  model
+}: {
+  messageContent: string | null
+  chatMessages: ChatMessage[]
+  chatSettings: ChatSettings
+  b64Images: string[]
+  isContinuation: boolean
+  selectedPlugin: PluginID | null
   model: LLMID
-) => {
-  if (!messageContent || isContinuation) messageContent = CONTINUE_PROMPT
+}) => {
+  const messageContentInternal = isContinuation ? CONTINUE_PROMPT : messageContent || CONTINUE_PROMPT
 
   let tempUserChatMessage: ChatMessage = {
     message: {
       chat_id: "",
-      content: messageContent,
+      content: messageContentInternal,
       created_at: "",
       id: uuidv4(),
       image_paths: b64Images,

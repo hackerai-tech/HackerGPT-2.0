@@ -14,7 +14,6 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
-import { CONTINUE_PROMPT_BACKEND } from "@/lib/models/llm/llm-prompting"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -58,12 +57,6 @@ export async function POST(request: Request) {
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages, wordReplacements)
 
-    if (isContinuation) {
-      messages[messages.length - 1].content = CONTINUE_PROMPT_BACKEND(
-        messages[messages.length - 2].content.slice(-25)
-      )
-    }
-
     const openai = createOpenAI({
       baseUrl: llmConfig.openai.baseUrl,
       apiKey: llmConfig.openai.apiKey
@@ -81,7 +74,7 @@ export async function POST(request: Request) {
     const result = await streamText({
       model: openai("gpt-4o-2024-08-06"),
       temperature: 0.5,
-      maxTokens: 2048,
+      maxTokens: 128,
       messages: toVercelChatMessages(messages, true),
       abortSignal: request.signal,
       tools: getSelectedSchemas("all"),
