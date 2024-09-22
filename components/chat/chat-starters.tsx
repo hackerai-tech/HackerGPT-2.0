@@ -58,7 +58,7 @@ const ChatStarters: React.FC<ChatStartersProps> = ({
               description={starter.description}
               key={`${selectedPlugin} ${starter.title} ${index}`}
               onClick={() =>
-                handleSendMessage(starter.chatMessage, chatMessages, false)
+                handleSendMessage({messageContent: starter.chatMessage, chatMessages})
               }
             />
           ))}

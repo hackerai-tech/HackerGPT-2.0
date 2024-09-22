@@ -114,7 +114,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     if (!isTyping && event.key === "Enter" && !event.shiftKey && !isMobile) {
       event.preventDefault()
       if (!isGenerating) {
-        handleSendMessage(userInput, chatMessages, false, false)
+        handleSendMessage({messageContent: userInput, chatMessages})
       }
     }
 
@@ -315,7 +315,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
               onClick={() => {
                 if (isTyping) setOptionsCollapsed(true)
                 if (!userInput) return
-                handleSendMessage(userInput, chatMessages, false)
+                handleSendMessage({messageContent: userInput, chatMessages})
               }}
               size={30}
             />

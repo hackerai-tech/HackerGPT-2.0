@@ -37,7 +37,8 @@ export const validateChatSettings = (
   profile: Tables<"profiles"> | null,
   selectedWorkspace: Tables<"workspaces"> | null,
   isContinuation: boolean,
-  messageContent: string | null
+  messageContent: string | null,
+  isAgenticResponse: boolean
 ) => {
   if (!chatSettings) {
     throw new Error("Chat settings not found")
@@ -55,7 +56,7 @@ export const validateChatSettings = (
     throw new Error("Workspace not found")
   }
 
-  if (!isContinuation && !messageContent) {
+  if (!isContinuation && !isAgenticResponse && !messageContent) {
     throw new Error("Message content not found")
   }
 }
@@ -108,9 +109,9 @@ export const createTempMessages = (
   b64Images: string[],
   isContinuation: boolean,
   selectedPlugin: PluginID | null,
-  model: LLMID
+  model: LLMID,
 ) => {
-  if (!messageContent || isContinuation) messageContent = CONTINUE_PROMPT
+  if (!messageContent || isContinuation ) messageContent = CONTINUE_PROMPT
 
   let tempUserChatMessage: ChatMessage = {
     message: {
@@ -815,6 +816,7 @@ export const handleCreateMessages = async (
     ]
 
     setChatMessages(finalChatMessages)
+    return finalChatMessages
   } else if (isContinuation) {
     const lastStartingMessage = chatMessages[chatMessages.length - 1].message
 
@@ -828,6 +830,7 @@ export const handleCreateMessages = async (
     finalChatMessages = [...chatMessages]
 
     setChatMessages(finalChatMessages)
+    return finalChatMessages
   } else {
     const createdMessages = await createMessages([
       finalUserMessage,
@@ -910,5 +913,7 @@ export const handleCreateMessages = async (
     ]
 
     setChatMessages(finalChatMessages)
+
+    return finalChatMessages
   }
 }

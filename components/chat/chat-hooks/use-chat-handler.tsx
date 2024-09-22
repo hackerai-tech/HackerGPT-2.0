@@ -178,17 +178,30 @@ export const useChatHandler = () => {
   }
 
   const handleSendContinuation = async () => {
-    await handleSendMessage(null, chatMessages, false, true)
+    await handleSendMessage({messageContent: null, chatMessages, isContinuation: true})
   }
 
-  const handleSendMessage = async (
-    messageContent: string | null,
-    chatMessages: ChatMessage[],
-    isRegeneration: boolean,
-    isContinuation: boolean = false,
-    editSequenceNumber?: number,
+  const handleSendMessage = async ({
+    messageContent,
+    chatMessages,
+    isRegeneration,
+    isContinuation,
+    editSequenceNumber,
+    model,
+    isAgenticResponse
+  }: {
+    messageContent: string | null
+    chatMessages: ChatMessage[]
+    isRegeneration?: boolean
+    isContinuation?: boolean
+    editSequenceNumber?: number
     model?: LLMID
-  ) => {
+    isAgenticResponse?: boolean
+  }) => {
+    isContinuation = !!isContinuation
+    isAgenticResponse = !!isAgenticResponse
+    isRegeneration = !!isRegeneration
+
     const isEdit = editSequenceNumber !== undefined
     const isRagEnabled = selectedPlugin === PluginID.ENHANCED_SEARCH
 
@@ -214,7 +227,8 @@ export const useChatHandler = () => {
         profile,
         selectedWorkspace,
         isContinuation,
-        messageContent
+        messageContent,
+        isAgenticResponse
       )
 
       if (chatSettings && !isRegeneration) {
@@ -249,9 +263,14 @@ export const useChatHandler = () => {
       if (isRegeneration) {
         sentChatMessages.pop()
         sentChatMessages.push(tempAssistantChatMessage)
+      } else if(isContinuation) {
+        sentChatMessages.push(tempUserChatMessage)
+      } else if(isAgenticResponse) {
+        sentChatMessages.push(tempAssistantChatMessage)
+        console.log("Agentic response", JSON.stringify(tempAssistantChatMessage, null, 2))
       } else {
         sentChatMessages.push(tempUserChatMessage)
-        if (!isContinuation) sentChatMessages.push(tempAssistantChatMessage)
+        sentChatMessages.push(tempAssistantChatMessage)
       }
 
       // Update the UI with the new messages
@@ -434,7 +453,7 @@ export const useChatHandler = () => {
         }
       }
 
-      await handleCreateMessages(
+      const finalChatMessages = await handleCreateMessages(
         chatMessages,
         currentChat,
         profile!,
@@ -454,6 +473,11 @@ export const useChatHandler = () => {
         assistantGeneratedImages
       )
 
+      if (finishReasonFromResponse === "tool-calls") {
+        await handleSendMessage({messageContent: null, chatMessages: finalChatMessages, isAgenticResponse: true})        
+      }
+
+
       setIsGenerating(false)
       setFirstTokenReceived(false)
     } catch (error) {
@@ -468,7 +492,7 @@ export const useChatHandler = () => {
   ) => {
     if (!selectedChat) return
 
-    handleSendMessage(editedContent, chatMessages, false, false, sequenceNumber)
+    handleSendMessage({messageContent: editedContent, chatMessages, editSequenceNumber: sequenceNumber})
   }
 
   return {

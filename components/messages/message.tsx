@@ -127,24 +127,22 @@ export const Message: FC<MessageProps> = ({
 
   const handleRegenerate = async () => {
     setIsGenerating(true)
-    await handleSendMessage(
-      editedMessage || chatMessages[chatMessages.length - 2].message.content,
+    await handleSendMessage({
+      messageContent: editedMessage || chatMessages[chatMessages.length - 2].message.content,
       chatMessages,
-      true
-    )
+      isRegeneration: true
+    })
   }
 
   const handleRegenerateSpecificModel = async (model: string) => {
     setIsGenerating(true)
 
-    await handleSendMessage(
-      editedMessage || chatMessages[chatMessages.length - 2].message.content,
+    await handleSendMessage({
+      messageContent: editedMessage || chatMessages[chatMessages.length - 2].message.content,
       chatMessages,
-      true,
-      false,
-      undefined,
-      model as LLMID
-    )
+      isRegeneration: true,
+      model: model as LLMID
+    })
   }
 
   const handleGoodResponse = async () => {
