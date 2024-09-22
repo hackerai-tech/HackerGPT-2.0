@@ -68,7 +68,7 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
               isAssistant={isAssistant}
             />
           ) : (
-            <div className={`overflow-hidden ${index === 1 ? 'mb-3' : 'my-3'}`}>
+            <div className={`overflow-hidden ${index === 1 ? "mb-3" : "my-3"}`}>
               <button
                 className="flex w-full items-center justify-between transition-colors duration-200"
                 onClick={() => toggleBlock(index)}
