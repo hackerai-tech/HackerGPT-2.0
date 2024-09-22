@@ -49,35 +49,41 @@ export async function commandGeneratorHandler({
 
   try {
     let terminalStream: ReadableStream<string> | null = null
-    let terminalResults: string | null = null
     let terminalExecuted = false
+    let loopCount = 0
+    const maxLoops = 3
+    let combinedResponse = ""
 
-    const { textStream } = await streamText({
-      model: openai("gpt-4o-2024-08-06"),
-      temperature: 0.5,
-      maxTokens: 1024,
-      messages: toVercelChatMessages(messages, true),
-      tools: {
-        terminal: tool({
-          description: "Generate and execute a terminal command",
-          parameters: z.object({
-            command: z.string().describe("The terminal command to execute")
-          }),
-          execute: async ({ command }) => {
-            if (terminalExecuted) {
-              return
+    const processIteration = async () => {
+      const { textStream, finishReason } = await streamText({
+        model: openai("gpt-4o-2024-08-06"),
+        temperature: 0.5,
+        maxTokens: 1024,
+        messages: toVercelChatMessages(messages, true),
+        tools: {
+          terminal: tool({
+            description: "Generate and execute a terminal command",
+            parameters: z.object({
+              command: z.string().describe("The terminal command to execute")
+            }),
+            execute: async ({ command }) => {
+              if (terminalExecuted) {
+                return
+              }
+              terminalExecuted = true
+              terminalStream = await terminalExecutor({
+                userID,
+                command,
+                pluginID,
+                sandboxTemplate: getTerminalTemplate(pluginID)
+              })
             }
-            terminalExecuted = true
-            terminalStream = await terminalExecutor({
-              userID,
-              command,
-              pluginID,
-              sandboxTemplate: getTerminalTemplate(pluginID)
-            })
-          }
-        })
-      }
-    })
+          })
+        }
+      })
+
+      return { textStream, finishReason }
+    }
 
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -85,51 +91,43 @@ export async function commandGeneratorHandler({
         const enqueueChunk = (chunk: string) =>
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
 
-        // Process initial text stream
-        for await (const chunk of textStream) {
-          enqueueChunk(chunk)
-        }
+        // Create an initial assistant message
+        const assistantMessage = { role: "assistant", content: "" }
+        messages.push(assistantMessage)
 
-        if (terminalStream) {
-          const reader = terminalStream.getReader()
-          let terminalOutput = ""
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-            terminalOutput += value
-            enqueueChunk(value)
-          }
-          terminalResults = terminalOutput
-        }
+        while (loopCount < maxLoops) {
+          const { textStream, finishReason } = await processIteration()
 
-        // Process follow-up stream if terminal results are available
-        if (terminalResults) {
-          const answerSystemPrompt = {
-            role: "system",
-            content: getAnswerToolPrompt(
-              process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || ""
-            )
-          }
-
-          const lastThreeMessages = messages
-            .filter(message => message.role !== "system")
-            .slice(-3)
-          const answerMessages = [
-            answerSystemPrompt,
-            ...lastThreeMessages,
-            { role: "assistant", content: terminalResults }
-          ]
-
-          const { textStream: followUpStream } = await streamText({
-            model: openai("gpt-4o-mini"),
-            temperature: 0.5,
-            maxTokens: 512,
-            messages: toVercelChatMessages(answerMessages, true)
-          })
-
-          for await (const chunk of followUpStream) {
+          // Process text stream
+          for await (const chunk of textStream) {
+            combinedResponse += chunk
             enqueueChunk(chunk)
           }
+
+          if (terminalStream) {
+            const reader = terminalStream.getReader()
+            let terminalOutput = ""
+            while (true) {
+              const { done, value } = await reader.read()
+              if (done) break
+              terminalOutput += value
+              enqueueChunk(value)
+            }
+            combinedResponse += terminalOutput
+          }
+
+          // Update the existing assistant message
+          assistantMessage.content = combinedResponse.trim()
+
+          // Check if terminal was executed
+          const reason = await finishReason
+          if (reason !== "tool-calls") {
+            break
+          }
+
+          loopCount++
+          terminalExecuted = false
+          terminalStream = null
         }
 
         controller.close()
