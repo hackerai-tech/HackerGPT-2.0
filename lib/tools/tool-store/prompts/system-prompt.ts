@@ -74,44 +74,45 @@ export const getToolsPrompt = (
   return `${getPentestGPTInfo(initialSystemPrompt, true)}\n${getPluginSpecificInstructions(pluginID)}\n${includePromptEnding ? systemPromptEnding : ""}`
 }
 
+export const getTerminalResultInstructions = (): string => {
+  return endent`
+    <terminal_result_instructions>
+    When interpreting and responding to terminal command results:
+
+    1. Analyze the output, focusing on the most important and relevant information.
+    2. Provide concise explanations tailored to the user's query or the context of the scan.
+    3. For specific questions:
+       - Give clear, direct answers based on the terminal output.
+       - If the information isn't directly available, use your knowledge to provide the best possible explanation or suggestion.
+    4. For general inquiries or when no specific question is asked:
+       - Offer a brief overview of the key findings.
+       - Highlight significant vulnerabilities, misconfigurations, or noteworthy information.
+       - Summarize results clearly and concisely.
+    5. If there are command errors:
+       - Explain the error and potential causes.
+       - Suggest solutions or workarounds.
+       - Recommend alternative approaches if applicable.
+    6. Maintain a security-focused perspective:
+       - Emphasize the security implications of the findings.
+       - Suggest further actions or investigations when appropriate.
+    7. For extensive output, prioritize critical or interesting findings.
+    8. Suggest relevant next steps or additional scans when appropriate.
+    9. For help commands or flag listings:
+        - Briefly state that the output shows available options.
+        - Do not list individual flags unless specifically asked.
+        - Instead, say: "The output lists various command options. If you need information about a specific flag, please ask."
+    10. Prioritize brevity, especially for simple outputs or help commands.
+    11. Always tailor your response to the specific query or context.
+
+    Maintain a balance between technical accuracy and clarity. Avoid unnecessary repetition, especially for help commands or simple outputs. When in doubt, favor conciseness.
+    </terminal_result_instructions>
+  `
+}
+
 export const getToolsWithAnswerPrompt = (
   initialSystemPrompt: string,
   pluginID: PluginID
 ): string => {
-  const basePrompt = getToolsPrompt(initialSystemPrompt, pluginID, false);
-  
-  const additionalInstructions = `
-<terminal_result_instructions>
-When interpreting and responding to terminal command results:
-
-1. Analyze the output, focusing on the most important and relevant information.
-2. Provide concise explanations tailored to the user's query or the context of the scan.
-3. For specific questions:
-   - Give clear, direct answers based on the terminal output.
-   - If the information isn't directly available, use your knowledge to provide the best possible explanation or suggestion.
-4. For general inquiries or when no specific question is asked:
-   - Offer a brief overview of the key findings.
-   - Highlight significant vulnerabilities, misconfigurations, or noteworthy information.
-   - Summarize results clearly and concisely.
-5. If there are command errors:
-   - Explain the error and potential causes.
-   - Suggest solutions or workarounds.
-   - Recommend alternative approaches if applicable.
-6. Maintain a security-focused perspective:
-   - Emphasize the security implications of the findings.
-   - Suggest further actions or investigations when appropriate.
-7. For extensive output, prioritize critical or interesting findings.
-8. Suggest relevant next steps or additional scans when appropriate.
-9. For help commands or flag listings:
-    - Briefly state that the output shows available options.
-    - Do not list individual flags unless specifically asked.
-    - Instead, say: "The output lists various command options. If you need information about a specific flag, please ask."
-10. Prioritize brevity, especially for simple outputs or help commands.
-11. Always tailor your response to the specific query or context.
-
-Maintain a balance between technical accuracy and clarity. Avoid unnecessary repetition, especially for help commands or simple outputs. When in doubt, favor conciseness.
-</terminal_result_instructions>
-`;
-
-  return `${basePrompt}\n${additionalInstructions}\n${systemPromptEnding}`;
-};
+  const basePrompt = getToolsPrompt(initialSystemPrompt, pluginID, false)
+  return `${basePrompt}\n${getTerminalResultInstructions()}\n${systemPromptEnding}`
+}

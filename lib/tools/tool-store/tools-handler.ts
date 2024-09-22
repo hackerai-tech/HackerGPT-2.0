@@ -11,8 +11,7 @@ import { z } from "zod"
 import { APIError } from "@/lib/models/llm/api-error"
 import {
   replaceWordsInLastUserMessage,
-  updateSystemMessage,
-  wordReplacements
+  updateSystemMessage
 } from "../../ai-helper"
 import {
   getToolsPrompt,
@@ -40,7 +39,7 @@ export async function commandGeneratorHandler({
   )
   updateSystemMessage(messages, customPrompt, profile_context)
   filterEmptyAssistantMessages(messages)
-  replaceWordsInLastUserMessage(messages, wordReplacements)
+  replaceWordsInLastUserMessage(messages)
 
   const openai = createOpenAI({
     baseUrl: llmConfig.openai.baseUrl,

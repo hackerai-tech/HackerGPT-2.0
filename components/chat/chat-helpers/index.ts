@@ -539,13 +539,17 @@ export const processResponse = async (
                 alertDispatch
               )
 
-              const terminalResult = await processResponsePlugins(
+              const terminalResult = await processResponse(
                 terminalResponse,
                 lastChatMessage,
                 controller,
                 setFirstTokenReceived,
                 setChatMessages,
-                setToolInUse
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
               )
 
               fullText += terminalResult.fullText
