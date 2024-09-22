@@ -50,7 +50,7 @@ const llmConfig = {
     // For webSearch tool
     pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`,
     // For terminal tool
-    pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, false, "GPT-4o")}\n${getTerminalResultInstructions()}\n${systemPromptEnding}`
+    pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, false, "GPT-4o")}\n\n${getPentestGPTToolsInfo(false, false, true, false)}\n${getTerminalResultInstructions()}\n${systemPromptEnding}`
   },
   models: {
     pentestgpt_default_openrouter:
