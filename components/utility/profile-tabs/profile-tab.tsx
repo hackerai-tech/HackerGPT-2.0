@@ -29,10 +29,10 @@ export const ProfileTab: FC<ProfileTabProps> = ({
       </div>
 
       <div className="flex items-center justify-between">
-        <Label className="flex-shrink pr-4 max-w-[80%]">
+        <Label className="max-w-[80%] shrink pr-4">
           Always show terminal output when using plugins
         </Label>
-        <div className="flex-grow flex justify-end">
+        <div className="flex grow justify-end">
           <Switch
             id="show-terminal-output"
             checked={showTerminalOutput}
