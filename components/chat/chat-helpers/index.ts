@@ -619,7 +619,6 @@ export const processResponse = async (
       }
     } finally {
       reader.releaseLock()
-      setToolInUse("none")
     }
 
     return {
@@ -630,54 +629,6 @@ export const processResponse = async (
       selectedPlugin: updatedPlugin,
       assistantGeneratedImages
     }
-  } else {
-    throw new Error("Response body is null")
-  }
-}
-
-export const processResponsePlugins = async (
-  response: Response,
-  lastChatMessage: ChatMessage,
-  controller: AbortController,
-  setFirstTokenReceived: React.Dispatch<React.SetStateAction<boolean>>,
-  setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
-  setToolInUse: React.Dispatch<React.SetStateAction<string>>
-) => {
-  let fullText = ""
-  let isFirstChunk = true
-
-  if (response.body) {
-    try {
-      await consumeReadableStream(
-        response.body,
-        chunk => {
-          if (isFirstChunk) {
-            setFirstTokenReceived(true)
-            isFirstChunk = false
-          }
-
-          fullText += chunk
-          setChatMessages(prev =>
-            prev.map(chatMessage =>
-              chatMessage.message.id === lastChatMessage.message.id
-                ? {
-                    message: {
-                      ...chatMessage.message,
-                      content: chatMessage.message.content + chunk
-                    },
-                    fileItems: chatMessage.fileItems
-                  }
-                : chatMessage
-            )
-          )
-        },
-        controller.signal
-      )
-    } finally {
-      setToolInUse("none")
-    }
-
-    return { fullText, finishReason: "" }
   } else {
     throw new Error("Response body is null")
   }

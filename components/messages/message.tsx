@@ -277,19 +277,11 @@ export const Message: FC<MessageProps> = ({
                           <div>Browsing the web...</div>
                         </div>
                       )
-                    case "Enhanced Search":
-                      return (
-                        <div className="flex animate-pulse items-center space-x-2">
-                          <IconDatabaseSearch size={20} />
-
-                          <div>Using Enhanced Search...</div>
-                        </div>
-                      )
                     case PluginID.TERMINAL:
                       return (
                         <div className="flex animate-pulse items-center space-x-2">
                           <IconTerminal2 size={20} />
-                          <div>Executing command in Terminal...</div>
+                          <div>Using Terminal...</div>
                         </div>
                       )
                     case PluginID.REASON_LLM:
