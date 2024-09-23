@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useContext } from "react"
 import { MessageMarkdown } from "../message-markdown"
 import {
   IconChevronDown,
@@ -7,6 +7,7 @@ import {
 } from "@tabler/icons-react"
 import { PluginID } from "@/types/plugins"
 import { MessageTooLong } from "../message-too-long"
+import { PentestGPTContext } from "@/context/context"
 
 interface MessageTerminalProps {
   content: string
@@ -30,9 +31,12 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
   messageId,
   isAssistant
 }) => {
+  const { showTerminalOutput } = useContext(PentestGPTContext)
   const contentBlocks = useMemo(() => parseContent(content), [content])
-  const [closedBlocks, setClosedBlocks] = useState<Set<number>>(new Set())
-
+  const [closedBlocks, setClosedBlocks] = useState<Set<number>>(
+    () =>
+      new Set(showTerminalOutput ? [] : contentBlocks.map((_, index) => index))
+  )
   const toggleBlock = (index: number) => {
     setClosedBlocks(prev => {
       const newSet = new Set(prev)
@@ -125,10 +129,10 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
 const parseContent = (content: string): ContentBlock[] => {
   const blocks: ContentBlock[] = []
   const blockRegex =
-    /(```terminal\n[\s\S]*?```(?:\n```(?:stdout|stderr)\n[\s\S]*?```)*)/g
+    /(```terminal\n[\s\S]*?```(?:\n```(?:stdout|stderr)[\s\S]*?(?:```|$))*)/g
   const terminalRegex = /```terminal\n([\s\S]*?)```/
-  const stdoutRegex = /```stdout\n([\s\S]*?)```/
-  const stderrRegex = /```stderr\n([\s\S]*?)```/
+  const stdoutRegex = /```stdout\n([\s\S]*?)(?:```|$)/
+  const stderrRegex = /```stderr\n([\s\S]*?)(?:```|$)/
 
   let lastIndex = 0
   let match

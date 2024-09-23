@@ -400,9 +400,11 @@ export const useChatHandler = () => {
         assistantGeneratedImages
       )
 
+      setToolInUse("none")
       setIsGenerating(false)
       setFirstTokenReceived(false)
     } catch (error) {
+      setToolInUse("none")
       setIsGenerating(false)
       setFirstTokenReceived(false)
     }
