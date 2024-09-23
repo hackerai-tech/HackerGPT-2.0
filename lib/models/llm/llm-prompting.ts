@@ -119,7 +119,7 @@ It responds with command output or times out after 5 minutes. Key points:
   
 1. Text output only; no graphical interfaces.
 2. Pre-installed with various tools including: nmap, whois, curl, wget, sqlmap, nikto, whatweb, \
-dnsutils, nuclei, ffuf, subfinder, wpscan, katana, gem, golang, and other basic tools. 
+dnsutils, nuclei, subfinder, wpscan, katana, gem, golang, and other basic tools. 
 3. Can install additional packages using 'apt-get install', 'gem install', or any other way.
 4. Never uses 'apt-get update' or updates the package list before installing packages.
 5. Executes all commands without user confirmation.

@@ -97,7 +97,10 @@ export async function POST(request: Request) {
           targetStandAloneMessage,
           llmConfig.systemPrompts.pentestgptCurrentDateOnly,
           true,
-          similarityTopK
+          similarityTopK,
+          providerBaseUrl,
+          providerHeaders,
+          llmConfig.models.pentestgpt_standalone_question_openrouter
         )
 
       const response = await fetch(llmConfig.hackerRAG.endpoint, {
@@ -163,11 +166,6 @@ export async function POST(request: Request) {
           baseURL: providerBaseUrl,
           headers: providerHeaders
         })
-      } else if (selectedModel.startsWith("accounts/fireworks")) {
-        provider = createOpenAI({
-          apiKey: llmConfig.fireworks.apiKey,
-          baseURL: llmConfig.fireworks.baseUrl
-        })
       } else {
         provider = createOpenAI({
           baseURL: providerBaseUrl,
@@ -219,7 +217,7 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   const isPentestGPTPro = chatSettings.model === "mistral-large"
 
   const defaultModel = llmConfig.models.pentestgpt_default_openrouter
-  const proModel = llmConfig.models.pentestgpt_pro_fireworks
+  const proModel = llmConfig.models.pentestgpt_pro_openrouter
 
   const providerUrl = llmConfig.openrouter.url
   const providerBaseUrl = llmConfig.openrouter.baseUrl
