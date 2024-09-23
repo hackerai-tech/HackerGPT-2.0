@@ -1,3 +1,4 @@
+import { getTerminalResultInstructions } from "@/lib/tools/tool-store/prompts/system-prompt"
 import {
   getPentestGPTInfo,
   systemPromptEnding,
@@ -47,7 +48,9 @@ const llmConfig = {
     // For browser tool
     pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${systemPromptEnding}`,
     // For webSearch tool
-    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`
+    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`,
+    // For terminal tool
+    pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, false, "GPT-4o")}\n\n${getPentestGPTToolsInfo(false, false, true, false)}\n${getTerminalResultInstructions()}\n${systemPromptEnding}`
   },
   models: {
     pentestgpt_default_openrouter:

@@ -1,7 +1,6 @@
 import {
   replaceWordsInLastUserMessage,
-  updateSystemMessage,
-  wordReplacements
+  updateSystemMessage
 } from "@/lib/ai-helper"
 import {
   filterEmptyAssistantMessages,
@@ -56,7 +55,7 @@ export async function POST(request: Request) {
       profile.profile_context
     )
     filterEmptyAssistantMessages(messages)
-    replaceWordsInLastUserMessage(messages, wordReplacements)
+    replaceWordsInLastUserMessage(messages)
 
     if (isContinuation) {
       messages[messages.length - 1].content = CONTINUE_PROMPT_BACKEND(

@@ -3,7 +3,6 @@ import {
   ProcessExitError,
   OutputMessage
 } from "@e2b/code-interpreter"
-import { StreamingTextResponse } from "ai"
 
 const TEMPLATE = "bash-terminal"
 const BASH_SANDBOX_TIMEOUT = 15 * 60 * 1000
@@ -18,11 +17,11 @@ interface TerminalExecutorOptions {
 export const terminalExecutor = async ({
   userID,
   command
-}: TerminalExecutorOptions): Promise<StreamingTextResponse> => {
+}: TerminalExecutorOptions): Promise<ReadableStream<Uint8Array>> => {
   let sbx: CodeInterpreter | null = null
   let hasTerminalOutput = false
 
-  const stream = new ReadableStream({
+  const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       controller.enqueue(ENCODER.encode(`\n\`\`\`terminal\n${command}\n\`\`\``))
       console.log(`[${userID}] Executing terminal command: ${command}`)
@@ -60,7 +59,7 @@ export const terminalExecutor = async ({
     }
   })
 
-  return new StreamingTextResponse(stream)
+  return stream
 }
 
 function handleExecutionResult(

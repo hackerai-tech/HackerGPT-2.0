@@ -391,6 +391,7 @@ export const processResponse = async (
     let isFirstChunk = true
     let updatedPlugin = selectedPlugin
     let assistantGeneratedImages: string[] = []
+    let toolExecuted = false
     const reader = response.body.getReader()
     const stream = readDataStream(reader, {
       isAborted: () => controller.signal.aborted
@@ -480,6 +481,8 @@ export const processResponse = async (
             break
 
           case "tool_call":
+            if (toolExecuted) break
+
             const { toolName } = streamPart.value
 
             if (toolName === "browser" && streamPart.value.args.open_url) {
@@ -516,36 +519,30 @@ export const processResponse = async (
               )
 
               fullText += browserResult.fullText
-            } else if (
-              toolName === "terminal" &&
-              streamPart.value.args.command
-            ) {
+            } else if (toolName === "terminal") {
               setToolInUse(PluginID.TERMINAL)
               updatedPlugin = PluginID.TERMINAL
 
-              const command = streamPart.value.args.command
-
-              const terminalRequestBody = {
-                ...requestBody,
-                command: command
-              }
-
               const terminalResponse = await fetchChatResponse(
                 "/api/chat/tools/terminal",
-                terminalRequestBody,
+                requestBody,
                 controller,
                 setIsGenerating,
                 setChatMessages,
                 alertDispatch
               )
 
-              const terminalResult = await processResponsePlugins(
+              const terminalResult = await processResponse(
                 terminalResponse,
                 lastChatMessage,
                 controller,
                 setFirstTokenReceived,
                 setChatMessages,
-                setToolInUse
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
               )
 
               fullText += terminalResult.fullText
@@ -604,6 +601,7 @@ export const processResponse = async (
 
               fullText += reasonLLMResult.fullText
             }
+            toolExecuted = true
             break
 
           case "finish_message":
