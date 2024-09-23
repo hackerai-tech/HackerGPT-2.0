@@ -21,11 +21,7 @@ export const runtime: ServerRuntime = "edge"
 
 export async function POST(request: Request) {
   try {
-    const { messages, command } = await request.json()
-
-    if (!command) {
-      return new Response("Command is required", { status: 400 })
-    }
+    const { messages } = await request.json()
 
     const profile = await getAIProfile()
     if (!(await isPremiumUser(profile.user_id))) {
@@ -70,23 +66,10 @@ export async function POST(request: Request) {
         const enqueueChunk = (chunk: string) =>
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
 
-        let assistantMessage: { role: "assistant"; content: string } | null =
-          null
-        let terminalExecuted = false
-
-        const terminalStream = await terminalExecutor({
-          userID: profile.user_id,
-          command
-        })
-        const terminalOutput = await streamTerminalOutput(
-          terminalStream,
-          enqueueChunk
-        )
-
-        assistantMessage = { role: "assistant", content: terminalOutput }
-        messages.push(assistantMessage)
+        let iterationResponse = ""
 
         for (let i = 0; i < 3; i++) {
+          let terminalExecuted = false
           const { textStream, finishReason } = await streamText({
             model: openai("gpt-4o-2024-08-06"),
             temperature: 0.5,
@@ -110,27 +93,30 @@ export async function POST(request: Request) {
                     userID: profile.user_id,
                     command
                   })
-                  const terminalOutput = await streamTerminalOutput(
-                    terminalStream,
-                    chunk => {
-                      enqueueChunk(chunk)
-                      assistantMessage!.content += chunk
-                    }
-                  )
-                  return terminalOutput.trim()
+                  await streamTerminalOutput(terminalStream, chunk => {
+                    enqueueChunk(chunk)
+                    iterationResponse += chunk
+                  })
                 }
               })
             }
           })
 
-          let iterationResponse = ""
           for await (const chunk of textStream) {
             iterationResponse += chunk
             enqueueChunk(chunk)
           }
 
           if (iterationResponse.trim()) {
-            assistantMessage!.content += "\n" + iterationResponse.trim()
+            const lastMessage = messages[messages.length - 1]
+            if (lastMessage && lastMessage.role === "assistant") {
+              lastMessage.content += "\n" + iterationResponse.trim()
+            } else {
+              messages.push({
+                role: "assistant",
+                content: iterationResponse.trim()
+              })
+            }
           }
 
           if ((await finishReason) !== "tool-calls") break

@@ -516,23 +516,13 @@ export const processResponse = async (
               )
 
               fullText += browserResult.fullText
-            } else if (
-              toolName === "terminal" &&
-              streamPart.value.args.command
-            ) {
+            } else if (toolName === "terminal") {
               setToolInUse(PluginID.TERMINAL)
               updatedPlugin = PluginID.TERMINAL
 
-              const command = streamPart.value.args.command
-
-              const terminalRequestBody = {
-                ...requestBody,
-                command: command
-              }
-
               const terminalResponse = await fetchChatResponse(
                 "/api/chat/tools/terminal",
-                terminalRequestBody,
+                requestBody,
                 controller,
                 setIsGenerating,
                 setChatMessages,
