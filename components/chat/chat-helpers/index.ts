@@ -391,6 +391,7 @@ export const processResponse = async (
     let isFirstChunk = true
     let updatedPlugin = selectedPlugin
     let assistantGeneratedImages: string[] = []
+    let toolExecuted = false
     const reader = response.body.getReader()
     const stream = readDataStream(reader, {
       isAborted: () => controller.signal.aborted
@@ -480,6 +481,8 @@ export const processResponse = async (
             break
 
           case "tool_call":
+            if (toolExecuted) break
+
             const { toolName } = streamPart.value
 
             if (toolName === "browser" && streamPart.value.args.open_url) {
@@ -598,6 +601,7 @@ export const processResponse = async (
 
               fullText += reasonLLMResult.fullText
             }
+            toolExecuted = true
             break
 
           case "finish_message":
