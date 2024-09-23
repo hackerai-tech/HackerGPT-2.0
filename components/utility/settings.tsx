@@ -44,6 +44,7 @@ export const Settings: FC<SettingsProps> = () => {
   const [profileInstructions, setProfileInstructions] = useState(
     profile?.profile_context || ""
   )
+  const [activeTab, setActiveTab] = useState("profile")
 
   useEffect(() => {
     const fetchUserEmail = async () => {
@@ -187,6 +188,7 @@ export const Settings: FC<SettingsProps> = () => {
           <Tabs
             defaultValue="profile"
             className={`${isMobile ? "mt-4 flex flex-col" : "mt-10 flex"}`}
+            onValueChange={setActiveTab}
           >
             <TabsList className={`${tabListClass} bg-transparent`}>
               {tabItems.map(({ value, icon: Icon, label }, index) => (
@@ -232,8 +234,12 @@ export const Settings: FC<SettingsProps> = () => {
             </div>
           </Tabs>
 
-          <div className="mt-6 flex items-center justify-end">
-            <Button onClick={handleSave}>Save</Button>
+          <div className="mt-6 flex h-[38px] items-center justify-end">
+            {activeTab === "personalization" ? (
+              <Button onClick={handleSave}>Save</Button>
+            ) : (
+              <div className="w-[64px]"></div>
+            )}
           </div>
         </DialogPanel>
       </TransitionedDialog>
