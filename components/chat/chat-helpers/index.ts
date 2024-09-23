@@ -253,8 +253,7 @@ export const handleHostedPluginsChat = async (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
-  selectedPlugin: PluginID,
-  fileData?: { fileName: string; fileContent: string }[]
+  selectedPlugin: PluginID
 ) => {
   const apiEndpoint = "/api/chat/plugins"
 
@@ -262,10 +261,6 @@ export const handleHostedPluginsChat = async (
     payload: payload,
     chatImages: chatImages,
     selectedPlugin: selectedPlugin
-  }
-
-  if (fileData) {
-    requestBody.fileData = fileData
   }
 
   if (selectedPlugin && selectedPlugin !== PluginID.NONE) {

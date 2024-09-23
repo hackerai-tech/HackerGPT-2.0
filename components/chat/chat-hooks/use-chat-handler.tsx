@@ -254,7 +254,7 @@ export const useChatHandler = () => {
         if (!isContinuation) sentChatMessages.push(tempAssistantChatMessage)
       }
 
-      // Update the UI with the new messages
+      // Update the UI with the new messages except for continuations
       if (!isContinuation) setChatMessages(sentChatMessages)
 
       let retrievedFileItems: Tables<"file_items">[] = []
@@ -290,66 +290,13 @@ export const useChatHandler = () => {
       let ragId = null
       let assistantGeneratedImages: string[] = []
 
-      // Always update the assistant message, even if it's empty
-      sentChatMessages[sentChatMessages.length - 1].message.content =
-        generatedText
-      setChatMessages(sentChatMessages)
-
       if (
         selectedPlugin.length > 0 &&
         selectedPlugin !== PluginID.NONE &&
         selectedPlugin !== PluginID.WEB_SEARCH &&
         selectedPlugin !== PluginID.ENHANCED_SEARCH &&
         selectedPlugin !== PluginID.TERMINAL
-        // selectedPlugin !== PluginID.PYTHON
       ) {
-        let fileData: { fileName: string; fileContent: string }[] = []
-
-        // const nonExcludedPluginsForFilesCommand = []
-
-        // const isCommand = (allowedCommands: string[], message: string) => {
-        //   if (!message.startsWith("/")) return false
-        //   const trimmedMessage = message.trim().toLowerCase()
-
-        //   // Check if the message matches any of the allowed commands
-        //   return allowedCommands.some(commandName => {
-        //     const commandPattern = new RegExp(
-        //       `^\\/${commandName}(?:\\s+(-[a-z]+|\\S+))*$`
-        //     )
-        //     return commandPattern.test(trimmedMessage)
-        //   })
-        // }
-
-        // if (
-        //   messageContent &&
-        //   newMessageFiles.length > 0 &&
-        //   newMessageFiles[0].type === "text" &&
-        //   (nonExcludedPluginsForFilesCommand.includes(selectedPlugin) ||
-        //     isCommand(nonExcludedPluginsForFilesCommand, messageContent))
-        // ) {
-        //   const fileIds = newMessageFiles
-        //     .filter(file => file.type === "text")
-        //     .map(file => file.id)
-
-        //   if (fileIds.length > 0) {
-        //     const response = await fetch(`/api/retrieval/file-2v`, {
-        //       method: "POST",
-        //       headers: {
-        //         "Content-Type": "application/json"
-        //       },
-        //       body: JSON.stringify({ fileIds: fileIds })
-        //     })
-
-        //     if (!response.ok) {
-        //       const errorData = await response.json()
-        //       toast.warning(errorData.message)
-        //     }
-
-        //     const data = await response.json()
-        //     fileData.push(...data.files)
-        //   }
-        // }
-
         const { fullText, finishReason } = await handleHostedPluginsChat(
           payload,
           profile!,
@@ -364,8 +311,7 @@ export const useChatHandler = () => {
           setChatMessages,
           setToolInUse,
           alertDispatch,
-          selectedPlugin,
-          fileData
+          selectedPlugin
         )
         generatedText = fullText
         finishReasonFromResponse = finishReason
