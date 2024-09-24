@@ -8,6 +8,7 @@ import {
 import { PluginID } from "@/types/plugins"
 import { MessageTooLong } from "../message-too-long"
 import { PentestGPTContext } from "@/context/context"
+import { terminalPlugins } from "../message-type-solver"
 
 interface MessageTerminalProps {
   content: string
@@ -31,7 +32,7 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
   messageId,
   isAssistant
 }) => {
-  const { showTerminalOutput } = useContext(PentestGPTContext)
+  const { showTerminalOutput, toolInUse } = useContext(PentestGPTContext)
   const contentBlocks = useMemo(() => parseContent(content), [content])
   const [closedBlocks, setClosedBlocks] = useState<Set<number>>(
     () =>
@@ -79,7 +80,9 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
                 aria-expanded={!closedBlocks.has(index)}
                 aria-controls={`terminal-content-${index}`}
               >
-                <div className="flex items-center">
+                <div
+                  className={`flex items-center ${contentBlocks.length - 1 === index && terminalPlugins.includes(toolInUse as PluginID) ? "animate-pulse" : ""}`}
+                >
                   <IconTerminal2 size={20} />
                   <h4 className="ml-2 mr-1 text-lg">Terminal</h4>
                   {closedBlocks.has(index) ? (

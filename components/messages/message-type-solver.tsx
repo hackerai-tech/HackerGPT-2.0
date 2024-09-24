@@ -21,7 +21,7 @@ const extractOutputFilename = (content: string) => {
   return filenameMatch ? filenameMatch[1].trim() : undefined
 }
 
-const terminalPlugins = [
+export const terminalPlugins = [
   PluginID.TERMINAL,
   PluginID.SQLI_EXPLOITER,
   PluginID.SSL_SCANNER,
