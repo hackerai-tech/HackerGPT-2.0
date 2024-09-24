@@ -45,19 +45,19 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
   const [userInteracted, setUserInteracted] = useState(() => new Set<number>())
 
   useEffect(() => {
-    if (!showTerminalOutput) {
-      setClosedBlocks(prev => {
-        const newSet = new Set(prev)
-        contentBlocks.forEach((_, index) => {
-          if (!userInteracted.has(index)) {
+    setClosedBlocks(prev => {
+      const newSet = new Set(prev)
+      contentBlocks.forEach((_, index) => {
+        if (!userInteracted.has(index)) {
+          if (!showTerminalOutput) {
             newSet.add(index)
+          } else {
+            newSet.delete(index)
           }
-        })
-        return newSet
+        }
       })
-    } else {
-      setClosedBlocks(new Set())
-    }
+      return newSet
+    })
   }, [showTerminalOutput, contentBlocks, userInteracted])
 
   const toggleBlock = useCallback((index: number) => {
