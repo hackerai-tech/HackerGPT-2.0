@@ -62,12 +62,12 @@ export async function POST(request: Request) {
       ratelimitmodel = "gpt-4"
     }
 
-    const rateLimitCheckResultForPlugins = await checkRatelimitOnApi(
+    const terminalRateLimitCheck = await checkRatelimitOnApi(
       profile.user_id,
-      "plugins"
+      "terminal"
     )
-    if (rateLimitCheckResultForPlugins !== null) {
-      return rateLimitCheckResultForPlugins.response
+    if (terminalRateLimitCheck !== null) {
+      return terminalRateLimitCheck.response
     }
 
     const rateLimitCheckResultForChatSettingsModel = await checkRatelimitOnApi(
