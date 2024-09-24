@@ -7,14 +7,12 @@ import { CreateFile } from "./items/files/create-file"
 
 interface SidebarCreateButtonsProps {
   contentType: ContentType
-  setShowSidebar: (showSidebar: boolean) => void
-  mobile: boolean
+  handleSidebarVisibility: () => void
 }
 
 export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
   contentType,
-  setShowSidebar,
-  mobile
+  handleSidebarVisibility
 }) => {
   const { handleNewChat } = useChatHandler()
 
@@ -25,9 +23,7 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
       case "chats":
         return async () => {
           handleNewChat()
-          if (mobile) {
-            setShowSidebar(false)
-          }
+          handleSidebarVisibility()
         }
 
       case "files":
