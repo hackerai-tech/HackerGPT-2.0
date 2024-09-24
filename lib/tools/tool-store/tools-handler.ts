@@ -19,6 +19,7 @@ import {
 } from "./prompts/system-prompt"
 import { PluginID } from "@/types/plugins"
 import { getTerminalTemplate } from "@/lib/tools/tool-store/tools-helper"
+import { encode, decode } from "gpt-tokenizer"
 
 interface CommandGeneratorHandlerOptions {
   userID: string
@@ -26,6 +27,9 @@ interface CommandGeneratorHandlerOptions {
   messages: any[]
   pluginID: PluginID
 }
+
+const MAX_TOKENS = 32000
+const INITIAL_TOKENS = 1000
 
 export async function commandGeneratorHandler({
   userID,
@@ -124,7 +128,22 @@ export async function commandGeneratorHandler({
               terminalOutput += value
               enqueueChunk(value)
             }
-            iterationResponse += terminalOutput
+
+            // Process terminal output for AI
+            const tokens = encode(terminalOutput)
+            let aiTerminalOutput = ""
+            if (tokens.length > MAX_TOKENS) {
+              const initialTokens = tokens.slice(0, INITIAL_TOKENS)
+              const remainingTokens = tokens.slice(
+                -(MAX_TOKENS - INITIAL_TOKENS)
+              )
+              aiTerminalOutput =
+                decode(initialTokens) + "\n...\n" + decode(remainingTokens)
+            } else {
+              aiTerminalOutput = terminalOutput
+            }
+
+            iterationResponse += aiTerminalOutput
           }
 
           // Update or create the assistant message

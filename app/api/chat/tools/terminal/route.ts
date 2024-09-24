@@ -16,8 +16,12 @@ import {
   updateSystemMessage
 } from "@/lib/ai-helper"
 import { z } from "zod"
+import { encode, decode } from "gpt-tokenizer"
 
 export const runtime: ServerRuntime = "edge"
+
+const MAX_TOKENS = 32000
+const INITIAL_TOKENS = 1000
 
 export async function POST(request: Request) {
   try {
@@ -66,10 +70,10 @@ export async function POST(request: Request) {
         const enqueueChunk = (chunk: string) =>
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
 
-        let iterationResponse = ""
-
         for (let i = 0; i < 3; i++) {
           let terminalExecuted = false
+          let terminalOutput = ""
+
           const { textStream, finishReason } = await streamText({
             model: openai("gpt-4o-2024-08-06"),
             temperature: 0.5,
@@ -95,26 +99,45 @@ export async function POST(request: Request) {
                   })
                   await streamTerminalOutput(terminalStream, chunk => {
                     enqueueChunk(chunk)
-                    iterationResponse += chunk
+                    terminalOutput += chunk
                   })
                 }
               })
             }
           })
 
+          let aiResponse = ""
           for await (const chunk of textStream) {
-            iterationResponse += chunk
+            aiResponse += chunk
             enqueueChunk(chunk)
           }
 
-          if (iterationResponse.trim()) {
+          // Process terminal output for AI if it exists
+          if (terminalOutput.trim()) {
+            const tokens = encode(terminalOutput)
+            let processedTerminalOutput = ""
+            if (tokens.length > MAX_TOKENS) {
+              const initialTokens = tokens.slice(0, INITIAL_TOKENS)
+              const remainingTokens = tokens.slice(
+                -(MAX_TOKENS - INITIAL_TOKENS)
+              )
+              processedTerminalOutput =
+                decode(initialTokens) + "\n...\n" + decode(remainingTokens)
+            } else {
+              processedTerminalOutput = terminalOutput
+            }
+            aiResponse += "\n" + processedTerminalOutput
+          }
+
+          // Update or create the assistant message
+          if (aiResponse.trim()) {
             const lastMessage = messages[messages.length - 1]
             if (lastMessage && lastMessage.role === "assistant") {
-              lastMessage.content += "\n" + iterationResponse.trim()
+              lastMessage.content += "\n" + aiResponse.trim()
             } else {
               messages.push({
                 role: "assistant",
-                content: iterationResponse.trim()
+                content: aiResponse.trim()
               })
             }
           }

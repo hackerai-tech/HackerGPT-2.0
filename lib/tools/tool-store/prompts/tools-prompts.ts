@@ -74,8 +74,9 @@ The user has selected the CVEMap plugin, which uses the cvemap tool in the termi
 - -age string: Filter CVEs published within a specified age in days. (e.g., "> 365", "360")
 - -assignee string[]: List CVEs for a given publisher assignee. (e.g., "cve@mitre.org")
 - -vstatus value: Filter CVEs by given vulnerability status in CLI output. Supported values: new, confirmed, unconfirmed, modified, rejected, unknown (e.g., "confirmed")
-- -limit int: Limit the number of results to display (default 25, specify a different number as needed).
+- -limit int: Limit the number of results to display (specify a different number as needed).
 5. Do not use the search flag.
+6. Always limit the number of results to 10 by default.
 `
 
     case PluginID.URL_FUZZER:
