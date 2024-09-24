@@ -10,17 +10,17 @@ type ToolContext = {
 
 export const createToolSchemas = (context: ToolContext) => {
   const allSchemas = {
-    reasonLLM: {
-      description:
-        "Uses OpenAI's o1 model for advanced reasoning in complex scenarios.",
-      parameters: z.object({
-        reason: z
-          .boolean()
-          .describe(
-            "Set to true to use the advanced reasoning engine for complex problems"
-          )
-      })
-    },
+    // reasonLLM: {
+    //   description:
+    //     "Uses OpenAI's o1 model for advanced reasoning in complex scenarios.",
+    //   parameters: z.object({
+    //     reason: z
+    //       .boolean()
+    //       .describe(
+    //         "Set to true to use the advanced reasoning engine for complex problems"
+    //       )
+    //   })
+    // },
     webSearch: {
       description: "Search the web for latest information",
       parameters: z.object({ search: z.boolean() })
