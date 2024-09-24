@@ -3,8 +3,6 @@ import { PluginID } from "@/types/plugins"
 import { FC } from "react"
 import { MessageMarkdown } from "./message-markdown"
 import { MessagePluginFile } from "./message-plugin-file"
-// import { MessageImageGenerator } from "./message-image-generator"
-// import { MessageCodeInterpreter } from "./e2b-messages/message-code-interpreter"
 import { MessageTerminal } from "./e2b-messages/message-terminal"
 
 interface MessageTypeResolverProps {
@@ -23,7 +21,19 @@ const extractOutputFilename = (content: string) => {
   return filenameMatch ? filenameMatch[1].trim() : undefined
 }
 
-const terminalPlugins = [PluginID.TERMINAL, PluginID.SQLI_EXPLOITER]
+const terminalPlugins = [
+  PluginID.TERMINAL,
+  PluginID.SQLI_EXPLOITER,
+  PluginID.SSL_SCANNER,
+  PluginID.DNS_SCANNER,
+  PluginID.PORT_SCANNER,
+  PluginID.WAF_DETECTOR,
+  PluginID.WHOIS_LOOKUP,
+  PluginID.SUBDOMAIN_FINDER,
+  PluginID.CVE_MAP,
+  PluginID.URL_FUZZER,
+  PluginID.WORDPRESS_SCANNER
+]
 
 export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   previousMessage,
@@ -43,19 +53,6 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   //   role: message.role
   // })
 
-  // if (
-  //   (isPluginOutput && message.plugin === PluginID.PYTHON.toString()) ||
-  //   toolInUse === PluginID.PYTHON
-  // ) {
-  //   return (
-  //     <MessageCodeInterpreter
-  //       content={message.content}
-  //       messageId={message.id}
-  //       isAssistant={message.role === "assistant"}
-  //     />
-  //   )
-  // }
-
   if (
     (isPluginOutput && terminalPlugins.includes(message.plugin as PluginID)) ||
     terminalPlugins.includes(toolInUse as PluginID)
@@ -68,18 +65,6 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
       />
     )
   }
-
-  // if (
-  //   message.plugin === PluginID.IMAGE_GENERATOR.toString() ||
-  //   toolInUse === PluginID.IMAGE_GENERATOR
-  // ) {
-  //   return (
-  //     <MessageImageGenerator
-  //       content={message.content}
-  //       isAssistant={message.role === "assistant"}
-  //     />
-  //   )
-  // }
 
   // If the previous message is a plugin command and the current message is the output
   if (

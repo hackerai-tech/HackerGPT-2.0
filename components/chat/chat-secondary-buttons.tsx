@@ -19,16 +19,15 @@ export const ChatSecondaryButtons: FC<ChatSecondaryButtonsProps> = ({}) => {
 
       <WithTooltip
         delayDuration={200}
-        display={<div>Start a new chat</div>}
+        display={"New chat"}
         trigger={
-          <div className="mt-1">
-            <IconMessagePlus
-              className="cursor-pointer hover:opacity-50"
-              size={24}
-              onClick={handleNewChat}
-            />
-          </div>
+          <IconMessagePlus
+            className="cursor-pointer hover:opacity-50"
+            size={24}
+            onClick={handleNewChat}
+          />
         }
+        side="bottomRight"
       />
     </div>
   )

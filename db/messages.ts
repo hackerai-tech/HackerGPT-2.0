@@ -15,13 +15,23 @@ export const getMessageById = async (messageId: string) => {
   return message
 }
 
-export const getMessagesByChatId = async (chatId: string, limit = 50) => {
-  const { data: messages } = await supabase
+export const getMessagesByChatId = async (
+  chatId: string,
+  limit = 20,
+  lastSequenceNumber?: number
+) => {
+  let query = supabase
     .from("messages")
     .select("*, feedback(*), file_items (*)")
     .eq("chat_id", chatId)
-    .order("created_at", { ascending: false })
+    .order("sequence_number", { ascending: false })
     .limit(limit)
+
+  if (lastSequenceNumber !== undefined) {
+    query = query.lt("sequence_number", lastSequenceNumber)
+  }
+
+  const { data: messages } = await query
 
   if (!messages) {
     throw new Error("Messages not found")

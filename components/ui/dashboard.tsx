@@ -25,13 +25,13 @@ import {
   useEffect
 } from "react"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
-import GPTsStorePage from "@/components/gpts/gpts-store"
+import ToolsStorePage from "@/components/gpts/tools-store"
 import {
   ActionTypes,
   getInstalledPlugins,
   usePluginContext
 } from "../chat/chat-hooks/PluginProvider"
-import { availablePlugins } from "@/lib/plugins/available-plugins"
+import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { toast } from "sonner"
 
 export const SIDEBAR_WIDTH = 350
@@ -48,7 +48,6 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     isMobile,
     showSidebar,
     setShowSidebar,
-    selectedChat,
     contentType,
     setContentType
   } = useContext(PentestGPTContext)
@@ -111,7 +110,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     switch (contentType) {
       case "gpts":
         return (
-          <GPTsStorePage
+          <ToolsStorePage
             pluginsData={updatedAvailablePlugins}
             installPlugin={installPlugin}
             uninstallPlugin={uninstallPlugin}

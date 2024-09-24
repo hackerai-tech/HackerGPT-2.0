@@ -113,16 +113,6 @@ interface PentestGPTContext {
   isReadyToChat: boolean
   setIsReadyToChat: Dispatch<SetStateAction<boolean>>
 
-  // Audio
-  currentPlayingMessageId: string | null
-  setCurrentPlayingMessageId: Dispatch<SetStateAction<string | null>>
-  isMicSupported: boolean
-  setIsMicSupported: Dispatch<SetStateAction<boolean>>
-
-  // Conversational AI
-  isConversationalAIOpen: boolean
-  setIsConversationalAIOpen: Dispatch<SetStateAction<boolean>>
-
   // Sidebar
   showSidebar: boolean
   setShowSidebar: (value: boolean | ((prevState: boolean) => boolean)) => void
@@ -229,16 +219,6 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
 
   isReadyToChat: false,
   setIsReadyToChat: () => {},
-
-  // Audio
-  currentPlayingMessageId: null,
-  setCurrentPlayingMessageId: () => {},
-  isMicSupported: true,
-  setIsMicSupported: () => {},
-
-  // Conversational AI
-  isConversationalAIOpen: false,
-  setIsConversationalAIOpen: () => {},
 
   // Sidebar
   showSidebar: false,

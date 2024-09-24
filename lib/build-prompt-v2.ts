@@ -59,16 +59,19 @@ export async function buildFinalMessages(
 
   // Lower chunk size for plugins that don't need to handle long inputs
   if (
-    selectedPlugin === PluginID.CVEMAP ||
-    selectedPlugin === PluginID.SUBFINDER ||
-    // Tools
-    selectedPlugin === PluginID.PORTSCANNER ||
-    selectedPlugin === PluginID.SSLSCANNER ||
-    selectedPlugin === PluginID.DNSSCANNER ||
-    selectedPlugin === PluginID.WHOIS ||
-    selectedPlugin === PluginID.WAFDETECTOR
+    // Pentest tools
+    selectedPlugin === PluginID.SSL_SCANNER ||
+    selectedPlugin === PluginID.SQLI_EXPLOITER ||
+    selectedPlugin === PluginID.DNS_SCANNER ||
+    selectedPlugin === PluginID.PORT_SCANNER ||
+    selectedPlugin === PluginID.WAF_DETECTOR ||
+    selectedPlugin === PluginID.WHOIS_LOOKUP ||
+    selectedPlugin === PluginID.SUBDOMAIN_FINDER ||
+    selectedPlugin === PluginID.CVE_MAP ||
+    selectedPlugin === PluginID.URL_FUZZER ||
+    selectedPlugin === PluginID.WORDPRESS_SCANNER
   ) {
-    CHUNK_SIZE = 4096
+    CHUNK_SIZE = 8000
   }
 
   // Adjusting the chunk size for RAG

@@ -15,8 +15,9 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
-import { createToolSchemas } from "@/lib/tools/toolSchemas"
 import { detectCategoryAndModeration } from "@/lib/server/moderation"
+import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
+import { CONTINUE_PROMPT_BACKEND } from "@/lib/models/llm/llm-prompting"
 
 export const runtime: ServerRuntime = "edge"
 
@@ -26,7 +27,6 @@ export async function POST(request: Request) {
 
   let ragUsed = false
   let ragId: string | null = null
-  let perplexityUsed = false
   const shouldUseRAG = !isRetrieval && isRagEnabled
 
   try {
@@ -37,7 +37,6 @@ export async function POST(request: Request) {
       providerHeaders,
       providerApiKey,
       selectedModel,
-      selectedStandaloneQuestionModel,
       rateLimitCheckResult,
       similarityTopK,
       modelTemperature,
@@ -62,21 +61,19 @@ export async function POST(request: Request) {
         providerHeaders
       )
 
-    const shouldUseMiniModel =
-      !isPentestGPTPro &&
-      (moderationLevel === -1 ||
-        moderationLevel === 0 ||
-        (moderationLevel >= 0.0 && moderationLevel <= 0.1))
-
     updateSystemMessage(
       messages,
       isPentestGPTPro
         ? llmConfig.systemPrompts.pgpt4
-        : shouldUseMiniModel
-          ? llmConfig.systemPrompts.pgpt35
-          : llmConfig.systemPrompts.pentestGPTChat,
+        : llmConfig.systemPrompts.pgpt35,
       profile.profile_context
     )
+
+    if (isContinuation) {
+      messages[messages.length - 1].content = CONTINUE_PROMPT_BACKEND(
+        messages[messages.length - 2].content.slice(-25)
+      )
+    }
 
     // On normal chat, the last user message is the target standalone message
     // On continuation, the tartget is the last generated message by the system
@@ -98,12 +95,12 @@ export async function POST(request: Request) {
         await generateStandaloneQuestion(
           messages,
           targetStandAloneMessage,
-          providerBaseUrl,
-          providerHeaders,
-          selectedStandaloneQuestionModel,
           llmConfig.systemPrompts.pentestgptCurrentDateOnly,
           true,
-          similarityTopK
+          similarityTopK,
+          providerBaseUrl,
+          providerHeaders,
+          llmConfig.models.pentestgpt_standalone_question_openrouter
         )
 
       const response = await fetch(llmConfig.hackerRAG.endpoint, {
@@ -131,18 +128,23 @@ export async function POST(request: Request) {
           `---------------------\n` +
           `DON'T MENTION OR REFERENCE ANYTHING RELATED TO RAG CONTENT OR ANYTHING RELATED TO RAG. USER DOESN'T HAVE DIRECT ACCESS TO THIS CONTENT, ITS PURPOSE IS TO ENRICH YOUR OWN KNOWLEDGE. ROLE PLAY.`
       } else {
-        perplexityUsed = true
         selectedModel = "perplexity/llama-3.1-sonar-large-128k-online"
       }
       ragId = data?.resultId
     }
 
-    const highRiskCategories = ["S4", "S12", "S3", "S9", "S11"]
+    const highRiskCategories = ["S4", "S12", "S3", "S11"]
     const isHighRiskCategory = highRiskCategories.includes(
       hazardCategory.toUpperCase()
     )
 
-    if (shouldUseMiniModel && !perplexityUsed) {
+    const shouldUseMiniModel =
+      !isPentestGPTPro &&
+      (moderationLevel === -1 ||
+        moderationLevel === 0 ||
+        (moderationLevel >= 0.0 && moderationLevel <= 0.1))
+
+    if (shouldUseMiniModel) {
       selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(messages)
     } else if (
@@ -163,11 +165,6 @@ export async function POST(request: Request) {
           apiKey: providerApiKey,
           baseURL: providerBaseUrl,
           headers: providerHeaders
-        })
-      } else if (selectedModel.startsWith("accounts/fireworks")) {
-        provider = createOpenAI({
-          apiKey: llmConfig.fireworks.apiKey,
-          baseURL: llmConfig.fireworks.baseUrl
         })
       } else {
         provider = createOpenAI({
@@ -194,7 +191,6 @@ export async function POST(request: Request) {
         abortSignal: request.signal,
         ...(selectedModel === "openai/gpt-4o-mini"
           ? {
-              experimental_toolCallStreaming: true,
               tools
             }
           : {}),
@@ -221,10 +217,7 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   const isPentestGPTPro = chatSettings.model === "mistral-large"
 
   const defaultModel = llmConfig.models.pentestgpt_default_openrouter
-  const proModel = llmConfig.models.pentestgpt_pro_fireworks
-
-  const selectedStandaloneQuestionModel =
-    llmConfig.models.pentestgpt_standalone_question_openrouter
+  const proModel = llmConfig.models.pentestgpt_pro_openrouter
 
   const providerUrl = llmConfig.openrouter.url
   const providerBaseUrl = llmConfig.openrouter.baseUrl
@@ -251,7 +244,6 @@ async function getProviderConfig(chatSettings: any, profile: any) {
     providerApiKey,
     providerHeaders,
     selectedModel,
-    selectedStandaloneQuestionModel,
     rateLimitCheckResult,
     similarityTopK,
     isPentestGPTPro,

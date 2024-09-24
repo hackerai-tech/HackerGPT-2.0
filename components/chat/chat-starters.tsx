@@ -1,4 +1,4 @@
-import { availablePlugins } from "@/lib/plugins/available-plugins"
+import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { ChatMessage } from "@/types"
 import { ChatStarter, PluginID } from "@/types/plugins"
 import React, { memo, useContext } from "react"

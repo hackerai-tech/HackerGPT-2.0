@@ -277,36 +277,19 @@ export const Message: FC<MessageProps> = ({
                           <div>Browsing the web...</div>
                         </div>
                       )
-                    case "Enhanced Search":
-                      return (
-                        <div className="flex animate-pulse items-center space-x-2">
-                          <IconDatabaseSearch size={20} />
-
-                          <div>Using Enhanced Search...</div>
-                        </div>
-                      )
-                    // case PluginID.PYTHON:
-                    //   return (
-                    //     <div className="flex animate-pulse items-center space-x-2">
-                    //       <IconCode size={20} />
-
-                    //       <div>Using Code Interpreter...</div>
-                    //     </div>
-                    //   )
                     case PluginID.TERMINAL:
                       return (
                         <div className="flex animate-pulse items-center space-x-2">
                           <IconTerminal2 size={20} />
-                          <div>Executing command in Terminal...</div>
+                          <div>Using Terminal...</div>
                         </div>
                       )
-                    // case PluginID.IMAGE_GENERATOR:
-                    //   return (
-                    //     <div className="flex animate-pulse items-center space-x-2">
-                    //       <IconPhoto size={20} />
-                    //       <div>Generating image...</div>
-                    //     </div>
-                    //   )
+                    case PluginID.REASON_LLM:
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <div>Thinking with OpenAI o1...</div>
+                        </div>
+                      )
                     default:
                       return (
                         <div className="flex animate-pulse items-center space-x-2">

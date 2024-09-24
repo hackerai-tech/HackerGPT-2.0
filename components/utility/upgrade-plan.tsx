@@ -1,6 +1,6 @@
 "use client"
 
-import Loading from "@/app/[locale]/loading"
+import Loading from "@/app/loading"
 import { Button } from "@/components/ui/button"
 import { PentestGPTContext } from "@/context/context"
 import { getCheckoutUrl } from "@/lib/server/stripe-url"
@@ -103,7 +103,7 @@ export const UpgradePlan: FC = () => {
 
   const planPrices = {
     free: { monthly: "$0", yearly: "$0" },
-    pro: { monthly: "$20", yearly: "$15" }
+    pro: { monthly: "$25", yearly: "$20" }
   }
 
   const getYearlySavingsNote = () => {
@@ -193,11 +193,12 @@ export const UpgradePlan: FC = () => {
             <PlanStatement>Early access to new features</PlanStatement>
             <PlanStatement>Access to PGPT-4, GPT-4o, PGPT-3.5</PlanStatement>
             <PlanStatement>
-              Access to file uploads, vision, and terminal
+              Access to file uploads, vision, web search and browsing
             </PlanStatement>
             <PlanStatement>
               Access to advanced plugins like DNS Scanner, PortScanner, and more
             </PlanStatement>
+            <PlanStatement>Access to terminal</PlanStatement>
           </PlanCard>
         </div>
       </div>

@@ -6,23 +6,13 @@ import endent from "endent"
 export async function generateStandaloneQuestion(
   messages: any[],
   latestUserMessage: any,
-  openRouterBaseUrl: string | undefined,
-  openRouterHeaders: any,
-  selectedStandaloneQuestionModel: string | undefined,
   systemMessageContent: string,
   generateAtomicQuestions: boolean = false,
-  numAtomicQuestions: number = 4
+  numAtomicQuestions: number = 4,
+  openRouterBaseUrl: string | undefined,
+  openRouterHeaders: any,
+  selectedStandaloneQuestionModel: string | undefined
 ) {
-  if (!openRouterBaseUrl || !selectedStandaloneQuestionModel) {
-    console.error(
-      "Missing openRouterBaseUrl or selectedStandaloneQuestionModel"
-    )
-    return {
-      standaloneQuestion: latestUserMessage,
-      atomicQuestions: [latestUserMessage]
-    }
-  }
-
   filterEmptyAssistantMessages(messages)
 
   let chatHistory = messages
@@ -63,7 +53,7 @@ export async function generateStandaloneQuestion(
   }
 
   try {
-    const openai = createOpenAI({
+    const openrouter = createOpenAI({
       baseURL: openRouterBaseUrl,
       headers: {
         ...openRouterHeaders,
@@ -73,8 +63,8 @@ export async function generateStandaloneQuestion(
     })
 
     const result = await generateText({
-      model: openai(selectedStandaloneQuestionModel),
-      temperature: 0.4,
+      model: openrouter(`${selectedStandaloneQuestionModel}`),
+      temperature: 0.5,
       maxTokens: 1024,
       messages: [
         { role: "system", content: systemMessageContent },

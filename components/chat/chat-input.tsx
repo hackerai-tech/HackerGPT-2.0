@@ -9,11 +9,9 @@ import {
   IconPlayerStopFilled,
   IconPuzzle,
   IconPuzzleOff,
-  IconArrowUp,
-  IconHeadphones
+  IconArrowUp
 } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
-import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Input } from "../ui/input"
 import { TextareaAutosize } from "../ui/textarea-autosize"
@@ -30,7 +28,6 @@ import { UnsupportedFilesDialog } from "./unsupported-files-dialog"
 interface ChatInputProps {}
 
 export const ChatInput: FC<ChatInputProps> = ({}) => {
-  const { t } = useTranslation()
   const TOOLTIP_DELAY = 1000
 
   useHotkey("l", () => {
@@ -58,8 +55,6 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     setIsEnhancedMenuOpen,
     selectedPlugin,
     subscription,
-    setIsConversationalAIOpen,
-    isMicSupported,
     isMobile
   } = useContext(PentestGPTContext)
 
@@ -283,14 +278,12 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
 
         <TextareaAutosize
           textareaRef={chatInputRef}
-          className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 pl-2 ${
-            isMicSupported && !userInput && !isGenerating ? "pr-20" : "pr-14"
-          } focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
+          className="ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 pl-2 pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           placeholder={
             isMobile
-              ? t(`Message`) + (!subscription ? "" : t(`. Type "#" for files.`))
-              : t(`Message PentestGPT`) +
-                (!subscription ? "" : t(`. Type "#" for files.`))
+              ? `Message` + (!subscription ? "" : `. Type "#" for files.`)
+              : `Message PentestGPT` +
+                (!subscription ? "" : `. Type "#" for files.`)
           }
           onValueChange={handleInputChange} // This function updates the userInput state
           value={userInput} // This state should display the transcribed text
@@ -312,10 +305,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
               onClick={handleStopMessage}
               size={30}
             />
-          ) : userInput ||
-            !isMicSupported ||
-            !subscription ||
-            !VOICE_ASSISTANT_ENABLED ? (
+          ) : (
             <IconArrowUp
               className={cn(
                 "bg-primary text-secondary rounded p-1 hover:opacity-50",
@@ -329,15 +319,6 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
               }}
               size={30}
             />
-          ) : (
-            subscription &&
-            VOICE_ASSISTANT_ENABLED && (
-              <IconHeadphones
-                className="bg-primary text-secondary rounded p-1 hover:opacity-50"
-                onClick={() => setIsConversationalAIOpen(true)}
-                size={30}
-              />
-            )
           )}
         </div>
       </div>

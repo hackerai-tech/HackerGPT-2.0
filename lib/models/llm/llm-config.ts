@@ -1,3 +1,4 @@
+import { getTerminalResultInstructions } from "@/lib/tools/tool-store/prompts/system-prompt"
 import {
   getPentestGPTInfo,
   systemPromptEnding,
@@ -25,10 +26,6 @@ const llmConfig = {
     url: "https://api.openai.com/v1/chat/completions",
     apiKey: process.env.OPENAI_API_KEY
   },
-  fireworks: {
-    baseUrl: "https://api.fireworks.ai/inference/v1",
-    apiKey: process.env.FIREWORKS_API_KEY
-  },
   systemPrompts: {
     // For question generator
     pentestgptCurrentDateOnly: `${initialSystemPrompt}\n${currentDate}`,
@@ -39,7 +36,7 @@ const llmConfig = {
     // For PGPT
     pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${systemPromptEnding}`,
     // For PGPT-3.5
-    pgpt35: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${getPentestGPTToolsInfo(true, true)}\n${systemPromptEnding}`,
+    pgpt35: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${systemPromptEnding}`,
     // For PGPT-4
     pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-4")}\n${systemPromptEnding}`,
     // For GPT-4o
@@ -47,14 +44,16 @@ const llmConfig = {
     // For browser tool
     pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${systemPromptEnding}`,
     // For webSearch tool
-    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`
+    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`,
+    // For terminal tool
+    pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, false, "GPT-4o")}\n\n${getPentestGPTToolsInfo(false, false, true, false)}\n${getTerminalResultInstructions()}\n${systemPromptEnding}`
   },
   models: {
     pentestgpt_default_openrouter:
       process.env.OPENROUTER_PENTESTGPT_DEFAULT_MODEL,
     pentestgpt_standalone_question_openrouter:
       process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
-    pentestgpt_pro_fireworks: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
+    pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
   },
   hackerRAG: {
     enabled:

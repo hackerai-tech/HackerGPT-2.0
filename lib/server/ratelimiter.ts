@@ -196,8 +196,9 @@ export function getRateLimitErrorMessage(
     message += `\n\n🔓 Want more? Upgrade to Pro and unlock a world of features:
 - Higher usage limits
 - Access to PGPT-4 and GPT-4o
-- Access to file uploads, vision, and terminal
-- Access to advanced plugins like DNS Scanner, PortScanner, and more`
+- Access to file uploads, vision, web search and browsing
+- Access to advanced plugins like DNS Scanner, PortScanner, and more
+- Access to terminal`
   }
 
   return message.trim()
@@ -206,7 +207,6 @@ export function getRateLimitErrorMessage(
 function getModelName(model: string): string {
   const modelNames: { [key: string]: string } = {
     plugins: "plugins",
-    "tts-1": "text-to-speech",
     pentestgpt: "PGPT-3.5",
     "pentestgpt-pro": "PGPT-4",
     "gpt-4": "GPT-4"

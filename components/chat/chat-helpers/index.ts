@@ -197,7 +197,8 @@ export const handleHostedChat = async (
     provider === "openai"
       ? {
           messages: formattedMessages,
-          chatSettings
+          chatSettings,
+          isContinuation
         }
       : {
           messages: formattedMessages,
@@ -252,8 +253,7 @@ export const handleHostedPluginsChat = async (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
-  selectedPlugin: PluginID,
-  fileData?: { fileName: string; fileContent: string }[]
+  selectedPlugin: PluginID
 ) => {
   const apiEndpoint = "/api/chat/plugins"
 
@@ -263,15 +263,11 @@ export const handleHostedPluginsChat = async (
     selectedPlugin: selectedPlugin
   }
 
-  if (fileData) {
-    requestBody.fileData = fileData
-  }
-
   if (selectedPlugin && selectedPlugin !== PluginID.NONE) {
     setToolInUse(selectedPlugin)
   }
 
-  const response = await fetchChatResponse(
+  const chatResponse = await fetchChatResponse(
     apiEndpoint,
     requestBody,
     newAbortController,
@@ -280,15 +276,21 @@ export const handleHostedPluginsChat = async (
     alertDispatch
   )
 
-  return await processResponsePlugins(
-    response,
-    isRegeneration
-      ? payload.chatMessages[payload.chatMessages.length - 1]
-      : tempAssistantChatMessage,
+  const lastMessage = isRegeneration
+    ? payload.chatMessages[payload.chatMessages.length - 1]
+    : tempAssistantChatMessage
+
+  return processResponse(
+    chatResponse,
+    lastMessage,
     newAbortController,
     setFirstTokenReceived,
     setChatMessages,
-    setToolInUse
+    setToolInUse,
+    requestBody,
+    setIsGenerating,
+    alertDispatch,
+    selectedPlugin
   )
 }
 
@@ -384,6 +386,7 @@ export const processResponse = async (
     let isFirstChunk = true
     let updatedPlugin = selectedPlugin
     let assistantGeneratedImages: string[] = []
+    let toolExecuted = false
     const reader = response.body.getReader()
     const stream = readDataStream(reader, {
       isAborted: () => controller.signal.aborted
@@ -393,64 +396,17 @@ export const processResponse = async (
       for await (const streamPart of stream) {
         // console.log(streamPart)
 
-        const isToolCallDelta = (
-          part: any
-        ): part is {
-          type: "tool_call_delta"
-          value: { toolCallId: string; argsTextDelta: string }
-        } =>
-          part.type === "tool_call_delta" &&
-          "toolCallId" in part.value &&
-          "argsTextDelta" in part.value
-
-        const isToolResult = (
-          part: any
-        ): part is {
-          type: "tool_result"
-          value: {
-            toolCallId: string
-            result: { results: string; runtimeError: string }
-          }
-        } =>
-          part.type === "tool_result" &&
-          "toolCallId" in part.value &&
-          "result" in part.value
-
-        const isTerminalResult = (
+        const isReasonLLMResult = (
           part: any
         ): part is {
           type: "data"
-          value: Array<{ type: string; content: string }>
+          value: Array<{ reason: string }>
         } =>
           part.type === "data" &&
           Array.isArray(part.value) &&
           part.value.length > 0 &&
           typeof part.value[0] === "object" &&
-          "type" in part.value[0] &&
-          part.value[0].type !== "imageGenerated" &&
-          "content" in part.value[0]
-
-        // const isImageResult = (
-        //   part: any
-        // ): part is {
-        //   type: "data"
-        //   value: Array<{
-        //     type: string
-        //     content: {
-        //       url: string
-        //       prompt: string
-        //       width: number
-        //       height: number
-        //     }
-        //   }>
-        // } =>
-        //   part.type === "data" &&
-        //   Array.isArray(part.value) &&
-        //   part.value.length > 0 &&
-        //   typeof part.value[0] === "object" &&
-        //   "type" in part.value[0] &&
-        //   part.value[0].type === "imageGenerated" &&
-        //   "content" in part.value[0]
+          "reason" in part.value[0]
 
         const processStreamPart = (
           streamPart: any,
@@ -459,56 +415,18 @@ export const processResponse = async (
           if (streamPart.type === "text")
             return { contentToAdd: streamPart.value, newImagePath: null }
 
-          if (
-            isToolCallDelta(streamPart) &&
-            streamPart.value.toolCallId === toolCallId
-          ) {
+          if (isReasonLLMResult(streamPart)) {
             return {
-              contentToAdd: streamPart.value.argsTextDelta,
+              contentToAdd: streamPart.value[0].reason,
               newImagePath: null
             }
           }
-
-          if (
-            isToolResult(streamPart) &&
-            streamPart.value.toolCallId === toolCallId
-          ) {
-            const { results, runtimeError } = streamPart.value.result
-            const content = [
-              results && `<results>${results}</results>`,
-              runtimeError && `<runtimeError>${runtimeError}</runtimeError>`
-            ]
-              .filter(Boolean)
-              .join("")
-            return { contentToAdd: content, newImagePath: null }
-          }
-
-          if (isTerminalResult(streamPart)) {
-            return {
-              contentToAdd: streamPart.value
-                .filter(item =>
-                  ["terminal", "stdout", "stderr"].includes(item.type)
-                )
-                .map(item => item.content)
-                .join(""),
-              newImagePath: null
-            }
-          }
-
-          // if (isImageResult(streamPart)) {
-          //   const { url, prompt, width, height } = streamPart.value[0].content
-          //   return {
-          //     contentToAdd: `<ai_generated_image>${prompt} width: ${width} height: ${height}</ai_generated_image>`,
-          //     newImagePath: url
-          //   }
-          // }
 
           return { contentToAdd: "", newImagePath: null }
         }
 
         switch (streamPart.type) {
           case "text":
-          case "tool_call_delta":
           case "tool_result":
           case "data":
             const { contentToAdd, newImagePath } = processStreamPart(
@@ -557,63 +475,15 @@ export const processResponse = async (
             }
             break
 
-          case "tool_call_streaming_start":
+          case "tool_call":
+            if (toolExecuted) break
+
             const { toolName } = streamPart.value
 
-            switch (toolName) {
-              case "webSearch":
-                setToolInUse(PluginID.WEB_SEARCH)
-                updatedPlugin = PluginID.WEB_SEARCH
+            if (toolName === "browser" && streamPart.value.args.open_url) {
+              setToolInUse(PluginID.BROWSER)
+              updatedPlugin = PluginID.BROWSER
 
-                const webSearchResponse = await fetchChatResponse(
-                  "/api/chat/plugins/web-search",
-                  requestBody,
-                  controller,
-                  setIsGenerating,
-                  setChatMessages,
-                  alertDispatch
-                )
-
-                const webSearchResult = await processResponse(
-                  webSearchResponse,
-                  lastChatMessage,
-                  controller,
-                  setFirstTokenReceived,
-                  setChatMessages,
-                  setToolInUse,
-                  requestBody,
-                  setIsGenerating,
-                  alertDispatch,
-                  updatedPlugin
-                )
-
-                fullText += webSearchResult.fullText
-                break
-              // case "python":
-              //   setToolInUse(PluginID.PYTHON)
-              //   toolCallId = streamPart.value.toolCallId
-              //   updatedPlugin = PluginID.PYTHON
-              //   break
-              case "browser":
-                setToolInUse(PluginID.BROWSER)
-                updatedPlugin = PluginID.BROWSER
-                break
-              case "terminal":
-                setToolInUse(PluginID.TERMINAL)
-                updatedPlugin = PluginID.TERMINAL
-                break
-              // case "generateImage":
-              //   setToolInUse(PluginID.IMAGE_GENERATOR)
-              //   updatedPlugin = PluginID.IMAGE_GENERATOR
-              //   break
-            }
-            break
-
-          case "tool_call":
-            if (
-              streamPart.value.toolName === "browser" &&
-              streamPart.value.args.open_url
-            ) {
               const urlToOpen = streamPart.value.args.open_url
 
               const browserRequestBody = {
@@ -644,39 +514,89 @@ export const processResponse = async (
               )
 
               fullText += browserResult.fullText
-              break
-            } else if (
-              streamPart.value.toolName === "terminal" &&
-              streamPart.value.args.command
-            ) {
-              const command = streamPart.value.args.command
-
-              const terminalRequestBody = {
-                ...requestBody,
-                command: command
-              }
+            } else if (toolName === "terminal") {
+              setToolInUse(PluginID.TERMINAL)
+              updatedPlugin = PluginID.TERMINAL
 
               const terminalResponse = await fetchChatResponse(
                 "/api/chat/tools/terminal",
-                terminalRequestBody,
+                requestBody,
                 controller,
                 setIsGenerating,
                 setChatMessages,
                 alertDispatch
               )
 
-              const terminalResult = await processResponsePlugins(
+              const terminalResult = await processResponse(
                 terminalResponse,
                 lastChatMessage,
                 controller,
                 setFirstTokenReceived,
                 setChatMessages,
-                setToolInUse
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
               )
 
               fullText += terminalResult.fullText
-              break
+            } else if (toolName === "webSearch") {
+              setToolInUse(PluginID.WEB_SEARCH)
+              updatedPlugin = PluginID.WEB_SEARCH
+
+              const webSearchResponse = await fetchChatResponse(
+                "/api/chat/plugins/web-search",
+                requestBody,
+                controller,
+                setIsGenerating,
+                setChatMessages,
+                alertDispatch
+              )
+
+              const webSearchResult = await processResponse(
+                webSearchResponse,
+                lastChatMessage,
+                controller,
+                setFirstTokenReceived,
+                setChatMessages,
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
+              )
+
+              fullText += webSearchResult.fullText
+            } else if (toolName === "reasonLLM") {
+              setToolInUse(PluginID.REASON_LLM)
+              updatedPlugin = PluginID.REASON_LLM
+
+              const reasonLLMResponse = await fetchChatResponse(
+                "/api/chat/tools/reason-llm",
+                requestBody,
+                controller,
+                setIsGenerating,
+                setChatMessages,
+                alertDispatch
+              )
+
+              const reasonLLMResult = await processResponse(
+                reasonLLMResponse,
+                lastChatMessage,
+                controller,
+                setFirstTokenReceived,
+                setChatMessages,
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
+              )
+
+              fullText += reasonLLMResult.fullText
             }
+            toolExecuted = true
             break
 
           case "finish_message":
@@ -694,7 +614,6 @@ export const processResponse = async (
       }
     } finally {
       reader.releaseLock()
-      setToolInUse("none")
     }
 
     return {
@@ -705,54 +624,6 @@ export const processResponse = async (
       selectedPlugin: updatedPlugin,
       assistantGeneratedImages
     }
-  } else {
-    throw new Error("Response body is null")
-  }
-}
-
-export const processResponsePlugins = async (
-  response: Response,
-  lastChatMessage: ChatMessage,
-  controller: AbortController,
-  setFirstTokenReceived: React.Dispatch<React.SetStateAction<boolean>>,
-  setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
-  setToolInUse: React.Dispatch<React.SetStateAction<string>>
-) => {
-  let fullText = ""
-  let isFirstChunk = true
-
-  if (response.body) {
-    try {
-      await consumeReadableStream(
-        response.body,
-        chunk => {
-          if (isFirstChunk) {
-            setFirstTokenReceived(true)
-            isFirstChunk = false
-          }
-
-          fullText += chunk
-          setChatMessages(prev =>
-            prev.map(chatMessage =>
-              chatMessage.message.id === lastChatMessage.message.id
-                ? {
-                    message: {
-                      ...chatMessage.message,
-                      content: chatMessage.message.content + chunk
-                    },
-                    fileItems: chatMessage.fileItems
-                  }
-                : chatMessage
-            )
-          )
-        },
-        controller.signal
-      )
-    } finally {
-      setToolInUse("none")
-    }
-
-    return { fullText, finishReason: "" }
   } else {
     throw new Error("Response body is null")
   }

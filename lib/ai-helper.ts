@@ -1,9 +1,6 @@
 import endent from "endent"
 
-export function replaceWordsInLastUserMessage(
-  messages: any[],
-  replacements: { [s: string]: unknown } | ArrayLike<unknown>
-) {
+export function replaceWordsInLastUserMessage(messages: any[]) {
   const lastUserMessageIndex = messages.length - 1
   for (let i = lastUserMessageIndex; i >= 0; i--) {
     if (messages[i].role === "user") {
@@ -13,7 +10,7 @@ export function replaceWordsInLastUserMessage(
         let replacedContent = content.split(/\b/)
 
         for (let j = 0; j < replacedContent.length; j++) {
-          for (const [key, value] of Object.entries(replacements)) {
+          for (const [key, value] of Object.entries(wordReplacements)) {
             if (
               replacedContent[j].toLowerCase() === key.toLowerCase() &&
               !replacedContent[j].startsWith("√")
@@ -33,7 +30,7 @@ export function replaceWordsInLastUserMessage(
             let replacedContent = content.split(/\b/)
 
             for (let j = 0; j < replacedContent.length; j++) {
-              for (const [key, value] of Object.entries(replacements)) {
+              for (const [key, value] of Object.entries(wordReplacements)) {
                 if (
                   replacedContent[j].toLowerCase() === key.toLowerCase() &&
                   !replacedContent[j].startsWith("√")
