@@ -14,14 +14,16 @@ export const SidebarContent: FC<SidebarContentProps> = ({
   contentType,
   data
 }) => {
-  const { subscription } = useContext(PentestGPTContext)
+  const { subscription, setShowSidebar, isMobile } =
+    useContext(PentestGPTContext)
 
   return (
     <div className="flex max-h-[calc(100%-10px)] grow flex-col">
       <div className="flex items-center">
         <SidebarCreateButtons
           contentType={contentType}
-          hasData={data.length > 0}
+          setShowSidebar={setShowSidebar}
+          mobile={isMobile}
         />
       </div>
 
