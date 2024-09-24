@@ -24,7 +24,6 @@ import { PluginID } from "@/types/plugins"
 import { useRouter } from "next/navigation"
 import { FC, useEffect, useState } from "react"
 import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
-// import { getUserRole } from "@/db/user-role"
 
 interface GlobalStateProps {
   children: React.ReactNode
@@ -38,9 +37,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
   // CONTENT TYPE STORE
   const [contentType, setContentType] = useState<ContentType>("chats")
-
-  // User Role
-  // const [userRole, setUserRole] = useState<Tables<"user_role"> | null>(null)
 
   // SUBSCRIPTION STORE
   const [subscription, setSubscription] =
@@ -116,6 +112,10 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     "showSidebar",
     false
   )
+
+  // Terminal output setting
+  const [showTerminalOutput, setShowTerminalOutput] =
+    useLocalStorageState<boolean>("showTerminalOutput", true)
 
   // Handle window resize to update isMobile
   useEffect(() => {
@@ -211,10 +211,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         contentType,
         setContentType,
 
-        // USER ROLE STORE
-        // userRole,
-        // setUserRole,
-
         // SUBSCRIPTION STORE
         subscription,
         setSubscription,
@@ -307,7 +303,11 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
         // Sidebar
         showSidebar,
-        setShowSidebar
+        setShowSidebar,
+
+        // Terminal output setting
+        showTerminalOutput,
+        setShowTerminalOutput
       }}
     >
       {children}

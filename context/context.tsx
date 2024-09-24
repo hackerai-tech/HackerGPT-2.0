@@ -116,6 +116,12 @@ interface PentestGPTContext {
   // Sidebar
   showSidebar: boolean
   setShowSidebar: (value: boolean | ((prevState: boolean) => boolean)) => void
+
+  // Terminal output setting
+  showTerminalOutput: boolean
+  setShowTerminalOutput: (
+    value: boolean | ((prevState: boolean) => boolean)
+  ) => void
 }
 
 export const PentestGPTContext = createContext<PentestGPTContext>({
@@ -126,10 +132,6 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
   // CONTENT TYPE STORE
   contentType: "chats",
   setContentType: () => {},
-
-  // USER ROLE STORE
-  // userRole: null,
-  // setUserRole: () => {},
 
   // SUBSCRIPTION STORE
   subscription: null,
@@ -222,5 +224,9 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
 
   // Sidebar
   showSidebar: false,
-  setShowSidebar: () => {}
+  setShowSidebar: () => {},
+
+  // Terminal output setting
+  showTerminalOutput: false,
+  setShowTerminalOutput: () => {}
 })

@@ -51,7 +51,7 @@ export async function _ratelimit(
     if (remaining === 0) {
       return { allowed: false, remaining, timeRemaining: timeRemaining! }
     }
-    await _addRequest(storageKey, model)
+    await _addRequest(storageKey)
     return { allowed: true, remaining: remaining - 1, timeRemaining: null }
   } catch (error) {
     console.error("Redis rate limiter error:", error)
@@ -66,7 +66,7 @@ export async function getRemaining(
   isPremium: boolean
 ): Promise<[number, number | null]> {
   const storageKey = _makeStorageKey(userId, model)
-  const timeWindow = getTimeWindow(model)
+  const timeWindow = getTimeWindow()
   const now = Date.now()
   const limit = _getLimit(model, isPremium)
 
@@ -90,43 +90,30 @@ export async function getRemaining(
   return [remaining, remaining === 0 ? windowEndTime - now : null]
 }
 
-function getTimeWindow(model: string): number {
-  const key =
-    model === "plugins"
-      ? "RATELIMITER_TIME_PLUGINS_WINDOW_MINUTES"
-      : "RATELIMITER_TIME_WINDOW_MINUTES"
+function getTimeWindow(): number {
+  const key = "RATELIMITER_TIME_WINDOW_MINUTES"
   return Number(process.env[key]) * 60 * 1000
 }
 
 function _getLimit(model: string, isPremium: boolean): number {
   let limit
-  if (model === "plugins") {
-    const limitKey = `RATELIMITER_LIMIT_${model.toUpperCase()}_${isPremium ? "PREMIUM" : "FREE"}`
-    limit =
-      process.env[limitKey] === undefined
-        ? isPremium
-          ? 30
-          : 15
-        : Number(process.env[limitKey])
-  } else {
-    const fixedModelName = _getFixedModelName(model)
-    const limitKey = `RATELIMITER_LIMIT_${fixedModelName}_${isPremium ? "PREMIUM" : "FREE"}`
-    limit =
-      process.env[limitKey] === undefined
-        ? isPremium
-          ? 30
-          : 15
-        : Number(process.env[limitKey])
-  }
+  const fixedModelName = _getFixedModelName(model)
+  const limitKey = `RATELIMITER_LIMIT_${fixedModelName}_${isPremium ? "PREMIUM" : "FREE"}`
+  limit =
+    process.env[limitKey] === undefined
+      ? isPremium
+        ? 30
+        : 15
+      : Number(process.env[limitKey])
   if (isNaN(limit) || limit < 0) {
     throw new Error("Invalid limit configuration")
   }
   return limit
 }
 
-async function _addRequest(key: string, model: string) {
+async function _addRequest(key: string) {
   const now = Date.now()
-  const timeWindow = getTimeWindow(model)
+  const timeWindow = getTimeWindow()
 
   const redis = getRedis()
   try {
@@ -174,12 +161,12 @@ export function getRateLimitErrorMessage(
   model: string
 ): string {
   const remainingText = epochTimeToNaturalLanguage(timeRemaining)
-  const baseMessage = `⚠️ You've reached the rate limit for ${getModelName(model)}\n⏰ Access will be restored in ${remainingText}`
 
-  if (["plugins", "tts-1", "stt-1"].includes(model)) {
-    return premium
+  if (model === "terminal") {
+    const baseMessage = `⚠️ You've reached the limit for terminal usage.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
+    return !premium
       ? baseMessage
-      : `${baseMessage}\n🚀 Consider upgrading for higher limits and more features`
+      : `${baseMessage}\n\n🚀 Consider upgrading to Pro for higher terminal usage limits and more features.`
   }
 
   let message = `⚠️ Usage Limit Reached for ${getModelName(model)}\n⏰ Access will be restored in ${remainingText}`
@@ -206,10 +193,10 @@ export function getRateLimitErrorMessage(
 
 function getModelName(model: string): string {
   const modelNames: { [key: string]: string } = {
-    plugins: "plugins",
     pentestgpt: "PGPT-3.5",
     "pentestgpt-pro": "PGPT-4",
-    "gpt-4": "GPT-4"
+    "gpt-4": "GPT-4",
+    terminal: "terminal"
   }
   return modelNames[model] || model
 }
