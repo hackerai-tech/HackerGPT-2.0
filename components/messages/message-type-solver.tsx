@@ -32,7 +32,8 @@ export const terminalPlugins = [
   PluginID.SUBDOMAIN_FINDER,
   PluginID.CVE_MAP,
   PluginID.URL_FUZZER,
-  PluginID.WORDPRESS_SCANNER
+  PluginID.WORDPRESS_SCANNER,
+  PluginID.XSS_EXPLOITER
 ]
 
 export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({

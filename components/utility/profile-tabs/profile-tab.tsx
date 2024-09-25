@@ -29,7 +29,7 @@ export const ProfileTab: FC<ProfileTabProps> = ({
       </div>
 
       <div className="flex items-center justify-between">
-        <Label className="max-w-[80%] shrink pr-4">
+        <Label className="max-w-[80%] shrink leading-normal">
           Always show terminal output when using plugins
         </Label>
         <div className="flex grow justify-end">

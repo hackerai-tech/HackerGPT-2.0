@@ -5,6 +5,7 @@ import { CopyButton, generateRandomString } from "../message-codeblock"
 import chalk from "chalk"
 import AnsiToHtml from "ansi-to-html"
 import stripAnsi from "strip-ansi"
+import DOMPurify from "dompurify"
 
 interface MessageTerminalBlockProps {
   value: string
@@ -53,7 +54,23 @@ export const MessageTerminalBlock: FC<MessageTerminalBlockProps> = memo(
             ? chalk.red.bold(match)
             : chalk.yellow.bold(match)
         )
-      return converter.toHtml(styledValue)
+
+      const htmlWithColors = converter.toHtml(styledValue)
+
+      let sanitizedHtml = htmlWithColors
+      try {
+        sanitizedHtml = DOMPurify.sanitize(htmlWithColors, {
+          ALLOWED_TAGS: ["span", "br"],
+          ALLOWED_ATTR: ["style"],
+          ADD_ATTR: ["target"],
+          KEEP_CONTENT: true,
+          ALLOW_DATA_ATTR: false
+        })
+      } catch (error) {
+        // Fall back to unsanitized HTML
+      }
+
+      return sanitizedHtml
     }, [value])
 
     return (

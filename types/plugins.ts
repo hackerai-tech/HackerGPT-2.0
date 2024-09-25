@@ -34,7 +34,6 @@ export enum PluginID {
   REASON_LLM = "reason-llm",
 
   // Pentest tools
-  SQLI_EXPLOITER = "sqli-exploiter",
   SSL_SCANNER = "ssl-scanner",
   DNS_SCANNER = "dns-scanner",
   PORT_SCANNER = "port-scanner",
@@ -43,7 +42,10 @@ export enum PluginID {
   SUBDOMAIN_FINDER = "subdomain-finder",
   CVE_MAP = "cve-map",
   URL_FUZZER = "url-fuzzer",
-  WORDPRESS_SCANNER = "wordpress-scanner"
+  WORDPRESS_SCANNER = "wordpress-scanner",
+  // Exploit Tools
+  SQLI_EXPLOITER = "sqli-exploiter",
+  XSS_EXPLOITER = "xss-exploiter"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -57,7 +59,6 @@ type PluginUrls = Record<string, string>
 export const pluginUrls: PluginUrls = {
   PENTESTGPT: "https://github.com/hackerai-tech/PentestGPT",
   // Pentest tools
-  SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap",
   SSL_SCANNER: "https://github.com/drwetter/testssl.sh/",
   DNS_SCANNER: "https://github.com/darkoperator/dnsrecon",
   PORT_SCANNER: "https://github.com/projectdiscovery/naabu",
@@ -66,5 +67,8 @@ export const pluginUrls: PluginUrls = {
   SUBDOMAIN_FINDER: "https://github.com/projectdiscovery/subfinder",
   CVE_MAP: "https://github.com/projectdiscovery/cvemap",
   URL_FUZZER: "https://github.com/ffuf/ffuf",
-  WORDPRESS_SCANNER: "https://github.com/wpscanteam/wpscan"
+  WORDPRESS_SCANNER: "https://github.com/wpscanteam/wpscan",
+  // Exploit Tools
+  SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap",
+  XSS_EXPLOITER: "https://github.com/hahwul/dalfox"
 }
