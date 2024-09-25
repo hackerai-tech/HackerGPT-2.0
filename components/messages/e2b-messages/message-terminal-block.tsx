@@ -57,13 +57,18 @@ export const MessageTerminalBlock: FC<MessageTerminalBlockProps> = memo(
 
       const htmlWithColors = converter.toHtml(styledValue)
 
-      const sanitizedHtml = DOMPurify.sanitize(htmlWithColors, {
-        ALLOWED_TAGS: ["span", "br"],
-        ALLOWED_ATTR: ["style"],
-        ADD_ATTR: ["target"],
-        KEEP_CONTENT: true,
-        ALLOW_DATA_ATTR: false
-      })
+      let sanitizedHtml = htmlWithColors
+      try {
+        sanitizedHtml = DOMPurify.sanitize(htmlWithColors, {
+          ALLOWED_TAGS: ["span", "br"],
+          ALLOWED_ATTR: ["style"],
+          ADD_ATTR: ["target"],
+          KEEP_CONTENT: true,
+          ALLOW_DATA_ATTR: false
+        })
+      } catch (error) {
+        // Fall back to unsanitized HTML
+      }
 
       return sanitizedHtml
     }, [value])
