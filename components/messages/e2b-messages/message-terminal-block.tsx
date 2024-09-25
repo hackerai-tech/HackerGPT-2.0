@@ -54,13 +54,13 @@ export const MessageTerminalBlock: FC<MessageTerminalBlockProps> = memo(
             ? chalk.red.bold(match)
             : chalk.yellow.bold(match)
         )
-      
+
       const htmlWithColors = converter.toHtml(styledValue)
-      
+
       const sanitizedHtml = DOMPurify.sanitize(htmlWithColors, {
-        ALLOWED_TAGS: ['span', 'br'],
-        ALLOWED_ATTR: ['style'],
-        ADD_ATTR: ['target'],
+        ALLOWED_TAGS: ["span", "br"],
+        ALLOWED_ATTR: ["style"],
+        ADD_ATTR: ["target"],
         KEEP_CONTENT: true,
         ALLOW_DATA_ATTR: false
       })

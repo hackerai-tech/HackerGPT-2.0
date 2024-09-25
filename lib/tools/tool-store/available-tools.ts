@@ -427,7 +427,8 @@ export const availablePlugins: PluginSummary[] = [
       {
         title: "Find XSS Vulnerabilities",
         description: "on testphp.vulnweb.com",
-        chatMessage: "Find XSS vulnerabilities on http://testphp.vulnweb.com/listproducts.php"
+        chatMessage:
+          "Find XSS vulnerabilities on http://testphp.vulnweb.com/listproducts.php"
       },
       {
         title: "XSS Exploiter Help",

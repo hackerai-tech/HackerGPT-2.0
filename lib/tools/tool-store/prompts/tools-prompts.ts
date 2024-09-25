@@ -99,8 +99,8 @@ The user has selected the WordPress Scanner plugin, which uses the wpscan tool i
 3. Don't use --banner and --format flags by default.
 `
 
-case PluginID.XSS_EXPLOITER:
-  return `
+    case PluginID.XSS_EXPLOITER:
+      return `
 The user has selected the XSS Exploiter plugin, which uses the dalfox tool in the terminal. This tool is designed to find and verify XSS vulnerabilities in web applications. Remember:
 1. Focus on identifying and exploiting Cross-Site Scripting (XSS) vulnerabilities.
 2. Provide dalfox-specific options and explanations for effective XSS scanning and exploitation.
