@@ -372,11 +372,12 @@ export const availablePlugins: PluginSummary[] = [
       }
     ]
   },
+  // Exploit Tools id 30-39
   {
-    id: 12,
+    id: 30,
     name: "SQLi Exploiter",
     value: PluginID.SQLI_EXPLOITER,
-    categories: ["vuln-scanners"],
+    categories: ["exploit"],
     icon: "https://cdn-icons-png.flaticon.com/128/6843/6843633.png",
     invertInDarkMode: true,
     description: "Exploit SQL injection in web apps to extract data",
@@ -407,6 +408,31 @@ export const availablePlugins: PluginSummary[] = [
         title: "SQLi Exploiter Help",
         description: "How does the SQLi Exploiter plugin work?",
         chatMessage: "How does the SQLi Exploiter plugin work?"
+      }
+    ]
+  },
+  {
+    id: 31,
+    name: "XSS Exploiter",
+    value: PluginID.XSS_EXPLOITER,
+    categories: ["exploit"],
+    icon: "https://cdn-icons-png.flaticon.com/128/14702/14702433.png",
+    invertInDarkMode: true,
+    description: "Exploit XSS in real life-attacks, extract cookies, and data",
+    githubRepoUrl: pluginUrls.XSS_EXPLOITER,
+    isInstalled: false,
+    isPremium: true,
+    createdAt: "2024-09-25",
+    starters: [
+      {
+        title: "Find XSS Vulnerabilities",
+        description: "on testphp.vulnweb.com",
+        chatMessage: "Find XSS vulnerabilities on http://testphp.vulnweb.com/listproducts.php"
+      },
+      {
+        title: "XSS Exploiter Help",
+        description: "How does the XSS Exploiter plugin work?",
+        chatMessage: "How does the XSS Exploiter plugin work?"
       }
     ]
   },

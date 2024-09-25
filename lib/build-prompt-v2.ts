@@ -10,6 +10,7 @@ import { encode } from "gpt-tokenizer"
 import { GPT4o } from "./models/llm/openai-llm-list"
 import endent from "endent"
 import { toast } from "sonner"
+import { getTerminalPlugins } from "./tools/tool-store/tools-helper"
 
 const buildBasePrompt = (
   profileContext: string,
@@ -57,20 +58,8 @@ export async function buildFinalMessages(
     CHUNK_SIZE = 14000
   }
 
-  // Lower chunk size for plugins that don't need to handle long inputs
-  if (
-    // Pentest tools
-    selectedPlugin === PluginID.SSL_SCANNER ||
-    selectedPlugin === PluginID.SQLI_EXPLOITER ||
-    selectedPlugin === PluginID.DNS_SCANNER ||
-    selectedPlugin === PluginID.PORT_SCANNER ||
-    selectedPlugin === PluginID.WAF_DETECTOR ||
-    selectedPlugin === PluginID.WHOIS_LOOKUP ||
-    selectedPlugin === PluginID.SUBDOMAIN_FINDER ||
-    selectedPlugin === PluginID.CVE_MAP ||
-    selectedPlugin === PluginID.URL_FUZZER ||
-    selectedPlugin === PluginID.WORDPRESS_SCANNER
-  ) {
+  // Lower chunk size for terminal plugins
+  if (selectedPlugin && getTerminalPlugins().includes(selectedPlugin)) {
     CHUNK_SIZE = 8000
   }
 

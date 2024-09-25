@@ -26,7 +26,13 @@ function ToolsStorePage({
     setIsEnhancedMenuOpen
   } = useContext(PentestGPTContext)
 
-  const filters = ["Free", "Recon tools", "Vulnerability scanners", "Installed"]
+  const filters = [
+    "Free",
+    "Recon tools",
+    "Vulnerability scanners",
+    "Exploit tools",
+    "Installed"
+  ]
   const [selectedFilter, setSelectedFilter] = useState("All")
   const [searchTerm, setSearchTerm] = useState("")
   const categoryRefs = useRef<{
@@ -64,6 +70,8 @@ function ToolsStorePage({
         if (filter === "Recon tools") return plugin.categories.includes("recon")
         if (filter === "Vulnerability scanners")
           return plugin.categories.includes("vuln-scanners")
+        if (filter === "Exploit tools")
+          return plugin.categories.includes("exploit")
         return false
       })
       return acc
