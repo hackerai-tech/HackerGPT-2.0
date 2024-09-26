@@ -1,10 +1,11 @@
 "use client"
 
-import React from "react"
+import React, { useState, useEffect } from "react"
 import { Tables } from "@/supabase/types"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { ModelIcon } from "../models/model-icon"
 import { MessageTypeResolver } from "@/components/messages/message-type-solver"
+import { bulkFetchImageData } from "./chat-helpers"
 
 const ICON_SIZE = 28
 
@@ -20,6 +21,18 @@ export const SharedMessage: React.FC<SharedMessageProps> = ({
   isLast
 }) => {
   const modelDetails = LLM_LIST.find(model => model.modelId === message.model)
+  const [imageUrls, setImageUrls] = useState<(string | null)[]>([])
+
+  useEffect(() => {
+    const loadImages = async () => {
+      if (message.image_paths.length === 0) {
+        return
+      }
+      const urls = await bulkFetchImageData(message.image_paths)
+      setImageUrls(urls)
+    }
+    loadImages()
+  }, [message.image_paths])
 
   return (
     <div className="flex w-full justify-center">
@@ -38,12 +51,20 @@ export const SharedMessage: React.FC<SharedMessageProps> = ({
             className={`min-w-0 grow ${message.role === "user" ? "flex justify-end" : ""}`}
           >
             <div>
-              {message.image_paths.map((path, index) => (
+              {imageUrls.map((url, index) => (
                 <div
                   key={index}
                   className="mb-2 rounded bg-gray-200 p-2 text-sm italic text-gray-600"
                 >
-                  Image {index + 1}
+                  {url ? (
+                    <img
+                      src={url}
+                      alt={`Image ${index + 1}`}
+                      className="h-auto max-w-full"
+                    />
+                  ) : (
+                    `Loading Image ${index + 1}...`
+                  )}
                 </div>
               ))}
               <MessageTypeResolver
