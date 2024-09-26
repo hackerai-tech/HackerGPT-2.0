@@ -53,11 +53,6 @@ export async function generateStandaloneQuestion(
   }
 
   try {
-    const groq = createOpenAI({
-      baseURL: "https://api.groq.com/openai/v1",
-      apiKey: process.env.GROQ_API_KEY
-    })
-
     const openrouter = createOpenAI({
       baseURL: openRouterBaseUrl,
       headers: {
@@ -67,29 +62,15 @@ export async function generateStandaloneQuestion(
       }
     })
 
-    async function generateWithModel(model: any) {
-      return await generateText({
-        model,
-        temperature: 0.5,
-        maxTokens: 1024,
-        messages: [
-          { role: "system", content: systemMessageContent },
-          { role: "user", content: template }
-        ]
-      })
-    }
-
-    let result
-    try {
-      // Try with Groq first
-      result = await generateWithModel(groq("mixtral-8x7b-32768"))
-    } catch (groqError) {
-      console.warn("Error with Groq, falling back to OpenRouter:", groqError)
-      // Fallback to OpenRouter
-      result = await generateWithModel(
-        openrouter(`${selectedStandaloneQuestionModel}`)
-      )
-    }
+    const result = await generateText({
+      model: openrouter(`${selectedStandaloneQuestionModel}`),
+      temperature: 0.5,
+      maxTokens: 1024,
+      messages: [
+        { role: "system", content: systemMessageContent },
+        { role: "user", content: template }
+      ]
+    })
 
     const returnText = result.text
 
