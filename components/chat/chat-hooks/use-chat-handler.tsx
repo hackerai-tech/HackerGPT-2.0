@@ -6,7 +6,6 @@ import { ChatMessage, ChatPayload, LLMID } from "@/types"
 import { PluginID } from "@/types/plugins"
 import { useRouter } from "next/navigation"
 import { useContext, useEffect, useRef } from "react"
-import { toast } from "sonner"
 import { LLM_LIST } from "../../../lib/models/llm/llm-list"
 
 import { createMessageFeedback } from "@/db/message-feedback"
@@ -226,15 +225,15 @@ export const useChatHandler = () => {
       const b64Images = newMessageImages.map(image => image.base64)
 
       const { tempUserChatMessage, tempAssistantChatMessage } =
-        createTempMessages(
+        createTempMessages({
           messageContent,
           chatMessages,
-          chatSettings!,
+          chatSettings: chatSettings!,
           b64Images,
           isContinuation,
           selectedPlugin,
-          model || chatSettings!.model
-        )
+          model: model || chatSettings!.model
+        })
 
       let sentChatMessages = [...chatMessages]
 
