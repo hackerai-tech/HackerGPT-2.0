@@ -11,13 +11,11 @@ import { Loader2 } from "lucide-react"
 interface SidebarDataListProps {
   contentType: ContentType
   data: DataListType
-  onChatSelect?: () => void
 }
 
 export const SidebarDataList: FC<SidebarDataListProps> = ({
   contentType,
-  data,
-  onChatSelect
+  data
 }) => {
   const { setChats } = useContext(PentestGPTContext)
 
@@ -81,11 +79,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
   ) => {
     switch (contentType) {
       case "chats":
-        return (
-          <div onClick={onChatSelect}>
-            <ChatItem key={item.id} chat={item as Tables<"chats">} />
-          </div>
-        )
+        return <ChatItem key={item.id} chat={item as Tables<"chats">} />
       case "files":
         return <FileItem key={item.id} file={item as Tables<"files">} />
 

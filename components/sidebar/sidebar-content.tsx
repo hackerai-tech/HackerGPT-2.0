@@ -32,11 +32,7 @@ export const SidebarContent: FC<SidebarContentProps> = ({
         />
       </div>
 
-      <SidebarDataList
-        contentType={contentType}
-        data={data}
-        onChatSelect={handleSidebarVisibility}
-      />
+      <SidebarDataList contentType={contentType} data={data} />
 
       {!subscription && <SidebarUpgrade />}
     </div>
