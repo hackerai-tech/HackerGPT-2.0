@@ -6,6 +6,7 @@ import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { ModelIcon } from "../models/model-icon"
 import { MessageTypeResolver } from "@/components/messages/message-type-solver"
 import { bulkFetchImageData } from "./chat-helpers"
+import Image from "next/image"
 
 const ICON_SIZE = 28
 
@@ -51,22 +52,24 @@ export const SharedMessage: React.FC<SharedMessageProps> = ({
             className={`min-w-0 grow ${message.role === "user" ? "flex justify-end" : ""}`}
           >
             <div>
-              {imageUrls.map((url, index) => (
-                <div
-                  key={index}
-                  className="mb-2 rounded bg-gray-200 p-2 text-sm italic text-gray-600"
-                >
-                  {url ? (
-                    <img
-                      src={url}
-                      alt={`Image ${index + 1}`}
-                      className="h-auto max-w-full"
-                    />
-                  ) : (
-                    `Loading Image ${index + 1}...`
-                  )}
-                </div>
-              ))}
+              <div
+                className={`flex flex-wrap ${message.role === "user" ? "justify-end" : "justify-start"} gap-2`}
+              >
+                {imageUrls.map(
+                  (url, index) =>
+                    url && (
+                      <Image
+                        key={index}
+                        className="mb-2 rounded"
+                        src={url}
+                        alt={`message image ${index + 1}`}
+                        width={400}
+                        height={400}
+                        loading="lazy"
+                      />
+                    )
+                )}
+              </div>
               <MessageTypeResolver
                 previousMessage={previousMessage}
                 message={message}
