@@ -14,39 +14,53 @@ import { deleteChat } from "@/db/chats"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { Tables } from "@/supabase/types"
 import { IconTrash } from "@tabler/icons-react"
-import { FC, useContext, useRef, useState } from "react"
+import { FC, useContext, useCallback, useState } from "react"
 
 interface DeleteChatProps {
   chat: Tables<"chats">
+  onAction: () => void
 }
 
-export const DeleteChat: FC<DeleteChatProps> = ({ chat }) => {
-  useHotkey("Backspace", () => setShowChatDialog(true))
+export const DeleteChat: FC<DeleteChatProps> = ({ chat, onAction }) => {
   const { setChats } = useContext(PentestGPTContext)
   const { handleNewChat } = useChatHandler()
-  const buttonRef = useRef<HTMLButtonElement>(null)
-  const [showChatDialog, setShowChatDialog] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
 
-  const handleDeleteChat = async () => {
-    await deleteChat(chat.id)
+  const handleDeleteChat = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      await deleteChat(chat.id)
+      setChats(prevState => prevState.filter(c => c.id !== chat.id))
+      setIsOpen(false)
+      onAction()
+      handleNewChat()
+    },
+    [chat.id, setChats, onAction, handleNewChat]
+  )
 
-    setChats(prevState => prevState.filter(c => c.id !== chat.id))
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open)
+      if (!open) {
+        onAction()
+      }
+    },
+    [onAction]
+  )
 
-    setShowChatDialog(false)
+  const handleTriggerClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsOpen(true)
+  }, [])
 
-    handleNewChat()
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Enter") {
-      buttonRef.current?.click()
-    }
-  }
+  useHotkey("Backspace", () => setIsOpen(true))
 
   return (
-    <Dialog open={showChatDialog} onOpenChange={setShowChatDialog}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <div className="w-full cursor-pointer">
+        <div className="w-full cursor-pointer" onClick={handleTriggerClick}>
           <div className="text-error flex items-center p-3 hover:opacity-50">
             <IconTrash className="mr-2" size={20} />
             <span>Delete</span>
@@ -54,10 +68,9 @@ export const DeleteChat: FC<DeleteChatProps> = ({ chat }) => {
         </div>
       </DialogTrigger>
 
-      <DialogContent onKeyDown={handleKeyDown}>
+      <DialogContent onClick={e => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>Delete Chat?</DialogTitle>
-
           <DialogDescription>
             <br />
             This will delete &quot;{chat.name}&quot;
@@ -65,14 +78,10 @@ export const DeleteChat: FC<DeleteChatProps> = ({ chat }) => {
         </DialogHeader>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={() => setShowChatDialog(false)}>
+          <Button variant="ghost" onClick={() => setIsOpen(false)}>
             Cancel
           </Button>
-          <Button
-            ref={buttonRef}
-            variant="destructive"
-            onClick={handleDeleteChat}
-          >
+          <Button variant="destructive" onClick={handleDeleteChat}>
             Delete
           </Button>
         </DialogFooter>
