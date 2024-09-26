@@ -190,10 +190,3 @@ export const CONTINUE_PROMPT = endent`
 You got cut off in the middle of your message. Continue exactly from where you stopped. \
 Whatever you output will be appended to your last message, so DO NOT repeat any of the previous message text. \
 Do NOT apologize or add any unrelated text; just continue.`
-
-export const CONTINUE_PROMPT_BACKEND = (lastMessageEnd: string) => endent`
-You got cut off in the middle of your message. Continue exactly from where you stopped.
-Here are the last 25 characters of your previous message:
-"${lastMessageEnd}"
-Whatever you output will be appended to your last message, so DO NOT repeat any of the previous message text.
-Do NOT apologize or add any unrelated text; just continue directly from where you left off.`

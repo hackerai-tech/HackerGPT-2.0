@@ -13,7 +13,6 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
-import { CONTINUE_PROMPT_BACKEND } from "@/lib/models/llm/llm-prompting"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -38,7 +37,7 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   try {
-    const { messages, isContinuation } = await request.json()
+    const { messages } = await request.json()
 
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
@@ -56,12 +55,6 @@ export async function POST(request: Request) {
     )
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
-
-    if (isContinuation) {
-      messages[messages.length - 1].content = CONTINUE_PROMPT_BACKEND(
-        messages[messages.length - 2].content.slice(-25)
-      )
-    }
 
     const openai = createOpenAI({
       baseUrl: llmConfig.openai.baseUrl,
