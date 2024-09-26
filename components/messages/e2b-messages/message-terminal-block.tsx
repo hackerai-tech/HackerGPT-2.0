@@ -5,7 +5,7 @@ import { CopyButton, generateRandomString } from "../message-codeblock"
 import chalk from "chalk"
 import AnsiToHtml from "ansi-to-html"
 import stripAnsi from "strip-ansi"
-import DOMPurify from "dompurify"
+import DOMPurify from "isomorphic-dompurify"
 
 interface MessageTerminalBlockProps {
   value: string
