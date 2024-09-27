@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     )
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
-    
+
     // Continue assistant message from previous terminal call
     if (isTerminalContinuation) {
       messages.pop()
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
         const enqueueChunk = (chunk: string) =>
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
 
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 3; i++) {
           let terminalExecuted = false
           let terminalOutput = ""
 

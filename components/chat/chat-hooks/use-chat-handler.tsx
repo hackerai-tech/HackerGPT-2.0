@@ -181,7 +181,15 @@ export const useChatHandler = () => {
   }
 
   const handleSendTerminalContinuation = async () => {
-    await handleSendMessage(null, chatMessages, false, true, undefined, undefined, true)
+    await handleSendMessage(
+      null,
+      chatMessages,
+      false,
+      true,
+      undefined,
+      undefined,
+      true
+    )
   }
 
   const handleSendMessage = async (

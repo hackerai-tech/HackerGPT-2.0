@@ -231,7 +231,6 @@ export const handleHostedChat = async (
   )
   const chatSettings = payload.chatSettings
 
-
   let requestBody: any
 
   if (isTerminalContinuation) {
