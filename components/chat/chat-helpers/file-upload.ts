@@ -26,14 +26,14 @@ export const handleFileUpload = (
   files.forEach(file => {
     const fileExtension = file.name.split(".").pop()?.toLowerCase() || ""
 
-    if (
-      imageExtensions.includes(fileExtension) &&
-      chatSettings?.model !== GPT4o.modelId
-    ) {
-      toast.error(
-        `${file.name}: Image files are only supported by GPT-4 for now.`
-      )
-    } else if (videoExtensions.includes(fileExtension)) {
+    // if (
+    //   imageExtensions.includes(fileExtension) &&
+    //   chatSettings?.model !== GPT4o.modelId
+    // ) {
+    //   toast.error(
+    //     `${file.name}: Image files are only supported by GPT-4 for now.`
+    //   )
+    if (videoExtensions.includes(fileExtension)) {
       toast.error(`${file.name}: Video files are not supported yet.`)
     } else if (fileExtension && !supportedExtensions.includes(fileExtension)) {
       unsupportedFiles.push(file)

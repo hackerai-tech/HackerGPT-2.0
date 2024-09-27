@@ -8,7 +8,6 @@ import {
   SheetTitle,
   SheetTrigger
 } from "@/components/ui/sheet"
-import { AssignWorkspaces } from "@/components/workspace/assign-workspaces"
 import { PentestGPTContext } from "@/context/context"
 import { updateChat } from "@/db/chats"
 import {
@@ -247,17 +246,6 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
           </SheetHeader>
 
           <div className="mt-4 space-y-3">
-            {workspaces.length > 1 && (
-              <div className="space-y-1">
-                <Label>Assigned Workspaces</Label>
-
-                <AssignWorkspaces
-                  selectedWorkspaces={selectedWorkspaces}
-                  onSelectWorkspace={handleSelectWorkspace}
-                />
-              </div>
-            )}
-
             {renderInputs(renderState[contentType])}
           </div>
         </div>

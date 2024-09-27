@@ -2,7 +2,7 @@ import { PentestGPTContext } from "@/context/context"
 import { cn } from "@/lib/utils"
 import { Tables } from "@/supabase/types"
 import { useParams } from "next/navigation"
-import { FC, useContext, useRef, useState } from "react"
+import { FC, useContext, useRef, useState, useCallback } from "react"
 import { DeleteChat } from "./delete-chat"
 import { UpdateChat } from "./update-chat"
 import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
@@ -19,16 +19,20 @@ interface ChatItemProps {
 }
 
 export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
-  const { selectedChat, isMobile } = useContext(PentestGPTContext)
+  const { selectedChat, isMobile, setShowSidebar } =
+    useContext(PentestGPTContext)
   const { handleSelectChat } = useChatHandler()
   const params = useParams()
   const isActive = params.chatid === chat.id || selectedChat?.id === chat.id
   const itemRef = useRef<HTMLDivElement>(null)
   const [isOpen, setIsOpen] = useState(false)
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
     handleSelectChat(chat)
-  }
+    if (isMobile) {
+      setShowSidebar(false)
+    }
+  }, [handleSelectChat, chat, isMobile, setShowSidebar])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
@@ -36,6 +40,16 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
       itemRef.current?.click()
     }
   }
+
+  const handleCloseDropdown = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  const handleDropdownTrigger = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setIsOpen(true)
+  }, [])
 
   return (
     <div
@@ -60,17 +74,18 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
             <button
-              onClick={e => {
-                e.stopPropagation()
-                e.preventDefault()
-                setIsOpen(true)
-              }}
+              onClick={handleDropdownTrigger}
               className="flex size-6 items-center justify-center rounded"
             >
               <IconDots size={16} />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" sideOffset={5} className="py-2">
+          <DropdownMenuContent
+            align="start"
+            sideOffset={5}
+            className="py-2"
+            onClick={e => e.stopPropagation()}
+          >
             <ShareChatButton chat={chat}>
               <div className="w-full cursor-pointer">
                 <div className="flex items-center p-3 hover:opacity-50">
@@ -79,8 +94,8 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
                 </div>
               </div>
             </ShareChatButton>
-            <UpdateChat chat={chat} />
-            <DeleteChat chat={chat} />
+            <UpdateChat chat={chat} onAction={handleCloseDropdown} />
+            <DeleteChat chat={chat} onAction={handleCloseDropdown} />
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

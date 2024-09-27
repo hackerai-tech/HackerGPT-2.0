@@ -6,6 +6,7 @@ import { updateSystemMessage } from "@/lib/ai-helper"
 import {
   filterEmptyAssistantMessages,
   handleAssistantMessages,
+  messagesIncludeImages,
   toVercelChatMessages
 } from "@/lib/build-prompt"
 import { handleErrorResponse } from "@/lib/models/llm/api-error"
@@ -126,7 +127,7 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
-    const highRiskCategories = ["S4", "S12", "S3", "S11"]
+    const highRiskCategories = ["S4", "S3", "S10", "S11", "S12"]
     const isHighRiskCategory = highRiskCategories.includes(
       hazardCategory.toUpperCase()
     )
@@ -137,12 +138,14 @@ export async function POST(request: Request) {
         moderationLevel === 0 ||
         (moderationLevel >= 0.0 && moderationLevel <= 0.1))
 
-    if (shouldUseMiniModel) {
+    const includeImages = messagesIncludeImages(messages)
+
+    if (shouldUseMiniModel || includeImages) {
       selectedModel = "openai/gpt-4o-mini"
       filterEmptyAssistantMessages(messages)
     } else if (
       moderationLevel >= 0.3 &&
-      moderationLevel <= 0.8 &&
+      moderationLevel <= 0.9 &&
       !isHighRiskCategory
     ) {
       handleAssistantMessages(messages)
@@ -177,7 +180,7 @@ export async function POST(request: Request) {
 
       const result = await streamText({
         model: provider(selectedModel),
-        messages: toVercelChatMessages(messages),
+        messages: toVercelChatMessages(messages, includeImages),
         temperature: modelTemperature,
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
