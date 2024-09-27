@@ -25,7 +25,7 @@ const INITIAL_TOKENS = 1000
 
 export async function POST(request: Request) {
   try {
-    const { messages } = await request.json()
+    const { messages, isTerminalContinuation } = await request.json()
 
     const profile = await getAIProfile()
     if (!(await isPremiumUser(profile.user_id))) {
@@ -58,6 +58,11 @@ export async function POST(request: Request) {
     )
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
+    
+    // Continue assistant message from previous terminal call
+    if (isTerminalContinuation) {
+      messages.pop()
+    }
 
     const openai = createOpenAI({
       baseUrl: llmConfig.openai.baseUrl,
@@ -70,7 +75,7 @@ export async function POST(request: Request) {
         const enqueueChunk = (chunk: string) =>
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 1; i++) {
           let terminalExecuted = false
           let terminalOutput = ""
 

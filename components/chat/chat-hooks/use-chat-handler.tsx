@@ -180,13 +180,18 @@ export const useChatHandler = () => {
     await handleSendMessage(null, chatMessages, false, true)
   }
 
+  const handleSendTerminalContinuation = async () => {
+    await handleSendMessage(null, chatMessages, false, true, undefined, undefined, true)
+  }
+
   const handleSendMessage = async (
     messageContent: string | null,
     chatMessages: ChatMessage[],
     isRegeneration: boolean,
     isContinuation: boolean = false,
     editSequenceNumber?: number,
-    model?: LLMID
+    model?: LLMID,
+    isTerminalContinuation: boolean = false
   ) => {
     const isEdit = editSequenceNumber !== undefined
     const isRagEnabled = selectedPlugin === PluginID.ENHANCED_SEARCH
@@ -196,7 +201,10 @@ export const useChatHandler = () => {
         setUserInput("")
       }
 
-      setIsGenerating(!isContinuation)
+      if (isContinuation) {
+        setFirstTokenReceived(true)
+      }
+      setIsGenerating(true)
       setIsAtPickerOpen(false)
       setNewMessageImages([])
 
@@ -330,6 +338,7 @@ export const useChatHandler = () => {
           isRegeneration,
           isRagEnabled,
           isContinuation,
+          isTerminalContinuation,
           newAbortController,
           chatImages,
           setIsGenerating,
@@ -425,6 +434,7 @@ export const useChatHandler = () => {
     handleFocusChatInput,
     handleStopMessage,
     handleSendContinuation,
+    handleSendTerminalContinuation,
     handleSendEdit,
     handleSendFeedback,
     handleSelectChat

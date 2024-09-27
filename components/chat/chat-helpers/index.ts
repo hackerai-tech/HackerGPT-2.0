@@ -195,6 +195,7 @@ export const handleHostedChat = async (
   isRegeneration: boolean,
   isRagEnabled: boolean,
   isContinuation: boolean,
+  isTerminalContinuation: boolean,
   newAbortController: AbortController,
   chatImages: MessageImage[],
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
@@ -207,13 +208,19 @@ export const handleHostedChat = async (
   let { provider } = modelData
   let apiEndpoint = `/api/chat/${provider}`
 
-  setToolInUse(
-    isRagEnabled && provider !== "openai"
-      ? "Enhanced Search"
-      : selectedPlugin && selectedPlugin !== PluginID.NONE
-        ? selectedPlugin
-        : "none"
-  )
+  if (isTerminalContinuation) {
+    apiEndpoint = `/api/chat/tools/terminal`
+    setToolInUse(PluginID.TERMINAL)
+    selectedPlugin = PluginID.TERMINAL
+  } else {
+    setToolInUse(
+      isRagEnabled && provider !== "openai"
+        ? "Enhanced Search"
+        : selectedPlugin && selectedPlugin !== PluginID.NONE
+          ? selectedPlugin
+          : "none"
+    )
+  }
 
   const formattedMessages = await buildFinalMessages(
     payload,
@@ -224,21 +231,29 @@ export const handleHostedChat = async (
   )
   const chatSettings = payload.chatSettings
 
-  const requestBody =
-    provider === "openai"
-      ? {
-          messages: formattedMessages,
-          chatSettings,
-          isContinuation
-        }
-      : {
-          messages: formattedMessages,
-          chatSettings: chatSettings,
-          isRetrieval:
-            payload.messageFileItems && payload.messageFileItems.length > 0,
-          isContinuation,
-          isRagEnabled
-        }
+
+  let requestBody: any
+
+  if (isTerminalContinuation) {
+    requestBody = {
+      messages: formattedMessages,
+      isTerminalContinuation: true
+    }
+  } else if (provider === "openai") {
+    requestBody = {
+      messages: formattedMessages,
+      chatSettings
+    }
+  } else {
+    requestBody = {
+      messages: formattedMessages,
+      chatSettings: chatSettings,
+      isRetrieval:
+        payload.messageFileItems && payload.messageFileItems.length > 0,
+      isContinuation,
+      isRagEnabled
+    }
+  }
 
   const chatResponse = await fetchChatResponse(
     apiEndpoint,
@@ -631,7 +646,15 @@ export const processResponse = async (
             break
 
           case "finish_message":
-            finishReason = streamPart.value.finishReason
+            if (
+              streamPart.value.finishReason === "tool-calls" &&
+              updatedPlugin === PluginID.TERMINAL
+            ) {
+              // To use continue generating
+              finishReason = "terminal-calls"
+            } else {
+              finishReason = streamPart.value.finishReason
+            }
             break
         }
 

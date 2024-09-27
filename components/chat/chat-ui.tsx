@@ -52,8 +52,12 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     showSidebar
   } = useContext(PentestGPTContext)
 
-  const { handleNewChat, handleFocusChatInput, handleSendContinuation } =
-    useChatHandler()
+  const {
+    handleNewChat,
+    handleFocusChatInput,
+    handleSendContinuation,
+    handleSendTerminalContinuation
+  } = useChatHandler()
 
   const {
     messagesStartRef,
@@ -325,18 +329,24 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
           />
         </div>
 
-        {!isGenerating && selectedChat?.finish_reason === "length" && (
-          <div className="flex w-full justify-center p-2">
-            <Button
-              onClick={handleSendContinuation}
-              variant="secondary"
-              className="flex items-center space-x-1 px-4 py-2"
-            >
-              <IconPlayerTrackNext size={16} />
-              <span>Continue generating</span>
-            </Button>
-          </div>
-        )}
+        {!isGenerating &&
+          (selectedChat?.finish_reason === "length" ||
+            selectedChat?.finish_reason === "terminal-calls") && (
+            <div className="flex w-full justify-center p-2">
+              <Button
+                onClick={
+                  selectedChat?.finish_reason === "terminal-calls"
+                    ? handleSendTerminalContinuation
+                    : handleSendContinuation
+                }
+                variant="secondary"
+                className="flex items-center space-x-1 px-4 py-2"
+              >
+                <IconPlayerTrackNext size={16} />
+                <span>Continue generating</span>
+              </Button>
+            </div>
+          )}
 
         <ChatInput />
       </div>

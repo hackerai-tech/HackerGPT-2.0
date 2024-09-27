@@ -65,9 +65,6 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     handleFocusChatInput
   } = useChatHandler()
 
-  const VOICE_ASSISTANT_ENABLED =
-    process.env.NEXT_PUBLIC_VOICE_ASSISTANT_ENABLED?.toLowerCase() === "true"
-
   const handleToggleEnhancedMenu = () => {
     setIsEnhancedMenuOpen(!isEnhancedMenuOpen)
   }
