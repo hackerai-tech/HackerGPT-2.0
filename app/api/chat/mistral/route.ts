@@ -127,7 +127,7 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
-    const highRiskCategories = ["S4", "S12", "S3", "S11"]
+    const highRiskCategories = ["S4", "S3", "S10", "S11", "S12",]
     const isHighRiskCategory = highRiskCategories.includes(
       hazardCategory.toUpperCase()
     )
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
       filterEmptyAssistantMessages(messages)
     } else if (
       moderationLevel >= 0.3 &&
-      moderationLevel <= 0.8 &&
+      moderationLevel <= 0.9 &&
       !isHighRiskCategory
     ) {
       handleAssistantMessages(messages)
