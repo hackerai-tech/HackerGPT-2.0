@@ -6,7 +6,7 @@ export const PGPT3_5: LLM = {
   shortModelName: "PGPT-3.5",
   provider: "mistral",
   hostedId: "mistral-medium",
-  imageInput: false
+  imageInput: true
 }
 
 export const PGPT4: LLM = {
@@ -15,7 +15,7 @@ export const PGPT4: LLM = {
   shortModelName: "PGPT-4",
   provider: "mistral",
   hostedId: "mistral-large",
-  imageInput: false
+  imageInput: true
 }
 
 export const HACKERAI_LLM_LIST: LLM[] = [PGPT3_5, PGPT4]
