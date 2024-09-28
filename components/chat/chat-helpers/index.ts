@@ -324,9 +324,12 @@ export const handleHostedPluginsChat = async (
     alertDispatch
   )
 
-  const lastMessage = isRegeneration
-    ? payload.chatMessages[payload.chatMessages.length - 1]
-    : tempAssistantChatMessage
+  const lastMessage =
+    isRegeneration || isTerminalContinuation
+      ? payload.chatMessages[
+          payload.chatMessages.length - (isTerminalContinuation ? 2 : 1)
+        ]
+      : tempAssistantChatMessage
 
   return processResponse(
     chatResponse,
