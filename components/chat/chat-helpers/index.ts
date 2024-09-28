@@ -586,6 +586,12 @@ export const processResponse = async (
               )
 
               fullText += terminalResult.fullText
+
+              finishReason = terminalResult.finishReason
+
+              if (finishReason === "tool-calls") {
+                finishReason = "terminal-calls"
+              }
             } else if (toolName === "webSearch") {
               setToolInUse(PluginID.WEB_SEARCH)
               updatedPlugin = PluginID.WEB_SEARCH
@@ -645,14 +651,18 @@ export const processResponse = async (
             break
 
           case "finish_message":
-            if (
-              streamPart.value.finishReason === "tool-calls" &&
-              updatedPlugin === PluginID.TERMINAL
-            ) {
-              // To use continue generating
-              finishReason = "terminal-calls"
-            } else {
-              finishReason = streamPart.value.finishReason
+            if (finishReason === "") {
+              // Only set finishReason if it hasn't been set before
+              console.log("finish_message", streamPart.value)
+              if (
+                streamPart.value.finishReason === "tool-calls" &&
+                updatedPlugin === PluginID.TERMINAL
+              ) {
+                // To use continue generating for terminal
+                finishReason = "terminal-calls"
+              } else {
+                finishReason = streamPart.value.finishReason
+              }
             }
             break
         }
