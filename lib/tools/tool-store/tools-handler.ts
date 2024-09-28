@@ -26,6 +26,7 @@ interface CommandGeneratorHandlerOptions {
   profile_context: string
   messages: any[]
   pluginID: PluginID
+  isTerminalContinuation: boolean
 }
 
 const MAX_TOKENS = 32000
@@ -35,7 +36,8 @@ export async function commandGeneratorHandler({
   userID,
   profile_context,
   messages,
-  pluginID
+  pluginID,
+  isTerminalContinuation
 }: CommandGeneratorHandlerOptions) {
   const customPrompt = getToolsPrompt(
     process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || "",
@@ -45,18 +47,30 @@ export async function commandGeneratorHandler({
   filterEmptyAssistantMessages(messages)
   replaceWordsInLastUserMessage(messages)
 
-  const openai = createOpenAI({
-    baseUrl: llmConfig.openai.baseUrl,
-    apiKey: llmConfig.openai.apiKey
+  if (isTerminalContinuation) {
+    messages.pop()
+  }
+
+  const providerHeaders = {
+    Authorization: `Bearer ${llmConfig.openrouter.apiKey}`,
+    "Content-Type": "application/json",
+    "HTTP-Referer": `https://hacktheworld.com/tools-terminal`,
+    "X-Title": "tools-terminal"
+  }
+
+  const openrouter = createOpenAI({
+    baseUrl: llmConfig.openrouter.baseUrl,
+    headers: providerHeaders
   })
 
   try {
     let terminalStream: ReadableStream<string> | null = null
     let terminalExecuted = false
     let loopCount = 0
-    const maxLoops = 3
+    const maxLoops = 2
     let combinedResponse = ""
     let assistantMessage: { role: "assistant"; content: string } | null = null
+    let finalFinishReason = "unknown"
 
     const processIteration = async () => {
       const customPrompt =
@@ -73,7 +87,7 @@ export async function commandGeneratorHandler({
       updateSystemMessage(messages, customPrompt, profile_context)
 
       const { textStream, finishReason } = await streamText({
-        model: openai("gpt-4o-2024-08-06"),
+        model: openrouter("openai/gpt-4o-2024-08-06"),
         temperature: 0.5,
         maxTokens: 1024,
         messages: toVercelChatMessages(messages, true),
@@ -163,6 +177,7 @@ export async function commandGeneratorHandler({
 
           // Check if terminal was executed
           const reason = await finishReason
+          finalFinishReason = reason
           if (reason !== "tool-calls") {
             break
           }
@@ -172,6 +187,11 @@ export async function commandGeneratorHandler({
           terminalStream = null
         }
 
+        // Enqueue the finish reason as the last chunk
+        const finalData = {
+          finishReason: finalFinishReason
+        }
+        controller.enqueue(encoder.encode(`d:${JSON.stringify(finalData)}\n`))
         controller.close()
       }
     })

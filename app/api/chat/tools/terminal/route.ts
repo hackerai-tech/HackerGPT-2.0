@@ -64,10 +64,19 @@ export async function POST(request: Request) {
       messages.pop()
     }
 
-    const openai = createOpenAI({
-      baseUrl: llmConfig.openai.baseUrl,
-      apiKey: llmConfig.openai.apiKey
+    const providerHeaders = {
+      Authorization: `Bearer ${llmConfig.openrouter.apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": `https://hacktheworld.com/terminal`,
+      "X-Title": "terminal"
+    }
+
+    const openrouter = createOpenAI({
+      baseUrl: llmConfig.openrouter.baseUrl,
+      headers: providerHeaders
     })
+
+    let finalFinishReason: string = "unknown"
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -80,7 +89,7 @@ export async function POST(request: Request) {
           let terminalOutput = ""
 
           const { textStream, finishReason } = await streamText({
-            model: openai("gpt-4o-2024-08-06"),
+            model: openrouter("openai/gpt-4o-2024-08-06"),
             temperature: 0.5,
             maxTokens: 1024,
             messages: toVercelChatMessages(messages, true),
@@ -147,9 +156,16 @@ export async function POST(request: Request) {
             }
           }
 
-          if ((await finishReason) !== "tool-calls") break
+          finalFinishReason = await finishReason
+
+          if (finalFinishReason !== "tool-calls") break
         }
 
+        // Enqueue only the finish reason as the last chunk
+        const finalData = {
+          finishReason: finalFinishReason
+        }
+        controller.enqueue(encoder.encode(`d:${JSON.stringify(finalData)}\n`))
         controller.close()
       }
     })

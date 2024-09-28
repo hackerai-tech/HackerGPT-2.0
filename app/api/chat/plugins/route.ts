@@ -35,11 +35,13 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   const json = await request.json()
-  const { payload, chatImages, selectedPlugin } = json as {
-    payload: any
-    chatImages: any[]
-    selectedPlugin: string
-  }
+  const { payload, chatImages, selectedPlugin, isTerminalContinuation } =
+    json as {
+      payload: any
+      chatImages: any[]
+      selectedPlugin: string
+      isTerminalContinuation: boolean
+    }
 
   try {
     const profile = await getAIProfile()
@@ -90,7 +92,8 @@ export async function POST(request: Request) {
         userID: profile.user_id,
         profile_context: profile.profile_context,
         messages: formattedMessages,
-        pluginID: selectedPlugin as PluginID
+        pluginID: selectedPlugin as PluginID,
+        isTerminalContinuation: isTerminalContinuation
       })
     }
   } catch (error: any) {
