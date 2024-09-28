@@ -318,6 +318,7 @@ export const useChatHandler = () => {
           modelData!,
           tempAssistantChatMessage,
           isRegeneration,
+          isTerminalContinuation,
           newAbortController,
           newMessageImages,
           chatImages,

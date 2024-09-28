@@ -30,6 +30,7 @@ import { readDataStream } from "ai"
 import { CONTINUE_PROMPT } from "@/lib/models/llm/llm-prompting"
 import { buildFinalMessages } from "@/lib/build-prompt-v2"
 import { supabase } from "@/lib/supabase/browser-client"
+import { getTerminalPlugins } from "@/lib/tools/tool-store/tools-helper"
 
 export const validateChatSettings = (
   chatSettings: ChatSettings | null,
@@ -290,6 +291,7 @@ export const handleHostedPluginsChat = async (
   modelData: LLM,
   tempAssistantChatMessage: ChatMessage,
   isRegeneration: boolean,
+  isTerminalContinuation: boolean,
   newAbortController: AbortController,
   newMessageImages: MessageImage[],
   chatImages: MessageImage[],
@@ -305,7 +307,8 @@ export const handleHostedPluginsChat = async (
   const requestBody: any = {
     payload: payload,
     chatImages: chatImages,
-    selectedPlugin: selectedPlugin
+    selectedPlugin: selectedPlugin,
+    isTerminalContinuation: isTerminalContinuation
   }
 
   if (selectedPlugin && selectedPlugin !== PluginID.NONE) {
@@ -425,7 +428,7 @@ export const processResponse = async (
   if (response.body) {
     let fullText = ""
     let finishReason = ""
-    let toolCallId = ""
+    // let toolCallId = ""
     let ragUsed = false
     let ragId = null
     let isFirstChunk = true
@@ -439,33 +442,33 @@ export const processResponse = async (
 
     try {
       for await (const streamPart of stream) {
-        // console.log(streamPart)
+        console.log(streamPart)
 
-        const isReasonLLMResult = (
-          part: any
-        ): part is {
-          type: "data"
-          value: Array<{ reason: string }>
-        } =>
-          part.type === "data" &&
-          Array.isArray(part.value) &&
-          part.value.length > 0 &&
-          typeof part.value[0] === "object" &&
-          "reason" in part.value[0]
+        // const isReasonLLMResult = (
+        //   part: any
+        // ): part is {
+        //   type: "data"
+        //   value: Array<{ reason: string }>
+        // } =>
+        //   part.type === "data" &&
+        //   Array.isArray(part.value) &&
+        //   part.value.length > 0 &&
+        //   typeof part.value[0] === "object" &&
+        //   "reason" in part.value[0]
 
         const processStreamPart = (
-          streamPart: any,
-          toolCallId: string
+          streamPart: any
+          // toolCallId: string
         ): { contentToAdd: string; newImagePath: string | null } => {
           if (streamPart.type === "text")
             return { contentToAdd: streamPart.value, newImagePath: null }
 
-          if (isReasonLLMResult(streamPart)) {
-            return {
-              contentToAdd: streamPart.value[0].reason,
-              newImagePath: null
-            }
-          }
+          // if (isReasonLLMResult(streamPart)) {
+          //   return {
+          //     contentToAdd: streamPart.value[0].reason,
+          //     newImagePath: null
+          //   }
+          // }
 
           return { contentToAdd: "", newImagePath: null }
         }
@@ -475,8 +478,8 @@ export const processResponse = async (
           case "tool_result":
           case "data":
             const { contentToAdd, newImagePath } = processStreamPart(
-              streamPart,
-              toolCallId
+              streamPart
+              // toolCallId
             )
 
             if (contentToAdd || newImagePath) {
@@ -653,10 +656,9 @@ export const processResponse = async (
           case "finish_message":
             if (finishReason === "") {
               // Only set finishReason if it hasn't been set before
-              console.log("finish_message", streamPart.value)
               if (
                 streamPart.value.finishReason === "tool-calls" &&
-                updatedPlugin === PluginID.TERMINAL
+                getTerminalPlugins().includes(updatedPlugin)
               ) {
                 // To use continue generating for terminal
                 finishReason = "terminal-calls"

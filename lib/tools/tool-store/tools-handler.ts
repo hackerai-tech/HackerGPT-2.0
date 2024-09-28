@@ -26,6 +26,7 @@ interface CommandGeneratorHandlerOptions {
   profile_context: string
   messages: any[]
   pluginID: PluginID
+  isTerminalContinuation: boolean
 }
 
 const MAX_TOKENS = 32000
@@ -35,7 +36,8 @@ export async function commandGeneratorHandler({
   userID,
   profile_context,
   messages,
-  pluginID
+  pluginID,
+  isTerminalContinuation
 }: CommandGeneratorHandlerOptions) {
   const customPrompt = getToolsPrompt(
     process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || "",
@@ -44,6 +46,10 @@ export async function commandGeneratorHandler({
   updateSystemMessage(messages, customPrompt, profile_context)
   filterEmptyAssistantMessages(messages)
   replaceWordsInLastUserMessage(messages)
+
+  if (isTerminalContinuation) {
+    messages.pop()
+  }
 
   const providerHeaders = {
     Authorization: `Bearer ${llmConfig.openrouter.apiKey}`,
@@ -64,6 +70,7 @@ export async function commandGeneratorHandler({
     const maxLoops = 2
     let combinedResponse = ""
     let assistantMessage: { role: "assistant"; content: string } | null = null
+    let finalFinishReason = "unknown"
 
     const processIteration = async () => {
       const customPrompt =
@@ -170,6 +177,7 @@ export async function commandGeneratorHandler({
 
           // Check if terminal was executed
           const reason = await finishReason
+          finalFinishReason = reason
           if (reason !== "tool-calls") {
             break
           }
@@ -179,6 +187,11 @@ export async function commandGeneratorHandler({
           terminalStream = null
         }
 
+        // Enqueue the finish reason as the last chunk
+        const finalData = {
+          finishReason: finalFinishReason
+        }
+        controller.enqueue(encoder.encode(`d:${JSON.stringify(finalData)}\n`))
         controller.close()
       }
     })
