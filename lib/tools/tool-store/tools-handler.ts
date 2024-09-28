@@ -61,7 +61,7 @@ export async function commandGeneratorHandler({
     let terminalStream: ReadableStream<string> | null = null
     let terminalExecuted = false
     let loopCount = 0
-    const maxLoops = 3
+    const maxLoops = 2
     let combinedResponse = ""
     let assistantMessage: { role: "assistant"; content: string } | null = null
 
