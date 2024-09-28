@@ -45,9 +45,16 @@ export async function commandGeneratorHandler({
   filterEmptyAssistantMessages(messages)
   replaceWordsInLastUserMessage(messages)
 
-  const openai = createOpenAI({
-    baseUrl: llmConfig.openai.baseUrl,
-    apiKey: llmConfig.openai.apiKey
+  const providerHeaders = {
+    Authorization: `Bearer ${llmConfig.openrouter.apiKey}`,
+    "Content-Type": "application/json",
+    "HTTP-Referer": `https://hacktheworld.com/tools-terminal`,
+    "X-Title": "tools-terminal"
+  }
+
+  const openrouter = createOpenAI({
+    baseUrl: llmConfig.openrouter.baseUrl,
+    headers: providerHeaders
   })
 
   try {
@@ -73,7 +80,7 @@ export async function commandGeneratorHandler({
       updateSystemMessage(messages, customPrompt, profile_context)
 
       const { textStream, finishReason } = await streamText({
-        model: openai("gpt-4o-2024-08-06"),
+        model: openrouter("openai/gpt-4o-2024-08-06"),
         temperature: 0.5,
         maxTokens: 1024,
         messages: toVercelChatMessages(messages, true),
