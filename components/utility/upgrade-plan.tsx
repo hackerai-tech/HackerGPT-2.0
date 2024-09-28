@@ -196,7 +196,8 @@ export const UpgradePlan: FC = () => {
               Access to file uploads, vision, web search and browsing
             </PlanStatement>
             <PlanStatement>
-              Access to advanced plugins like DNS Scanner, PortScanner, and more
+              Access to advanced plugins like SQLi Exploiter, XSS Exploiter, and
+              more
             </PlanStatement>
             <PlanStatement>Access to terminal</PlanStatement>
           </PlanCard>

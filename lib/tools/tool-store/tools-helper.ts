@@ -4,7 +4,9 @@ export const getFreePlugins = (): PluginID[] => [
   PluginID.CVE_MAP,
   PluginID.SUBDOMAIN_FINDER,
   PluginID.WAF_DETECTOR,
-  PluginID.WHOIS_LOOKUP
+  PluginID.WHOIS_LOOKUP,
+  PluginID.DNS_SCANNER,
+  PluginID.PORT_SCANNER
 ]
 
 export const getTerminalPlugins = (): PluginID[] => [
