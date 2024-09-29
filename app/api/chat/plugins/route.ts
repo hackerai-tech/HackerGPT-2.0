@@ -4,7 +4,7 @@ import { ServerRuntime } from "next"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 
 import { PluginID } from "@/types/plugins"
-import { isPremiumUser } from "@/lib/server/subscription-utils"
+import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
 import { buildFinalMessages } from "@/lib/build-prompt"
 import { commandGeneratorHandler } from "@/lib/tools/tool-store/tools-handler"
 import {
@@ -45,11 +45,14 @@ export async function POST(request: Request) {
 
   try {
     const profile = await getAIProfile()
-    const isPremium = await isPremiumUser(profile.user_id)
+    const subscriptionInfo = await getSubscriptionInfo(profile.user_id)
 
-    if (!isFreePlugin(selectedPlugin as PluginID) && !isPremium) {
+    if (
+      !isFreePlugin(selectedPlugin as PluginID) &&
+      !subscriptionInfo.isPremium
+    ) {
       return new Response(
-        `Access Denied to ${selectedPlugin}: The plugin you are trying to use is exclusive to Pro members. Please upgrade to a Pro account to access this plugin.`
+        `Access Denied to ${selectedPlugin}: The plugin you are trying to use is exclusive to to Pro and Team members. Please upgrade to access this plugin.`
       )
     }
 

@@ -10,7 +10,7 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
 import { generateText } from "ai"
 import { toVercelChatMessages } from "@/lib/build-prompt"
-import { isPremiumUser } from "@/lib/server/subscription-utils"
+import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
 import { createOpenAI } from "@ai-sdk/openai"
 
 export const runtime: ServerRuntime = "edge"
@@ -39,11 +39,11 @@ export async function POST(request: Request) {
     const { messages } = await request.json()
 
     const profile = await getAIProfile()
-    const isPremium = await isPremiumUser(profile.user_id)
+    const subscriptionInfo = await getSubscriptionInfo(profile.user_id)
 
-    if (!isPremium) {
+    if (!subscriptionInfo.isPremium) {
       return new Response(
-        "Access Denied: This feature is exclusive to Pro members. Please upgrade to a Pro account to access the reason LLM.",
+        "Access Denied: This feature is exclusive to Pro and Team members. Please upgrade your account to access the reason LLM.",
         { status: 403 }
       )
     }

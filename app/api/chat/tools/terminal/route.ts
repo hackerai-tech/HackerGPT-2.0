@@ -1,7 +1,7 @@
 import { ServerRuntime } from "next"
 import { terminalExecutor } from "@/lib/tools/llm/terminal-executor"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
-import { isPremiumUser } from "@/lib/server/subscription-utils"
+import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
 import { ratelimit } from "@/lib/server/ratelimiter"
 import { epochTimeToNaturalLanguage } from "@/lib/utils"
 import llmConfig from "@/lib/models/llm/llm-config"
@@ -28,7 +28,9 @@ export async function POST(request: Request) {
     const { messages, isTerminalContinuation } = await request.json()
 
     const profile = await getAIProfile()
-    if (!(await isPremiumUser(profile.user_id))) {
+    const subscriptionInfo = await getSubscriptionInfo(profile.user_id)
+
+    if (!subscriptionInfo.isPremium) {
       return new Response(
         "Access Denied: This feature is exclusive to Pro members. Please upgrade to a Pro account to access the terminal.",
         { status: 403 }
