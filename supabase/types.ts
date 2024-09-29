@@ -589,9 +589,12 @@ export type Database = {
           customer_id: string
           ended_at: string | null
           id: string
+          plan_type: string
+          quantity: number | null
           start_date: string | null
           status: string
           subscription_id: string
+          team_name: string | null
           updated_at: string | null
           user_id: string
         }
@@ -602,9 +605,12 @@ export type Database = {
           customer_id: string
           ended_at?: string | null
           id?: string
+          plan_type: string
+          quantity?: number | null
           start_date?: string | null
           status: string
           subscription_id: string
+          team_name?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -615,9 +621,12 @@ export type Database = {
           customer_id?: string
           ended_at?: string | null
           id?: string
+          plan_type?: string
+          quantity?: number | null
           start_date?: string | null
           status?: string
           subscription_id?: string
+          team_name?: string | null
           updated_at?: string | null
           user_id?: string
         }

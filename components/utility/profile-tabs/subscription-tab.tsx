@@ -76,7 +76,7 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
         <div>
           <Label className="text-sm font-medium">Current plan</Label>
           <p className="mt-1">
-            <PlanName isPremium={isPremium} />
+            <PlanName subscription={subscription} />
           </p>
         </div>
         {isPremium ? (
@@ -137,15 +137,18 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
 }
 
 interface PlanNameProps {
-  isPremium: boolean
+  subscription: any | null
 }
 
-export const PlanName: FC<PlanNameProps> = ({ isPremium }) => {
+export const PlanName: FC<PlanNameProps> = ({ subscription }) => {
+  const planType = subscription?.plan_type || "free"
+  const planName = planType.charAt(0).toUpperCase() + planType.slice(1)
+
   return (
     <span
-      className={`text-xl font-bold ${isPremium ? "text-primary" : "text-muted-foreground"}`}
+      className={`text-xl font-bold ${subscription ? "text-primary" : "text-muted-foreground"}`}
     >
-      {isPremium ? "Pro" : "Free"}
+      {planName}
     </span>
   )
 }

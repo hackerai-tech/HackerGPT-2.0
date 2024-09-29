@@ -110,6 +110,13 @@ async function restoreToDatabase(
     return errStr("invalid customer value")
   }
 
+  // Determine the plan type and team name
+  const planType = subscription.metadata.teamName ? "team" : "pro"
+  const teamName = subscription.metadata.teamName || null
+
+  // Get the quantity (number of seats) for team plans
+  const quantity = subscription.items.data[0].quantity || 1
+
   // Restore subscription data in Supabase without attempting to update the Stripe subscription
   const result = await supabaseAdmin.from("subscriptions").upsert(
     {
@@ -126,11 +133,13 @@ async function restoreToDatabase(
         : null,
       ended_at: subscription.ended_at
         ? unixToDateString(subscription.ended_at)
-        : null
+        : null,
+      plan_type: planType,
+      team_name: teamName,
+      quantity: quantity
     },
     { onConflict: "subscription_id" }
   )
-
   if (result.error) {
     console.error(result.error)
     Sentry.withScope(scope => {
