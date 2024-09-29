@@ -20,20 +20,12 @@ import PentestGPTTextSVG from "@/components/icons/pentestgpt-text-svg"
 import { TabGroup, TabList, Tab } from "@headlessui/react"
 
 const YEARLY_PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRO_PRICE_ID
-const MONTHLY_TEAM_PRICE_ID =
-  process.env.NEXT_PUBLIC_STRIPE_MONTHLY_TEAM_PRICE_ID
-const YEARLY_TEAM_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_YEARLY_TEAM_PRICE_ID
 
 export const UpgradePlan: FC = () => {
   const router = useRouter()
   const { profile, isMobile } = useContext(PentestGPTContext)
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
-  const [teamCheckoutUrl, setTeamCheckoutUrl] = useState<string | null>(null)
-  const [prefetchedPlan, setPrefetchedPlan] = useState<"monthly" | "yearly">(
-    "monthly"
-  )
   const [isLoading, setIsLoading] = useState(true)
-  const [isButtonLoading, setIsButtonLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
     "monthly"
   )
@@ -47,80 +39,78 @@ export const UpgradePlan: FC = () => {
         return
       }
 
-      const subscription = await getSubscriptionByUserId(profile.user_id)
+      try {
+        const subscription = await getSubscriptionByUserId(profile.user_id)
 
-      if (subscription) {
-        router.push("/login")
-        return
+        if (subscription) {
+          router.push("/login")
+          return
+        }
+
+        const result = await getCheckoutUrl()
+        if (result.type === "error") {
+          throw new Error(result.error.message)
+        } else {
+          setCheckoutUrl(result.value)
+        }
+      } catch (error) {
+        Sentry.captureException(error)
+        toast.error(
+          "Failed to load subscription information. Please try again."
+        )
+      } finally {
+        setIsLoading(false)
       }
-
-      const proResult = await getCheckoutUrl()
-      const teamResult = await getCheckoutUrl(MONTHLY_TEAM_PRICE_ID)
-
-      if (proResult.type === "error" || teamResult.type === "error") {
-        Sentry.withScope(scope => {
-          scope.setExtras({ userId: profile.user_id })
-          if (proResult.type === "error") {
-            scope.captureMessage(proResult.error.message)
-            toast.error(proResult.error.message)
-          }
-          if (teamResult.type === "error") {
-            scope.captureMessage(teamResult.error.message)
-            toast.error(teamResult.error.message)
-          }
-        })
-      } else {
-        setCheckoutUrl(proResult.value)
-        setTeamCheckoutUrl(teamResult.value)
-        setPrefetchedPlan("monthly")
-      }
-
-      setIsLoading(false)
     }
 
     initialize()
   }, [profile, router])
 
   const handleUpgradeClick = async (planType: "pro" | "team") => {
-    if (!isLoading && profile) {
-      setLoadingPlan(planType)
+    if (isLoading || !profile) return
+
+    setLoadingPlan(planType)
+
+    try {
+      if (planType === "team") {
+        redirectToNewTeamPage()
+        return
+      }
 
       let url: string | null = null
-      let priceId: string | undefined
+      let priceId: string | undefined =
+        selectedPlan === "yearly" ? YEARLY_PRO_PRICE_ID : undefined
 
-      if (planType === "pro") {
-        if (checkoutUrl && selectedPlan === prefetchedPlan) {
-          url = checkoutUrl
-        } else {
-          priceId = selectedPlan === "yearly" ? YEARLY_PRO_PRICE_ID : undefined
-        }
-      } else if (planType === "team") {
-        if (teamCheckoutUrl && selectedPlan === prefetchedPlan) {
-          url = teamCheckoutUrl
-        } else {
-          priceId =
-            selectedPlan === "yearly"
-              ? YEARLY_TEAM_PRICE_ID
-              : MONTHLY_TEAM_PRICE_ID
-        }
-      }
-
-      if (url) {
-        router.push(url)
+      if (checkoutUrl && selectedPlan === "monthly") {
+        url = checkoutUrl
       } else {
         const result = await getCheckoutUrl(priceId)
-        setIsButtonLoading(false)
         if (result.type === "error") {
-          Sentry.withScope(scope => {
-            scope.setExtras({ userId: profile.user_id })
-            scope.captureMessage(result.error.message)
-          })
-          toast.error(result.error.message)
-        } else {
-          router.push(result.value)
+          throw new Error(result.error.message)
         }
+        url = result.value
       }
+
+      router.push(url)
+    } catch (error) {
+      Sentry.captureException(error)
+      toast.error("Failed to process upgrade. Please try again.")
+    } finally {
+      setLoadingPlan(null)
     }
+  }
+
+  const redirectToNewTeamPage = () => {
+    const yearlyParam = selectedPlan === "yearly" ? "true" : "false"
+    router.push(`/team/new-team?yearly=${yearlyParam}`)
+  }
+
+  if (isLoading) {
+    return <Loading />
+  }
+
+  if (!profile) {
+    return null
   }
 
   if (isLoading) {

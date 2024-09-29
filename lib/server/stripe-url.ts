@@ -10,7 +10,8 @@ import {
 import { Result, errStr, ok } from "../result"
 
 export async function getCheckoutUrl(
-  priceId?: string
+  priceId?: string,
+  teamName?: string
 ): Promise<Result<string>> {
   const supabase = createSupabaseAppServerClient()
   const user = (await supabase.auth.getUser()).data.user
@@ -70,19 +71,37 @@ export async function getCheckoutUrl(
     finalPriceId = price.id
   }
 
-  const session = await stripe.checkout.sessions.create({
+  const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
+    price: finalPriceId,
+    quantity: 1
+  }
+
+  if (teamName) {
+    lineItem.adjustable_quantity = {
+      enabled: true,
+      minimum: 1,
+      maximum: 1000
+    }
+  }
+
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
     mode: "subscription",
     customer: customer!.id,
-    line_items: [
-      {
-        price: finalPriceId,
-        quantity: 1
-      }
-    ],
-    // allow_promotion_codes: true,
+    line_items: [lineItem],
     success_url: process.env.STRIPE_SUCCESS_URL,
     cancel_url: process.env.STRIPE_RETURN_URL
-  })
+  }
+
+  if (teamName) {
+    sessionParams.subscription_data = {
+      metadata: {
+        teamName: teamName
+      }
+    }
+  }
+
+  const session = await stripe.checkout.sessions.create(sessionParams)
+
   if (session.url === null) {
     return errStr("Missing checkout URL")
   }
