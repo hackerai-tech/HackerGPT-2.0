@@ -14,7 +14,7 @@ export const SidebarContent: FC<SidebarContentProps> = ({
   contentType,
   data
 }) => {
-  const { subscription, setShowSidebar, isMobile } =
+  const { isPremiumSubscription, setShowSidebar, isMobile } =
     useContext(PentestGPTContext)
 
   const handleSidebarVisibility = () => {
@@ -34,7 +34,7 @@ export const SidebarContent: FC<SidebarContentProps> = ({
 
       <SidebarDataList contentType={contentType} data={data} />
 
-      {!subscription && <SidebarUpgrade />}
+      {!isPremiumSubscription && <SidebarUpgrade />}
     </div>
   )
 }

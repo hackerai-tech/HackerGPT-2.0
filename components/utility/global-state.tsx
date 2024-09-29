@@ -18,11 +18,12 @@ import {
   ContentType,
   LLM,
   MessageImage,
+  SubscriptionStatus,
   WorkspaceImage
 } from "@/types"
 import { PluginID } from "@/types/plugins"
 import { useRouter } from "next/navigation"
-import { FC, useEffect, useState } from "react"
+import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
 
 interface GlobalStateProps {
@@ -41,6 +42,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // SUBSCRIPTION STORE
   const [subscription, setSubscription] =
     useState<Tables<"subscriptions"> | null>(null)
+  const [subscriptionStatus, setSubscriptionStatus] =
+    useState<SubscriptionStatus>("free")
 
   // ITEMS STORE
   const [chats, setChats] = useState<Tables<"chats">[]>([])
@@ -149,6 +152,23 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     })()
   }, [])
 
+  const updateSubscription = useCallback(
+    (newSubscription: Tables<"subscriptions"> | null) => {
+      setSubscription(newSubscription)
+      if (newSubscription) {
+        setSubscriptionStatus(newSubscription.plan_type as SubscriptionStatus)
+      } else {
+        setSubscriptionStatus("free")
+      }
+    },
+    []
+  )
+
+  const isPremiumSubscription = useMemo(
+    () => subscriptionStatus !== "free",
+    [subscriptionStatus]
+  )
+
   const fetchStartingData = async () => {
     const session = (await supabase.auth.getSession()).data.session
 
@@ -158,15 +178,12 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
       const profile = await getProfileByUserId(user.id)
       setProfile(profile)
 
-      // const userRole = await getUserRole(user.id)
-      // setUserRole(userRole)
-
       if (!profile.has_onboarded) {
         return router.push("/setup")
       }
 
       const subscription = await getSubscriptionByUserId(user.id)
-      setSubscription(subscription)
+      updateSubscription(subscription)
 
       const workspaces = await getWorkspacesByUserId(user.id)
       setWorkspaces(workspaces)
@@ -214,6 +231,10 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         // SUBSCRIPTION STORE
         subscription,
         setSubscription,
+        subscriptionStatus,
+        setSubscriptionStatus,
+        updateSubscription,
+        isPremiumSubscription,
 
         // ITEMS STORE
         chats,

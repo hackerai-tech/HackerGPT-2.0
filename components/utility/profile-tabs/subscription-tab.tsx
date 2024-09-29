@@ -10,6 +10,7 @@ import { restoreSubscription } from "@/lib/server/restore"
 import { toast } from "sonner"
 import * as Sentry from "@sentry/nextjs"
 import { IconRefresh } from "@tabler/icons-react"
+import { SubscriptionStatus } from "@/types/chat"
 
 interface SubscriptionTabProps {
   value: string
@@ -25,9 +26,12 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
   const router = useRouter()
   const isLongEmail = userEmail.length > 30
   const [loading, setLoading] = useState(false)
-  const { subscription, setSubscription, profile } =
-    useContext(PentestGPTContext)
-  const isPremium = subscription !== null
+  const {
+    isPremiumSubscription,
+    subscriptionStatus,
+    updateSubscription,
+    profile
+  } = useContext(PentestGPTContext)
 
   const redirectToBillingPortal = async () => {
     setLoading(true)
@@ -55,7 +59,7 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
           toast.warning("You have no subscription to restore.")
         } else {
           toast.success("Your subscription has been restored.")
-          setSubscription(restoreResult.value)
+          updateSubscription(restoreResult.value)
         }
       }
     } finally {
@@ -68,7 +72,8 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
   }
 
   const showRestoreSubscription =
-    !isPremium && process.env.NEXT_PUBLIC_ENABLE_STRIPE_RESTORE === "true"
+    subscriptionStatus === "free" &&
+    process.env.NEXT_PUBLIC_ENABLE_STRIPE_RESTORE === "true"
 
   return (
     <TabsContent className="space-y-4" value={value}>
@@ -76,10 +81,10 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
         <div>
           <Label className="text-sm font-medium">Current plan</Label>
           <p className="mt-1">
-            <PlanName subscription={subscription} />
+            <PlanName subscriptionStatus={subscriptionStatus} />
           </p>
         </div>
-        {isPremium ? (
+        {isPremiumSubscription ? (
           <Button
             variant="secondary"
             disabled={loading}
@@ -137,16 +142,16 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
 }
 
 interface PlanNameProps {
-  subscription: any | null
+  subscriptionStatus: SubscriptionStatus
 }
 
-export const PlanName: FC<PlanNameProps> = ({ subscription }) => {
-  const planType = subscription?.plan_type || "free"
-  const planName = planType.charAt(0).toUpperCase() + planType.slice(1)
+export const PlanName: FC<PlanNameProps> = ({ subscriptionStatus }) => {
+  const planName =
+    subscriptionStatus.charAt(0).toUpperCase() + subscriptionStatus.slice(1)
 
   return (
     <span
-      className={`text-xl font-bold ${subscription ? "text-primary" : "text-muted-foreground"}`}
+      className={`text-xl font-bold ${subscriptionStatus !== "free" ? "text-primary" : "text-muted-foreground"}`}
     >
       {planName}
     </span>

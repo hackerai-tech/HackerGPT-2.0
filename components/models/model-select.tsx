@@ -17,9 +17,8 @@ export const ModelSelect: FC<ModelSelectProps> = ({
   onSelectModel
 }) => {
   const router = useRouter()
-  const { subscription, profile, availableHostedModels } =
+  const { isPremiumSubscription, profile, availableHostedModels } =
     useContext(PentestGPTContext)
-  const isPremium = subscription !== null
 
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -99,7 +98,7 @@ export const ModelSelect: FC<ModelSelectProps> = ({
   return (
     <div className="flex size-full flex-col">
       <div className="space-y-1 overflow-y-auto p-3">
-        {!isPremium
+        {!isPremiumSubscription
           ? freeUserModels.map(model => (
               <div
                 key={model.modelId}

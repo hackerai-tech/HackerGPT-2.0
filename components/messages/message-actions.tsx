@@ -52,9 +52,9 @@ export const MessageActions: FC<MessageActionsProps> = ({
   messageModel,
   messageSequenceNumber
 }) => {
-  const { isGenerating, isMobile, subscription } = useContext(PentestGPTContext)
+  const { isGenerating, isMobile, isPremiumSubscription } =
+    useContext(PentestGPTContext)
   const [showCheckmark, setShowCheckmark] = useState(false)
-  const isPremium = subscription !== null
 
   const MESSAGE_ICON_SIZE = isMobile ? 22 : 20
   const isMessageLengthTooShort = messageContent.length === 0
@@ -173,7 +173,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {isLast && !messageHasImage && isPremium && (
+      {isLast && !messageHasImage && isPremiumSubscription && (
         <ChangeModelIcon
           currentModel={messageModel}
           onChangeModel={onRegenerateSpecificModel}

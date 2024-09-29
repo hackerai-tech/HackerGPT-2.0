@@ -5,7 +5,8 @@ import {
   ChatSettings,
   LLM,
   MessageImage,
-  WorkspaceImage
+  WorkspaceImage,
+  SubscriptionStatus
 } from "@/types"
 import { PluginID } from "@/types/plugins"
 import { Dispatch, SetStateAction, createContext } from "react"
@@ -20,13 +21,13 @@ interface PentestGPTContext {
   contentType: ContentType
   setContentType: React.Dispatch<React.SetStateAction<ContentType>>
 
-  // USER ROLE STORE
-  // userRole: Tables<"user_role"> | null
-  // setUserRole: Dispatch<SetStateAction<Tables<"user_role"> | null>>
-
   // SUBSCRIPTION STORE
   subscription: Tables<"subscriptions"> | null
   setSubscription: Dispatch<SetStateAction<Tables<"subscriptions"> | null>>
+  subscriptionStatus: SubscriptionStatus
+  setSubscriptionStatus: Dispatch<SetStateAction<SubscriptionStatus>>
+  updateSubscription: (newSubscription: Tables<"subscriptions"> | null) => void
+  isPremiumSubscription: boolean
 
   // ITEMS STORE
   chats: Tables<"chats">[]
@@ -136,6 +137,10 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
   // SUBSCRIPTION STORE
   subscription: null,
   setSubscription: () => {},
+  subscriptionStatus: "free",
+  setSubscriptionStatus: () => {},
+  updateSubscription: () => {},
+  isPremiumSubscription: false,
 
   // ITEMS STORE
   chats: [],

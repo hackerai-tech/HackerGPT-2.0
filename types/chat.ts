@@ -24,3 +24,5 @@ export interface Message {
 }
 
 export type Role = "assistant" | "user" | "system"
+
+export type SubscriptionStatus = "free" | "pro" | "team"

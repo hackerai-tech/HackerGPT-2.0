@@ -42,7 +42,7 @@ interface DashboardProps {
 
 export const Dashboard: FC<DashboardProps> = ({ children }) => {
   const {
-    subscription,
+    isPremiumSubscription,
     chatSettings,
     isReadyToChat,
     isMobile,
@@ -134,7 +134,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     const items = event.dataTransfer.items
     const files: File[] = []
 
-    if (items && subscription) {
+    if (items && isPremiumSubscription) {
       for (let i = 0; i < Math.min(items.length, 5); i++) {
         const item = items[i]
         if (item.kind === "file") {
@@ -161,7 +161,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
   }
 
   const isDraggingEnabled =
-    contentType !== "gpts" && isReadyToChat && subscription
+    contentType !== "gpts" && isReadyToChat && isPremiumSubscription
 
   const handleConversionConfirmation = () => {
     pendingFiles.forEach(file => handleSelectDeviceFile(file))
