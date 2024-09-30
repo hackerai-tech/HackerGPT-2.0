@@ -5,20 +5,15 @@ import { LLM_LIST_MAP } from "@/lib/models/llm/llm-list"
 import { supabase } from "@/lib/supabase/browser-client"
 import {
   IconCreditCard,
+  IconDatabaseCog,
   IconSettings,
   IconUserHeart,
   IconX
 } from "@tabler/icons-react"
-import {
-  Dialog,
-  Transition,
-  TransitionChild,
-  DialogPanel,
-  DialogTitle
-} from "@headlessui/react"
+import { DialogPanel, DialogTitle } from "@headlessui/react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { FC, Fragment, useContext, useEffect, useState } from "react"
+import { FC, useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { SIDEBAR_ICON_SIZE } from "../sidebar/sidebar-switcher"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
@@ -29,6 +24,7 @@ import { deleteAllChats } from "@/db/chats"
 import { PersonalizationTab } from "./profile-tabs/personalization-tab"
 import { ProfileTab } from "./profile-tabs/profile-tab"
 import { DeleteAllChatsDialog } from "./delete-all-chats-dialog"
+import { DataControlsTab } from "./profile-tabs/data-controls-tab"
 
 interface SettingsProps {}
 
@@ -134,12 +130,13 @@ export const Settings: FC<SettingsProps> = () => {
   const tabItems = [
     { value: "profile", icon: IconSettings, label: "General" },
     { value: "personalization", icon: IconUserHeart, label: "Personalization" },
-    { value: "subscription", icon: IconCreditCard, label: "Subscription" }
+    { value: "subscription", icon: IconCreditCard, label: "Subscription" },
+    { value: "data-controls", icon: IconDatabaseCog, label: "Data Controls" }
   ]
 
   const tabListClass = isMobile
     ? "mb-6 flex flex-wrap gap-2"
-    : "mr-8 mt-6 w-1/4 flex-col space-y-2"
+    : "mr-8 mt-6 w-1/4 flex-col space-y-2 pt-10"
 
   const tabTriggerClass = `
     ${isMobile ? "flex-shrink flex-grow-0 min-w-0" : "w-full justify-start"}
@@ -230,6 +227,10 @@ export const Settings: FC<SettingsProps> = () => {
                   profileInstructions={profileInstructions}
                   setProfileInstructions={setProfileInstructions}
                 />
+              </TabsContent>
+
+              <TabsContent value="data-controls">
+                <DataControlsTab value="data-controls" />
               </TabsContent>
             </div>
           </Tabs>
