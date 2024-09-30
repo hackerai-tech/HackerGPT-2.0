@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react"
 import { Dialog, DialogContent, DialogTitle } from "../../ui/dialog"
 import { Button } from "../../ui/button"
-import { IconTrash, IconX } from "@tabler/icons-react"
+import { IconTrash, IconX, IconLoader2 } from "@tabler/icons-react"
 import { supabase } from "@/lib/supabase/browser-client"
 import { PentestGPTContext } from "@/context/context"
 import { Tables } from "@/supabase/types"
@@ -19,6 +19,9 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
   onClose
 }) => {
   const [sharedChats, setSharedChats] = useState<Tables<"chats">[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [deletingChatId, setDeletingChatId] = useState<string | null>(null)
+  const [isDeletingAll, setIsDeletingAll] = useState(false)
   const { profile, isMobile } = useContext(PentestGPTContext)
 
   useEffect(() => {
@@ -29,23 +32,28 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
 
   const fetchSharedChats = async () => {
     if (!profile?.user_id) return
+    setIsLoading(true)
 
-    const { data, error } = await supabase
-      .from("chats")
-      .select("*")
-      .eq("user_id", profile.user_id)
-      .eq("sharing", "public")
-      .order("shared_at", { ascending: false })
+    try {
+      const { data, error } = await supabase
+        .from("chats")
+        .select("*")
+        .eq("user_id", profile.user_id)
+        .eq("sharing", "public")
+        .order("shared_at", { ascending: false })
 
-    if (error) {
+      if (error) throw error
+      setSharedChats(data || [])
+    } catch (error) {
       console.error("Error fetching shared chats:", error)
       toast.error("Failed to fetch shared chats")
-    } else {
-      setSharedChats(data || [])
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const handleMakePrivate = async (chatId: string) => {
+    setDeletingChatId(chatId)
     try {
       await updateChat(chatId, {
         sharing: "private",
@@ -58,10 +66,13 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
     } catch (error) {
       console.error("Error deleting shared link:", error)
       toast.error("Failed to delete shared link")
+    } finally {
+      setDeletingChatId(null)
     }
   }
 
   const handleMakeAllPrivate = async () => {
+    setIsDeletingAll(true)
     try {
       await Promise.all(
         sharedChats.map(chat =>
@@ -78,6 +89,8 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
     } catch (error) {
       console.error("Error deleting all shared links:", error)
       toast.error("Failed to delete all shared links")
+    } finally {
+      setIsDeletingAll(false)
     }
   }
 
@@ -104,7 +117,11 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
           </Button>
         </div>
         <div className="mt-4 grow overflow-x-auto">
-          {sharedChats.length === 0 ? (
+          {isLoading ? (
+            <div className="flex h-32 items-center justify-center">
+              <IconLoader2 className="animate-spin" size={24} />
+            </div>
+          ) : sharedChats.length === 0 ? (
             <p className="text-sm text-gray-500">No shared links found.</p>
           ) : (
             <table className="w-full table-fixed">
@@ -117,6 +134,7 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
                 <tr className="border-b">
                   <th className="pb-2 text-left font-medium">Name</th>
                   <th className="pb-2 text-left font-medium">Date Shared</th>
+                  <th className="pb-2 text-right font-medium"></th>
                 </tr>
               </thead>
               <tbody>
@@ -144,8 +162,13 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
                         onClick={() => handleMakePrivate(chat.id)}
                         className="transition-colors hover:bg-red-100 hover:text-red-600"
                         title="Delete shared link"
+                        disabled={deletingChatId === chat.id}
                       >
-                        <IconTrash size={16} />
+                        {deletingChatId === chat.id ? (
+                          <IconLoader2 className="animate-spin" size={16} />
+                        ) : (
+                          <IconTrash size={16} />
+                        )}
                       </Button>
                     </td>
                   </tr>
@@ -160,8 +183,16 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
               variant="destructive"
               onClick={handleMakeAllPrivate}
               className="text-sm"
+              disabled={isDeletingAll}
             >
-              Delete all shared links
+              {isDeletingAll ? (
+                <>
+                  <IconLoader2 className="mr-2 animate-spin" size={16} />
+                  Deleting...
+                </>
+              ) : (
+                "Delete all shared links"
+              )}
             </Button>
           </div>
         )}
