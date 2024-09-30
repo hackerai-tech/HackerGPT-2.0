@@ -108,7 +108,7 @@ export const UpgradePlan: FC = () => {
 
   const getYearlySavingsNote = () => {
     if (selectedPlan === "yearly") {
-      return "Save $60 (3 months free)"
+      return "Save $60"
     }
     return ""
   }
