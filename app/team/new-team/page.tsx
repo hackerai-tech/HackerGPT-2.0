@@ -1,11 +1,12 @@
 "use client"
 
-import { FC, useState, useEffect } from "react"
+import { FC, useState, useContext, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Switch } from "@/components/ui/switch"
 import { IconArrowLeft, IconLoader2 } from "@tabler/icons-react"
 import * as Sentry from "@sentry/nextjs"
+import Loading from "@/app/loading"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,19 +14,45 @@ import { supabase } from "@/lib/supabase/browser-client"
 import { getCheckoutUrl } from "@/lib/server/stripe-url"
 import PentestGPTTextSVG from "@/components/icons/pentestgpt-text-svg"
 import { useTheme } from "next-themes"
+import { PentestGPTContext } from "@/context/context"
+import { getSubscriptionByUserId } from "@/db/subscriptions"
 
 const MONTHLY_TEAM_PRICE_ID =
   process.env.NEXT_PUBLIC_STRIPE_MONTHLY_TEAM_PRICE_ID
 const YEARLY_TEAM_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_YEARLY_TEAM_PRICE_ID
+const MAX_TEAM_NAME_LENGTH = 25
 
 const NewTeamPage: FC = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { profile } = useContext(PentestGPTContext)
   const [teamName, setTeamName] = useState("")
   const [isYearly, setIsYearly] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [userEmail, setUserEmail] = useState("")
   const { theme } = useTheme()
+
+  useEffect(() => {
+    const checkSubscription = async () => {
+      if (profile) {
+        try {
+          const subscription = await getSubscriptionByUserId(profile.user_id)
+
+          if (subscription) {
+            router.push("/login")
+            return
+          }
+        } catch (error) {
+          console.error("Error checking subscription:", error)
+          toast.error("Failed to check subscription status. Please try again.")
+        } finally {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    checkSubscription()
+  }, [profile, router])
 
   useEffect(() => {
     const yearlyParam = searchParams.get("yearly")
@@ -43,6 +70,13 @@ const NewTeamPage: FC = () => {
   const handleCreateTeam = async () => {
     if (!teamName.trim()) {
       toast.error("Please enter a team name")
+      return
+    }
+
+    if (teamName.length > MAX_TEAM_NAME_LENGTH) {
+      toast.error(
+        `Team name must be ${MAX_TEAM_NAME_LENGTH} characters or less`
+      )
       return
     }
 
@@ -70,6 +104,14 @@ const NewTeamPage: FC = () => {
     await supabase.auth.signOut()
     router.push("/login")
     router.refresh()
+  }
+
+  if (isLoading) {
+    return <Loading />
+  }
+
+  if (!profile) {
+    return null
   }
 
   return (
@@ -120,7 +162,11 @@ const NewTeamPage: FC = () => {
                 value={teamName}
                 onChange={e => setTeamName(e.target.value)}
                 placeholder="Enter your team name"
+                maxLength={MAX_TEAM_NAME_LENGTH}
               />
+              <p className="text-muted-foreground mt-1 text-xs">
+                {teamName.length}/{MAX_TEAM_NAME_LENGTH} characters
+              </p>
             </div>
 
             <div className="flex items-center justify-between">

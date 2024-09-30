@@ -113,14 +113,6 @@ export const UpgradePlan: FC = () => {
     return null
   }
 
-  if (isLoading) {
-    return <Loading />
-  }
-
-  if (!profile) {
-    return null
-  }
-
   const planPrices = {
     pro: { monthly: "$25", yearly: "$20" },
     team: { monthly: "$40", yearly: "$32" }
