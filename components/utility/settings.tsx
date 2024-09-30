@@ -7,6 +7,7 @@ import {
   IconCreditCard,
   IconSettings,
   IconUserHeart,
+  IconUsers,
   IconX
 } from "@tabler/icons-react"
 import {
@@ -29,12 +30,19 @@ import { deleteAllChats } from "@/db/chats"
 import { PersonalizationTab } from "./profile-tabs/personalization-tab"
 import { ProfileTab } from "./profile-tabs/profile-tab"
 import { DeleteAllChatsDialog } from "./delete-all-chats-dialog"
+import { TeamTab } from "./profile-tabs/team-tab"
 
 interface SettingsProps {}
 
 export const Settings: FC<SettingsProps> = () => {
-  const { profile, setProfile, envKeyMap, setAvailableHostedModels, isMobile } =
-    useContext(PentestGPTContext)
+  const {
+    profile,
+    setProfile,
+    envKeyMap,
+    setAvailableHostedModels,
+    isMobile,
+    subscription
+  } = useContext(PentestGPTContext)
 
   const router = useRouter()
 
@@ -134,7 +142,8 @@ export const Settings: FC<SettingsProps> = () => {
   const tabItems = [
     { value: "profile", icon: IconSettings, label: "General" },
     { value: "personalization", icon: IconUserHeart, label: "Personalization" },
-    { value: "subscription", icon: IconCreditCard, label: "Subscription" }
+    { value: "subscription", icon: IconCreditCard, label: "Subscription" },
+    { value: "team", icon: IconUsers, label: "Team" }
   ]
 
   const tabListClass = isMobile
@@ -229,6 +238,15 @@ export const Settings: FC<SettingsProps> = () => {
                   value="personalization"
                   profileInstructions={profileInstructions}
                   setProfileInstructions={setProfileInstructions}
+                />
+              </TabsContent>
+
+              <TabsContent value="team">
+                <TeamTab
+                  value="team"
+                  teamName={subscription?.team_name || "Your Team"}
+                  isMobile={isMobile}
+                  teamMemberLimit={subscription?.quantity || 0}
                 />
               </TabsContent>
             </div>

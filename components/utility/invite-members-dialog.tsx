@@ -5,6 +5,7 @@ import { PentestGPTContext } from "@/context/context"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
+import { toast } from "sonner"
 
 interface InviteMembersDialogProps {
   isOpen: boolean
@@ -23,6 +24,9 @@ export const InviteMembersDialog: FC<InviteMembersDialogProps> = ({
   const handleInvite = () => {
     // Implement your invite logic here
     console.log(`Inviting ${email} to ${teamName}`)
+    // You would typically make an API call here to send the invitation
+    // For now, we'll just show a success message
+    toast.success(`Invitation sent to ${email}`)
     setEmail("")
     onClose()
   }
@@ -38,7 +42,7 @@ export const InviteMembersDialog: FC<InviteMembersDialogProps> = ({
       >
         <div className="mb-4 flex items-center justify-between">
           <DialogTitle className="text-xl font-medium leading-6">
-            Invite Members
+            Invite Team Member
           </DialogTitle>
           <button
             onClick={onClose}
@@ -50,7 +54,7 @@ export const InviteMembersDialog: FC<InviteMembersDialogProps> = ({
 
         <div className="mt-4">
           <p className="text-muted-foreground mb-4">
-            Invite members to the {teamName} team
+            Invite a new member to the {teamName} team
           </p>
           <Input
             type="email"
