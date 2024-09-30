@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react"
-import { Dialog, DialogContent, DialogTitle } from "../../ui/dialog"
+import { DialogPanel, DialogTitle } from "@headlessui/react"
 import { Button } from "../../ui/button"
 import { IconTrash, IconX, IconLoader2 } from "@tabler/icons-react"
 import { supabase } from "@/lib/supabase/browser-client"
@@ -8,6 +8,7 @@ import { Tables } from "@/supabase/types"
 import { updateChat } from "@/db/chats"
 import { toast } from "sonner"
 import Link from "next/link"
+import { TransitionedDialog } from "../../ui/transitioned-dialog"
 
 interface SharedChatsPopupProps {
   isOpen: boolean
@@ -95,8 +96,8 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
+    <TransitionedDialog isOpen={isOpen} onClose={onClose}>
+      <DialogPanel
         className={`
           bg-popover overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all
           ${isMobile ? "w-full px-4" : "w-full max-w-4xl md:min-w-[800px]"}
@@ -196,7 +197,7 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
             </Button>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </DialogPanel>
+    </TransitionedDialog>
   )
 }
