@@ -19,6 +19,7 @@ The user has selected the SSL Scanner plugin, which uses the testssl.sh tool in 
  - '-U' or '--vulnerable' to test for all applicable vulnerabilities
  - '-p' or '--protocols' to check TLS/SSL protocols
  - '-S' or '--server-defaults' to display the server's default picks and certificate info
+5. Create and run commands using the following structure: "testssl.sh [options] [target]" or simply "testssl.sh [target]" for a basic scan.
 `
     case PluginID.DNS_SCANNER:
       return `
