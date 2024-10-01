@@ -93,7 +93,7 @@ export async function commandGeneratorHandler({
             )
 
       updateSystemMessage(messages, customPrompt, profile_context)
-      console.log(model)
+
       const { textStream, finishReason } = await streamText({
         model: openrouter(model),
         temperature: 0.5,
