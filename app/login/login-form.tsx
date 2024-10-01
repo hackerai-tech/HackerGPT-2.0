@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Brand } from "@/components/ui/brand"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip"
 
 interface LoginFormProps {
   errorMessage: string
@@ -75,7 +81,9 @@ export function LoginForm({
           </div>
 
           <div className="mt-2 space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="flex items-center">
+              Password
+            </Label>
             <div className="relative">
               <Input
                 id="password"
@@ -83,20 +91,33 @@ export function LoginForm({
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 required
+                className="pr-10"
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <IconEyeOff size={20} className="text-muted-foreground" />
-                ) : (
-                  <IconEye size={20} className="text-muted-foreground" />
-                )}
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <IconEyeOff
+                          size={20}
+                          className="text-muted-foreground"
+                        />
+                      ) : (
+                        <IconEye size={20} className="text-muted-foreground" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{showPassword ? "Hide password" : "Show password"}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
 
@@ -121,7 +142,7 @@ export function LoginForm({
             </p>
           )}
 
-          <div className="text-muted-foreground mt-4 text-center text-sm">
+          <div className="text-muted-foreground mt-4 px-8 text-center text-sm sm:px-0">
             <span>By using PentestGPT, you agree to our </span>
             <a
               href="/terms"
