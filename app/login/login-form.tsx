@@ -1,7 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { IconEye, IconEyeOff, IconBrandGoogle } from "@tabler/icons-react"
+import {
+  IconEye,
+  IconEyeOff,
+  IconBrandGoogle,
+  IconAlertCircle
+} from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -119,6 +124,12 @@ export function LoginForm({
                 </Tooltip>
               </TooltipProvider>
             </div>
+            {errorMessage && (
+              <div className="mt-2 flex items-center gap-2 text-sm text-red-500">
+                <IconAlertCircle size={16} />
+                <span>{errorMessage}</span>
+              </div>
+            )}
           </div>
 
           <Button type="submit" className="mt-4">
@@ -135,12 +146,6 @@ export function LoginForm({
           >
             Sign Up
           </Button>
-
-          {errorMessage && (
-            <p className="mt-2 rounded bg-red-50 p-4 text-center text-sm text-red-500">
-              {errorMessage}
-            </p>
-          )}
 
           <div className="text-muted-foreground mt-4 px-8 text-center text-sm sm:px-0">
             <span>By using PentestGPT, you agree to our </span>
