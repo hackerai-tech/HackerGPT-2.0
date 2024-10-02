@@ -31,27 +31,29 @@ const errorMessages: Record<string, string> = {
   default: "An unexpected error occurred."
 }
 
-export default async function Login({
-  searchParams
-}: {
-  searchParams: { message: string; reset?: string }
-}) {
-  let errorMessage = ""
+const validateEmail = (email: string) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
 
-  if (searchParams.message) {
-    try {
-      const errorKey = decodeURIComponent(searchParams.message)
-      errorMessage = errorMessages[errorKey] || errorMessages["default"]
-
-      if (errorKey === "password_reset_limit") {
-        errorMessage = errorMessages.password_reset_limit
-      }
-    } catch (e) {
-      console.error("Failed to decode message:", e)
-      errorMessage = errorMessages["default"]
+const validatePassword = (password: string) => {
+  const checks = [
+    { test: password.length >= 8, message: "6" },
+    { test: /[A-Z]/.test(password) && /[a-z]/.test(password), message: "7" },
+    { test: /[0-9]/.test(password), message: "8" },
+    {
+      test: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(password),
+      message: "9"
     }
-  }
+  ]
 
+  for (const check of checks) {
+    if (!check.test) return check.message
+  }
+  return null
+}
+
+export default async function Login() {
   const cookieStore = cookies()
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -76,7 +78,7 @@ export default async function Login({
       .single()
 
     if (!homeWorkspace) {
-      throw new Error(error.message)
+      return { message: "default" }
     }
 
     return redirect(`/${homeWorkspace.id}/chat`)
@@ -87,21 +89,16 @@ export default async function Login({
 
     const email = formData.get("email") as string
     const password = formData.get("password") as string
+
+    if (!validateEmail(email)) return { message: "11" }
+
     const supabase = createClient(cookies())
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return redirect(`/login?message=11`)
-    }
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
 
-    if (error) {
-      return redirect(`/login?message=4`)
-    }
+    if (error) return { message: "4" }
 
     const { data: homeWorkspace, error: homeWorkspaceError } = await supabase
       .from("workspaces")
@@ -111,9 +108,7 @@ export default async function Login({
       .single()
 
     if (!homeWorkspace) {
-      throw new Error(
-        homeWorkspaceError?.message || "An unexpected error occurred"
-      )
+      return { message: homeWorkspaceError?.message || "default" }
     }
 
     return redirect(`/${homeWorkspace.id}/chat`)
@@ -126,30 +121,11 @@ export default async function Login({
     const email = formData.get("email") as string
     const password = formData.get("password") as string
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      return redirect(`/login?message=11`)
-    }
+    if (!validateEmail(email)) return { message: "11" }
+    if (!password) return { message: "5" }
 
-    if (!password) {
-      return redirect(`/login?message=5`)
-    }
-
-    const passwordChecks = [
-      { test: password.length >= 8, message: "6" },
-      { test: /[A-Z]/.test(password) && /[a-z]/.test(password), message: "7" },
-      { test: /[0-9]/.test(password), message: "8" },
-      {
-        test: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(password),
-        message: "9"
-      }
-    ]
-
-    for (const check of passwordChecks) {
-      if (!check.test) {
-        return redirect(`/login?message=${check.message}`)
-      }
-    }
+    const passwordError = validatePassword(password)
+    if (passwordError) return { message: passwordError }
 
     let emailDomainWhitelist: string[] = []
     let emailWhitelist: string[] = []
@@ -172,28 +148,21 @@ export default async function Login({
         !emailDomainWhitelist.includes(email.split("@")[1])) ||
       (emailWhitelist.length > 0 && !emailWhitelist.includes(email))
     ) {
-      return redirect(`/login?message=1`)
+      return { message: "1" }
     }
 
     const supabase = createClient(cookies())
-
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        // USE IF YOU WANT TO SEND EMAIL VERIFICATION, ALSO CHANGE TOML FILE
         emailRedirectTo: `${origin}/auth/callback`
       }
     })
 
-    if (error) {
-      return redirect(`/login?message=${error.message}`)
-    }
+    if (error) return { message: error.message }
 
-    // return redirect("/setup")
-
-    // USE IF YOU WANT TO SEND EMAIL VERIFICATION, ALSO CHANGE TOML FILE
-    return redirect("/login?message=2")
+    return { message: "2" }
   }
 
   const handleResetPassword = async (formData: FormData) => {
@@ -202,31 +171,24 @@ export default async function Login({
     const origin = headers().get("origin")
     const email = formData.get("email") as string
 
-    // Check if email is provided
-    if (!email || email.trim() === "") {
-      return redirect(`/login?message=12`)
-    }
+    if (!email || email.trim() === "") return { message: errorMessages["12"] }
+    if (!validateEmail(email)) return { message: errorMessages["11"] }
 
     const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
     const supabase = createClient(cookies())
 
     const { success } = await checkPasswordResetRateLimit(email, ip)
-    if (!success) {
-      return redirect(`/login?message=password_reset_limit`)
-    }
+    if (!success) return { message: errorMessages["password_reset_limit"] }
 
-    // Add a small delay to slow down automated attacks
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${origin}/auth/callback?next=/login/password`
     })
 
-    if (error) {
-      return redirect(`/login?message=${error.message}`)
-    }
+    if (error) return { message: error.message }
 
-    return redirect("/login?message=10")
+    return { message: errorMessages["3"] }
   }
 
   const handleSignInWithGoogle = async () => {
@@ -236,25 +198,20 @@ export default async function Login({
 
     const { error, data } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${origin}/auth/callback?next=/login`
-      }
+      options: { redirectTo: `${origin}/auth/callback?next=/login` }
     })
 
-    if (error) {
-      return redirect(`/login?message=${error.message}`)
-    }
-
+    if (error) return { message: error.message }
     return redirect(data.url)
   }
 
   return (
     <LoginForm
-      errorMessage={errorMessage}
       onSignIn={signIn}
       onSignUp={signUp}
       onResetPassword={handleResetPassword}
       onSignInWithGoogle={handleSignInWithGoogle}
+      errorMessages={errorMessages}
     />
   )
 }
