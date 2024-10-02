@@ -28,7 +28,7 @@
   "dependencies": {
     "@ai-sdk/mistral": "^0.0.42",
     "@ai-sdk/openai": "^0.0.63",
-    "@e2b/code-interpreter": "^0.0.9-beta.54",
+    "@e2b/code-interpreter": "^0.0.9-beta.61",
     "@headlessui/react": "^2.1.8",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",

@@ -51,8 +51,7 @@ export const SidebarCreateItem: FC<SidebarCreateItemProps> = ({
       const createdFile = await createFileBasedOnExtension(
         file,
         rest,
-        workspaceId,
-        "openai"
+        workspaceId
       )
 
       return createdFile

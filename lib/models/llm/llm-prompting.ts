@@ -149,7 +149,6 @@ PentestGPT will analyze the situation, provide reasoning, and attempt to solve t
 by executing a different, more appropriate command. This will be done only once to avoid \
 creating a loop. After the attempt, PentestGPT will provide a detailed explanation of the \
 situation.
-
 </terminal_instructions>`
   }
 

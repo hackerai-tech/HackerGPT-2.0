@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, FormEvent, useCallback } from "react"
 import {
   IconEye,
   IconEyeOff,
@@ -19,45 +19,92 @@ import {
 } from "@/components/ui/tooltip"
 
 interface LoginFormProps {
-  errorMessage: string
-  onSignIn: (formData: FormData) => void
-  onSignUp: (formData: FormData) => void
-  onResetPassword: (formData: FormData) => void
-  onSignInWithGoogle: () => void
+  onSignIn: (formData: FormData) => Promise<{ message: string }>
+  onSignUp: (formData: FormData) => Promise<{ message: string }>
+  onResetPassword: (formData: FormData) => Promise<{ message: string }>
+  onSignInWithGoogle: () => Promise<{ message: string }>
+  errorMessages: Record<string, string>
 }
 
 export function LoginForm({
-  errorMessage,
   onSignIn,
   onSignUp,
   onResetPassword,
-  onSignInWithGoogle
+  onSignInWithGoogle,
+  errorMessages
 }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const handleSubmit = useCallback(
+    async (
+      e: FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>,
+      isSignUp: boolean
+    ) => {
+      e.preventDefault()
+      let formData: FormData
 
-  if (!mounted) {
-    return null
-  }
+      if (e.currentTarget instanceof HTMLFormElement) {
+        formData = new FormData(e.currentTarget)
+      } else {
+        const form = e.currentTarget.closest("form")
+        if (!form) {
+          setErrorMessage(errorMessages["default"])
+          return
+        }
+        formData = new FormData(form)
+      }
+
+      try {
+        const result = isSignUp
+          ? await onSignUp(formData)
+          : await onSignIn(formData)
+        setErrorMessage(errorMessages[result.message] || "")
+      } catch (error: any) {
+        console.error("Login error:", error)
+        setErrorMessage(
+          errorMessages[error.message] || errorMessages["default"]
+        )
+      }
+    },
+    [onSignIn, onSignUp, errorMessages]
+  )
+
+  const handleResetPassword = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault()
+      const form = e.currentTarget.closest("form")
+      if (form) {
+        const result = await onResetPassword(new FormData(form))
+        setErrorMessage(errorMessages[result.message] || result.message)
+      }
+    },
+    [onResetPassword, errorMessages]
+  )
+
+  const handleGoogleSignIn = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      try {
+        const result = await onSignInWithGoogle()
+        setErrorMessage(errorMessages[result.message] || "")
+      } catch (error: any) {
+        console.error("Google sign-in error:", error)
+        setErrorMessage(errorMessages["auth"])
+      }
+    },
+    [onSignInWithGoogle, errorMessages]
+  )
 
   return (
     <div className="flex w-full flex-1 flex-col justify-center gap-2 px-8 sm:max-w-md">
       <div>
-        <form className="animate-in flex w-full flex-1 flex-col justify-center gap-2">
+        <form
+          onSubmit={handleGoogleSignIn}
+          className="animate-in flex w-full flex-1 flex-col justify-center gap-2"
+        >
           <Brand />
-
-          <Button
-            variant="default"
-            className="mt-4"
-            onClick={e => {
-              e.preventDefault()
-              onSignInWithGoogle()
-            }}
-          >
+          <Button variant="default" className="mt-4" type="submit">
             <IconBrandGoogle className="mr-2" size={20} />
             Continue with Google
           </Button>
@@ -68,10 +115,7 @@ export function LoginForm({
           <div className="grow border-t border-gray-300"></div>
         </div>
         <form
-          onSubmit={e => {
-            e.preventDefault()
-            onSignIn(new FormData(e.currentTarget))
-          }}
+          onSubmit={e => handleSubmit(e, false)}
           className="animate-in mt-4 flex w-full flex-1 flex-col justify-center gap-3"
         >
           <div className="space-y-2">
@@ -84,7 +128,6 @@ export function LoginForm({
               required
             />
           </div>
-
           <div className="mt-2 space-y-2">
             <Label htmlFor="password" className="flex items-center">
               Password
@@ -131,40 +174,31 @@ export function LoginForm({
               </div>
             )}
           </div>
-
           <Button type="submit" className="mt-4">
             Login
           </Button>
-
           <Button
             type="button"
             variant="secondary"
-            onClick={e => {
-              e.preventDefault()
-              onSignUp(new FormData(e.currentTarget.form!))
-            }}
+            onClick={e => handleSubmit(e, true)}
           >
             Sign Up
           </Button>
-
           <div className="text-muted-foreground mt-4 px-8 text-center text-sm sm:px-0">
             <span>By using PentestGPT, you agree to our </span>
             <a
               href="/terms"
               target="_blank"
+              rel="noopener noreferrer"
               className="hover:text-primary underline"
             >
               Terms of Use
             </a>
           </div>
-
           <div className="text-muted-foreground mt-2 text-center text-sm">
             <span>Forgot your password? </span>
             <button
-              onClick={e => {
-                e.preventDefault()
-                onResetPassword(new FormData(e.currentTarget.form!))
-              }}
+              onClick={handleResetPassword}
               className="hover:text-primary underline"
             >
               Reset
