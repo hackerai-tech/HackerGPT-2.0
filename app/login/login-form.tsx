@@ -75,15 +75,8 @@ export function LoginForm({
       e.preventDefault()
       const form = e.currentTarget.closest("form")
       if (form) {
-        try {
-          const result = await onResetPassword(new FormData(form))
-          setErrorMessage(errorMessages[result.message] || "")
-        } catch (error: any) {
-          console.error("Password reset error:", error)
-          setErrorMessage(
-            errorMessages[error.message] || errorMessages["default"]
-          )
-        }
+        const result = await onResetPassword(new FormData(form))
+        setErrorMessage(errorMessages[result.message] || result.message)
       }
     },
     [onResetPassword, errorMessages]

@@ -15,7 +15,6 @@ export const metadata: Metadata = {
 const errorMessages: Record<string, string> = {
   "1": "Email is not allowed to sign up.",
   "2": "Check your email to continue the sign-in process.",
-  "3": "Check email to reset password.",
   "4": "Invalid credentials provided.",
   "5": "Signup requires a valid password.",
   "6": "Your password must be at least 8 characters long.",
@@ -171,14 +170,14 @@ export default async function Login() {
     const origin = headers().get("origin")
     const email = formData.get("email") as string
 
-    if (!email || email.trim() === "") return { message: errorMessages["12"] }
-    if (!validateEmail(email)) return { message: errorMessages["11"] }
+    if (!email || email.trim() === "") return { message: "12" }
+    if (!validateEmail(email)) return { message: "11" }
 
     const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
     const supabase = createClient(cookies())
 
     const { success } = await checkPasswordResetRateLimit(email, ip)
-    if (!success) return { message: errorMessages["password_reset_limit"] }
+    if (!success) return { message: "password_reset_limit" }
 
     await new Promise(resolve => setTimeout(resolve, 1000))
 
@@ -188,7 +187,7 @@ export default async function Login() {
 
     if (error) return { message: error.message }
 
-    return { message: errorMessages["3"] }
+    return { message: "10" }
   }
 
   const handleSignInWithGoogle = async () => {
