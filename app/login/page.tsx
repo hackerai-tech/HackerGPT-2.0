@@ -25,7 +25,7 @@ const errorMessages: Record<string, string> = {
   "10": "Password reset email sent. Check your email to continue.",
   "11": "The email address is not in a valid format.",
   password_reset_limit:
-    "Too many password reset attempts. Please try again later.",
+    "Too many password reset attempts. Please try again after an hour.",
   auth: "Authentication failed. Please try again or contact support if the issue persists.",
   default: "An unexpected error occurred."
 }
@@ -42,11 +42,8 @@ export default async function Login({
       const errorKey = decodeURIComponent(searchParams.message)
       errorMessage = errorMessages[errorKey] || errorMessages["default"]
 
-      if (errorKey === "password_reset_limit" && searchParams.reset) {
-        const resetTime = new Date(
-          parseInt(searchParams.reset)
-        ).toLocaleString()
-        errorMessage = `Too many password reset attempts. You can try again after ${resetTime}.`
+      if (errorKey === "password_reset_limit") {
+        errorMessage = errorMessages.password_reset_limit
       }
     } catch (e) {
       console.error("Failed to decode message:", e)
@@ -206,9 +203,9 @@ export default async function Login({
     const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
     const supabase = createClient(cookies())
 
-    const { success, reset } = await checkPasswordResetRateLimit(email, ip)
+    const { success } = await checkPasswordResetRateLimit(email, ip)
     if (!success) {
-      return redirect(`/login?message=password_reset_limit&reset=${reset}`)
+      return redirect(`/login?message=password_reset_limit`)
     }
 
     // Add a small delay to slow down automated attacks
