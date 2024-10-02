@@ -6,6 +6,7 @@ import { Metadata } from "next"
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { LoginForm } from "./login-form"
+import { checkPasswordResetRateLimit } from "@/lib/server/password-reset-ratelimiter"
 
 export const metadata: Metadata = {
   title: "Login"
@@ -23,6 +24,8 @@ const errorMessages: Record<string, string> = {
   "9": "Your password must include at least one special character (e.g., !@#$%^&*()).",
   "10": "Password reset email sent. Check your email to continue.",
   "11": "The email address is not in a valid format.",
+  password_reset_limit:
+    "Too many password reset attempts. Please try again later.",
   auth: "Authentication failed. Please try again or contact support if the issue persists.",
   default: "An unexpected error occurred."
 }
@@ -30,7 +33,7 @@ const errorMessages: Record<string, string> = {
 export default async function Login({
   searchParams
 }: {
-  searchParams: { message: string }
+  searchParams: { message: string; reset?: string }
 }) {
   let errorMessage = ""
 
@@ -38,6 +41,13 @@ export default async function Login({
     try {
       const errorKey = decodeURIComponent(searchParams.message)
       errorMessage = errorMessages[errorKey] || errorMessages["default"]
+
+      if (errorKey === "password_reset_limit" && searchParams.reset) {
+        const resetTime = new Date(
+          parseInt(searchParams.reset)
+        ).toLocaleString()
+        errorMessage = `Too many password reset attempts. You can try again after ${resetTime}.`
+      }
     } catch (e) {
       console.error("Failed to decode message:", e)
       errorMessage = errorMessages["default"]
@@ -193,7 +203,16 @@ export default async function Login({
 
     const origin = headers().get("origin")
     const email = formData.get("email") as string
+    const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
     const supabase = createClient(cookies())
+
+    const { success, reset } = await checkPasswordResetRateLimit(email, ip)
+    if (!success) {
+      return redirect(`/login?message=password_reset_limit&reset=${reset}`)
+    }
+
+    // Add a small delay to slow down automated attacks
+    await new Promise(resolve => setTimeout(resolve, 1000))
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${origin}/auth/callback?next=/login/password`
