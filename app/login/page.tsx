@@ -24,6 +24,7 @@ const errorMessages: Record<string, string> = {
   "9": "Your password must include at least one special character (e.g., !@#$%^&*()).",
   "10": "Password reset email sent. Check your email to continue.",
   "11": "The email address is not in a valid format.",
+  "12": "Password recovery requires an email.",
   password_reset_limit:
     "Too many password reset attempts. Please try again after an hour.",
   auth: "Authentication failed. Please try again or contact support if the issue persists.",
@@ -200,6 +201,12 @@ export default async function Login({
 
     const origin = headers().get("origin")
     const email = formData.get("email") as string
+
+    // Check if email is provided
+    if (!email || email.trim() === "") {
+      return redirect(`/login?message=12`)
+    }
+
     const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
     const supabase = createClient(cookies())
 
