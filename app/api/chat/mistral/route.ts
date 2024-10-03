@@ -171,11 +171,11 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
-      let tools
-      if (selectedModel === "openai/gpt-4o-mini") {
-        const toolSchemas = createToolSchemas({ profile, data })
-        tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
-      }
+      // let tools
+      // if (selectedModel === "openai/gpt-4o-mini") {
+      //   const toolSchemas = createToolSchemas({ profile, data })
+      //   tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
+      // }
 
       const result = await streamText({
         model: provider(selectedModel),
@@ -184,11 +184,11 @@ export async function POST(request: Request) {
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
-        ...(selectedModel === "openai/gpt-4o-mini"
-          ? {
-              tools
-            }
-          : {}),
+        // ...(selectedModel === "openai/gpt-4o-mini"
+        //   ? {
+        //       tools
+        //     }
+        //   : {}),
         onFinish: () => {
           data.close()
         }
