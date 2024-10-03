@@ -91,7 +91,7 @@ export const ModelSelect: FC<ModelSelectProps> = ({
   ]
 
   const modelDescriptions: Record<string, string> = {
-    "gpt-4-turbo-preview": "Advanced model with terminal access",
+    "gpt-4-turbo-preview": "Advanced model with tools",
     "mistral-large": "Advanced model for complex tasks",
     "mistral-medium": "Great for everyday tasks"
   }
