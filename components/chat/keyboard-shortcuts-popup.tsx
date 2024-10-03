@@ -45,6 +45,10 @@ export const KeyboardShortcutsPopup: React.FC<KeyboardShortcutsPopupProps> = ({
       {
         key: isMac ? "⌘ + Shift + C" : "Ctrl + Shift + C",
         description: "Copy last response"
+      },
+      {
+        key: isMac ? "⌘ + /" : "Ctrl + /",
+        description: "Show shortcuts"
       }
     ],
     [isMac]

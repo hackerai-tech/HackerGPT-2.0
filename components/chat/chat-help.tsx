@@ -42,7 +42,7 @@ export const ChatHelp: FC<ChatHelpProps> = () => {
     },
     {
       icon: IconKeyboard,
-      text: "Keyboard Shortcuts",
+      text: "Keyboard shortcuts",
       onClick: () => setIsKeyboardShortcutsOpen(true)
     }
   ]
