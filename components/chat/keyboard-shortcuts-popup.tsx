@@ -1,11 +1,12 @@
 import React, { useMemo } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
-import { IconX } from "@tabler/icons-react"
+import { IconBackspace, IconX } from "@tabler/icons-react"
 import { Button } from "../ui/button"
 
 interface ShortcutItem {
   key: string
   description: string
+  icon?: React.ReactNode
 }
 
 interface KeyboardShortcutsPopupProps {
@@ -35,6 +36,11 @@ export const KeyboardShortcutsPopup: React.FC<KeyboardShortcutsPopupProps> = ({
       {
         key: isMac ? "⌘ + Shift + S" : "Ctrl + Shift + S",
         description: "Toggle sidebar"
+      },
+      {
+        key: isMac ? "⌘" : "Ctrl + Shift",
+        description: "Delete chat",
+        icon: <IconBackspace size={20} />
       }
     ],
     [isMac]
@@ -57,6 +63,11 @@ export const KeyboardShortcutsPopup: React.FC<KeyboardShortcutsPopupProps> = ({
             <span className="text-xs">{key.trim()}</span>
           </div>
         ))}
+        {shortcut.icon && (
+          <div className="my-2 flex h-8 min-w-[50px] items-center justify-center rounded-md border">
+            {shortcut.icon}
+          </div>
+        )}
       </div>
     </div>
   )
