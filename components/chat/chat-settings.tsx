@@ -1,5 +1,4 @@
 import { PentestGPTContext } from "@/context/context"
-import useHotkey from "@/lib/hooks/use-hotkey"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { IconChevronDown } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
@@ -10,20 +9,12 @@ import { ModelSelect } from "../models/model-select"
 interface ChatSettingsProps {}
 
 export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
-  // useHotkey("i", () => handleClick())
-
   const { chatSettings, setChatSettings, isMobile, profile, subscription } =
     useContext(PentestGPTContext)
 
   const [isOpen, setIsOpen] = useState(false)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
-
-  // const handleClick = () => {
-  //   if (buttonRef.current) {
-  //     buttonRef.current.click()
-  //   }
-  // }
 
   useEffect(() => {
     if (!chatSettings) return

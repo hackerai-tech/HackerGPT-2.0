@@ -29,6 +29,8 @@ import MessageDetailedFeedback from "./message-detailed-feedback"
 import { MessageQuickFeedback } from "./message-quick-feedback"
 import { MessageTypeResolver } from "./message-type-solver"
 import { PluginID } from "@/types/plugins"
+import useHotkey from "@/lib/hooks/use-hotkey"
+import { toast } from "sonner"
 
 const ICON_SIZE = 28
 
@@ -113,6 +115,15 @@ export const Message: FC<MessageProps> = ({
       document.body.removeChild(textArea)
     }
   }
+
+  useHotkey("c", () => {
+    if (isLast && message.role === "assistant") {
+      handleCopy()
+      toast.success("Last response copied to clipboard", {
+        duration: 3000
+      })
+    }
+  })
 
   const handleSendEdit = () => {
     onSubmitEdit(editedMessage, message.sequence_number)

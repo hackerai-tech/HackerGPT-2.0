@@ -27,12 +27,20 @@ import { ChatMessages } from "./chat-messages"
 import { ChatScrollButtons } from "./chat-scroll-buttons"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
+import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
 
 const MESSAGES_PER_FETCH = 20
 interface ChatUIProps {}
 
 export const ChatUI: FC<ChatUIProps> = ({}) => {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
   useHotkey("o", () => handleNewChat())
+  useHotkey("Backspace", () => {
+    if (selectedChat) {
+      setIsDeleteDialogOpen(true)
+    }
+  })
 
   const params = useParams()
   const router = useRouter()
@@ -354,6 +362,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">
         <ChatHelp />
       </div>
+      <GlobalDeleteChatDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
     </div>
   )
 }

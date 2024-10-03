@@ -1,6 +1,4 @@
 import { PentestGPTContext } from "@/context/context"
-import { getFileFromStorage } from "@/db/storage/files"
-import useHotkey from "@/lib/hooks/use-hotkey"
 import { cn } from "@/lib/utils"
 import { ChatFile, MessageImage } from "@/types"
 import {
@@ -26,11 +24,7 @@ import { dragHelper } from "@/components/chat/chat-helpers/drag"
 interface ChatFilesDisplayProps {}
 
 export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
-  // useHotkey("f", () => setShowFilesDisplay(prev => !prev))
-  // useHotkey("e", () => setUseRetrieval(prev => !prev))
-
   const {
-    files,
     newMessageImages,
     setNewMessageImages,
     newMessageFiles,
@@ -65,15 +59,6 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
   const onlyImages = messageImages.length > 0 && combinedChatFiles.length == 0
 
   const combinedMessageFiles = [...messageImages, ...combinedChatFiles]
-
-  // const getLinkAndView = async (file: ChatFile) => {
-  //   const fileRecord = files.find(f => f.id === file.id)
-
-  //   if (!fileRecord) return
-
-  //   const link = await getFileFromStorage(fileRecord.file_path)
-  //   window.open(link, "_blank")
-  // }
 
   return onlyImages || (showFilesDisplay && combinedMessageFiles.length > 0) ? (
     <>
