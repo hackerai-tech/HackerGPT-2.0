@@ -22,7 +22,7 @@ interface LoginFormProps {
   onSignIn: (formData: FormData) => Promise<{ message: string }>
   onSignUp: (formData: FormData) => Promise<{ message: string }>
   onResetPassword: (formData: FormData) => Promise<{ message: string }>
-  onSignInWithGoogle: () => Promise<{ message: string }>
+  onSignInWithGoogle: () => Promise<{ error?: string; url?: string }>
   errorMessages: Record<string, string>
 }
 
@@ -35,6 +35,7 @@ export function LoginForm({
 }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = useCallback(
     async (
@@ -85,12 +86,20 @@ export function LoginForm({
   const handleGoogleSignIn = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
+      setIsLoading(true)
+      setErrorMessage("")
       try {
         const result = await onSignInWithGoogle()
-        setErrorMessage(errorMessages[result.message] || "")
+        if (result.error) {
+          setErrorMessage(errorMessages["auth"])
+        } else if (result.url) {
+          window.location.href = result.url
+        }
       } catch (error: any) {
         console.error("Google sign-in error:", error)
         setErrorMessage(errorMessages["auth"])
+      } finally {
+        setIsLoading(false)
       }
     },
     [onSignInWithGoogle, errorMessages]
@@ -106,7 +115,7 @@ export function LoginForm({
           <Brand />
           <Button variant="default" className="mt-4" type="submit">
             <IconBrandGoogle className="mr-2" size={20} />
-            Continue with Google
+            {isLoading ? "Redirecting..." : "Continue with Google"}
           </Button>
         </form>
         <div className="mt-4 flex items-center">

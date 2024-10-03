@@ -200,8 +200,12 @@ export default async function Login() {
       options: { redirectTo: `${origin}/auth/callback?next=/login` }
     })
 
-    if (error) return { message: error.message }
-    return redirect(data.url)
+    if (error) {
+      console.error("Google sign-in error:", error)
+      return { error: error.message }
+    }
+
+    return { url: data.url }
   }
 
   return (
