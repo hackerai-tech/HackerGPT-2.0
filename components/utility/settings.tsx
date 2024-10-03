@@ -244,9 +244,10 @@ export const Settings: FC<SettingsProps> = () => {
               <TabsContent value="team">
                 <TeamTab
                   value="team"
-                  teamName={"Your Team"}
+                  teamName={subscription?.team_name || "Your Team"}
                   isMobile={isMobile}
                   teamMemberLimit={subscription?.quantity || 0}
+                  teamId={subscription?.team_id || ""}
                 />
               </TabsContent>
             </div>

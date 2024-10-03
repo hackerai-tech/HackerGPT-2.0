@@ -6,29 +6,42 @@ import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { toast } from "sonner"
+import { supabase } from "@/lib/supabase/browser-client"
 
 interface InviteMembersDialogProps {
   isOpen: boolean
   onClose: () => void
   teamName: string
+  teamId: string
 }
 
 export const InviteMembersDialog: FC<InviteMembersDialogProps> = ({
   isOpen,
   onClose,
-  teamName
+  teamName,
+  teamId
 }) => {
   const { isMobile } = useContext(PentestGPTContext)
   const [email, setEmail] = useState("")
 
-  const handleInvite = () => {
-    // Implement your invite logic here
-    console.log(`Inviting ${email} to ${teamName}`)
-    // You would typically make an API call here to send the invitation
-    // For now, we'll just show a success message
-    toast.success(`Invitation sent to ${email}`)
-    setEmail("")
-    onClose()
+  const handleInvite = async () => {
+    try {
+      const { data, error } = await supabase.rpc("invite_user_to_team", {
+        p_team_id: teamId, // You'll need to pass the teamId as a prop or get it from context
+        p_invitee_email: email
+      })
+
+      if (error) throw error
+
+      toast.success(`Invitation sent to ${email}`)
+      setEmail("")
+      onClose()
+    } catch (error: any) {
+      console.error("Error inviting user:", error)
+      toast.error(
+        error.message || "Failed to send invitation. Please try again."
+      )
+    }
   }
 
   return (

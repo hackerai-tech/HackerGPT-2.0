@@ -51,11 +51,12 @@ export const SidebarContent: FC<SidebarContentProps> = ({
 
       {!isPremiumSubscription && <SidebarUpgrade />}
 
-      {canInviteMembers && (
+      {canInviteMembers && subscription.team_id && (
         <InviteMembersDialog
           isOpen={isInviteDialogOpen}
           onClose={() => setIsInviteDialogOpen(false)}
-          teamName={"Your Team"}
+          teamName={subscription?.team_name || "Your Team"}
+          teamId={subscription?.team_id || ""}
         />
       )}
     </div>

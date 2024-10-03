@@ -595,6 +595,7 @@ export interface Database {
           status: string
           subscription_id: string
           team_id: string | null
+          team_name: string | null
           updated_at: string | null
           user_id: string
         }
@@ -611,6 +612,7 @@ export interface Database {
           status: string
           subscription_id: string
           team_id?: string | null
+          team_name?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -627,6 +629,7 @@ export interface Database {
           status?: string
           subscription_id?: string
           team_id?: string | null
+          team_name?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -647,22 +650,70 @@ export interface Database {
           }
         ]
       }
+      team_invitations: {
+        Row: {
+          created_at: string
+          id: string
+          invitee_email: string
+          inviter_id: string
+          status: string
+          team_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invitee_email: string
+          inviter_id: string
+          status?: string
+          team_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invitee_email?: string
+          inviter_id?: string
+          status?: string
+          team_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       team_members: {
         Row: {
           created_at: string
           id: string
+          role: string
           team_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          role?: string
           team_id: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          role?: string
           team_id?: string
           user_id?: string
         }
@@ -812,10 +863,9 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      add_user_to_team: {
+      accept_team_invitation: {
         Args: {
-          p_team_id: string
-          p_user_id: string
+          p_invitation_id: string
         }
         Returns: boolean
       }
@@ -876,6 +926,13 @@ export interface Database {
           updated_at: string
           user_id: string
         }[]
+      }
+      invite_user_to_team: {
+        Args: {
+          p_team_id: string
+          p_invitee_email: string
+        }
+        Returns: boolean
       }
       is_moderator: {
         Args: {

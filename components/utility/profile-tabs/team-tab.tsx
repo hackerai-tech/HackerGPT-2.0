@@ -35,13 +35,15 @@ interface TeamTabProps {
   teamName: string
   isMobile: boolean
   teamMemberLimit: number
+  teamId: string
 }
 
 export const TeamTab: FC<TeamTabProps> = ({
   value,
   teamName,
   isMobile,
-  teamMemberLimit
+  teamMemberLimit,
+  teamId
 }) => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false)
@@ -209,6 +211,7 @@ export const TeamTab: FC<TeamTabProps> = ({
         isOpen={isInviteDialogOpen}
         onClose={() => setIsInviteDialogOpen(false)}
         teamName={teamName}
+        teamId={teamId}
       />
 
       <Dialog open={isRemoveDialogOpen} onOpenChange={setIsRemoveDialogOpen}>
