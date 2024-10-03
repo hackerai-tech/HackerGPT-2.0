@@ -202,6 +202,15 @@ BEGIN
         RAISE EXCEPTION 'No active subscription found for the team';
     END IF;
 
+    -- Check if the user is already a team member or has a pending invitation
+    IF EXISTS (
+        SELECT 1 FROM team_members WHERE team_id = p_team_id AND user_id = (SELECT id FROM auth.users WHERE email = p_invitee_email)
+        UNION ALL
+        SELECT 1 FROM team_invitations WHERE team_id = p_team_id AND invitee_email = p_invitee_email AND status = 'pending'
+    ) THEN
+        RAISE EXCEPTION 'User is already a team member or has a pending invitation';
+    END IF;
+
     -- Count current team members and pending invitations
     SELECT COUNT(*) INTO v_current_members
     FROM (
@@ -217,9 +226,7 @@ BEGIN
 
     -- Create the invitation
     INSERT INTO team_invitations (team_id, inviter_id, invitee_email)
-    VALUES (p_team_id, auth.uid(), p_invitee_email)
-    ON CONFLICT (team_id, invitee_email) 
-    DO UPDATE SET status = 'pending', updated_at = CURRENT_TIMESTAMP;
+    VALUES (p_team_id, auth.uid(), p_invitee_email);
 
     RETURN TRUE;
 END;
