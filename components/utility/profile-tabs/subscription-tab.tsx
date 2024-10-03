@@ -147,7 +147,7 @@ interface PlanNameProps {
 
 export const PlanName: FC<PlanNameProps> = ({ subscriptionStatus }) => {
   const planName =
-    subscriptionStatus.charAt(0).toUpperCase() + subscriptionStatus.slice(1)
+    subscriptionStatus?.charAt(0).toUpperCase() + subscriptionStatus?.slice(1)
 
   return (
     <span

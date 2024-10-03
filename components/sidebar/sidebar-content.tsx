@@ -55,7 +55,7 @@ export const SidebarContent: FC<SidebarContentProps> = ({
         <InviteMembersDialog
           isOpen={isInviteDialogOpen}
           onClose={() => setIsInviteDialogOpen(false)}
-          teamName={subscription?.team_name || "Your Team"}
+          teamName={"Your Team"}
         />
       )}
     </div>
