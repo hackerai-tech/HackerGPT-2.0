@@ -2,7 +2,7 @@ import { Database } from "@/supabase/types"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 
-export async function getServerProfile() {
+export async function getServerUserAndProfile() {
   const cookieStore = cookies()
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,6 +31,11 @@ export async function getServerProfile() {
     throw new Error("Profile not found")
   }
 
+  return { user, profile }
+}
+
+export async function getServerProfile() {
+  const { profile } = await getServerUserAndProfile()
   return profile
 }
 

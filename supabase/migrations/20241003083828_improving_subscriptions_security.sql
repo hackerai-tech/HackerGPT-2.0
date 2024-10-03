@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS team_members (
 
 -- Modify subscriptions table
 ALTER TABLE subscriptions
-DROP COLUMN team_name,
 ADD COLUMN team_id UUID REFERENCES teams(id) ON DELETE SET NULL;
 
 -- Enable RLS on teams and team_members
