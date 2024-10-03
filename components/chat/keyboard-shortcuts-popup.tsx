@@ -38,9 +38,13 @@ export const KeyboardShortcutsPopup: React.FC<KeyboardShortcutsPopupProps> = ({
         description: "Toggle sidebar"
       },
       {
-        key: isMac ? "⌘" : "Ctrl + Shift",
+        key: isMac ? "⌘ + Shift" : "Ctrl + Shift",
         description: "Delete chat",
         icon: <IconBackspace size={20} />
+      },
+      {
+        key: isMac ? "⌘ + Shift + C" : "Ctrl + Shift + C",
+        description: "Copy last response"
       }
     ],
     [isMac]

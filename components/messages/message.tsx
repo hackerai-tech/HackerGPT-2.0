@@ -29,6 +29,7 @@ import MessageDetailedFeedback from "./message-detailed-feedback"
 import { MessageQuickFeedback } from "./message-quick-feedback"
 import { MessageTypeResolver } from "./message-type-solver"
 import { PluginID } from "@/types/plugins"
+import useHotkey from "@/lib/hooks/use-hotkey"
 
 const ICON_SIZE = 28
 
@@ -113,6 +114,12 @@ export const Message: FC<MessageProps> = ({
       document.body.removeChild(textArea)
     }
   }
+
+  useHotkey("c", () => {
+    if (isLast && message.role === "assistant") {
+      handleCopy()
+    }
+  })
 
   const handleSendEdit = () => {
     onSubmitEdit(editedMessage, message.sequence_number)
