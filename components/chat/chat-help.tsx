@@ -18,6 +18,7 @@ import {
 import { KeyboardShortcutsPopup } from "./keyboard-shortcuts-popup"
 import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"
 import { Button } from "../ui/button"
+import { toast } from "sonner"
 
 interface ChatHelpProps {}
 
@@ -34,11 +35,18 @@ export const ChatHelp: FC<ChatHelpProps> = () => {
     }
   ]
 
+  const handleCopyEmail = () => {
+    copyToClipboard("contact@hackerai.co")
+    toast.success("Email copied to clipboard", {
+      duration: 3000
+    })
+  }
+
   const menuItems = [
     {
       icon: IconCopy,
       text: "contact@hackerai.co",
-      onClick: () => copyToClipboard("contact@hackerai.co")
+      onClick: handleCopyEmail
     },
     {
       icon: IconKeyboard,
