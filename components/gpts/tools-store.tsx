@@ -31,6 +31,7 @@ function ToolsStorePage({
     "Recon tools",
     "Vulnerability scanners",
     "Exploit tools",
+    "Utils",
     "Installed"
   ]
   const [selectedFilter, setSelectedFilter] = useState("All")
@@ -72,6 +73,7 @@ function ToolsStorePage({
           return plugin.categories.includes("vuln-scanners")
         if (filter === "Exploit tools")
           return plugin.categories.includes("exploit")
+        if (filter === "Utils") return plugin.categories.includes("utils")
         return false
       })
       return acc
