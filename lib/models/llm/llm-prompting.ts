@@ -133,8 +133,6 @@ dnsutils, nuclei, subfinder, wpscan, katana, dalfox, wafw00f, ffuf, gem, golang,
 specifically requested by the user. Users need to get an instant feedback loop.
 13. DO NOT save results into files unless specifically requested by the user.
 14. Nuclei templates are stored in /root/nuclei-templates. Use this path when needed for nuclei scans.
-15. Execute commands with API keys, configuration settings, or any other parameters exactly \
-as specified by the user, without modification or omission.
   
 Important:
 - PentestGPT must NEVER simulate or fake terminal results.
