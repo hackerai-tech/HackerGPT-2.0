@@ -19,8 +19,8 @@ import {
 } from "./prompts/system-prompt"
 import { PluginID } from "@/types/plugins"
 import {
-  getTerminalTemplate,
-  getFreePlugins
+  getTerminalTemplate
+  // getFreePlugins
 } from "@/lib/tools/tool-store/tools-helper"
 import { encode, decode } from "gpt-tokenizer"
 
@@ -75,10 +75,10 @@ export async function commandGeneratorHandler({
     let assistantMessage: { role: "assistant"; content: string } | null = null
     let finalFinishReason = "unknown"
 
-    const freePlugins = getFreePlugins()
-    const model = freePlugins.includes(pluginID)
-      ? "openai/gpt-4o-mini"
-      : "openai/gpt-4o-2024-08-06"
+    // const freePlugins = getFreePlugins()
+    // const model = freePlugins.includes(pluginID)
+    //   ? "openai/gpt-4o-mini"
+    //   : "openai/gpt-4o-2024-08-06"
 
     const processIteration = async () => {
       const customPrompt =
@@ -95,7 +95,7 @@ export async function commandGeneratorHandler({
       updateSystemMessage(messages, customPrompt, profile_context)
 
       const { textStream, finishReason } = await streamText({
-        model: openrouter(model),
+        model: openrouter("openai/gpt-4o-2024-08-06"),
         temperature: 0.5,
         maxTokens: 1024,
         messages: toVercelChatMessages(messages, true),

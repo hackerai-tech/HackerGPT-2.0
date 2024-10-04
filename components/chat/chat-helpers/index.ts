@@ -209,7 +209,7 @@ export const handleHostedChat = async (
   let { provider } = modelData
   let apiEndpoint = `/api/chat/${provider}`
 
-  if (isTerminalContinuation) {
+  if (isTerminalContinuation || selectedPlugin === PluginID.TERMINAL) {
     apiEndpoint = `/api/chat/tools/terminal`
     setToolInUse(PluginID.TERMINAL)
     selectedPlugin = PluginID.TERMINAL
