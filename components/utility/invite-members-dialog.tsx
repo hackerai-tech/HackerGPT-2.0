@@ -1,37 +1,34 @@
-import { FC, useContext, useState } from "react"
-import { DialogPanel, DialogTitle } from "@headlessui/react"
-import { IconX, IconUserPlus } from "@tabler/icons-react"
 import { PentestGPTContext } from "@/context/context"
-import { TransitionedDialog } from "../ui/transitioned-dialog"
+import { inviteUserToTeam } from "@/db/teams"
+import { DialogPanel, DialogTitle } from "@headlessui/react"
+import { IconUserPlus, IconX } from "@tabler/icons-react"
+import { FC, useContext, useState } from "react"
+import { toast } from "sonner"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
-import { toast } from "sonner"
-import { supabase } from "@/lib/supabase/browser-client"
+import { TransitionedDialog } from "../ui/transitioned-dialog"
 
 interface InviteMembersDialogProps {
   isOpen: boolean
   onClose: () => void
-  teamName: string
-  teamId: string
 }
 
 export const InviteMembersDialog: FC<InviteMembersDialogProps> = ({
   isOpen,
-  onClose,
-  teamName,
-  teamId
+  onClose
 }) => {
-  const { isMobile } = useContext(PentestGPTContext)
+  const { isMobile, teamMembers, refreshTeamMembers } =
+    useContext(PentestGPTContext)
   const [email, setEmail] = useState("")
 
   const handleInvite = async () => {
+    if (!teamMembers || teamMembers.length === 0) {
+      toast.error("No team selected")
+      return
+    }
     try {
-      const { data, error } = await supabase.rpc("invite_user_to_team", {
-        p_team_id: teamId, // You'll need to pass the teamId as a prop or get it from context
-        p_invitee_email: email
-      })
-
-      if (error) throw error
+      await inviteUserToTeam(teamMembers[0].team_id, email)
+      await refreshTeamMembers()
 
       toast.success(`Invitation sent to ${email}`)
       setEmail("")
@@ -67,7 +64,7 @@ export const InviteMembersDialog: FC<InviteMembersDialogProps> = ({
 
         <div className="mt-4">
           <p className="text-muted-foreground mb-4">
-            Invite a new member to the {teamName} team
+            Invite a new member to the {teamMembers?.[0]?.team_name} team
           </p>
           <Input
             type="email"

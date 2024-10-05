@@ -5,8 +5,12 @@
 import { PentestGPTContext } from "@/context/context"
 import { getProfileByUserId } from "@/db/profile"
 import { getWorkspaceImageFromStorage } from "@/db/storage/workspace-images"
-import { getSubscriptionByUserId } from "@/db/subscriptions"
+import {
+  getSubscriptionByTeamId,
+  getSubscriptionByUserId
+} from "@/db/subscriptions"
 import { getWorkspacesByUserId } from "@/db/workspaces"
+import { getTeamMembersByTeamId } from "@/db/teams"
 import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import { fetchHostedModels } from "@/lib/models/fetch-models"
 import { supabase } from "@/lib/supabase/browser-client"
@@ -25,6 +29,7 @@ import { PluginID } from "@/types/plugins"
 import { useRouter } from "next/navigation"
 import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
+import { ProcessedTeamMember } from "@/lib/team-utils"
 
 interface GlobalStateProps {
   children: React.ReactNode
@@ -44,7 +49,9 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     useState<Tables<"subscriptions"> | null>(null)
   const [subscriptionStatus, setSubscriptionStatus] =
     useState<SubscriptionStatus>("free")
-
+  const [teamMembers, setTeamMembers] = useState<ProcessedTeamMember[] | null>(
+    null
+  )
   // ITEMS STORE
   const [chats, setChats] = useState<Tables<"chats">[]>([])
   const [files, setFiles] = useState<Tables<"files">[]>([])
@@ -188,6 +195,21 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
       const workspaces = await getWorkspacesByUserId(user.id)
       setWorkspaces(workspaces)
 
+      const members = await getTeamMembersByTeamId(
+        user.id,
+        subscription?.team_id
+      )
+      setTeamMembers(members)
+
+      if (
+        (!subscription || subscription.status !== "active") &&
+        members &&
+        members.length > 0
+      ) {
+        const subscription = await getSubscriptionByTeamId(members[0].team_id)
+        updateSubscription(subscription)
+      }
+
       for (const workspace of workspaces) {
         let workspaceImageUrl = ""
 
@@ -217,6 +239,14 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     }
   }
 
+  const refreshTeamMembers = async () => {
+    const members = await getTeamMembersByTeamId(
+      profile?.user_id || "",
+      subscription?.team_id || ""
+    )
+    setTeamMembers(members)
+  }
+
   return (
     <PentestGPTContext.Provider
       value={{
@@ -235,6 +265,9 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setSubscriptionStatus,
         updateSubscription,
         isPremiumSubscription,
+        teamMembers,
+        setTeamMembers,
+        refreshTeamMembers,
 
         // ITEMS STORE
         chats,

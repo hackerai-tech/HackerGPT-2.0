@@ -1,19 +1,16 @@
-import { FC, useState } from "react"
-import { Button } from "../../ui/button"
-import { InviteMembersDialog } from "../invite-members-dialog"
+import { PentestGPTContext } from "@/context/context"
+import { removeUserFromTeam } from "@/db/teams"
+import { ProcessedTeamMember, TeamRole } from "@/lib/team-utils"
 import {
-  MoreHorizontal,
-  Trash2,
   ChevronLeft,
   ChevronRight,
+  MoreHorizontal,
+  Trash2,
   UserPlus
 } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "../../ui/dropdown-menu"
+import { FC, useContext, useState } from "react"
+import { toast } from "sonner"
+import { Button } from "../../ui/button"
 import {
   Dialog,
   DialogContent,
@@ -22,90 +19,54 @@ import {
   DialogHeader,
   DialogTitle
 } from "../../ui/dialog"
-
-interface TeamMember {
-  id: number
-  email: string
-  joinedDate: string
-  role: "Admin" | "Member"
-}
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "../../ui/dropdown-menu"
+import { InviteMembersDialog } from "../invite-members-dialog"
 
 interface TeamTabProps {
   value: string
-  teamName: string
   isMobile: boolean
-  teamMemberLimit: number
-  teamId: string
 }
 
-export const TeamTab: FC<TeamTabProps> = ({
-  value,
-  teamName,
-  isMobile,
-  teamMemberLimit,
-  teamId
-}) => {
+const membersPerPage = 5
+
+export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
+  const { teamMembers, subscription, refreshTeamMembers } =
+    useContext(PentestGPTContext)
+
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false)
-  const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null)
+  const [memberToRemove, setMemberToRemove] =
+    useState<ProcessedTeamMember | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const membersPerPage = 3
-
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
-    {
-      id: 1,
-      email: "john@example.com",
-      joinedDate: "2023-01-15T12:00:00Z",
-      role: "Admin"
-    },
-    {
-      id: 2,
-      email: "jane@example.com",
-      joinedDate: "2023-02-20T14:30:00Z",
-      role: "Member"
-    },
-    {
-      id: 3,
-      email: "alice@example.com",
-      joinedDate: "2023-03-10T09:15:00Z",
-      role: "Member"
-    },
-    {
-      id: 4,
-      email: "bob@example.com",
-      joinedDate: "2023-04-05T16:45:00Z",
-      role: "Member"
-    },
-    {
-      id: 5,
-      email: "charlie@example.com",
-      joinedDate: "2023-05-22T11:20:00Z",
-      role: "Member"
-    },
-    {
-      id: 6,
-      email: "david@example.com",
-      joinedDate: "2023-06-18T13:10:00Z",
-      role: "Member"
-    }
-  ])
 
   const handleInvite = () => {
     setIsInviteDialogOpen(true)
   }
 
-  const handleRemoveMember = (member: TeamMember) => {
+  const handleRemoveMember = (member: ProcessedTeamMember) => {
     setMemberToRemove(member)
     setIsRemoveDialogOpen(true)
   }
 
-  const confirmRemoveMember = () => {
+  const confirmRemoveMember = async () => {
     if (memberToRemove) {
-      setTeamMembers(
-        teamMembers.filter(member => member.id !== memberToRemove.id)
-      )
-      setIsRemoveDialogOpen(false)
-      setMemberToRemove(null)
+      try {
+        await removeUserFromTeam(
+          memberToRemove.team_id,
+          memberToRemove.invitee_email
+        )
+      } catch (error: any) {
+        toast.error(error.message)
+      } finally {
+        await refreshTeamMembers()
+        setIsRemoveDialogOpen(false)
+        setMemberToRemove(null)
+      }
     }
   }
 
@@ -120,20 +81,20 @@ export const TeamTab: FC<TeamTabProps> = ({
 
   const indexOfLastMember = currentPage * membersPerPage
   const indexOfFirstMember = indexOfLastMember - membersPerPage
-  const currentMembers = teamMembers.slice(
+  const currentMembers = teamMembers?.slice(
     indexOfFirstMember,
     indexOfLastMember
   )
 
-  const totalPages = Math.ceil(teamMembers.length / membersPerPage)
+  const totalPages = Math.ceil((teamMembers?.length || 0) / membersPerPage)
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">{teamName}</h2>
+        <h2 className="text-xl font-bold">{teamMembers?.[0]?.team_name}</h2>
         <Button
           onClick={handleInvite}
-          disabled={teamMembers.length >= teamMemberLimit}
+          disabled={(teamMembers?.length || 0) >= (subscription?.quantity || 0)}
           className="flex items-center"
           size="sm"
         >
@@ -143,25 +104,31 @@ export const TeamTab: FC<TeamTabProps> = ({
       </div>
       <div className="space-y-2">
         <h3 className="text-base font-semibold">
-          Team Members ({teamMembers.length}/{teamMemberLimit})
+          Team Members ({teamMembers?.length}/{subscription?.quantity})
         </h3>
         <ul className="space-y-1 rounded-lg p-2">
-          {currentMembers.map(member => (
+          {currentMembers?.map(member => (
             <li
-              key={member.id}
+              key={member.invitee_email}
               className="flex items-center justify-between border-b py-1 last:border-b-0"
             >
               <div>
-                <p className="text-sm font-medium">{member.email}</p>
+                <p className="text-sm font-medium">{member.invitee_email}</p>
                 <p className="text-muted-foreground text-xs">
-                  Joined {formatDate(member.joinedDate)}
+                  {member.invitation_status === "accepted"
+                    ? `Joined ${formatDate(member.invitation_updated_at)}`
+                    : "Pending"}
                 </p>
               </div>
               <div className="flex items-center space-x-2">
                 <span
-                  className={`rounded px-2 py-0.5 text-xs ${member.role === "Admin" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
+                  className={`rounded px-2 py-0.5 text-xs ${member.member_role === TeamRole.ADMIN || member.member_role === TeamRole.OWNER ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
                 >
-                  {member.role}
+                  {member.member_role === TeamRole.ADMIN
+                    ? "Admin"
+                    : member.member_role === TeamRole.OWNER
+                      ? "Owner"
+                      : "Member"}
                 </span>
                 <DropdownMenu>
                   <DropdownMenuTrigger>
@@ -210,8 +177,6 @@ export const TeamTab: FC<TeamTabProps> = ({
       <InviteMembersDialog
         isOpen={isInviteDialogOpen}
         onClose={() => setIsInviteDialogOpen(false)}
-        teamName={teamName}
-        teamId={teamId}
       />
 
       <Dialog open={isRemoveDialogOpen} onOpenChange={setIsRemoveDialogOpen}>
@@ -219,8 +184,8 @@ export const TeamTab: FC<TeamTabProps> = ({
           <DialogHeader>
             <DialogTitle>Remove Team Member</DialogTitle>
             <DialogDescription>
-              Are you sure you want to remove {memberToRemove?.email} from the
-              team? This action cannot be undone.
+              Are you sure you want to remove {memberToRemove?.invitee_email}{" "}
+              from the team? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

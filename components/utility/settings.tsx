@@ -1,8 +1,10 @@
 import { PentestGPTContext } from "@/context/context"
+import { deleteAllChats } from "@/db/chats"
 import { PROFILE_CONTEXT_MAX } from "@/db/limits"
 import { updateProfile } from "@/db/profile"
 import { LLM_LIST_MAP } from "@/lib/models/llm/llm-list"
 import { supabase } from "@/lib/supabase/browser-client"
+import { DialogPanel, DialogTitle } from "@headlessui/react"
 import {
   IconCreditCard,
   IconSettings,
@@ -10,39 +12,23 @@ import {
   IconUsers,
   IconX
 } from "@tabler/icons-react"
-import {
-  Dialog,
-  Transition,
-  TransitionChild,
-  DialogPanel,
-  DialogTitle
-} from "@headlessui/react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { FC, Fragment, useContext, useEffect, useState } from "react"
+import { FC, useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { SIDEBAR_ICON_SIZE } from "../sidebar/sidebar-switcher"
-import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { Button } from "../ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
-import { SubscriptionTab } from "./profile-tabs/subscription-tab"
-import { deleteAllChats } from "@/db/chats"
+import { TransitionedDialog } from "../ui/transitioned-dialog"
+import { DeleteAllChatsDialog } from "./delete-all-chats-dialog"
 import { PersonalizationTab } from "./profile-tabs/personalization-tab"
 import { ProfileTab } from "./profile-tabs/profile-tab"
-import { DeleteAllChatsDialog } from "./delete-all-chats-dialog"
+import { SubscriptionTab } from "./profile-tabs/subscription-tab"
 import { TeamTab } from "./profile-tabs/team-tab"
 
-interface SettingsProps {}
-
-export const Settings: FC<SettingsProps> = () => {
-  const {
-    profile,
-    setProfile,
-    envKeyMap,
-    setAvailableHostedModels,
-    isMobile,
-    subscription
-  } = useContext(PentestGPTContext)
+export const Settings: FC = () => {
+  const { profile, setProfile, envKeyMap, setAvailableHostedModels, isMobile } =
+    useContext(PentestGPTContext)
 
   const router = useRouter()
 
@@ -242,13 +228,7 @@ export const Settings: FC<SettingsProps> = () => {
               </TabsContent>
 
               <TabsContent value="team">
-                <TeamTab
-                  value="team"
-                  teamName={subscription?.team_name || "Your Team"}
-                  isMobile={isMobile}
-                  teamMemberLimit={subscription?.quantity || 0}
-                  teamId={subscription?.team_id || ""}
-                />
+                <TeamTab value="team" isMobile={isMobile} />
               </TabsContent>
             </div>
           </Tabs>

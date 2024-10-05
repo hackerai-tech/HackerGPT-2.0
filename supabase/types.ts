@@ -699,6 +699,7 @@ export interface Database {
         Row: {
           created_at: string
           id: string
+          invitation_id: string | null
           role: string
           team_id: string
           user_id: string
@@ -706,6 +707,7 @@ export interface Database {
         Insert: {
           created_at?: string
           id?: string
+          invitation_id?: string | null
           role?: string
           team_id: string
           user_id: string
@@ -713,11 +715,19 @@ export interface Database {
         Update: {
           created_at?: string
           id?: string
+          invitation_id?: string | null
           role?: string
           team_id?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "team_members_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "team_invitations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "team_members_team_id_fkey"
             columns: ["team_id"]
@@ -927,6 +937,24 @@ export interface Database {
           user_id: string
         }[]
       }
+      get_team_members: {
+        Args: {
+          p_team_id: string
+        }
+        Returns: {
+          team_id: string
+          team_name: string
+          member_id: string
+          member_user_id: string
+          member_created_at: string
+          member_role: string
+          invitation_id: string
+          invitee_email: string
+          invitation_status: string
+          invitation_created_at: string
+          invitation_updated_at: string
+        }[]
+      }
       invite_user_to_team: {
         Args: {
           p_team_id: string
@@ -983,7 +1011,7 @@ export interface Database {
       remove_user_from_team: {
         Args: {
           p_team_id: string
-          p_user_id: string
+          p_user_email: string
         }
         Returns: boolean
       }

@@ -1,28 +1,12 @@
 -- Remove the existing full access policy
 DROP POLICY IF EXISTS "Allow full access to own subscriptions" ON subscriptions;
 
--- Create a new read-only policy
-CREATE POLICY "Allow read access to own subscriptions"
-    ON subscriptions
-    FOR SELECT
-    USING (user_id = auth.uid());
-
 -- Create teams table
 CREATE TABLE IF NOT EXISTS teams (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ
-);
-
--- Create team_members table
-CREATE TABLE IF NOT EXISTS team_members (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    role TEXT NOT NULL DEFAULT 'member',
-    UNIQUE(team_id, user_id)
 );
 
 -- Create team_invitations table
@@ -35,6 +19,17 @@ CREATE TABLE IF NOT EXISTS team_invitations (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ,
     UNIQUE(team_id, invitee_email)
+);
+
+-- Create team_members table
+CREATE TABLE IF NOT EXISTS team_members (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    team_id UUID NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    invitation_id UUID REFERENCES team_invitations(id) ON DELETE CASCADE,
+    role TEXT NOT NULL DEFAULT 'member',
+    UNIQUE(team_id, user_id)
 );
 
 -- Modify subscriptions table
@@ -52,11 +47,12 @@ CREATE POLICY "Allow read access to own teams"
     FOR SELECT
     USING (id IN (SELECT team_id FROM team_members WHERE user_id = auth.uid()));
 
+-- DROP POLICY IF EXISTS  "Allow read access to own team memberships" ON team_members;
 -- Create policies for team_members
 CREATE POLICY "Allow read access to own team memberships"
     ON team_members
     FOR SELECT
-    USING (user_id = auth.uid() OR team_id IN (SELECT team_id FROM team_members WHERE user_id = auth.uid()));
+    USING (user_id = auth.uid());
 
 -- Create policies for team_invitations
 CREATE POLICY "Allow read access to own team invitations"
@@ -64,11 +60,73 @@ CREATE POLICY "Allow read access to own team invitations"
     FOR SELECT
     USING (inviter_id = auth.uid() OR invitee_email = auth.email());
 
+
+-- Function to safely get the whole team by team_id
+CREATE OR REPLACE FUNCTION get_team_members(p_team_id UUID)
+RETURNS TABLE (
+    team_id UUID,
+    team_name TEXT,
+    member_id UUID,
+    member_user_id UUID,
+    member_created_at TIMESTAMPTZ,
+    member_role TEXT,
+    invitation_id UUID,
+    invitee_email TEXT,
+    invitation_status TEXT,
+    invitation_created_at TIMESTAMPTZ,
+    invitation_updated_at TIMESTAMPTZ
+) AS $$
+BEGIN
+
+    IF NOT EXISTS (SELECT 1 FROM teams WHERE id = p_team_id) THEN
+        RAISE EXCEPTION 'Team not found';
+    END IF;
+
+    RETURN QUERY
+    SELECT 
+        t.id AS team_id,
+        t.name AS team_name,
+        tm.id AS member_id,
+        tm.user_id AS member_user_id,
+        tm.created_at AS member_created_at,
+        tm.role AS member_role,
+        ti.id AS invitation_id,
+        ti.invitee_email,
+        ti.status AS invitation_status,
+        ti.created_at AS invitation_created_at,
+        ti.updated_at AS invitation_updated_at
+    FROM 
+        teams t
+    JOIN 
+        team_invitations ti ON t.id = ti.team_id
+    LEFT JOIN 
+        team_members tm ON ti.id = tm.invitation_id
+    WHERE 
+        t.id = p_team_id
+        AND (
+            -- Allow admins or owners to view all members
+            EXISTS (
+                SELECT 1 
+                FROM team_members tm2
+                WHERE tm2.team_id = p_team_id 
+                AND tm2.user_id = auth.uid() 
+                AND (tm2.role = 'admin' OR tm2.role = 'owner')
+            )
+            -- Allow team members to view themselves
+            OR tm.user_id = auth.uid()
+            -- Allow invited users to view their own invitation
+            OR ti.invitee_email = auth.email()
+        );
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- Function to manage team creation, deletion, and member updates when a subscription changes
 CREATE OR REPLACE FUNCTION manage_team_on_subscription_change() RETURNS TRIGGER AS $$
 DECLARE
     v_team_id UUID;
     v_members_to_remove INT;
+    v_owner_email TEXT;
 BEGIN
     -- If the new plan type is 'team' and it wasn't before, or if it's a new team subscription
     IF NEW.plan_type = 'team' AND (OLD.plan_type != 'team' OR OLD.plan_type IS NULL) THEN
@@ -80,9 +138,19 @@ BEGIN
         -- Update the subscription with the new team_id
         NEW.team_id := v_team_id;
 
-        -- Add the subscription owner to the team as an admin
-        INSERT INTO team_members (team_id, user_id, role)
-        VALUES (v_team_id, NEW.user_id, 'admin');
+        -- Get the owner's email
+        SELECT email INTO v_owner_email
+        FROM auth.users
+        WHERE id = NEW.user_id;
+
+        -- Create a team_invitation for the owner
+        INSERT INTO team_invitations (team_id, inviter_id, invitee_email, status, updated_at)
+        VALUES (v_team_id, NEW.user_id, v_owner_email, 'accepted', CURRENT_TIMESTAMP);
+
+                -- Add the subscription owner to the team as an admin
+        INSERT INTO team_members (team_id, user_id, role, invitation_id)
+        VALUES (v_team_id, NEW.user_id, 'owner', (SELECT id FROM team_invitations WHERE team_id = v_team_id AND invitee_email = v_owner_email AND status = 'accepted'));
+
     -- If the old plan type was 'team' and the new one isn't
     ELSIF OLD.plan_type = 'team' AND NEW.plan_type != 'team' THEN
         -- Delete all team members
@@ -126,12 +194,18 @@ EXECUTE FUNCTION manage_team_on_subscription_change();
 
 
 -- Function to remove user from a team
-CREATE OR REPLACE FUNCTION remove_user_from_team(p_team_id UUID, p_user_id UUID)
+CREATE OR REPLACE FUNCTION remove_user_from_team(p_team_id UUID, p_user_email TEXT)
 RETURNS BOOLEAN AS $$
 DECLARE
     v_team_owner_id UUID;
     v_user_role TEXT;
+    v_user_id UUID;
 BEGIN
+    -- Get the user ID based on the email   
+    SELECT id INTO v_user_id
+    FROM auth.users
+    WHERE email = p_user_email;
+
     -- Identify the team owner
     SELECT user_id INTO v_team_owner_id
     FROM subscriptions
@@ -145,7 +219,7 @@ BEGIN
     -- Get the role of the user to be removed
     SELECT role INTO v_user_role
     FROM team_members
-    WHERE team_id = p_team_id AND user_id = p_user_id;
+    WHERE team_id = p_team_id AND user_id = v_user_id;
 
     -- Check if the current user is the team owner or an admin
     IF NOT EXISTS (
@@ -156,7 +230,7 @@ BEGIN
     END IF;
 
     -- Prevent removing the team owner
-    IF p_user_id = v_team_owner_id THEN
+    IF v_user_id = v_team_owner_id THEN
         RAISE EXCEPTION 'Cannot remove the team owner from the team';
     END IF;
 
@@ -167,7 +241,10 @@ BEGIN
 
     -- Remove the user from the team
     DELETE FROM team_members
-    WHERE team_id = p_team_id AND user_id = p_user_id;
+    WHERE team_id = p_team_id AND user_id = v_user_id;
+
+    DELETE FROM team_invitations
+    WHERE team_id = p_team_id AND invitee_email = p_user_email;
 
     RETURN TRUE;
 END;
@@ -241,9 +318,10 @@ RETURNS BOOLEAN AS $$
 DECLARE
     v_team_id UUID;
     v_invitee_email TEXT;
+    v_invitation_id UUID;
 BEGIN
     -- Get the invitation details
-    SELECT team_id, invitee_email INTO v_team_id, v_invitee_email
+    SELECT team_id, invitee_email, id INTO v_team_id, v_invitee_email, v_invitation_id
     FROM team_invitations
     WHERE id = p_invitation_id AND status = 'pending';
 
@@ -257,8 +335,8 @@ BEGIN
     END IF;
 
     -- Add the user to the team
-    INSERT INTO team_members (team_id, user_id)
-    VALUES (v_team_id, auth.uid())
+    INSERT INTO team_members (team_id, user_id, invitation_id)
+    VALUES (v_team_id, auth.uid(), v_invitation_id)
     ON CONFLICT (team_id, user_id) DO NOTHING;
 
     -- Update the invitation status
@@ -272,3 +350,13 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Grant execute permission on the function to authenticated users
 GRANT EXECUTE ON FUNCTION accept_team_invitation TO authenticated;
+
+
+-- Create a new read-only policy
+DROP POLICY IF EXISTS "Allow read access to own subscriptions" ON subscriptions;
+
+CREATE POLICY "Allow read access to own subscriptions"
+    ON subscriptions
+    FOR SELECT
+    USING (user_id = auth.uid() OR team_id IN (SELECT team_id FROM team_members WHERE user_id = auth.uid()));
+
