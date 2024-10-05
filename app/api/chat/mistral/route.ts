@@ -139,25 +139,30 @@ export async function POST(request: Request) {
 
     const includeImages = messagesIncludeImages(messages)
 
-    if (shouldUseMiniModel || includeImages) {
-      selectedModel = "openai/gpt-4o-mini"
-      filterEmptyAssistantMessages(messages)
-    } else if (
-      moderationLevel >= 0.3 &&
-      moderationLevel <= 0.8 &&
-      !isHighRiskCategory
-    ) {
-      handleAssistantMessages(messages)
-    } else if (moderationLevel >= 0.9 && moderationLevel <= 1) {
-      if (isPentestGPTPro) {
-        selectedModel = "mistralai/mistral-large"
-      } else {
-        selectedModel = "mistralai/mistral-small"
+    const handleMessages = (
+      modLevel: number,
+      isHighRisk: boolean,
+      isPro: boolean
+    ) => {
+      if (shouldUseMiniModel || includeImages) {
+        selectedModel = "openai/gpt-4o-mini"
+        return filterEmptyAssistantMessages(messages)
       }
-      filterEmptyAssistantMessages(messages)
-    } else {
-      filterEmptyAssistantMessages(messages)
+
+      if (modLevel >= 0.7) {
+        selectedModel = isPro
+          ? "mistralai/mistral-large"
+          : "mistralai/mistral-small"
+      }
+
+      if (modLevel >= 0.3 && modLevel <= 0.8 && !isHighRisk) {
+        return handleAssistantMessages(messages)
+      }
+
+      return filterEmptyAssistantMessages(messages)
     }
+
+    handleMessages(moderationLevel, isHighRiskCategory, isPentestGPTPro)
 
     try {
       let provider
