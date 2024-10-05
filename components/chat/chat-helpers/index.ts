@@ -237,7 +237,7 @@ export const handleHostedChat = async (
   if (isTerminalContinuation) {
     requestBody = {
       messages: formattedMessages,
-      isTerminalContinuation: true
+      isTerminalContinuation: isTerminalContinuation
     }
   } else if (provider === "openai") {
     requestBody = {
