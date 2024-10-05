@@ -1,12 +1,9 @@
 "use client"
 
 import { useState, FormEvent, useCallback } from "react"
-import {
-  IconEye,
-  IconEyeOff,
-  IconBrandGoogle,
-  IconAlertCircle
-} from "@tabler/icons-react"
+import { IconEye, IconEyeOff, IconAlertCircle } from "@tabler/icons-react"
+import { MicrosoftIcon } from "@/components/icons/microsoft-icon"
+import { GoogleIcon } from "@/components/icons/google-icon"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,6 +20,7 @@ interface LoginFormProps {
   onSignUp: (formData: FormData) => Promise<{ message: string }>
   onResetPassword: (formData: FormData) => Promise<{ message: string }>
   onSignInWithGoogle: () => Promise<{ error?: string; url?: string }>
+  onSignInWithMicrosoft: () => Promise<{ error?: string; url?: string }>
   errorMessages: Record<string, string>
 }
 
@@ -31,6 +29,7 @@ export function LoginForm({
   onSignUp,
   onResetPassword,
   onSignInWithGoogle,
+  onSignInWithMicrosoft,
   errorMessages
 }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
@@ -105,6 +104,28 @@ export function LoginForm({
     [onSignInWithGoogle, errorMessages]
   )
 
+  const handleMicrosoftSignIn = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault()
+      setIsLoading(true)
+      setErrorMessage("")
+      try {
+        const result = await onSignInWithMicrosoft()
+        if (result.error) {
+          setErrorMessage(errorMessages["auth"])
+        } else if (result.url) {
+          window.location.href = result.url
+        }
+      } catch (error: any) {
+        console.error("Microsoft sign-in error:", error)
+        setErrorMessage(errorMessages["auth"])
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [onSignInWithMicrosoft, errorMessages]
+  )
+
   return (
     <div className="flex w-full flex-1 flex-col justify-center gap-2 px-8 sm:max-w-md">
       <div>
@@ -114,8 +135,17 @@ export function LoginForm({
         >
           <Brand />
           <Button variant="default" className="mt-4" type="submit">
-            <IconBrandGoogle className="mr-2" size={20} />
+            <GoogleIcon className="mr-2" width={20} height={20} />
             {isLoading ? "Redirecting..." : "Continue with Google"}
+          </Button>
+        </form>
+        <form
+          onSubmit={handleMicrosoftSignIn}
+          className="animate-in mt-2 flex w-full flex-1 flex-col justify-center gap-2"
+        >
+          <Button variant="default" className="mt-2" type="submit">
+            <MicrosoftIcon className="mr-2" width={20} height={20} />
+            {isLoading ? "Redirecting..." : "Continue with Microsoft"}
           </Button>
         </form>
         <div className="mt-4 flex items-center">
