@@ -155,7 +155,7 @@ export async function POST(request: Request) {
           : "mistralai/mistral-small"
       }
 
-      if (modLevel >= 0.3 && modLevel <= 0.8 && !isHighRisk) {
+      if (modLevel >= 0.2 && modLevel <= 0.8 && !isHighRisk) {
         return handleAssistantMessages(messages)
       }
 
