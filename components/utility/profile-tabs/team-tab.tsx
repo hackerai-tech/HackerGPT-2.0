@@ -17,20 +17,13 @@ import { FC, useContext, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "../../ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "../../ui/dialog"
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "../../ui/dropdown-menu"
 import { InviteMembersDialog } from "../invite-members-dialog"
+import { RemoveTeamMemberDialog } from "../remove-team-member-dialog"
 
 interface TeamTabProps {
   value: string
@@ -66,6 +59,11 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
         await removeUserFromTeam(
           memberToRemove.team_id,
           memberToRemove.invitee_email
+        )
+        toast.success(
+          memberToRemove.invitation_status === "pending"
+            ? "Invitation cancelled successfully"
+            : "Team member removed successfully"
         )
       } catch (error: any) {
         toast.error(error.message)
@@ -190,28 +188,13 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
         onClose={() => setIsInviteDialogOpen(false)}
       />
 
-      <Dialog open={isRemoveDialogOpen} onOpenChange={setIsRemoveDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Remove Team Member</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to remove {memberToRemove?.invitee_email}{" "}
-              from the team? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsRemoveDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={confirmRemoveMember}>
-              Remove
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <RemoveTeamMemberDialog
+        isOpen={isRemoveDialogOpen}
+        onClose={() => setIsRemoveDialogOpen(false)}
+        onConfirm={confirmRemoveMember}
+        email={memberToRemove?.invitee_email || ""}
+        isPendingInvitation={memberToRemove?.invitation_status === "pending"}
+      />
     </div>
   )
 }
