@@ -48,9 +48,71 @@ Deno.serve(async (req) => {
         to: email,
         subject: `Invitation to join ${teamName}`,
         html: `
-          <h1>You've been invited to join ${teamName}</h1>
-          <p>Click the link below to accept the invitation:</p>
-          <a href="${APP_URL}/login">Accept Invitation</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Invitation to join ${teamName}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        p {
+            margin: 10px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #3498db;
+            color: #ffffff;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 10px;
+            }
+            .button {
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Invitation to join ${teamName}</h2>
+        <p>You've been invited to join the ${teamName} team on PentestGPT. Click the button below to accept:</p>
+        <p><a href="${APP_URL}/login" class="button" target="_blank">Accept Invitation</a></p>
+    </div>
+</body>
+</html>
         `,
       }),
     });

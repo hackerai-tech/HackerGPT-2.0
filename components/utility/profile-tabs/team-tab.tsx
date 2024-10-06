@@ -123,21 +123,29 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
               key={member.invitee_email}
               className="flex items-center justify-between border-b py-1 last:border-b-0"
             >
-              <div>
-                <p className="text-sm font-medium">{member.invitee_email}</p>
-                <p className="text-muted-foreground text-xs">
+              <div className="mr-2 min-w-0 grow">
+                <div className="scrollbar-hide overflow-x-auto">
+                  <p className="whitespace-nowrap text-sm font-medium">
+                    {member.invitee_email}
+                  </p>
+                </div>
+                <p className="text-muted-foreground truncate text-xs">
                   {member.invitation_status === "accepted"
                     ? `Joined ${formatDate(member.invitation_updated_at)}`
                     : "Pending"}
                 </p>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex shrink-0 items-center space-x-2">
                 <span
-                  className={`rounded px-2 py-0.5 text-xs ${isTeamAdmin(member) ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
+                  className={`rounded px-2 py-0.5 text-xs ${
+                    isTeamAdmin(member)
+                      ? "bg-blue-100 text-blue-800"
+                      : "bg-gray-100 text-gray-800"
+                  }`}
                 >
                   {roleToLabel(member.member_role)}
                 </span>
-                {isAdmin && (
+                {isAdmin && member.member_role !== "owner" && (
                   <DropdownMenu>
                     <DropdownMenuTrigger>
                       <MoreHorizontal className="size-4 text-gray-500" />
