@@ -3,6 +3,7 @@
 // This enables autocomplete, go to definition, etc.
 
 // @ts-nocheck
+import { corsHeaders } from '../_shared/cors.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const APP_URL = Deno.env.get('APP_URL')
@@ -12,16 +13,17 @@ interface InvitationEmailParams {
   teamName: string
 }
 
-const createResponse = (data: object, status: number): Response => {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' }
-  });
-};
-
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response('Method not allowed', { 
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 
   try {
@@ -55,12 +57,18 @@ Deno.serve(async (req) => {
 
     const data = await res.json();
 
-    return createResponse({ success: true, data }, 200);
+    return new Response(JSON.stringify({ success: true, data }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error) {
     console.error('Error in send-invitation-email:', error);
-    return createResponse({ 
+    return new Response(JSON.stringify({ 
       success: false, 
       error: error instanceof Error ? error.message : 'An unknown error occurred' 
-    }, 400);
+    }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
