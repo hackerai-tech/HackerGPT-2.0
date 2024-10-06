@@ -64,15 +64,55 @@ export const removeUserFromTeam = async (teamId: string, email: string) => {
   return data
 }
 
-export const inviteUserToTeam = async (teamId: string, email: string) => {
-  const { data, error } = await supabase.rpc("invite_user_to_team", {
-    p_team_id: teamId,
-    p_invitee_email: email
-  })
+export const inviteUserToTeam = async (
+  teamId: string,
+  teamName: string,
+  email: string
+) => {
+  try {
+    const { data, error } = await supabase.rpc("invite_user_to_team", {
+      p_team_id: teamId,
+      p_invitee_email: email
+    })
 
-  if (error) throw error
+    if (error) {
+      if (
+        error.message.includes(
+          "User already has a team, subscription, or pending invitation"
+        )
+      ) {
+        throw new Error("User already has a team or pending invitation")
+      }
+      throw error
+    }
 
-  return data
+    // Only send invitation email if the RPC call was successful
+    await sendInvitationEmail(email, teamName)
+
+    return data
+  } catch (error) {
+    console.error("Error in inviteUserToTeam:", error)
+    throw error
+  }
+}
+
+async function sendInvitationEmail(email: string, teamName: string) {
+  const { data, error } = await supabase.functions.invoke(
+    "send-invitation-email",
+    {
+      body: { email, teamName }
+    }
+  )
+
+  if (error) {
+    console.error("Error sending invitation email:", error)
+    throw new Error("Failed to send invitation email")
+  }
+
+  if (!data.success) {
+    console.error("Failed to send invitation email:", data.error)
+    throw new Error(data.error || "Failed to send invitation email")
+  }
 }
 
 export const acceptTeamInvitation = async (invitationId: string) => {

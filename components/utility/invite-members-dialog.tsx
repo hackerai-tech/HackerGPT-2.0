@@ -27,7 +27,11 @@ export const InviteMembersDialog: FC<InviteMembersDialogProps> = ({
       return
     }
     try {
-      await inviteUserToTeam(teamMembers[0].team_id, email)
+      await inviteUserToTeam(
+        teamMembers[0].team_id,
+        teamMembers[0].team_name,
+        email
+      )
       await refreshTeamMembers()
 
       toast.success(`Invitation sent to ${email}`)
@@ -35,9 +39,11 @@ export const InviteMembersDialog: FC<InviteMembersDialogProps> = ({
       onClose()
     } catch (error: any) {
       console.error("Error inviting user:", error)
-      toast.error(
-        error.message || "Failed to send invitation. Please try again."
-      )
+      if (error.message === "User already has a team or pending invitation") {
+        toast.error("This user already has a team or pending invitation")
+      } else {
+        toast.error("Failed to send invitation. Please try again.")
+      }
     }
   }
 
