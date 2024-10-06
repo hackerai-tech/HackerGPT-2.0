@@ -19,6 +19,25 @@ import { z } from "zod"
 import { encode, decode } from "gpt-tokenizer"
 
 export const runtime: ServerRuntime = "edge"
+export const preferredRegion = [
+  "iad1",
+  "arn1",
+  "bom1",
+  "cdg1",
+  "cle1",
+  "cpt1",
+  "dub1",
+  "fra1",
+  "gru1",
+  "hnd1",
+  "icn1",
+  "kix1",
+  "lhr1",
+  "pdx1",
+  "sfo1",
+  "sin1",
+  "syd1"
+]
 
 const MAX_TOKENS = 32000
 const INITIAL_TOKENS = 1000
@@ -64,16 +83,9 @@ export async function POST(request: Request) {
       messages.pop()
     }
 
-    const providerHeaders = {
-      Authorization: `Bearer ${llmConfig.openrouter.apiKey}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": `https://hacktheworld.com/terminal`,
-      "X-Title": "terminal"
-    }
-
-    const openrouter = createOpenAI({
-      baseUrl: llmConfig.openrouter.baseUrl,
-      headers: providerHeaders
+    const openai = createOpenAI({
+      baseUrl: llmConfig.openai.baseUrl,
+      apiKey: llmConfig.openai.apiKey
     })
 
     let finalFinishReason: string = "unknown"
@@ -89,7 +101,7 @@ export async function POST(request: Request) {
           let terminalOutput = ""
 
           const { textStream, finishReason } = await streamText({
-            model: openrouter("openai/gpt-4o-2024-08-06"),
+            model: openai("gpt-4o-2024-08-06"),
             temperature: 0.5,
             maxTokens: 1024,
             messages: toVercelChatMessages(messages, true),
