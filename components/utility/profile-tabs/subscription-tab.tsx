@@ -29,7 +29,8 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
     isPremiumSubscription,
     subscriptionStatus,
     updateSubscription,
-    profile
+    profile,
+    refreshTeamMembers
   } = useContext(PentestGPTContext)
 
   const redirectToBillingPortal = async () => {
@@ -60,6 +61,8 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
           data.error || "An error occurred while restoring the subscription"
         )
       }
+
+      await refreshTeamMembers()
 
       if (data.message) {
         toast.warning(data.message)

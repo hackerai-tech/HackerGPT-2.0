@@ -10,7 +10,8 @@ import { useContext, useEffect } from "react"
 import { fetchHostedModels } from "@/lib/models/fetch-models"
 
 export default function SetupPage() {
-  const { setProfile, setAvailableHostedModels } = useContext(PentestGPTContext)
+  const { setProfile, setAvailableHostedModels, refreshTeamMembers } =
+    useContext(PentestGPTContext)
   const router = useRouter()
 
   useEffect(() => {
@@ -41,10 +42,12 @@ export default function SetupPage() {
         setAvailableHostedModels(data.hostedModels)
       }
 
+      refreshTeamMembers()
+
       const homeWorkspaceId = await getHomeWorkspaceByUserId(user.id)
       router.push(`/${homeWorkspaceId}/chat`)
     })()
-  }, [router, setProfile, setAvailableHostedModels])
+  }, [router, setProfile, setAvailableHostedModels, refreshTeamMembers])
 
   return null
 }

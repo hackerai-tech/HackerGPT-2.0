@@ -25,10 +25,17 @@ import { PersonalizationTab } from "./profile-tabs/personalization-tab"
 import { ProfileTab } from "./profile-tabs/profile-tab"
 import { SubscriptionTab } from "./profile-tabs/subscription-tab"
 import { TeamTab } from "./profile-tabs/team-tab"
+import { TeamRole } from "@/lib/team-utils"
 
 export const Settings: FC = () => {
-  const { profile, setProfile, envKeyMap, setAvailableHostedModels, isMobile } =
-    useContext(PentestGPTContext)
+  const {
+    profile,
+    setProfile,
+    envKeyMap,
+    setAvailableHostedModels,
+    isMobile,
+    membershipData
+  } = useContext(PentestGPTContext)
 
   const router = useRouter()
 
@@ -130,7 +137,18 @@ export const Settings: FC = () => {
     { value: "personalization", icon: IconUserHeart, label: "Personalization" },
     { value: "subscription", icon: IconCreditCard, label: "Subscription" },
     { value: "team", icon: IconUsers, label: "Team" }
-  ]
+  ].filter(tab => {
+    // Only owners can access the subscription tab
+    if (tab.value === "subscription") {
+      return !membershipData || membershipData?.member_role === TeamRole.OWNER
+    }
+
+    if (tab.value === "team") {
+      return membershipData && membershipData?.invitation_status === "accepted"
+    }
+
+    return true
+  })
 
   const tabListClass = isMobile
     ? "mb-6 flex flex-wrap gap-2"

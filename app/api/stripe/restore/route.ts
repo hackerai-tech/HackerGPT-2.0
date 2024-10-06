@@ -91,20 +91,6 @@ async function restoreToDatabase(
     })
   }
 
-  // Check if the user has an active subscription already in Supabase
-  const { data: subscriptions, error } = await supabaseAdmin
-    .from("subscriptions")
-    .select("*")
-    .eq("status", "active")
-    .eq("user_id", user.id)
-  if (error) {
-    return { type: "error", error: "error fetching subscriptions" }
-  }
-  if (subscriptions.length > 0) {
-    // If an active subscription already exists, return it
-    return { type: "ok", value: subscriptions[0] }
-  }
-
   // Ensure the subscription has a valid customer ID from Stripe
   if (!subscription.customer || typeof subscription.customer !== "string") {
     return { type: "error", error: "invalid customer value" }

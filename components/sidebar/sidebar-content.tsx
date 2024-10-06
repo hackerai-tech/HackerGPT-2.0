@@ -5,7 +5,9 @@ import { SidebarDataList } from "./sidebar-data-list"
 import { PentestGPTContext } from "@/context/context"
 import { SidebarUpgrade } from "./sidebar-upgrade"
 import { SidebarInviteButton } from "./sidebar-invite-button"
-import { InviteMembersDialog } from "../utility/invite-members-dialog"
+import { InviteMembersDialog } from "@/components/utility/invite-members-dialog"
+import { AcceptInvitationDialog } from "@/components/utility/accept-invitation-dialog"
+import { isTeamAdmin } from "@/lib/team-utils"
 
 interface SidebarContentProps {
   contentType: ContentType
@@ -16,11 +18,25 @@ export const SidebarContent: FC<SidebarContentProps> = ({
   contentType,
   data
 }) => {
-  const { isPremiumSubscription, setShowSidebar, isMobile, subscription } =
-    useContext(PentestGPTContext)
+  const {
+    isPremiumSubscription,
+    setShowSidebar,
+    isMobile,
+    subscription,
+    membershipData,
+    teamMembers
+  } = useContext(PentestGPTContext)
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
+  const [isAcceptInviteDialogOpen, setIsAcceptInviteDialogOpen] =
+    useState(false)
 
-  const canInviteMembers = subscription?.quantity && subscription.quantity > 1
+  const isInvitationPending = membershipData?.invitation_status === "pending"
+  const canInviteMembers =
+    isTeamAdmin(membershipData) &&
+    teamMembers &&
+    teamMembers.length < (subscription?.quantity || 0)
+
+  console.log(membershipData)
 
   const handleSidebarVisibility = () => {
     if (isMobile) {
@@ -30,6 +46,10 @@ export const SidebarContent: FC<SidebarContentProps> = ({
 
   const handleInvite = () => {
     setIsInviteDialogOpen(true)
+  }
+
+  const handleAcceptInvitation = () => {
+    setIsAcceptInviteDialogOpen(true)
   }
 
   return (
@@ -48,13 +68,29 @@ export const SidebarContent: FC<SidebarContentProps> = ({
           <SidebarInviteButton onInvite={handleInvite} />
         </div>
       )}
+      {isInvitationPending && (
+        <div className="mt-4">
+          <SidebarInviteButton
+            onInvite={handleAcceptInvitation}
+            title="Accept Invitation"
+            subtitle={`Join ${membershipData?.team_name} team.`}
+          />
+        </div>
+      )}
 
-      {!isPremiumSubscription && <SidebarUpgrade />}
+      {!isPremiumSubscription && !isInvitationPending && <SidebarUpgrade />}
 
-      {canInviteMembers && subscription.team_id && (
+      {canInviteMembers && subscription?.team_id && (
         <InviteMembersDialog
           isOpen={isInviteDialogOpen}
           onClose={() => setIsInviteDialogOpen(false)}
+        />
+      )}
+
+      {isInvitationPending && (
+        <AcceptInvitationDialog
+          isOpen={isAcceptInviteDialogOpen}
+          onClose={() => setIsAcceptInviteDialogOpen(false)}
         />
       )}
     </div>

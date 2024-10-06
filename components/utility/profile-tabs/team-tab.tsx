@@ -1,6 +1,11 @@
 import { PentestGPTContext } from "@/context/context"
 import { removeUserFromTeam } from "@/db/teams"
-import { ProcessedTeamMember, TeamRole } from "@/lib/team-utils"
+import {
+  isTeamAdmin,
+  ProcessedTeamMember,
+  roleToLabel,
+  TeamRole
+} from "@/lib/team-utils"
 import {
   ChevronLeft,
   ChevronRight,
@@ -35,7 +40,7 @@ interface TeamTabProps {
 const membersPerPage = 5
 
 export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
-  const { teamMembers, subscription, refreshTeamMembers } =
+  const { teamMembers, subscription, refreshTeamMembers, membershipData } =
     useContext(PentestGPTContext)
 
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
@@ -43,6 +48,8 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
   const [memberToRemove, setMemberToRemove] =
     useState<ProcessedTeamMember | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+
+  const isAdmin = isTeamAdmin(membershipData)
 
   const handleInvite = () => {
     setIsInviteDialogOpen(true)
@@ -92,20 +99,26 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">{teamMembers?.[0]?.team_name}</h2>
-        <Button
-          onClick={handleInvite}
-          disabled={(teamMembers?.length || 0) >= (subscription?.quantity || 0)}
-          className="flex items-center"
-          size="sm"
-        >
-          <UserPlus className="mr-2 size-4" />
-          Invite
-        </Button>
+        {isAdmin && (
+          <Button
+            onClick={handleInvite}
+            disabled={
+              (teamMembers?.length || 0) >= (subscription?.quantity || 0)
+            }
+            className="flex items-center"
+            size="sm"
+          >
+            <UserPlus className="mr-2 size-4" />
+            Invite
+          </Button>
+        )}
       </div>
       <div className="space-y-2">
-        <h3 className="text-base font-semibold">
-          Team Members ({teamMembers?.length}/{subscription?.quantity})
-        </h3>
+        {isAdmin && (
+          <h3 className="text-base font-semibold">
+            Team Members ({teamMembers?.length}/{subscription?.quantity})
+          </h3>
+        )}
         <ul className="space-y-1 rounded-lg p-2">
           {currentMembers?.map(member => (
             <li
@@ -122,27 +135,25 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
               </div>
               <div className="flex items-center space-x-2">
                 <span
-                  className={`rounded px-2 py-0.5 text-xs ${member.member_role === TeamRole.ADMIN || member.member_role === TeamRole.OWNER ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
+                  className={`rounded px-2 py-0.5 text-xs ${isTeamAdmin(member) ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"}`}
                 >
-                  {member.member_role === TeamRole.ADMIN
-                    ? "Admin"
-                    : member.member_role === TeamRole.OWNER
-                      ? "Owner"
-                      : "Member"}
+                  {roleToLabel(member.member_role)}
                 </span>
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <MoreHorizontal className="size-4 text-gray-500" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      onClick={() => handleRemoveMember(member)}
-                    >
-                      <Trash2 className="mr-2 size-4" />
-                      <span>Remove</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {isAdmin && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <MoreHorizontal className="size-4 text-gray-500" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        onClick={() => handleRemoveMember(member)}
+                      >
+                        <Trash2 className="mr-2 size-4" />
+                        <span>Remove</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </li>
           ))}

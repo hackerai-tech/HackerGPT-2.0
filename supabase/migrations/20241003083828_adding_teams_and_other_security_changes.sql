@@ -61,6 +61,36 @@ CREATE POLICY "Allow read access to own team invitations"
     USING (inviter_id = auth.uid() OR invitee_email = auth.email());
 
 
+-- Function to check if user already has a team or a subscription or a invitation
+CREATE OR REPLACE FUNCTION check_user_has_team_or_subscription_or_invitation(p_user_email TEXT)
+RETURNS BOOLEAN AS $$
+DECLARE
+    v_team_id UUID;
+    v_subscription_id UUID;
+    v_invitation_id UUID;
+BEGIN
+    -- Check if the user has a team
+    SELECT team_id INTO v_team_id FROM team_members WHERE user_id = (SELECT id FROM auth.users WHERE email = p_user_email);
+
+    -- Check if the user has an active subscription
+    SELECT id INTO v_subscription_id
+    FROM subscriptions 
+    WHERE user_id = (SELECT id FROM auth.users WHERE email = p_user_email)
+    AND status = 'active'
+    LIMIT 1;
+
+    -- Check if the user has a pending invitation
+    SELECT id INTO v_invitation_id
+    FROM team_invitations
+    WHERE invitee_email = p_user_email AND status = 'pending'
+    LIMIT 1;
+
+    -- Return true if any of the conditions are met
+    RETURN v_team_id IS NOT NULL OR v_subscription_id IS NOT NULL OR v_invitation_id IS NOT NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+
 -- Function to safely get the whole team by team_id
 CREATE OR REPLACE FUNCTION get_team_members(p_team_id UUID)
 RETURNS TABLE (
@@ -79,7 +109,7 @@ RETURNS TABLE (
 BEGIN
 
     IF NOT EXISTS (SELECT 1 FROM teams WHERE id = p_team_id) THEN
-        RAISE EXCEPTION 'Team not found';
+        RAISE EXCEPTION 'Team not found %', p_team_id;
     END IF;
 
     RETURN QUERY
@@ -118,7 +148,7 @@ BEGIN
             OR ti.invitee_email = auth.email()
         );
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
 -- Function to manage team creation, deletion, and member updates when a subscription changes
@@ -267,6 +297,11 @@ BEGIN
         WHERE team_id = p_team_id AND user_id = auth.uid() AND role IN ('admin', 'owner')
     ) THEN
         RAISE EXCEPTION 'Only team admins can invite members to the team';
+    END IF;
+
+    -- Check if the invitee already has a team, subscription, or pending invitation
+    IF check_user_has_team_or_subscription_or_invitation(p_invitee_email) THEN
+        RAISE EXCEPTION 'User already has a team, subscription, or pending invitation';
     END IF;
 
     -- Get the subscription for the team

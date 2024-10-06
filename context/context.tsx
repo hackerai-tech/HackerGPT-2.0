@@ -12,8 +12,12 @@ import { PluginID } from "@/types/plugins"
 import { Dispatch, SetStateAction, createContext } from "react"
 import { ContentType } from "@/types"
 import { ProcessedTeamMember } from "@/lib/team-utils"
+import { User } from "@supabase/supabase-js"
 
 interface PentestGPTContext {
+  // USER STORE
+  user: User | null
+
   // PROFILE STORE
   profile: Tables<"profiles"> | null
   setProfile: Dispatch<SetStateAction<Tables<"profiles"> | null>>
@@ -30,8 +34,9 @@ interface PentestGPTContext {
   updateSubscription: (newSubscription: Tables<"subscriptions"> | null) => void
   isPremiumSubscription: boolean
   teamMembers: ProcessedTeamMember[] | null
-  setTeamMembers: Dispatch<SetStateAction<ProcessedTeamMember[] | null>>
   refreshTeamMembers: () => Promise<void>
+  membershipData: ProcessedTeamMember | null
+
   // ITEMS STORE
   chats: Tables<"chats">[]
   setChats: Dispatch<SetStateAction<Tables<"chats">[]>>
@@ -129,6 +134,9 @@ interface PentestGPTContext {
 }
 
 export const PentestGPTContext = createContext<PentestGPTContext>({
+  // USER STORE
+  user: null,
+
   // PROFILE STORE
   profile: null,
   setProfile: () => {},
@@ -145,8 +153,8 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
   updateSubscription: () => {},
   isPremiumSubscription: false,
   teamMembers: null,
-  setTeamMembers: () => {},
   refreshTeamMembers: async () => {},
+  membershipData: null,
 
   // ITEMS STORE
   chats: [],
