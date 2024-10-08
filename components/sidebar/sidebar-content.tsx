@@ -26,17 +26,16 @@ export const SidebarContent: FC<SidebarContentProps> = ({
     membershipData,
     teamMembers
   } = useContext(PentestGPTContext)
+  const isInvitationPending = membershipData?.invitation_status === "pending"
+
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
   const [isAcceptInviteDialogOpen, setIsAcceptInviteDialogOpen] =
-    useState(false)
+    useState(isInvitationPending)
 
-  const isInvitationPending = membershipData?.invitation_status === "pending"
   const canInviteMembers =
     isTeamAdmin(membershipData) &&
     teamMembers &&
     teamMembers.length < (subscription?.quantity || 0)
-
-  console.log(membershipData)
 
   const handleSidebarVisibility = () => {
     if (isMobile) {

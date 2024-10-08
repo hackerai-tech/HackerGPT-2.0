@@ -1,7 +1,6 @@
-import { getServerUserAndProfile } from '@/lib/server/server-chat-helpers'
+import { getServerUserAndProfile } from "@/lib/server/server-chat-helpers"
 import { createSupabaseAdminClient } from "@/lib/server/server-utils"
-import { NextResponse } from 'next/server'
-
+import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
   try {
@@ -12,72 +11,77 @@ export async function POST(req: Request) {
     const APP_URL = process.env.NEXT_PUBLIC_APP_URL
 
     if (!user || !profile) {
-      throw new Error('Unauthorized')
+      throw new Error("Unauthorized")
     }
 
     const { data: inviterTeam, error: inviterTeamError } = await supabaseAdmin
-      .from('team_members')
-      .select('*, teams(name)')
-      .eq('user_id', user.id)
+      .from("team_members")
+      .select("*, teams(name)")
+      .eq("user_id", user.id)
       .single()
 
     if (inviterTeamError) {
-      throw new Error('Inviter team not found')
+      throw new Error("Inviter team not found")
     }
 
     const { data: invite, error: inviteError } = await supabaseAdmin
-      .from('team_invitations')
-      .select('*, teams(name)')
-      .eq('invitee_email', email)
-      .eq('team_id', inviterTeam.team_id)
+      .from("team_invitations")
+      .select("*, teams(name)")
+      .eq("invitee_email", email)
+      .eq("team_id", inviterTeam.team_id)
       .single()
 
     console.log("invite", invite)
 
     if (inviteError || !invite) {
-      throw new Error('Invite not found')
+      throw new Error("Invite not found")
     }
 
     let emailSent = false
-    let emailMessage = 'Invitation sent, but email delivery is not configured.'
+    let emailMessage = "Invitation sent, but email delivery is not configured."
 
     if (RESEND_API_KEY && invite.teams?.name) {
-
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`
         },
         body: JSON.stringify({
-          from: 'PentestGPT <noreply@pentestgpt.ai>',
+          from: "PentestGPT <noreply@pentestgpt.ai>",
           to: email,
           subject: `Invitation to join ${invite.teams?.name}`,
-          html: getInvitationEmailHtml(invite.teams?.name, APP_URL + "/login"),
-        }),
+          html: getInvitationEmailHtml(invite.teams?.name, APP_URL + "/login")
+        })
       })
 
       emailSent = true
-      emailMessage = 'Invitation sent successfully.'
+      emailMessage = "Invitation sent successfully."
     }
 
-    return NextResponse.json(
-      { success: true, message: 'Invitation sent', emailSent, emailMessage },
-    )
+    return NextResponse.json({
+      success: true,
+      message: "Invitation sent",
+      emailSent,
+      emailMessage
+    })
   } catch (error) {
-    console.error('Error in send-invite:', error)
+    console.error("Error in send-invite:", error)
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'An unknown error occurred',
+        error:
+          error instanceof Error ? error.message : "An unknown error occurred"
       },
       { status: 400 }
     )
   }
 }
 
-
-const getInvitationEmailHtml = (teamName: string, url: string) => `<!DOCTYPE html>
+const getInvitationEmailHtml = (
+  teamName: string,
+  url: string
+) => `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
