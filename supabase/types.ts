@@ -879,6 +879,12 @@ export interface Database {
         }
         Returns: boolean
       }
+      check_user_has_team_or_subscription_or_invitation: {
+        Args: {
+          p_user_email: string
+        }
+        Returns: boolean
+      }
       create_duplicate_messages_for_new_chat: {
         Args: {
           old_chat_id: string

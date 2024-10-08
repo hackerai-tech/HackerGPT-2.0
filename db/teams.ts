@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase/browser-client"
+import { toast } from "sonner"
 
 export const getTeamMembersByTeamId = async (
   userId: string,
@@ -34,7 +35,7 @@ export const getTeamMembersByTeamId = async (
   }
 
   if (!teamId) {
-    throw new Error("Team not found")
+    return []
   }
 
   console.log("teamId", teamId)
@@ -87,7 +88,7 @@ export const inviteUserToTeam = async (
     }
 
     // Only send invitation email if the RPC call was successful
-    await sendInvitationEmail(email, teamName)
+    await sendInvitationEmail(email)
 
     return data
   } catch (error) {
@@ -96,22 +97,30 @@ export const inviteUserToTeam = async (
   }
 }
 
-async function sendInvitationEmail(email: string, teamName: string) {
-  const { data, error } = await supabase.functions.invoke(
-    "send-invitation-email",
-    {
-      body: { email, teamName }
-    }
-  )
+async function sendInvitationEmail(email: string) {
+  const response = await fetch("/api/subscription/send-invite", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email })
+  })
 
-  if (error) {
-    console.error("Error sending invitation email:", error)
-    throw new Error("Failed to send invitation email")
+  const data = await response.json()
+
+  if (!response.ok) {
+    throw new Error(
+      data.error || "An error occurred while restoring the subscription"
+    )
   }
 
   if (!data.success) {
     console.error("Failed to send invitation email:", data.error)
     throw new Error(data.error || "Failed to send invitation email")
+  }
+
+  if (data.emailSent) {
+    toast.success("Invitation sent successfully.")
   }
 }
 
