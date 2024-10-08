@@ -1,5 +1,5 @@
 import { ContentType, DataListType } from "@/types"
-import { FC, useContext, useState } from "react"
+import { FC, useContext, useEffect, useState } from "react"
 import { SidebarCreateButtons } from "./sidebar-create-buttons"
 import { SidebarDataList } from "./sidebar-data-list"
 import { PentestGPTContext } from "@/context/context"
@@ -32,6 +32,11 @@ export const SidebarContent: FC<SidebarContentProps> = ({
   const [isAcceptInviteDialogOpen, setIsAcceptInviteDialogOpen] =
     useState(isInvitationPending)
 
+  useEffect(() => {
+    setIsAcceptInviteDialogOpen(isInvitationPending)
+  }, [isInvitationPending])
+
+  console.log(isAcceptInviteDialogOpen, membershipData, isInvitationPending)
   const canInviteMembers =
     isTeamAdmin(membershipData) &&
     teamMembers &&

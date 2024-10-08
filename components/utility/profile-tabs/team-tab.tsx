@@ -1,11 +1,6 @@
 import { PentestGPTContext } from "@/context/context"
 import { removeUserFromTeam } from "@/db/teams"
-import {
-  isTeamAdmin,
-  ProcessedTeamMember,
-  roleToLabel,
-  TeamRole
-} from "@/lib/team-utils"
+import { isTeamAdmin, ProcessedTeamMember, roleToLabel } from "@/lib/team-utils"
 import {
   ChevronLeft,
   ChevronRight,
@@ -132,7 +127,9 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
                 <p className="text-muted-foreground truncate text-xs">
                   {member.invitation_status === "accepted"
                     ? `Joined ${formatDate(member.invitation_updated_at)}`
-                    : "Pending"}
+                    : member.invitation_status === "pending"
+                      ? "Pending"
+                      : "Rejected"}
                 </p>
               </div>
               <div className="flex shrink-0 items-center space-x-2">

@@ -133,3 +133,13 @@ export const acceptTeamInvitation = async (invitationId: string) => {
 
   return data
 }
+
+export const rejectTeamInvitation = async (invitationId: string) => {
+  const { data, error } = await supabase.rpc("reject_team_invitation", {
+    p_invitation_id: invitationId
+  })
+
+  if (error) throw error
+
+  return data
+}

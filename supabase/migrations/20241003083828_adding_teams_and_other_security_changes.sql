@@ -79,10 +79,10 @@ BEGIN
     AND status = 'active'
     LIMIT 1;
 
-    -- Check if the user has a pending invitation
+    -- Check if the user has a pending or accepted invitation
     SELECT id INTO v_invitation_id
     FROM team_invitations
-    WHERE invitee_email = p_user_email AND status = 'pending'
+    WHERE invitee_email = p_user_email AND status IN ('pending', 'accepted')
     LIMIT 1;
 
     -- Return true if any of the conditions are met
@@ -386,6 +386,39 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Grant execute permission on the function to authenticated users
 GRANT EXECUTE ON FUNCTION accept_team_invitation TO authenticated;
 
+
+CREATE OR REPLACE FUNCTION reject_team_invitation(p_invitation_id UUID)
+RETURNS BOOLEAN AS $$
+DECLARE
+    v_team_id UUID;
+    v_invitee_email TEXT;
+    v_invitation_id UUID;
+BEGIN
+    -- Get the invitation details
+    SELECT team_id, invitee_email, id INTO v_team_id, v_invitee_email, v_invitation_id
+    FROM team_invitations
+    WHERE id = p_invitation_id AND status = 'pending';
+
+    IF v_team_id IS NULL THEN
+        RAISE EXCEPTION 'Invalid or expired invitation';
+    END IF;
+
+    -- Check if the current user's email matches the invitation
+    IF auth.email() != v_invitee_email THEN
+        RAISE EXCEPTION 'This invitation is not for your email address';
+    END IF;
+
+    -- Update the invitation status
+    UPDATE team_invitations
+    SET status = 'rejected', updated_at = CURRENT_TIMESTAMP
+    WHERE id = p_invitation_id;
+
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant execute permission on the function to authenticated users
+GRANT EXECUTE ON FUNCTION reject_team_invitation TO authenticated;
 
 -- Create a new read-only policy
 DROP POLICY IF EXISTS "Allow read access to own subscriptions" ON subscriptions;

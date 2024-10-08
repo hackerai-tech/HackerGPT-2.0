@@ -1,5 +1,5 @@
 import { PentestGPTContext } from "@/context/context"
-import { acceptTeamInvitation } from "@/db/teams"
+import { acceptTeamInvitation, rejectTeamInvitation } from "@/db/teams"
 import { DialogPanel, DialogTitle } from "@headlessui/react"
 import { IconCheck, IconX } from "@tabler/icons-react"
 import { FC, useContext } from "react"
@@ -40,6 +40,25 @@ export const AcceptInvitationDialog: FC<AcceptInvitationDialogProps> = ({
     }
   }
 
+  const handleReject = async () => {
+    if (!invitation) {
+      toast.error("Invitation not found")
+      return
+    }
+
+    try {
+      await rejectTeamInvitation(membershipData?.invitation_id)
+      await refreshTeamMembers()
+      toast.success("Invitation rejected successfully")
+      onClose()
+    } catch (error: any) {
+      console.error("Error rejecting invitation:", error)
+      toast.error(
+        error.message || "Failed to reject invitation. Please try again."
+      )
+    }
+  }
+
   return (
     <TransitionedDialog isOpen={isOpen} onClose={onClose}>
       <DialogPanel
@@ -66,9 +85,13 @@ export const AcceptInvitationDialog: FC<AcceptInvitationDialogProps> = ({
             You have been invited to join the &quot;{membershipData?.team_name}
             &quot; team. Would you like to accept the invitation?
           </p>
-          <Button onClick={handleAccept} className="w-full">
+          <Button onClick={handleAccept} className="mb-2 w-full">
             <IconCheck size={20} className="mr-2" />
             Accept Invitation
+          </Button>
+          <Button onClick={handleReject} className="w-full" variant="secondary">
+            <IconX size={20} className="mr-2" />
+            Reject Invitation
           </Button>
         </div>
       </DialogPanel>

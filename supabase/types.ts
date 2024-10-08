@@ -1014,6 +1014,12 @@ export interface Database {
         }
         Returns: boolean
       }
+      reject_team_invitation: {
+        Args: {
+          p_invitation_id: string
+        }
+        Returns: boolean
+      }
       remove_user_from_team: {
         Args: {
           p_team_id: string
