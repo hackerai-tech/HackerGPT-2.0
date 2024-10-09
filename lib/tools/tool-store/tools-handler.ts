@@ -18,10 +18,7 @@ import {
   getToolsWithAnswerPrompt
 } from "./prompts/system-prompt"
 import { PluginID } from "@/types/plugins"
-import {
-  getTerminalTemplate
-  // getFreePlugins
-} from "@/lib/tools/tool-store/tools-helper"
+import { getTerminalTemplate } from "@/lib/tools/tool-store/tools-helper"
 import { encode, decode } from "gpt-tokenizer"
 
 interface CommandGeneratorHandlerOptions {
@@ -30,6 +27,7 @@ interface CommandGeneratorHandlerOptions {
   messages: any[]
   pluginID: PluginID
   isTerminalContinuation: boolean
+  isPremium: boolean
 }
 
 const MAX_TOKENS = 32000
@@ -40,7 +38,8 @@ export async function commandGeneratorHandler({
   profile_context,
   messages,
   pluginID,
-  isTerminalContinuation
+  isTerminalContinuation,
+  isPremium
 }: CommandGeneratorHandlerOptions) {
   const customPrompt = getToolsPrompt(
     process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || "",
@@ -61,10 +60,20 @@ export async function commandGeneratorHandler({
     "X-Title": "tools-terminal"
   }
 
-  const openrouter = createOpenAI({
-    baseUrl: llmConfig.openrouter.baseUrl,
-    headers: providerHeaders
-  })
+  let provider, model
+  if (isPremium) {
+    model = "gpt-4o-2024-08-06"
+    provider = createOpenAI({
+      baseUrl: llmConfig.openai.baseUrl,
+      apiKey: llmConfig.openai.apiKey
+    })
+  } else {
+    model = "openai/gpt-4o-2024-08-06"
+    provider = createOpenAI({
+      baseUrl: llmConfig.openrouter.baseUrl,
+      headers: providerHeaders
+    })
+  }
 
   try {
     let terminalStream: ReadableStream<string> | null = null
@@ -74,11 +83,6 @@ export async function commandGeneratorHandler({
     let combinedResponse = ""
     let assistantMessage: { role: "assistant"; content: string } | null = null
     let finalFinishReason = "unknown"
-
-    // const freePlugins = getFreePlugins()
-    // const model = freePlugins.includes(pluginID)
-    //   ? "openai/gpt-4o-mini"
-    //   : "openai/gpt-4o-2024-08-06"
 
     const processIteration = async () => {
       const customPrompt =
@@ -95,7 +99,7 @@ export async function commandGeneratorHandler({
       updateSystemMessage(messages, customPrompt, profile_context)
 
       const { textStream, finishReason } = await streamText({
-        model: openrouter("openai/gpt-4o-2024-08-06"),
+        model: provider(model),
         temperature: 0.5,
         maxTokens: 1024,
         messages: toVercelChatMessages(messages, true),
