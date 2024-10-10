@@ -108,11 +108,15 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
               size="sm"
               disabled={isRefreshing}
             >
-              <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`size-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
             </Button>
             <Button
               onClick={handleInvite}
-              disabled={(teamMembers?.length || 0) >= (subscription?.quantity || 0)}
+              disabled={
+                (teamMembers?.length || 0) >= (subscription?.quantity || 0)
+              }
               className="flex items-center"
               size="sm"
             >
@@ -125,8 +129,8 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
       <div className="space-y-2">
         {isAdmin && (
           <h3 className="text-base font-semibold">
-                Team Members ({teamMembers?.length}/{subscription?.quantity})
-              </h3>
+            Team Members ({teamMembers?.length}/{subscription?.quantity})
+          </h3>
         )}
         <ul className="space-y-1 rounded-lg p-2">
           {currentMembers?.map(member => (

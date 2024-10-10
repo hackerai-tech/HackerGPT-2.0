@@ -11,7 +11,8 @@ import { Result, errStr, ok } from "../result"
 
 export async function getCheckoutUrl(
   priceId?: string,
-  teamName?: string
+  teamName?: string,
+  seatQuantity: number = 1
 ): Promise<Result<string>> {
   const supabase = createSupabaseAppServerClient()
   const user = (await supabase.auth.getUser()).data.user
@@ -73,7 +74,7 @@ export async function getCheckoutUrl(
 
   const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
     price: finalPriceId,
-    quantity: 1
+    quantity: seatQuantity
   }
 
   if (teamName) {

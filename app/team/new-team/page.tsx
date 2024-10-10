@@ -30,6 +30,7 @@ const NewTeamPage: FC = () => {
   const [isYearly, setIsYearly] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [userEmail, setUserEmail] = useState("")
+  const [seatQuantity, setSeatQuantity] = useState(1)
   const { theme } = useTheme()
 
   useEffect(() => {
@@ -80,11 +81,16 @@ const NewTeamPage: FC = () => {
       return
     }
 
+    if (seatQuantity < 1) {
+      toast.error("Seat quantity must be at least 1")
+      return
+    }
+
     setIsLoading(true)
 
     try {
       const priceId = isYearly ? YEARLY_TEAM_PRICE_ID : MONTHLY_TEAM_PRICE_ID
-      const result = await getCheckoutUrl(priceId, teamName)
+      const result = await getCheckoutUrl(priceId, teamName, seatQuantity)
 
       if (result.type === "error") {
         throw new Error(result.error.message)
@@ -167,6 +173,24 @@ const NewTeamPage: FC = () => {
               <p className="text-muted-foreground mt-1 text-xs">
                 {teamName.length}/{MAX_TEAM_NAME_LENGTH} characters
               </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="seatQuantity"
+                className="text-muted-foreground mb-2 block"
+              >
+                Number of users
+              </label>
+              <Input
+                id="seatQuantity"
+                type="number"
+                value={seatQuantity}
+                onChange={e =>
+                  setSeatQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                }
+                min="1"
+              />
             </div>
 
             <div className="flex items-center justify-between">
