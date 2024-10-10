@@ -70,7 +70,7 @@ export const ChatHelp: FC<ChatHelpProps> = () => {
     },
     {
       icon: IconExternalLink,
-      text: "Help & FAQ",
+      text: "Help & Support",
       href: "https://help.hackerai.co/en/collections/10615918-pentestgpt"
     },
     {

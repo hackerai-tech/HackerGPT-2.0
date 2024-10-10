@@ -131,7 +131,6 @@ export const UpgradePlan: FC = () => {
           />
         </div>
       </div>
-
       <div className="flex grow flex-col items-center justify-center p-2 md:mt-16 md:p-8">
         <span className="mb-8 text-center text-2xl font-semibold md:text-3xl">
           Upgrade your plan
@@ -176,9 +175,6 @@ export const UpgradePlan: FC = () => {
           >
             <PlanStatement>Limited access to PGPT-3.5</PlanStatement>
             <PlanStatement>Limited access to plugins</PlanStatement>
-            {/* <PlanStatement>
-              Limited access to web search and browsing
-            </PlanStatement> */}
           </PlanCard>
 
           {/* Pro Plan */}
@@ -203,8 +199,7 @@ export const UpgradePlan: FC = () => {
           </PlanCard>
         </div>
       </div>
-
-      <div className="h-8"></div>
+      <div className="h-16"></div> {/* Increased footer space */}
     </div>
   )
 }
@@ -255,6 +250,18 @@ const PlanCard: FC<PlanCardProps> = ({
       <span>{buttonText}</span>
     </Button>
     <div className="grow space-y-3">{children}</div>
+    {title === "Pro" && (
+      <div className="mb-1 mt-6 text-left">
+        <a
+          href="https://help.hackerai.co/en/articles/9982061-what-is-pentestgpt-pro"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:text-primary/80 text-xs font-medium underline"
+        >
+          Learn more about usage limits and FAQs
+        </a>
+      </div>
+    )}
   </div>
 )
 
