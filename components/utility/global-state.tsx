@@ -207,15 +207,20 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         userFromSession.email,
         subscription?.team_id
       )
-      setTeamMembers(members)
 
       const membershipData = members?.find(
         member =>
           member.member_user_id === userFromSession.id ||
           member.invitee_email === userFromSession.email
       )
-      setMembershipData(membershipData ?? null)
-      console.log({ members, membershipData })
+
+      if (membershipData?.invitation_status !== "rejected") {
+        setTeamMembers(members)
+        setMembershipData(membershipData ?? null)
+      } else {
+        setTeamMembers(null)
+        setMembershipData(null)
+      }
 
       if (
         (!subscription || subscription.status !== "active") &&

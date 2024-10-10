@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MoreHorizontal,
+  RefreshCw,
   Trash2,
   UserPlus
 } from "lucide-react"
@@ -36,6 +37,7 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
   const [memberToRemove, setMemberToRemove] =
     useState<ProcessedTeamMember | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const isAdmin = isTeamAdmin(membershipData)
 
@@ -70,6 +72,12 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
     }
   }
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    await refreshTeamMembers()
+    setIsRefreshing(false)
+  }
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return date.toLocaleDateString("en-US", {
@@ -93,24 +101,32 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">{teamMembers?.[0]?.team_name}</h2>
         {isAdmin && (
-          <Button
-            onClick={handleInvite}
-            disabled={
-              (teamMembers?.length || 0) >= (subscription?.quantity || 0)
-            }
-            className="flex items-center"
-            size="sm"
-          >
-            <UserPlus className="mr-2 size-4" />
-            Invite
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={handleRefresh}
+              className="flex items-center"
+              size="sm"
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`size-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </Button>
+            <Button
+              onClick={handleInvite}
+              disabled={(teamMembers?.length || 0) >= (subscription?.quantity || 0)}
+              className="flex items-center"
+              size="sm"
+            >
+              <UserPlus className="mr-2 size-4" />
+              Invite
+            </Button>
+          </div>
         )}
       </div>
       <div className="space-y-2">
         {isAdmin && (
           <h3 className="text-base font-semibold">
-            Team Members ({teamMembers?.length}/{subscription?.quantity})
-          </h3>
+                Team Members ({teamMembers?.length}/{subscription?.quantity})
+              </h3>
         )}
         <ul className="space-y-1 rounded-lg p-2">
           {currentMembers?.map(member => (
