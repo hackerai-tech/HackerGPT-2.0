@@ -20,7 +20,7 @@ export const SidebarUpgrade: FC = () => {
           <div className="flex flex-col">
             <div className="text-sm font-semibold">Upgrade plan</div>
             <div className="text-muted-foreground mt-1 text-xs">
-              Get PGPT-4, Terminal, and more
+              Get PGPT-Large, Terminal, and more
             </div>
           </div>
         </div>

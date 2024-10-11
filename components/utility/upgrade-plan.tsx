@@ -173,7 +173,7 @@ export const UpgradePlan: FC = () => {
             buttonText="Your current plan"
             buttonDisabled
           >
-            <PlanStatement>Limited access to PGPT-3.5</PlanStatement>
+            <PlanStatement>Limited access to PGPT-Small</PlanStatement>
             <PlanStatement>Limited access to plugins</PlanStatement>
           </PlanCard>
 
@@ -187,7 +187,9 @@ export const UpgradePlan: FC = () => {
             savingsNote={getYearlySavingsNote()}
           >
             <PlanStatement>Early access to new features</PlanStatement>
-            <PlanStatement>Access to PGPT-4, GPT-4o, PGPT-3.5</PlanStatement>
+            <PlanStatement>
+              Access to PGPT-Large, GPT-4o, PGPT-Small
+            </PlanStatement>
             <PlanStatement>
               Access to file uploads, vision, web search and browsing
             </PlanStatement>
