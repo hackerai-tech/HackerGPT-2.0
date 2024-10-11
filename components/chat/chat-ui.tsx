@@ -302,7 +302,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       <div
         className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
       >
-        <div className="mt-2 max-w-[200px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
+        <div className="mt-2 max-w-[230px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
           <ChatSettings />
         </div>
       </div>
