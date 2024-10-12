@@ -87,8 +87,9 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
   }
 
   const showRestoreSubscription =
-    subscriptionStatus === "free" &&
-    process.env.NEXT_PUBLIC_ENABLE_STRIPE_RESTORE === "true"
+    (subscriptionStatus === "free" &&
+      process.env.NEXT_PUBLIC_ENABLE_STRIPE_RESTORE === "true") ||
+    process.env.NODE_ENV === "development"
 
   return (
     <TabsContent className="space-y-4" value={value}>

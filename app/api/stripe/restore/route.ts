@@ -83,14 +83,6 @@ async function restoreToDatabase(
   // Retrieve the subscription details from Stripe
   const subscription = await stripe.subscriptions.retrieve(subscriptionId)
 
-  // Check if the subscription is already set to cancel at the period end
-  if (subscription.cancel_at_period_end) {
-    // If so, update the subscription to ensure it does not cancel at the period end
-    await stripe.subscriptions.update(subscriptionId, {
-      cancel_at_period_end: false
-    })
-  }
-
   // Ensure the subscription has a valid customer ID from Stripe
   if (!subscription.customer || typeof subscription.customer !== "string") {
     return { type: "error", error: "invalid customer value" }
@@ -102,10 +94,40 @@ async function restoreToDatabase(
 
   // Get the quantity (number of seats) for team plans
   const quantity = subscription.items.data[0].quantity || 1
+  // Check if the subscription already exists in the database
+  const existingSubscription = await supabaseAdmin
+    .from("subscriptions")
+    .select("*")
+    .eq("subscription_id", subscriptionId)
+    .single()
 
-  // Restore subscription data in Supabase without attempting to update the Stripe subscription
-  const result = await supabaseAdmin.from("subscriptions").upsert(
-    {
+  let result
+  if (existingSubscription.data) {
+    // If the subscription exists, update it
+    result = await supabaseAdmin
+      .from("subscriptions")
+      .update({
+        user_id: user.id,
+        customer_id: subscription.customer,
+        status: subscription.status,
+        start_date: unixToDateString(subscription.current_period_start),
+        cancel_at: subscription.cancel_at
+          ? unixToDateString(subscription.cancel_at)
+          : null,
+        canceled_at: subscription.canceled_at
+          ? unixToDateString(subscription.canceled_at)
+          : null,
+        ended_at: subscription.ended_at
+          ? unixToDateString(subscription.ended_at)
+          : null,
+        plan_type: planType,
+        team_name: teamName,
+        quantity: quantity
+      })
+      .eq("subscription_id", subscriptionId)
+  } else {
+    // If the subscription doesn't exist, insert it
+    result = await supabaseAdmin.from("subscriptions").insert({
       subscription_id: subscriptionId,
       user_id: user.id,
       customer_id: subscription.customer,
@@ -123,9 +145,8 @@ async function restoreToDatabase(
       plan_type: planType,
       team_name: teamName,
       quantity: quantity
-    },
-    { onConflict: "subscription_id" }
-  )
+    })
+  }
   if (result.error) {
     console.error(result.error)
     return { type: "error", error: "error upserting subscription" }
