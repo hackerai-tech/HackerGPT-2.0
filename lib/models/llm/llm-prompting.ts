@@ -138,7 +138,6 @@ Important:
 - PentestGPT must NEVER simulate or fake terminal results.
 - Always use the actual terminal tool for command execution.
 - Do not provide hypothetical or imagined command outputs.
-- One terminal execution per message allowed.
 - Combine multiple commands using "&&", ";", or appropriate operators.
 - Do not use multiple terminal tool calls for a single request.
 - For potentially long-running commands, provide a quick version by default \
@@ -150,7 +149,6 @@ PentestGPT will analyze the situation, provide reasoning, and attempt to solve t
 by executing a different, more appropriate command. This will be done only once to avoid \
 creating a loop. After the attempt, PentestGPT will provide a detailed explanation of the \
 situation.
-
 </terminal_instructions>`
   }
 

@@ -4,9 +4,11 @@ import { PROFILE_CONTEXT_MAX } from "@/db/limits"
 import { updateProfile } from "@/db/profile"
 import { LLM_LIST_MAP } from "@/lib/models/llm/llm-list"
 import { supabase } from "@/lib/supabase/browser-client"
+import { TeamRole } from "@/lib/team-utils"
 import { DialogPanel, DialogTitle } from "@headlessui/react"
 import {
   IconCreditCard,
+  IconDatabaseCog,
   IconSettings,
   IconUserHeart,
   IconUsers,
@@ -21,11 +23,11 @@ import { Button } from "../ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { DeleteAllChatsDialog } from "./delete-all-chats-dialog"
+import { DataControlsTab } from "./profile-tabs/data-controls-tab"
 import { PersonalizationTab } from "./profile-tabs/personalization-tab"
 import { ProfileTab } from "./profile-tabs/profile-tab"
 import { SubscriptionTab } from "./profile-tabs/subscription-tab"
 import { TeamTab } from "./profile-tabs/team-tab"
-import { TeamRole } from "@/lib/team-utils"
 
 export const Settings: FC = () => {
   const {
@@ -136,7 +138,8 @@ export const Settings: FC = () => {
     { value: "profile", icon: IconSettings, label: "General" },
     { value: "personalization", icon: IconUserHeart, label: "Personalization" },
     { value: "subscription", icon: IconCreditCard, label: "Subscription" },
-    { value: "team", icon: IconUsers, label: "Team" }
+    { value: "team", icon: IconUsers, label: "Team" },
+    { value: "data-controls", icon: IconDatabaseCog, label: "Data Controls" }
   ].filter(tab => {
     // Only owners can access the subscription tab
     if (tab.value === "subscription") {
@@ -152,7 +155,7 @@ export const Settings: FC = () => {
 
   const tabListClass = isMobile
     ? "mb-6 flex flex-wrap gap-2"
-    : "mr-8 mt-6 w-1/4 flex-col space-y-2"
+    : "mr-8 mt-6 w-1/4 flex-col space-y-2 pt-10"
 
   const tabTriggerClass = `
     ${isMobile ? "flex-shrink flex-grow-0 min-w-0" : "w-full justify-start"}
@@ -247,6 +250,10 @@ export const Settings: FC = () => {
 
               <TabsContent value="team">
                 <TeamTab value="team" isMobile={isMobile} />
+              </TabsContent>
+
+              <TabsContent value="data-controls">
+                <DataControlsTab value="data-controls" />
               </TabsContent>
             </div>
           </Tabs>
