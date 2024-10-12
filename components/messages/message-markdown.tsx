@@ -27,7 +27,7 @@ export const MessageMarkdown: FC<MessageMarkdownProps> = ({
 }) => {
   if (!isAssistant) {
     return (
-      <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 bg-secondary w-[80vw] min-w-full space-y-6 break-words rounded border p-2 md:w-full">
+      <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 bg-secondary min-w-full max-w-[80vw] space-y-6 break-words rounded border p-2 md:w-full">
         <p className="mb-2 whitespace-pre-wrap last:mb-0">{content}</p>
       </div>
     )

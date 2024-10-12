@@ -33,6 +33,7 @@ import {
 } from "../chat/chat-hooks/PluginProvider"
 import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { toast } from "sonner"
+import { KeyboardShortcutsPopup } from "../chat/keyboard-shortcuts-popup"
 
 export const SIDEBAR_WIDTH = 350
 
@@ -64,6 +65,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
   const { handleSelectDeviceFile } = useSelectFileHandler()
   const [isDragging, setIsDragging] = useState(false)
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false)
+  const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
 
   const toggleButtonRef = useRef<HTMLButtonElement>(null)
@@ -76,6 +78,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
   }, [tabValue, isMobile, setShowSidebar])
 
   useHotkey("s", () => setShowSidebar(prev => !prev))
+  useHotkey("/", () => setIsKeyboardShortcutsOpen(true), { shiftKey: false })
 
   const handleOverlayClick = useCallback(() => {
     if (isMobile && showSidebar) {
@@ -262,6 +265,11 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
           </Tabs>
         )}
       </div>
+
+      <KeyboardShortcutsPopup
+        isOpen={isKeyboardShortcutsOpen}
+        onClose={() => setIsKeyboardShortcutsOpen(false)}
+      />
 
       <div
         className={cn(

@@ -53,9 +53,9 @@ export async function buildFinalMessages(
   if (chatSettings.model === GPT4o.modelId) {
     CHUNK_SIZE = 14000
   } else if (chatSettings.model === "mistral-large") {
-    CHUNK_SIZE = 14000
+    CHUNK_SIZE = 10000
   } else if (chatSettings.model === "mistral-medium") {
-    CHUNK_SIZE = 14000
+    CHUNK_SIZE = 10000
   }
 
   // Lower chunk size for terminal plugins

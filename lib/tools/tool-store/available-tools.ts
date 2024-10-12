@@ -73,6 +73,54 @@ export const availablePlugins: PluginSummary[] = [
   },
   {
     id: 2,
+    name: "Terminal",
+    value: PluginID.TERMINAL,
+    categories: ["utils"],
+    icon: "https://cdn-icons-png.flaticon.com/128/5576/5576886.png",
+    invertInDarkMode: true,
+    description:
+      "Execute Bash commands, install and configure tools, and perform advanced pentesting tasks",
+    githubRepoUrl: pluginUrls.PENTESTGPT,
+    isInstalled: false,
+    isPremium: true,
+    createdAt: "2024-10-04",
+    starters: []
+  },
+  {
+    id: 3,
+    name: "CVE Map",
+    value: PluginID.CVE_MAP,
+    categories: ["utils"],
+    icon: "https://cdn-icons-png.flaticon.com/128/4337/4337922.png",
+    invertInDarkMode: true,
+    description: "Navigate the CVE jungle with ease",
+    githubRepoUrl: pluginUrls.CVE_MAP,
+    isInstalled: false,
+    isPremium: false,
+    createdAt: "2024-03-13",
+    starters: [
+      {
+        title: "Provide Me With",
+        description: "the latest CVEs with the severity of critical",
+        chatMessage:
+          "Provide me with the latest CVEs with the severity of critical."
+      },
+      {
+        title: "Provide Information About",
+        description: "CVE-2024-23897 (critical LFI in Jenkins)",
+        chatMessage:
+          "Provide information about CVE-2024-23897 (critical LFI in Jenkins)."
+      },
+      {
+        title: "CVEMap Help",
+        description: "How does the CVEMap plugin work?",
+        chatMessage: "How does the CVEMap plugin work?"
+      }
+    ]
+  },
+  // Recon tools id 10-19
+  {
+    id: 10,
     name: "Subdomain Finder",
     categories: ["recon"],
     value: PluginID.SUBDOMAIN_FINDER,
@@ -108,39 +156,43 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 3,
-    name: "CVE Map",
-    value: PluginID.CVE_MAP,
-    categories: [],
-    icon: "https://cdn-icons-png.flaticon.com/128/4337/4337922.png",
+    id: 11,
+    name: "Port Scanner",
+    value: PluginID.PORT_SCANNER,
+    categories: ["recon"],
+    icon: "https://cdn-icons-png.flaticon.com/128/7338/7338907.png",
     invertInDarkMode: true,
-    description: "Navigate the CVE jungle with ease",
-    githubRepoUrl: pluginUrls.CVE_MAP,
+    description: "Detect open ports and fingerprint services",
+    githubRepoUrl: pluginUrls.PORT_SCANNER,
     isInstalled: false,
     isPremium: false,
-    createdAt: "2024-03-13",
+    createdAt: "2024-06-29",
     starters: [
       {
-        title: "Provide Me With",
-        description: "the latest CVEs with the severity of critical",
-        chatMessage:
-          "Provide me with the latest CVEs with the severity of critical."
+        title: "Perform Light Port Scan",
+        description: "on hackerone.com (top 100 ports)",
+        chatMessage: "Perform a light port scan on hackerone.com"
       },
       {
-        title: "Provide Information About",
-        description: "CVE-2024-23897 (critical LFI in Jenkins)",
+        title: "Scan Specific Ports",
+        description: "80, 443, 8080 on hackerone.com and subdomains",
         chatMessage:
-          "Provide information about CVE-2024-23897 (critical LFI in Jenkins)."
+          "Scan ports 80, 443, and 8080 on hackerone.com and its subdomains: api.hackerone.com, docs.hackerone.com, resources.hackerone.com, gslink.hackerone.com"
       },
       {
-        title: "CVEMap Help",
-        description: "How does the CVEMap plugin work?",
-        chatMessage: "How does the CVEMap plugin work?"
+        title: "Conduct Deep Port Scan",
+        description: "on hackerone.com (top 1000 ports)",
+        chatMessage: "Conduct a deep port scan on hackerone.com"
+      },
+      {
+        title: "Port Scanner Help",
+        description: "How does the Port Scanner plugin work?",
+        chatMessage: "How does the Port Scanner plugin work?"
       }
     ]
   },
   {
-    id: 4,
+    id: 12,
     name: "WAF Detector",
     value: PluginID.WAF_DETECTOR,
     categories: ["recon"],
@@ -165,7 +217,7 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 5,
+    id: 13,
     name: "Whois Lookup",
     categories: ["recon"],
     value: PluginID.WHOIS_LOOKUP,
@@ -201,7 +253,40 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 8,
+    id: 14,
+    name: "URL Fuzzer",
+    value: PluginID.URL_FUZZER,
+    categories: ["recon"],
+    icon: "https://cdn-icons-png.flaticon.com/128/10423/10423265.png",
+    invertInDarkMode: true,
+    description: "Discover hidden files and directories",
+    githubRepoUrl: pluginUrls.URL_FUZZER,
+    isInstalled: false,
+    isPremium: true,
+    createdAt: "2024-09-17",
+    starters: [
+      {
+        title: "Quick Directory Scan",
+        description: "of google.com using common.txt",
+        chatMessage:
+          "Perform a quick directory scan on google.com using the common.txt wordlist, showing only 200 OK responses"
+      },
+      {
+        title: "Enumerate Subdomains",
+        description: "of google.com using subdomains wordlist",
+        chatMessage:
+          "Enumerate subdomains of FUZZ.google.com using subdomains wordlist, showing only 200 OK responses"
+      },
+      {
+        title: "URL Fuzzer Help",
+        description: "How does the URL Fuzzer plugin work?",
+        chatMessage: "How does the URL Fuzzer plugin work?"
+      }
+    ]
+  },
+  // Vulnerability scanners id 20-29
+  {
+    id: 20,
     name: "WordPress Scanner",
     value: PluginID.WORDPRESS_SCANNER,
     categories: ["vuln-scanners"],
@@ -238,75 +323,7 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 9,
-    name: "URL Fuzzer",
-    value: PluginID.URL_FUZZER,
-    categories: ["recon"],
-    icon: "https://cdn-icons-png.flaticon.com/128/10423/10423265.png",
-    invertInDarkMode: true,
-    description: "Discover hidden files and directories",
-    githubRepoUrl: pluginUrls.URL_FUZZER,
-    isInstalled: false,
-    isPremium: true,
-    createdAt: "2024-09-17",
-    starters: [
-      {
-        title: "Quick Directory Scan",
-        description: "of google.com using common.txt",
-        chatMessage:
-          "Perform a quick directory scan on google.com using the common.txt wordlist, showing only 200 OK responses"
-      },
-      {
-        title: "Enumerate Subdomains",
-        description: "of google.com using subdomains wordlist",
-        chatMessage:
-          "Enumerate subdomains of FUZZ.google.com using subdomains wordlist, showing only 200 OK responses"
-      },
-      {
-        title: "URL Fuzzer Help",
-        description: "How does the URL Fuzzer plugin work?",
-        chatMessage: "How does the URL Fuzzer plugin work?"
-      }
-    ]
-  },
-  {
-    id: 10,
-    name: "Port Scanner",
-    value: PluginID.PORT_SCANNER,
-    categories: ["recon"],
-    icon: "https://cdn-icons-png.flaticon.com/128/7338/7338907.png",
-    invertInDarkMode: true,
-    description: "Detect open ports and fingerprint services",
-    githubRepoUrl: pluginUrls.PORT_SCANNER,
-    isInstalled: false,
-    isPremium: false,
-    createdAt: "2024-06-29",
-    starters: [
-      {
-        title: "Perform Light Port Scan",
-        description: "on hackerone.com (top 100 ports)",
-        chatMessage: "Perform a light port scan on hackerone.com"
-      },
-      {
-        title: "Scan Specific Ports",
-        description: "80, 443, 8080 on hackerone.com and subdomains",
-        chatMessage:
-          "Scan ports 80, 443, and 8080 on hackerone.com and its subdomains: api.hackerone.com, docs.hackerone.com, resources.hackerone.com, gslink.hackerone.com"
-      },
-      {
-        title: "Conduct Deep Port Scan",
-        description: "on hackerone.com (top 1000 ports)",
-        chatMessage: "Conduct a deep port scan on hackerone.com"
-      },
-      {
-        title: "Port Scanner Help",
-        description: "How does the Port Scanner plugin work?",
-        chatMessage: "How does the Port Scanner plugin work?"
-      }
-    ]
-  },
-  {
-    id: 11,
+    id: 21,
     name: "DNS Scanner",
     value: PluginID.DNS_SCANNER,
     categories: ["vuln-scanners"],
@@ -337,7 +354,7 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
-    id: 14,
+    id: 22,
     name: "SSL/TLS Scanner",
     value: PluginID.SSL_SCANNER,
     categories: ["vuln-scanners"],

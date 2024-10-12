@@ -96,7 +96,8 @@ export async function POST(request: Request) {
         profile_context: profile.profile_context,
         messages: formattedMessages,
         pluginID: selectedPlugin as PluginID,
-        isTerminalContinuation: isTerminalContinuation
+        isTerminalContinuation: isTerminalContinuation,
+        isPremium: subscriptionInfo.isPremium
       })
     }
   } catch (error: any) {

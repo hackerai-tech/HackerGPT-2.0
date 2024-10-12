@@ -20,7 +20,8 @@ export const getTerminalPlugins = (): PluginID[] => [
   PluginID.CVE_MAP,
   PluginID.URL_FUZZER,
   PluginID.WORDPRESS_SCANNER,
-  PluginID.XSS_EXPLOITER
+  PluginID.XSS_EXPLOITER,
+  PluginID.TERMINAL
 ]
 
 export const isFreePlugin = (plugin: PluginID): boolean =>

@@ -209,7 +209,7 @@ export const handleHostedChat = async (
   let { provider } = modelData
   let apiEndpoint = `/api/chat/${provider}`
 
-  if (isTerminalContinuation) {
+  if (isTerminalContinuation || selectedPlugin === PluginID.TERMINAL) {
     apiEndpoint = `/api/chat/tools/terminal`
     setToolInUse(PluginID.TERMINAL)
     selectedPlugin = PluginID.TERMINAL
@@ -237,7 +237,7 @@ export const handleHostedChat = async (
   if (isTerminalContinuation) {
     requestBody = {
       messages: formattedMessages,
-      isTerminalContinuation: true
+      isTerminalContinuation: isTerminalContinuation
     }
   } else if (provider === "openai") {
     requestBody = {

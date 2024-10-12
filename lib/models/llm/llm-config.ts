@@ -35,10 +35,10 @@ const llmConfig = {
     RAG: `${initialSystemPrompt} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
     // For PGPT
     pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${systemPromptEnding}`,
-    // For PGPT-3.5
-    pgpt35: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-3.5")}\n${systemPromptEnding}`,
-    // For PGPT-4
-    pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-4")}\n${systemPromptEnding}`,
+    // For PGPT-Small
+    pgpt35: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-Small")}\n${systemPromptEnding}`,
+    // For PGPT-Large
+    pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-Large")}\n${systemPromptEnding}`,
     // For GPT-4o
     gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true)}\n${systemPromptEnding}`,
     // For browser tool

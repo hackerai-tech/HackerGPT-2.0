@@ -139,18 +139,30 @@ export async function POST(request: Request) {
 
     const includeImages = messagesIncludeImages(messages)
 
-    if (shouldUseMiniModel || includeImages) {
-      selectedModel = "openai/gpt-4o-mini"
-      filterEmptyAssistantMessages(messages)
-    } else if (
-      moderationLevel >= 0.3 &&
-      moderationLevel <= 0.9 &&
-      !isHighRiskCategory
-    ) {
-      handleAssistantMessages(messages)
-    } else {
-      filterEmptyAssistantMessages(messages)
+    const handleMessages = (
+      modLevel: number,
+      isHighRisk: boolean,
+      isPro: boolean
+    ) => {
+      if (shouldUseMiniModel || includeImages) {
+        selectedModel = "openai/gpt-4o-mini"
+        return filterEmptyAssistantMessages(messages)
+      }
+
+      if (modLevel >= 0.7) {
+        selectedModel = isPro
+          ? "mistralai/mistral-large"
+          : "mistralai/mistral-small"
+      }
+
+      if (modLevel >= 0.2 && modLevel <= 0.8 && !isHighRisk) {
+        return handleAssistantMessages(messages)
+      }
+
+      return filterEmptyAssistantMessages(messages)
     }
+
+    handleMessages(moderationLevel, isHighRiskCategory, isPentestGPTPro)
 
     try {
       let provider
@@ -171,11 +183,11 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
-      let tools
-      if (selectedModel === "openai/gpt-4o-mini") {
-        const toolSchemas = createToolSchemas({ profile, data })
-        tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
-      }
+      // let tools
+      // if (selectedModel === "openai/gpt-4o-mini") {
+      //   const toolSchemas = createToolSchemas({ profile, data })
+      //   tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
+      // }
 
       const result = await streamText({
         model: provider(selectedModel),
@@ -184,11 +196,11 @@ export async function POST(request: Request) {
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
-        ...(selectedModel === "openai/gpt-4o-mini"
-          ? {
-              tools
-            }
-          : {}),
+        // ...(selectedModel === "openai/gpt-4o-mini"
+        //   ? {
+        //       tools
+        //     }
+        //   : {}),
         onFinish: () => {
           data.close()
         }

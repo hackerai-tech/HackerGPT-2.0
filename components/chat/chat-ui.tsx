@@ -27,12 +27,20 @@ import { ChatMessages } from "./chat-messages"
 import { ChatScrollButtons } from "./chat-scroll-buttons"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
+import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
 
 const MESSAGES_PER_FETCH = 20
 interface ChatUIProps {}
 
 export const ChatUI: FC<ChatUIProps> = ({}) => {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+
   useHotkey("o", () => handleNewChat())
+  useHotkey("Backspace", () => {
+    if (selectedChat) {
+      setIsDeleteDialogOpen(true)
+    }
+  })
 
   const params = useParams()
   const router = useRouter()
@@ -294,7 +302,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       <div
         className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
       >
-        <div className="mt-2 max-w-[200px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
+        <div className="mt-2 max-w-[230px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
           <ChatSettings />
         </div>
       </div>
@@ -354,6 +362,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">
         <ChatHelp />
       </div>
+      <GlobalDeleteChatDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      />
     </div>
   )
 }
