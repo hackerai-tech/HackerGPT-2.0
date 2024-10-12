@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     if (!subscriptionInfo.isPremium) {
       return new Response(
-        "Access Denied: This feature is exclusive to Pro members. Please upgrade to a Pro account to access the terminal.",
+        "Access Denied: This feature is exclusive to Pro and Team members. Please upgrade your account to access the terminal.",
         { status: 403 }
       )
     }

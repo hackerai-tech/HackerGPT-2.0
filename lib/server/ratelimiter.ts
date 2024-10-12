@@ -99,18 +99,23 @@ function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
   let limit
   const fixedModelName = _getFixedModelName(model)
   const baseKey = `RATELIMITER_LIMIT_${fixedModelName}_`
-  const limitKey = baseKey + (subscriptionInfo.isPremium ? "PREMIUM" : "FREE")
+
+  const suffix = subscriptionInfo.isTeam
+    ? "_TEAM"
+    : subscriptionInfo.isPremium
+      ? "_PREMIUM"
+      : "_FREE"
+
+  const limitKey = baseKey + suffix
 
   limit =
     process.env[limitKey] === undefined
-      ? subscriptionInfo.isPremium
-        ? 30
-        : 15
+      ? subscriptionInfo.isTeam
+        ? 50
+        : subscriptionInfo.isPremium
+          ? 30
+          : 15
       : Number(process.env[limitKey])
-
-  if (subscriptionInfo.status === "team") {
-    limit += 20 // Add 20 to the limit for team subscriptions
-  }
 
   if (isNaN(limit) || limit < 0) {
     throw new Error("Invalid limit configuration")
@@ -173,7 +178,7 @@ export function getRateLimitErrorMessage(
     const baseMessage = `⚠️ You've reached the limit for terminal usage.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
     return !premium
       ? baseMessage
-      : `${baseMessage}\n\n🚀 Consider upgrading to Pro for higher terminal usage limits and more features.`
+      : `${baseMessage}\n\n🚀 Consider upgrading to Pro or Team for higher terminal usage limits and more features.`
   }
 
   let message = `⚠️ Usage Limit Reached for ${getModelName(model)}\n⏰ Access will be restored in ${remainingText}`
@@ -187,7 +192,7 @@ export function getRateLimitErrorMessage(
       message += `\n\nIn the meantime, you can use PGPT-4 or PGPT-3.5`
     }
   } else {
-    message += `\n\n🔓 Want more? Upgrade to Pro and unlock a world of features:
+    message += `\n\n🔓 Want more? Upgrade to Pro or Team and unlock a world of features:
 - Higher usage limits
 - Access to PGPT-4 and GPT-4o
 - Access to file uploads, vision, web search and browsing

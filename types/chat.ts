@@ -29,5 +29,6 @@ export type SubscriptionStatus = "free" | "pro" | "team"
 
 export type SubscriptionInfo = {
   isPremium: boolean
+  isTeam: boolean
   status: SubscriptionStatus
 }

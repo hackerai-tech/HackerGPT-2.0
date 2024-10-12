@@ -1,10 +1,29 @@
+import { SubscriptionInfo } from "@/types"
 import { createSupabaseAdminClient } from "./server-utils"
-import { SubscriptionStatus, SubscriptionInfo } from "@/types"
 
 export async function getSubscriptionInfo(
   userId: string
 ): Promise<SubscriptionInfo> {
   const supabaseAdmin = createSupabaseAdminClient()
+
+  // Check for team membership
+  const { data: teamMemberships, error: teamError } = await supabaseAdmin
+    .from("team_members")
+    .select("team_id, role")
+    .eq("user_id", userId)
+
+  if (teamError) {
+    throw new Error(teamError.message)
+  }
+
+  // If user is a team member, return team subscription info
+  if (teamMemberships && teamMemberships.length > 0) {
+    return {
+      isPremium: true,
+      isTeam: true,
+      status: "team"
+    }
+  }
 
   const { data: subscriptions, error } = await supabaseAdmin
     .from("subscriptions")
@@ -17,18 +36,12 @@ export async function getSubscriptionInfo(
   }
 
   if (!subscriptions || subscriptions.length === 0) {
-    return { isPremium: false, status: "free" }
+    return { isPremium: false, isTeam: false, status: "free" }
   }
 
-  // Determine the highest tier subscription
-  const highestTier = subscriptions.reduce((highest, current) => {
-    if (current.plan_type === "team") return "team"
-    if (current.plan_type === "pro" && highest !== "team") return "pro"
-    return highest
-  }, "free" as SubscriptionStatus)
-
   return {
-    isPremium: highestTier !== "free",
-    status: highestTier
+    isPremium: true,
+    isTeam: false,
+    status: "pro"
   }
 }
