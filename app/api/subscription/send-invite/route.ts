@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       .eq("team_id", inviterTeam.team_id)
       .single()
 
-    console.log("invite", invite)
+    // console.log("invite", invite)
 
     if (inviteError || !invite) {
       throw new Error("Invite not found")

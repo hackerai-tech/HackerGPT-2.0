@@ -38,7 +38,7 @@ export const getTeamMembersByTeamId = async (
     return []
   }
 
-  console.log("teamId", teamId)
+  // console.log("teamId", teamId)
   const { data: teamData, error: teamError } = await supabase.rpc(
     "get_team_members",
     { p_team_id: teamId }

@@ -177,7 +177,7 @@ export const UpgradePlan: FC = () => {
           className={`grid w-full max-w-5xl ${
             isMobile ? "grid-cols-1 gap-4" : "grid-cols-2 gap-4"
           } lg:px-28`}
-        >        
+        >
           {/* Pro Plan */}
           <PlanCard
             title="Pro"

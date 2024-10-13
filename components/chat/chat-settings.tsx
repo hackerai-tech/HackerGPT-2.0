@@ -9,9 +9,13 @@ import { ModelSelect } from "../models/model-select"
 interface ChatSettingsProps {}
 
 export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
-
-  const { chatSettings, setChatSettings, isMobile, profile, isPremiumSubscription } =
-    useContext(PentestGPTContext)
+  const {
+    chatSettings,
+    setChatSettings,
+    isMobile,
+    profile,
+    isPremiumSubscription
+  } = useContext(PentestGPTContext)
 
   const [isOpen, setIsOpen] = useState(false)
 
