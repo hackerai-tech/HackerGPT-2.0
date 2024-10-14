@@ -108,7 +108,7 @@ export default async function Login({
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      return redirect("/login?message=11")
+      return redirect(`/login?message=11`)
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -117,7 +117,7 @@ export default async function Login({
     })
 
     if (error) {
-      return redirect("/login?message=4")
+      return redirect(`/login?message=4`)
     }
 
     const { data: homeWorkspace, error: homeWorkspaceError } = await supabase
@@ -128,7 +128,9 @@ export default async function Login({
       .single()
 
     if (!homeWorkspace) {
-      return redirect("/login?message=default")
+      throw new Error(
+        homeWorkspaceError?.message || "An unexpected error occurred"
+      )
     }
 
     return redirect(`/${homeWorkspace.id}/chat`)
@@ -136,60 +138,79 @@ export default async function Login({
 
   const signUp = async (formData: FormData) => {
     "use server"
-    try {
-      const origin = headers().get("origin")
-      const email = formData.get("email") as string
-      const password = formData.get("password") as string
 
-      if (!validateEmail(email)) return redirect("/login?message=11")
-      if (!password) return redirect("/login?message=5")
+    const origin = headers().get("origin")
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
 
-      const passwordError = validatePassword(password)
-      if (passwordError) return redirect("/login?message=" + passwordError)
-
-      let emailDomainWhitelist: string[] = []
-      let emailWhitelist: string[] = []
-
-      if (process.env.EMAIL_DOMAIN_WHITELIST || process.env.EDGE_CONFIG) {
-        const patternsString =
-          process.env.EMAIL_DOMAIN_WHITELIST ||
-          (await get<string>("EMAIL_DOMAIN_WHITELIST"))
-        emailDomainWhitelist = patternsString?.split(",") ?? []
-      }
-
-      if (process.env.EMAIL_WHITELIST || process.env.EDGE_CONFIG) {
-        const patternsString =
-          process.env.EMAIL_WHITELIST || (await get<string>("EMAIL_WHITELIST"))
-        emailWhitelist = patternsString?.split(",") ?? []
-      }
-
-      if (
-        (emailDomainWhitelist.length > 0 &&
-          !emailDomainWhitelist.includes(email.split("@")[1])) ||
-        (emailWhitelist.length > 0 && !emailWhitelist.includes(email))
-      ) {
-        return redirect("/login?message=1")
-      }
-
-      const supabase = createClient(cookies())
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${origin}/auth/callback`
-        }
-      })
-
-      if (error) {
-        console.error("Sign-up error:", error)
-        return redirect("/login?message=auth")
-      }
-
-      return redirect("/login?message=2")
-    } catch (error) {
-      console.error("Unexpected error during sign-up:", error)
-      return redirect("/login?message=default")
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return redirect(`/login?message=11`)
     }
+
+    if (!password) {
+      return redirect(`/login?message=5`)
+    }
+
+    const passwordChecks = [
+      { test: password.length >= 8, message: "6" },
+      { test: /[A-Z]/.test(password) && /[a-z]/.test(password), message: "7" },
+      { test: /[0-9]/.test(password), message: "8" },
+      {
+        test: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(password),
+        message: "9"
+      }
+    ]
+
+    for (const check of passwordChecks) {
+      if (!check.test) {
+        return redirect(`/login?message=${check.message}`)
+      }
+    }
+
+    let emailDomainWhitelist: string[] = []
+    let emailWhitelist: string[] = []
+
+    if (process.env.EMAIL_DOMAIN_WHITELIST || process.env.EDGE_CONFIG) {
+      const patternsString =
+        process.env.EMAIL_DOMAIN_WHITELIST ||
+        (await get<string>("EMAIL_DOMAIN_WHITELIST"))
+      emailDomainWhitelist = patternsString?.split(",") ?? []
+    }
+
+    if (process.env.EMAIL_WHITELIST || process.env.EDGE_CONFIG) {
+      const patternsString =
+        process.env.EMAIL_WHITELIST || (await get<string>("EMAIL_WHITELIST"))
+      emailWhitelist = patternsString?.split(",") ?? []
+    }
+
+    if (
+      (emailDomainWhitelist.length > 0 &&
+        !emailDomainWhitelist.includes(email.split("@")[1])) ||
+      (emailWhitelist.length > 0 && !emailWhitelist.includes(email))
+    ) {
+      return redirect(`/login?message=1`)
+    }
+
+    const supabase = createClient(cookies())
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        // USE IF YOU WANT TO SEND EMAIL VERIFICATION, ALSO CHANGE TOML FILE
+        emailRedirectTo: `${origin}/auth/callback`
+      }
+    })
+
+    if (error) {
+      return redirect(`/login?message=${error.message}`)
+    }
+
+    // return redirect("/setup")
+
+    // USE IF YOU WANT TO SEND EMAIL VERIFICATION, ALSO CHANGE TOML FILE
+    return redirect("/login?message=2")
   }
 
   const handleResetPassword = async (formData: FormData) => {
