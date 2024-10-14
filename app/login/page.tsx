@@ -9,16 +9,11 @@ import { get } from "@vercel/edge-config"
 import { Metadata } from "next"
 import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
-import { IconEye, IconEyeOff, IconAlertCircle } from "@tabler/icons-react"
+import { IconAlertCircle } from "@tabler/icons-react"
 import { MicrosoftIcon } from "@/components/icons/microsoft-icon"
 import { GoogleIcon } from "@/components/icons/google-icon"
 import { checkPasswordResetRateLimit } from "@/lib/server/password-reset-ratelimiter"
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent
-} from "@/components/ui/tooltip"
+import { PasswordInput } from "@/components/ui/password-input"
 
 export const metadata: Metadata = {
   title: "Login"
@@ -303,36 +298,10 @@ export default async function Login({
             />
           </div>
           <div className="mt-2 space-y-2">
-            <Label htmlFor="password" className="flex items-center">
+            <Label className="text-md" htmlFor="password">
               Password
             </Label>
-            <div className="relative">
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                required
-                className="pr-10"
-              />
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    >
-                      <IconEye size={20} className="text-muted-foreground" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Show password</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+            <PasswordInput />
           </div>
           {errorMessage && (
             <div className="mt-2 flex items-center gap-2 text-sm text-red-500">
