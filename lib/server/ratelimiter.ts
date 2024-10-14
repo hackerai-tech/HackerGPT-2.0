@@ -1,7 +1,8 @@
 // must not describe 'use server' here to avoid security issues.
 import { epochTimeToNaturalLanguage } from "../utils"
 import { getRedis } from "./redis"
-import { isPremiumUser } from "./subscription-utils"
+import { getSubscriptionInfo } from "./subscription-utils"
+import { SubscriptionInfo } from "@/types"
 
 export type RateLimitResult =
   | {
@@ -28,8 +29,8 @@ export async function ratelimit(
   if (!isRateLimiterEnabled()) {
     return { allowed: true, remaining: -1, timeRemaining: null }
   }
-  const isPremium = await isPremiumUser(userId)
-  return _ratelimit(model, userId, isPremium)
+  const subscriptionInfo = await getSubscriptionInfo(userId)
+  return _ratelimit(model, userId, subscriptionInfo)
 }
 
 function isRateLimiterEnabled(): boolean {
@@ -39,14 +40,14 @@ function isRateLimiterEnabled(): boolean {
 export async function _ratelimit(
   model: string,
   userId: string,
-  isPremium: boolean
+  subscriptionInfo: SubscriptionInfo
 ): Promise<RateLimitResult> {
   try {
     const storageKey = _makeStorageKey(userId, model)
     const [remaining, timeRemaining] = await getRemaining(
       userId,
       model,
-      isPremium
+      subscriptionInfo
     )
     if (remaining === 0) {
       return { allowed: false, remaining, timeRemaining: timeRemaining! }
@@ -55,20 +56,19 @@ export async function _ratelimit(
     return { allowed: true, remaining: remaining - 1, timeRemaining: null }
   } catch (error) {
     console.error("Redis rate limiter error:", error)
-    // Deny the request in case of Redis errors
-    return { allowed: false, remaining: 0, timeRemaining: 60000 } // 1 minute cooldown
+    return { allowed: false, remaining: 0, timeRemaining: 60000 }
   }
 }
 
 export async function getRemaining(
   userId: string,
   model: string,
-  isPremium: boolean
+  subscriptionInfo: SubscriptionInfo
 ): Promise<[number, number | null]> {
   const storageKey = _makeStorageKey(userId, model)
   const timeWindow = getTimeWindow()
   const now = Date.now()
-  const limit = _getLimit(model, isPremium)
+  const limit = _getLimit(model, subscriptionInfo)
 
   const redis = getRedis()
   const [[firstMessageTime], count] = await Promise.all([
@@ -95,16 +95,28 @@ function getTimeWindow(): number {
   return Number(process.env[key]) * 60 * 1000
 }
 
-function _getLimit(model: string, isPremium: boolean): number {
+function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
   let limit
   const fixedModelName = _getFixedModelName(model)
-  const limitKey = `RATELIMITER_LIMIT_${fixedModelName}_${isPremium ? "PREMIUM" : "FREE"}`
+  const baseKey = `RATELIMITER_LIMIT_${fixedModelName}_`
+
+  const suffix = subscriptionInfo.isTeam
+    ? "_TEAM"
+    : subscriptionInfo.isPremium
+      ? "_PREMIUM"
+      : "_FREE"
+
+  const limitKey = baseKey + suffix
+
   limit =
     process.env[limitKey] === undefined
-      ? isPremium
-        ? 30
-        : 15
+      ? subscriptionInfo.isTeam
+        ? 50
+        : subscriptionInfo.isPremium
+          ? 30
+          : 15
       : Number(process.env[limitKey])
+
   if (isNaN(limit) || limit < 0) {
     throw new Error("Invalid limit configuration")
   }
@@ -166,7 +178,7 @@ export function getRateLimitErrorMessage(
     const baseMessage = `⚠️ You've reached the limit for terminal usage.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
     return !premium
       ? baseMessage
-      : `${baseMessage}\n\n🚀 Consider upgrading to Pro for higher terminal usage limits and more features.`
+      : `${baseMessage}\n\n🚀 Consider upgrading to Pro or Team for higher terminal usage limits and more features.`
   }
 
   let message = `⚠️ Usage Limit Reached for ${getModelName(model)}\n⏰ Access will be restored in ${remainingText}`
@@ -180,7 +192,7 @@ export function getRateLimitErrorMessage(
       message += `\n\nIn the meantime, you can use PGPT-Large or PGPT-Small`
     }
   } else {
-    message += `\n\n🔓 Want more? Upgrade to Pro and unlock a world of features:
+    message += `\n\n🔓 Want more? Upgrade to Pro or Team and unlock a world of features:
 - Higher usage limits
 - Access to PGPT-Large and GPT-4o
 - Access to file uploads, vision, web search and browsing
@@ -209,10 +221,10 @@ export async function checkRatelimitOnApi(
   if (result.allowed) {
     return null
   }
-  const premium = await isPremiumUser(userId)
+  const subscriptionInfo = await getSubscriptionInfo(userId)
   const message = getRateLimitErrorMessage(
     result.timeRemaining!,
-    premium,
+    subscriptionInfo.isPremium,
     model
   )
   const response = new Response(
@@ -235,11 +247,11 @@ export async function checkRateLimitWithoutIncrementing(
   if (!isRateLimiterEnabled()) {
     return { allowed: true, remaining: -1, timeRemaining: null }
   }
-  const isPremium = await isPremiumUser(userId)
+  const subscriptionInfo = await getSubscriptionInfo(userId)
   const [remaining, timeRemaining] = await getRemaining(
     userId,
     model,
-    isPremium
+    subscriptionInfo
   )
   if (remaining === 0) {
     return { allowed: false, remaining: 0, timeRemaining: timeRemaining! }

@@ -11,7 +11,7 @@ import {
   IconCircleCheck,
   IconArrowLeft
 } from "@tabler/icons-react"
-import { Sparkle, Sparkles } from "lucide-react"
+import { Sparkles, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { FC, useContext, useState, useEffect } from "react"
 import { toast } from "sonner"
@@ -25,14 +25,11 @@ export const UpgradePlan: FC = () => {
   const router = useRouter()
   const { profile, isMobile } = useContext(PentestGPTContext)
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
-  const [prefetchedPlan, setPrefetchedPlan] = useState<"monthly" | "yearly">(
-    "monthly"
-  )
   const [isLoading, setIsLoading] = useState(true)
-  const [isButtonLoading, setIsButtonLoading] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
     "monthly"
   )
+  const [loadingPlan, setLoadingPlan] = useState<"pro" | "team" | null>(null)
   const { theme } = useTheme()
 
   useEffect(() => {
@@ -42,55 +39,70 @@ export const UpgradePlan: FC = () => {
         return
       }
 
-      const subscription = await getSubscriptionByUserId(profile.user_id)
+      try {
+        const subscription = await getSubscriptionByUserId(profile.user_id)
 
-      if (subscription) {
-        router.push("/login")
-        return
+        if (subscription) {
+          router.push("/login")
+          return
+        }
+
+        const result = await getCheckoutUrl()
+        if (result.type === "error") {
+          throw new Error(result.error.message)
+        } else {
+          setCheckoutUrl(result.value)
+        }
+      } catch (error) {
+        Sentry.captureException(error)
+        toast.error(
+          "Failed to load subscription information. Please try again."
+        )
+      } finally {
+        setIsLoading(false)
       }
-
-      const result = await getCheckoutUrl()
-      if (result.type === "error") {
-        Sentry.withScope(scope => {
-          scope.setExtras({ userId: profile.user_id })
-          scope.captureMessage(result.error.message)
-        })
-        toast.error(result.error.message)
-      } else {
-        setCheckoutUrl(result.value)
-        setPrefetchedPlan("monthly")
-      }
-
-      setIsLoading(false)
     }
 
     initialize()
   }, [profile, router])
 
-  const handleUpgradeClick = async () => {
-    if (!isLoading && profile) {
-      setIsButtonLoading(true)
+  const handleUpgradeClick = async (planType: "pro" | "team") => {
+    if (isLoading || !profile) return
 
-      if (checkoutUrl && selectedPlan === prefetchedPlan) {
-        // Use the prefetched URL if it matches the selected plan
-        router.push(checkoutUrl)
-      } else {
-        // Fetch a new URL if plans don't match or no prefetched URL
-        const result = await getCheckoutUrl(
-          selectedPlan === "yearly" ? YEARLY_PRO_PRICE_ID : undefined
-        )
-        setIsButtonLoading(false)
-        if (result.type === "error") {
-          Sentry.withScope(scope => {
-            scope.setExtras({ userId: profile.user_id })
-            scope.captureMessage(result.error.message)
-          })
-          toast.error(result.error.message)
-        } else {
-          router.push(result.value)
-        }
+    setLoadingPlan(planType)
+
+    try {
+      if (planType === "team") {
+        redirectToNewTeamPage()
+        return
       }
+
+      let url: string | null = null
+      let priceId: string | undefined =
+        selectedPlan === "yearly" ? YEARLY_PRO_PRICE_ID : undefined
+
+      if (checkoutUrl && selectedPlan === "monthly") {
+        url = checkoutUrl
+      } else {
+        const result = await getCheckoutUrl(priceId)
+        if (result.type === "error") {
+          throw new Error(result.error.message)
+        }
+        url = result.value
+      }
+
+      router.push(url)
+    } catch (error) {
+      Sentry.captureException(error)
+      toast.error("Failed to process upgrade. Please try again.")
+    } finally {
+      setLoadingPlan(null)
     }
+  }
+
+  const redirectToNewTeamPage = () => {
+    const yearlyParam = selectedPlan === "yearly" ? "true" : "false"
+    router.push(`/team/new-team?yearly=${yearlyParam}`)
   }
 
   if (isLoading) {
@@ -102,13 +114,13 @@ export const UpgradePlan: FC = () => {
   }
 
   const planPrices = {
-    free: { monthly: "$0", yearly: "$0" },
-    pro: { monthly: "$25", yearly: "$20" }
+    pro: { monthly: "$25", yearly: "$20" },
+    team: { monthly: "$40", yearly: "$32" }
   }
 
-  const getYearlySavingsNote = () => {
+  const getYearlySavingsNote = (plan: "pro" | "team") => {
     if (selectedPlan === "yearly") {
-      return "Save $60"
+      return plan === "pro" ? "Save $60" : "Save $96"
     }
     return ""
   }
@@ -166,25 +178,14 @@ export const UpgradePlan: FC = () => {
             isMobile ? "grid-cols-1 gap-4" : "grid-cols-2 gap-4"
           } lg:px-28`}
         >
-          {/* Free Plan */}
-          <PlanCard
-            title="Free"
-            price={`USD ${planPrices.free[selectedPlan]}/month`}
-            buttonText="Your current plan"
-            buttonDisabled
-          >
-            <PlanStatement>Limited access to PGPT-Small</PlanStatement>
-            <PlanStatement>Limited access to plugins</PlanStatement>
-          </PlanCard>
-
           {/* Pro Plan */}
           <PlanCard
             title="Pro"
             price={`USD ${planPrices.pro[selectedPlan]}/month`}
             buttonText="Upgrade to Pro"
-            buttonLoading={isButtonLoading}
-            onButtonClick={handleUpgradeClick}
-            savingsNote={getYearlySavingsNote()}
+            buttonLoading={loadingPlan === "pro"}
+            onButtonClick={() => handleUpgradeClick("pro")}
+            savingsNote={getYearlySavingsNote("pro")}
           >
             <PlanStatement>Early access to new features</PlanStatement>
             <PlanStatement>
@@ -199,6 +200,20 @@ export const UpgradePlan: FC = () => {
             </PlanStatement>
             <PlanStatement>Access to terminal</PlanStatement>
           </PlanCard>
+
+          {/* Team Plan */}
+          <PlanCard
+            title="Team"
+            price={`USD ${planPrices.team[selectedPlan]} per person/month`}
+            buttonText="Upgrade to Team"
+            buttonLoading={loadingPlan === "team"}
+            onButtonClick={() => handleUpgradeClick("team")}
+            savingsNote={getYearlySavingsNote("team")}
+          >
+            <PlanStatement>Everything in Pro</PlanStatement>
+            <PlanStatement>Higher usage limits versus Pro plan</PlanStatement>
+            <PlanStatement>Central billing and administration</PlanStatement>
+          </PlanCard>
         </div>
       </div>
       <div className="h-16"></div> {/* Increased footer space */}
@@ -211,10 +226,10 @@ interface PlanCardProps {
   price: string
   buttonText: string
   buttonLoading?: boolean
-  buttonDisabled?: boolean
   onButtonClick?: () => void
   savingsNote?: string
   children: React.ReactNode
+  buttonDisabled?: boolean
 }
 
 const PlanCard: FC<PlanCardProps> = ({
@@ -222,18 +237,18 @@ const PlanCard: FC<PlanCardProps> = ({
   price,
   buttonText,
   buttonLoading,
-  buttonDisabled,
   onButtonClick,
   savingsNote,
-  children
+  children,
+  buttonDisabled
 }) => (
   <div className="bg-popover border-primary/20 flex flex-col rounded-lg border p-6 text-left shadow-md">
     <div className="mb-4">
       <h2 className="flex items-center text-xl font-bold">
-        {title === "Free" ? (
-          <Sparkle className="mr-2" size={18} />
-        ) : (
+        {title === "Pro" ? (
           <Sparkles className="mr-2" size={18} />
+        ) : (
+          <Users className="mr-2" size={18} />
         )}
         {title}
       </h2>
@@ -243,9 +258,9 @@ const PlanCard: FC<PlanCardProps> = ({
       )}
     </div>
     <Button
-      variant={buttonDisabled ? "outline" : "default"}
+      variant="default"
       onClick={onButtonClick}
-      disabled={buttonDisabled || buttonLoading}
+      disabled={buttonLoading || buttonDisabled}
       className="mb-6 w-full"
     >
       {buttonLoading && <IconLoader2 size={22} className="mr-2 animate-spin" />}

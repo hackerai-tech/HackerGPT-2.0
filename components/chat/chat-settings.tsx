@@ -9,8 +9,13 @@ import { ModelSelect } from "../models/model-select"
 interface ChatSettingsProps {}
 
 export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
-  const { chatSettings, setChatSettings, isMobile, profile, subscription } =
-    useContext(PentestGPTContext)
+  const {
+    chatSettings,
+    setChatSettings,
+    isMobile,
+    profile,
+    isPremiumSubscription
+  } = useContext(PentestGPTContext)
 
   const [isOpen, setIsOpen] = useState(false)
 
@@ -37,7 +42,7 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
           variant="ghost"
         >
           <div className="text-xl">
-            {!subscription
+            {!isPremiumSubscription
               ? "PentestGPT"
               : fullModel?.modelName || chatSettings.model}
           </div>

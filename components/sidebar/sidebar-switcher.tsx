@@ -23,7 +23,7 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
   onContentTypeChange,
   handleToggleSidebar
 }) => {
-  const { subscription, contentType } = useContext(PentestGPTContext)
+  const { isPremiumSubscription, contentType } = useContext(PentestGPTContext)
 
   return (
     <div
@@ -48,7 +48,7 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
           onContentTypeChange={onContentTypeChange}
         />
 
-        {subscription && (
+        {isPremiumSubscription && (
           <SidebarSwitchItem
             icon={<IconFile size={SIDEBAR_ICON_SIZE} />}
             contentType="files"

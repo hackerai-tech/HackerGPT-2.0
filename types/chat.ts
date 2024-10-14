@@ -24,3 +24,11 @@ export interface Message {
 }
 
 export type Role = "assistant" | "user" | "system"
+
+export type SubscriptionStatus = "free" | "pro" | "team"
+
+export type SubscriptionInfo = {
+  isPremium: boolean
+  isTeam: boolean
+  status: SubscriptionStatus
+}

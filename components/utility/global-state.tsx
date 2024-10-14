@@ -5,8 +5,12 @@
 import { PentestGPTContext } from "@/context/context"
 import { getProfileByUserId } from "@/db/profile"
 import { getWorkspaceImageFromStorage } from "@/db/storage/workspace-images"
-import { getSubscriptionByUserId } from "@/db/subscriptions"
+import {
+  getSubscriptionByTeamId,
+  getSubscriptionByUserId
+} from "@/db/subscriptions"
 import { getWorkspacesByUserId } from "@/db/workspaces"
+import { getTeamMembersByTeamId } from "@/db/teams"
 import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import { fetchHostedModels } from "@/lib/models/fetch-models"
 import { supabase } from "@/lib/supabase/browser-client"
@@ -18,12 +22,15 @@ import {
   ContentType,
   LLM,
   MessageImage,
+  SubscriptionStatus,
   WorkspaceImage
 } from "@/types"
 import { PluginID } from "@/types/plugins"
 import { useRouter } from "next/navigation"
-import { FC, useEffect, useState } from "react"
+import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
+import { ProcessedTeamMember } from "@/lib/team-utils"
+import { User } from "@supabase/supabase-js"
 
 interface GlobalStateProps {
   children: React.ReactNode
@@ -31,6 +38,9 @@ interface GlobalStateProps {
 
 export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const router = useRouter()
+
+  // USER STORE
+  const [user, setUser] = useState<User | null>(null)
 
   // PROFILE STORE
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null)
@@ -41,7 +51,13 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // SUBSCRIPTION STORE
   const [subscription, setSubscription] =
     useState<Tables<"subscriptions"> | null>(null)
-
+  const [subscriptionStatus, setSubscriptionStatus] =
+    useState<SubscriptionStatus>("free")
+  const [teamMembers, setTeamMembers] = useState<ProcessedTeamMember[] | null>(
+    null
+  )
+  const [membershipData, setMembershipData] =
+    useState<ProcessedTeamMember | null>(null)
   // ITEMS STORE
   const [chats, setChats] = useState<Tables<"chats">[]>([])
   const [files, setFiles] = useState<Tables<"files">[]>([])
@@ -149,27 +165,71 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     })()
   }, [])
 
+  const updateSubscription = useCallback(
+    (newSubscription: Tables<"subscriptions"> | null) => {
+      setSubscription(newSubscription)
+      if (newSubscription) {
+        setSubscriptionStatus(newSubscription.plan_type as SubscriptionStatus)
+      } else {
+        setSubscriptionStatus("free")
+      }
+    },
+    []
+  )
+
+  const isPremiumSubscription = useMemo(
+    () => subscriptionStatus !== "free",
+    [subscriptionStatus]
+  )
+
   const fetchStartingData = async () => {
     const session = (await supabase.auth.getSession()).data.session
 
     if (session) {
-      const user = session.user
+      const userFromSession = session.user
+      setUser(userFromSession)
 
-      const profile = await getProfileByUserId(user.id)
+      const profile = await getProfileByUserId(userFromSession.id)
       setProfile(profile)
-
-      // const userRole = await getUserRole(user.id)
-      // setUserRole(userRole)
 
       if (!profile.has_onboarded) {
         return router.push("/setup")
       }
 
-      const subscription = await getSubscriptionByUserId(user.id)
-      setSubscription(subscription)
+      const subscription = await getSubscriptionByUserId(userFromSession.id)
+      updateSubscription(subscription)
 
-      const workspaces = await getWorkspacesByUserId(user.id)
+      const workspaces = await getWorkspacesByUserId(userFromSession.id)
       setWorkspaces(workspaces)
+
+      const members = await getTeamMembersByTeamId(
+        userFromSession.id,
+        userFromSession.email,
+        subscription?.team_id
+      )
+
+      const membershipData = members?.find(
+        member =>
+          member.member_user_id === userFromSession.id ||
+          member.invitee_email === userFromSession.email
+      )
+
+      if (membershipData?.invitation_status !== "rejected") {
+        setTeamMembers(members)
+        setMembershipData(membershipData ?? null)
+      } else {
+        setTeamMembers(null)
+        setMembershipData(null)
+      }
+
+      if (
+        (!subscription || subscription.status !== "active") &&
+        members &&
+        members.length > 0
+      ) {
+        const subscription = await getSubscriptionByTeamId(members[0].team_id)
+        updateSubscription(subscription)
+      }
 
       for (const workspace of workspaces) {
         let workspaceImageUrl = ""
@@ -200,9 +260,16 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     }
   }
 
+  const refreshTeamMembers = async () => {
+    await fetchStartingData()
+  }
+
   return (
     <PentestGPTContext.Provider
       value={{
+        // USER STORE
+        user,
+
         // PROFILE STORE
         profile,
         setProfile,
@@ -214,6 +281,13 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         // SUBSCRIPTION STORE
         subscription,
         setSubscription,
+        subscriptionStatus,
+        setSubscriptionStatus,
+        updateSubscription,
+        isPremiumSubscription,
+        teamMembers,
+        refreshTeamMembers,
+        membershipData,
 
         // ITEMS STORE
         chats,

@@ -5,13 +5,19 @@ import {
   ChatSettings,
   LLM,
   MessageImage,
-  WorkspaceImage
+  WorkspaceImage,
+  SubscriptionStatus
 } from "@/types"
 import { PluginID } from "@/types/plugins"
 import { Dispatch, SetStateAction, createContext } from "react"
 import { ContentType } from "@/types"
+import { ProcessedTeamMember } from "@/lib/team-utils"
+import { User } from "@supabase/supabase-js"
 
 interface PentestGPTContext {
+  // USER STORE
+  user: User | null
+
   // PROFILE STORE
   profile: Tables<"profiles"> | null
   setProfile: Dispatch<SetStateAction<Tables<"profiles"> | null>>
@@ -20,13 +26,16 @@ interface PentestGPTContext {
   contentType: ContentType
   setContentType: React.Dispatch<React.SetStateAction<ContentType>>
 
-  // USER ROLE STORE
-  // userRole: Tables<"user_role"> | null
-  // setUserRole: Dispatch<SetStateAction<Tables<"user_role"> | null>>
-
   // SUBSCRIPTION STORE
   subscription: Tables<"subscriptions"> | null
   setSubscription: Dispatch<SetStateAction<Tables<"subscriptions"> | null>>
+  subscriptionStatus: SubscriptionStatus
+  setSubscriptionStatus: Dispatch<SetStateAction<SubscriptionStatus>>
+  updateSubscription: (newSubscription: Tables<"subscriptions"> | null) => void
+  isPremiumSubscription: boolean
+  teamMembers: ProcessedTeamMember[] | null
+  refreshTeamMembers: () => Promise<void>
+  membershipData: ProcessedTeamMember | null
 
   // ITEMS STORE
   chats: Tables<"chats">[]
@@ -125,6 +134,9 @@ interface PentestGPTContext {
 }
 
 export const PentestGPTContext = createContext<PentestGPTContext>({
+  // USER STORE
+  user: null,
+
   // PROFILE STORE
   profile: null,
   setProfile: () => {},
@@ -136,6 +148,13 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
   // SUBSCRIPTION STORE
   subscription: null,
   setSubscription: () => {},
+  subscriptionStatus: "free",
+  setSubscriptionStatus: () => {},
+  updateSubscription: () => {},
+  isPremiumSubscription: false,
+  teamMembers: null,
+  refreshTeamMembers: async () => {},
+  membershipData: null,
 
   // ITEMS STORE
   chats: [],

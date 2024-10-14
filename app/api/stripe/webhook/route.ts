@@ -112,6 +112,10 @@ async function upsertSubscription(
   if (profile) {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
 
+    // Determine the plan type and team name
+    const planType = subscription.metadata.teamName ? "team" : "pro"
+    const teamName = subscription.metadata.teamName || null
+
     const result = await supabaseAdmin.from("subscriptions").upsert(
       {
         subscription_id: subscriptionId,
@@ -121,7 +125,10 @@ async function upsertSubscription(
         start_date: unixToDateString(subscription.start_date),
         cancel_at: unixToDateString(subscription.cancel_at),
         canceled_at: unixToDateString(subscription.canceled_at),
-        ended_at: unixToDateString(subscription.ended_at)
+        ended_at: unixToDateString(subscription.ended_at),
+        plan_type: planType,
+        team_name: teamName,
+        quantity: subscription.items.data[0].quantity || 1
       },
       { onConflict: "subscription_id" }
     )

@@ -27,7 +27,7 @@ interface PluginSelectorProps {
 
 const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
   const {
-    subscription,
+    isPremiumSubscription,
     setSelectedPlugin,
     selectedPlugin,
     chatSettings,
@@ -43,8 +43,6 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
   const pathname = usePathname()
 
   const defaultPluginIds = [0, 99]
-
-  const isPremium = subscription !== null
 
   const handleUpgradeToPlus = () => {
     setShowLockedPluginDialog(false)
@@ -96,7 +94,7 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
       <DropdownMenuItem
         key={plugin.id}
         onSelect={() => {
-          if (!plugin.isPremium || isPremium) {
+          if (!plugin.isPremium || isPremiumSubscription) {
             if (plugin.value === PluginID.PLUGINS_STORE) {
               handleOpenGPTsStore()
             } else {
@@ -109,10 +107,10 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
             setShowLockedPluginDialog(true)
           }
         }}
-        className={`flex items-center justify-between ${plugin.isPremium && !isPremium ? "cursor-not-allowed opacity-50" : ""}`}
+        className={`flex items-center justify-between ${plugin.isPremium && !isPremiumSubscription ? "cursor-not-allowed opacity-50" : ""}`}
       >
         <span>{plugin.name}</span>
-        {plugin.isPremium && !isPremium ? (
+        {plugin.isPremium && !isPremiumSubscription ? (
           <IconLock size={18} className="ml-2" />
         ) : plugin.value === PluginID.PLUGINS_STORE ? (
           <IconBuildingStore size={18} className="ml-2" />
@@ -146,7 +144,7 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
         currentPlugin={currentPlugin}
         handleCancelUpgrade={() => setShowLockedPluginDialog(false)}
         handleUpgradeToPlus={handleUpgradeToPlus}
-        isPremium={isPremium}
+        isPremium={isPremiumSubscription}
       />
     </div>
   )

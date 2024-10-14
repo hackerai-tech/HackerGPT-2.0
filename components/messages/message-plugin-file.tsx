@@ -45,7 +45,7 @@ export const MessagePluginFile: FC<MessagePluginFileProps> = ({
 }) => {
   const [showModal, setShowModal] = useState(false)
   const { handleSelectDeviceFile } = useSelectFileHandler()
-  const { subscription } = useContext(PentestGPTContext)
+  const { isPremiumSubscription } = useContext(PentestGPTContext)
 
   const handleViewContent = () => {
     setShowModal(true)
@@ -125,7 +125,7 @@ export const MessagePluginFile: FC<MessagePluginFileProps> = ({
                 </span>
               </div>
             </Button>
-            {subscription && (
+            {isPremiumSubscription && (
               <Button
                 variant="outline"
                 className="text-primary bg-primary-foreground hover:bg-muted px-2 py-1 text-sm md:px-4 md:py-2 md:text-base"

@@ -54,7 +54,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     isEnhancedMenuOpen,
     setIsEnhancedMenuOpen,
     selectedPlugin,
-    subscription,
+    isPremiumSubscription,
     isMobile
   } = useContext(PentestGPTContext)
 
@@ -162,7 +162,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
         className="flex flex-row items-center"
         onClick={() => fileInputRef.current?.click()}
       >
-        {subscription && (
+        {isPremiumSubscription && (
           <WithTooltip
             delayDuration={TOOLTIP_DELAY}
             side="top"
@@ -233,7 +233,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
         className={`bg-secondary border-input relative flex min-h-[56px] w-full items-center justify-center rounded-xl border-2 ${selectedPlugin && selectedPlugin !== PluginID.NONE ? "border-primary" : "border-secondary"} ${isEnhancedMenuOpen ? "mt-3" : ""}`}
         ref={divRef}
       >
-        {subscription && (
+        {isPremiumSubscription && (
           <div
             className={`absolute left-0 w-full overflow-auto rounded-xl dark:border-none`}
             style={{ bottom: `${bottomSpacingPx}px` }}
@@ -260,7 +260,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
             accept={filesToAccept}
           />
 
-          {isMobile && subscription && optionsCollapsed ? (
+          {isMobile && isPremiumSubscription && optionsCollapsed ? (
             <div className="flex flex-row items-center">
               <IconCirclePlus
                 className="cursor-pointer p-1 hover:opacity-50"
@@ -278,9 +278,10 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
           className="ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 pl-2 pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           placeholder={
             isMobile
-              ? `Message` + (!subscription ? "" : `. Type "#" for files.`)
+              ? `Message` +
+                (!isPremiumSubscription ? "" : `. Type "#" for files.`)
               : `Message PentestGPT` +
-                (!subscription ? "" : `. Type "#" for files.`)
+                (!isPremiumSubscription ? "" : `. Type "#" for files.`)
           }
           onValueChange={handleInputChange} // This function updates the userInput state
           value={userInput} // This state should display the transcribed text

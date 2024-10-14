@@ -1,36 +1,43 @@
 import { PentestGPTContext } from "@/context/context"
+import { deleteAllChats } from "@/db/chats"
 import { PROFILE_CONTEXT_MAX } from "@/db/limits"
 import { updateProfile } from "@/db/profile"
 import { LLM_LIST_MAP } from "@/lib/models/llm/llm-list"
 import { supabase } from "@/lib/supabase/browser-client"
+import { TeamRole } from "@/lib/team-utils"
+import { DialogPanel, DialogTitle } from "@headlessui/react"
 import {
   IconCreditCard,
   IconDatabaseCog,
   IconSettings,
   IconUserHeart,
+  IconUsers,
   IconX
 } from "@tabler/icons-react"
-import { DialogPanel, DialogTitle } from "@headlessui/react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { FC, useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { SIDEBAR_ICON_SIZE } from "../sidebar/sidebar-switcher"
-import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { Button } from "../ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
-import { SubscriptionTab } from "./profile-tabs/subscription-tab"
-import { deleteAllChats } from "@/db/chats"
-import { PersonalizationTab } from "./profile-tabs/personalization-tab"
-import { ProfileTab } from "./profile-tabs/profile-tab"
+import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { DeleteAllChatsDialog } from "./delete-all-chats-dialog"
 import { DataControlsTab } from "./profile-tabs/data-controls-tab"
+import { PersonalizationTab } from "./profile-tabs/personalization-tab"
+import { ProfileTab } from "./profile-tabs/profile-tab"
+import { SubscriptionTab } from "./profile-tabs/subscription-tab"
+import { TeamTab } from "./profile-tabs/team-tab"
 
-interface SettingsProps {}
-
-export const Settings: FC<SettingsProps> = () => {
-  const { profile, setProfile, envKeyMap, setAvailableHostedModels, isMobile } =
-    useContext(PentestGPTContext)
+export const Settings: FC = () => {
+  const {
+    profile,
+    setProfile,
+    envKeyMap,
+    setAvailableHostedModels,
+    isMobile,
+    membershipData
+  } = useContext(PentestGPTContext)
 
   const router = useRouter()
 
@@ -131,8 +138,20 @@ export const Settings: FC<SettingsProps> = () => {
     { value: "profile", icon: IconSettings, label: "General" },
     { value: "personalization", icon: IconUserHeart, label: "Personalization" },
     { value: "subscription", icon: IconCreditCard, label: "Subscription" },
+    { value: "team", icon: IconUsers, label: "Team" },
     { value: "data-controls", icon: IconDatabaseCog, label: "Data Controls" }
-  ]
+  ].filter(tab => {
+    // Only owners can access the subscription tab
+    if (tab.value === "subscription") {
+      return !membershipData || membershipData?.member_role === TeamRole.OWNER
+    }
+
+    if (tab.value === "team") {
+      return membershipData && membershipData?.invitation_status === "accepted"
+    }
+
+    return true
+  })
 
   const tabListClass = isMobile
     ? "mb-6 flex flex-wrap gap-2"
@@ -227,6 +246,10 @@ export const Settings: FC<SettingsProps> = () => {
                   profileInstructions={profileInstructions}
                   setProfileInstructions={setProfileInstructions}
                 />
+              </TabsContent>
+
+              <TabsContent value="team">
+                <TeamTab value="team" isMobile={isMobile} />
               </TabsContent>
 
               <TabsContent value="data-controls">
