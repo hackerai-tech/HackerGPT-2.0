@@ -5,7 +5,15 @@ import { updateProfile } from "@/db/profile"
 import { LLM_LIST_MAP } from "@/lib/models/llm/llm-list"
 import { supabase } from "@/lib/supabase/browser-client"
 import { TeamRole } from "@/lib/team-utils"
-import { DialogPanel, DialogTitle } from "@headlessui/react"
+import {
+  TabGroup,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+  DialogPanel,
+  DialogTitle
+} from "@headlessui/react"
 import {
   IconCreditCard,
   IconDatabaseCog,
@@ -27,7 +35,6 @@ import { PersonalizationTab } from "./profile-tabs/personalization-tab"
 import { ProfileTab } from "./profile-tabs/profile-tab"
 import { SubscriptionTab } from "./profile-tabs/subscription-tab"
 import { TeamTab } from "./profile-tabs/team-tab"
-import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@headlessui/react"
 
 export const Settings: FC = () => {
   const {
@@ -141,7 +148,6 @@ export const Settings: FC = () => {
     { value: "team", icon: IconUsers, label: "Team" },
     { value: "data-controls", icon: IconDatabaseCog, label: "Data Controls" }
   ].filter(tab => {
-    // Only owners can access the subscription tab
     if (tab.value === "subscription") {
       return !membershipData || membershipData?.member_role === TeamRole.OWNER
     }
@@ -152,16 +158,6 @@ export const Settings: FC = () => {
 
     return true
   })
-
-  const tabListClass = isMobile
-    ? "mb-6 flex flex-wrap gap-2"
-    : "mr-8 mt-6 w-1/4 flex-col space-y-2 pt-10"
-
-  const tabTriggerClass = `
-    ${isMobile ? "flex-shrink flex-grow-0 min-w-0" : "w-full justify-start"}
-    flex items-center whitespace-nowrap px-2 py-2
-    data-[state=active]:bg-secondary data-[state=active]:text-primary data-[state=inactive]:text-primary
-  `
 
   if (!profile) return null
 
@@ -204,7 +200,11 @@ export const Settings: FC = () => {
           <TabGroup onChange={index => setActiveTab(tabItems[index].value)}>
             <div className={`${isMobile ? "flex flex-col" : "flex"}`}>
               <TabList
-                className={`${isMobile ? "mb-6 flex flex-wrap gap-2" : "mr-8 w-1/4 space-y-2"}`}
+                className={`${
+                  isMobile
+                    ? "mb-2 flex flex-wrap gap-2"
+                    : "mr-8 w-1/4 space-y-2"
+                }`}
               >
                 {tabItems.map(({ value, icon: Icon, label }) => (
                   <Tab
@@ -222,7 +222,7 @@ export const Settings: FC = () => {
               </TabList>
 
               <TabPanels
-                className={`${isMobile ? "mt-6" : ""} mb-4 min-h-[300px] w-full`}
+                className={`${isMobile ? "mt-2" : ""} mb-4 min-h-[300px] w-full`}
               >
                 <TabPanel>
                   <ProfileTab
