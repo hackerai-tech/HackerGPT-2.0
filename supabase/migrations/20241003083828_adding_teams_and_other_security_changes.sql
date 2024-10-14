@@ -207,9 +207,13 @@ BEGIN
 
         IF v_members_to_remove > 0 THEN
             DELETE FROM team_invitations
-            WHERE team_id = NEW.team_id AND status = 'rejected'
-            ORDER BY created_at DESC
-            LIMIT v_members_to_remove;
+            WHERE id IN (
+                SELECT id
+                FROM team_invitations
+                WHERE team_id = NEW.team_id AND status = 'rejected'
+                ORDER BY created_at DESC
+                LIMIT v_members_to_remove
+            );
         END IF;
 
 
@@ -221,15 +225,14 @@ BEGIN
         v_members_to_remove := v_members_to_remove - NEW.quantity;
 
         IF v_members_to_remove > 0 THEN
-            WITH invitations_to_remove AS (
-                SELECT ti.id
-                FROM team_invitations ti
-                WHERE ti.team_id = NEW.team_id AND ti.status = 'pending'
-                ORDER BY ti.created_at DESC
-                LIMIT v_members_to_remove
-            )
             DELETE FROM team_invitations
-            WHERE id IN (SELECT id FROM invitations_to_remove);
+            WHERE id IN (
+                SELECT id
+                FROM team_invitations
+                WHERE team_id = NEW.team_id AND status = 'pending'
+                ORDER BY created_at DESC
+                LIMIT v_members_to_remove
+            );
         END IF;
 
         -- Remove non-admin team members
@@ -239,20 +242,18 @@ BEGIN
 
         v_members_to_remove := v_members_to_remove - NEW.quantity;
 
-        IF v_members_to_remove > 0 THEN            
-            WITH members_to_remove AS (
-                SELECT tm.id, tm.invitation_id
-                FROM team_members tm
-                LEFT JOIN team_invitations ti ON tm.invitation_id = ti.id
+        IF v_members_to_remove > 0 THEN
+            DELETE FROM team_invitations
+            WHERE id IN (
+                SELECT ti.id
+                FROM team_invitations ti
+                JOIN team_members tm ON ti.id = tm.invitation_id
                 WHERE tm.team_id = NEW.team_id
-                    AND tm.user_id != NEW.user_id  -- Ensure we don't remove the team owner
-                    AND tm.role != 'admin' AND tm.role != 'owner'
+                    AND tm.user_id != NEW.user_id
+                    AND tm.role NOT IN ('admin', 'owner')
                 ORDER BY COALESCE(ti.created_at, tm.created_at) DESC
                 LIMIT v_members_to_remove
-            )
-            DELETE FROM team_invitations
-            WHERE id IN (SELECT invitation_id FROM members_to_remove);
-
+            );
         END IF;
 
         -- Remove admin team members
@@ -264,18 +265,17 @@ BEGIN
 
         -- Remove admin team members if necessary
         IF v_members_to_remove > 0 THEN
-            WITH members_to_remove AS (
-                SELECT tm.id, tm.invitation_id
-                FROM team_members tm
-                LEFT JOIN team_invitations ti ON tm.invitation_id = ti.id
+            DELETE FROM team_invitations
+            WHERE id IN (
+                SELECT ti.id
+                FROM team_invitations ti
+                JOIN team_members tm ON ti.id = tm.invitation_id
                 WHERE tm.team_id = NEW.team_id
-                    AND tm.user_id != NEW.user_id  -- Ensure we don't remove the team owner
+                    AND tm.user_id != NEW.user_id
                     AND tm.role = 'admin'
                 ORDER BY COALESCE(ti.created_at, tm.created_at) DESC
                 LIMIT v_members_to_remove
-            )
-            DELETE FROM team_invitations
-            WHERE id IN (SELECT invitation_id FROM members_to_remove);
+            );
         END IF;
     END IF;
     RETURN NEW;
