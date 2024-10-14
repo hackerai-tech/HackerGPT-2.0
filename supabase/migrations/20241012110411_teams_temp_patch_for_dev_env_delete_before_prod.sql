@@ -127,11 +127,15 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-DROP TRIGGER manage_team_on_subscription_trigger ON subscriptions;
+-- Check if the trigger exists before dropping it
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'manage_team_on_subscription_trigger') THEN
+        DROP TRIGGER manage_team_on_subscription_trigger ON subscriptions;
+    END IF;
+END $$;
 
 CREATE TRIGGER manage_team_on_subscription_trigger
 BEFORE INSERT OR UPDATE ON subscriptions
 FOR EACH ROW
 EXECUTE FUNCTION manage_team_on_subscription_change();
-
-
