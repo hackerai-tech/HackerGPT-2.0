@@ -3,11 +3,7 @@ import { Button } from "../../ui/button"
 import { Label } from "../../ui/label"
 import { SharedChatsPopup } from "./shared-chats-popup"
 
-interface DataControlsTabProps {
-  value: string
-}
-
-export const DataControlsTab: FC<DataControlsTabProps> = ({ value }) => {
+export const DataControlsTab: FC = () => {
   const [isSharedChatsPopupOpen, setIsSharedChatsPopupOpen] = useState(false)
 
   return (

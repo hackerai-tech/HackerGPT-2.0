@@ -12,23 +12,17 @@ import {
 import { FC, useContext, useState } from "react"
 import { toast } from "sonner"
 import { Button } from "../../ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "../../ui/dropdown-menu"
 import { InviteMembersDialog } from "../invite-members-dialog"
 import { RemoveTeamMemberDialog } from "../remove-team-member-dialog"
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react"
 
 interface TeamTabProps {
-  value: string
   isMobile: boolean
 }
 
 const membersPerPage = 5
 
-export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
+export const TeamTab: FC<TeamTabProps> = ({ isMobile }) => {
   const { teamMembers, subscription, refreshTeamMembers, membershipData } =
     useContext(PentestGPTContext)
 
@@ -163,19 +157,30 @@ export const TeamTab: FC<TeamTabProps> = ({ value, isMobile }) => {
                   {roleToLabel(member.member_role)}
                 </span>
                 {isAdmin && member.member_role !== "owner" && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger>
+                  <Menu as="div" className="relative inline-block text-left">
+                    <MenuButton className="flex items-center rounded-full p-1 hover:bg-gray-100">
                       <MoreHorizontal className="size-4 text-gray-500" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={() => handleRemoveMember(member)}
-                      >
-                        <Trash2 className="mr-2 size-4" />
-                        <span>Remove</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </MenuButton>
+                    <MenuItems className="absolute right-0 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <div className="p-1">
+                        <MenuItem>
+                          {({ active }) => (
+                            <button
+                              className={`${
+                                active
+                                  ? "bg-gray-100 text-gray-900"
+                                  : "text-gray-700"
+                              } group flex w-full items-center rounded-md p-2 text-sm`}
+                              onClick={() => handleRemoveMember(member)}
+                            >
+                              <Trash2 className="mr-2 size-4" />
+                              Remove
+                            </button>
+                          )}
+                        </MenuItem>
+                      </div>
+                    </MenuItems>
+                  </Menu>
                 )}
               </div>
             </li>

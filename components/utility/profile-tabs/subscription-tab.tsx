@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { TabsContent } from "@/components/ui/tabs"
 import { PentestGPTContext } from "@/context/context"
 import { getBillingPortalUrl } from "@/lib/server/stripe-url"
 import { SubscriptionStatus } from "@/types/chat"
@@ -12,13 +11,11 @@ import { FC, useContext, useState } from "react"
 import { toast } from "sonner"
 
 interface SubscriptionTabProps {
-  value: string
   userEmail: string
   isMobile: boolean
 }
 
 export const SubscriptionTab: FC<SubscriptionTabProps> = ({
-  value,
   userEmail,
   isMobile
 }) => {
@@ -92,7 +89,7 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
     process.env.NODE_ENV === "development"
 
   return (
-    <TabsContent className="space-y-4" value={value}>
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <Label className="text-sm font-medium">Current plan</Label>
@@ -153,7 +150,7 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
           className="bg-secondary w-full cursor-default truncate sm:w-2/3"
         />
       </div>
-    </TabsContent>
+    </div>
   )
 }
 

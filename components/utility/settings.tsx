@@ -20,7 +20,6 @@ import { FC, useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { SIDEBAR_ICON_SIZE } from "../sidebar/sidebar-switcher"
 import { Button } from "../ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { DeleteAllChatsDialog } from "./delete-all-chats-dialog"
 import { DataControlsTab } from "./profile-tabs/data-controls-tab"
@@ -28,6 +27,7 @@ import { PersonalizationTab } from "./profile-tabs/personalization-tab"
 import { ProfileTab } from "./profile-tabs/profile-tab"
 import { SubscriptionTab } from "./profile-tabs/subscription-tab"
 import { TeamTab } from "./profile-tabs/team-tab"
+import { TabGroup, TabList, Tab, TabPanels, TabPanel } from "@headlessui/react"
 
 export const Settings: FC = () => {
   const {
@@ -201,68 +201,57 @@ export const Settings: FC = () => {
             </button>
           </div>
 
-          <Tabs
-            defaultValue="profile"
-            className={`${isMobile ? "mt-4 flex flex-col" : "mt-10 flex"}`}
-            onValueChange={setActiveTab}
-          >
-            <TabsList className={`${tabListClass} bg-transparent`}>
-              {tabItems.map(({ value, icon: Icon, label }, index) => (
-                <TabsTrigger
-                  key={value}
-                  value={value}
-                  className={`
-                    ${tabTriggerClass}
-                    ${isMobile && index === tabItems.length - 1 && tabItems.length % 2 !== 0 ? "" : ""}
-                  `}
-                >
-                  <Icon className="mr-2" size={20} />
-                  {label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+          <TabGroup onChange={index => setActiveTab(tabItems[index].value)}>
+            <div className={`${isMobile ? "flex flex-col" : "flex"}`}>
+              <TabList
+                className={`${isMobile ? "mb-6 flex flex-wrap gap-2" : "mr-8 w-1/4 space-y-2"}`}
+              >
+                {tabItems.map(({ value, icon: Icon, label }) => (
+                  <Tab
+                    key={value}
+                    className={({ selected }) => `
+                      ${isMobile ? "flex-shrink flex-grow-0 min-w-0" : "w-full justify-start"}
+                      flex items-center whitespace-nowrap px-2 py-2 rounded
+                      ${selected ? "bg-secondary text-primary" : "text-primary hover:bg-secondary/50"}
+                    `}
+                  >
+                    <Icon className="mr-2" size={20} />
+                    {label}
+                  </Tab>
+                ))}
+              </TabList>
 
-            <div
-              className={`${isMobile ? "mt-6" : "-mt-7"} mb-4 min-h-[300px] w-full`}
-            >
-              <TabsContent value="profile">
-                <ProfileTab
-                  handleDeleteAllChats={handleDeleteAllChats}
-                  handleSignOut={handleSignOut}
-                />
-              </TabsContent>
-
-              <TabsContent value="subscription">
-                <SubscriptionTab
-                  value="subscription"
-                  userEmail={userEmail}
-                  isMobile={isMobile}
-                />
-              </TabsContent>
-
-              <TabsContent value="personalization">
-                <PersonalizationTab
-                  value="personalization"
-                  profileInstructions={profileInstructions}
-                  setProfileInstructions={setProfileInstructions}
-                />
-              </TabsContent>
-
-              <TabsContent value="team">
-                <TeamTab value="team" isMobile={isMobile} />
-              </TabsContent>
-
-              <TabsContent value="data-controls">
-                <DataControlsTab value="data-controls" />
-              </TabsContent>
+              <TabPanels
+                className={`${isMobile ? "mt-6" : ""} mb-4 min-h-[300px] w-full`}
+              >
+                <TabPanel>
+                  <ProfileTab
+                    handleDeleteAllChats={handleDeleteAllChats}
+                    handleSignOut={handleSignOut}
+                  />
+                </TabPanel>
+                <TabPanel>
+                  <PersonalizationTab
+                    profileInstructions={profileInstructions}
+                    setProfileInstructions={setProfileInstructions}
+                  />
+                </TabPanel>
+                <TabPanel>
+                  <SubscriptionTab userEmail={userEmail} isMobile={isMobile} />
+                </TabPanel>
+                <TabPanel>
+                  <TeamTab isMobile={isMobile} />
+                </TabPanel>
+                <TabPanel>
+                  <DataControlsTab />
+                </TabPanel>
+              </TabPanels>
             </div>
-          </Tabs>
+          </TabGroup>
 
           <div className="mt-6 flex h-[38px] items-center justify-end">
-            {activeTab === "personalization" ? (
+            {activeTab === "personalization" && (
               <Button onClick={handleSave}>Save</Button>
-            ) : (
-              <div className="w-[64px]"></div>
             )}
           </div>
         </DialogPanel>
