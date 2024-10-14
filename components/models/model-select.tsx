@@ -1,8 +1,7 @@
 import { PentestGPTContext } from "@/context/context"
 import { LLM, LLMID } from "@/types"
-import { IconCircle, IconCircleCheck, IconLock } from "@tabler/icons-react"
+import { IconCircle, IconCircleCheck } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
-import { ModelOption } from "./model-option"
 import { useRouter } from "next/navigation"
 import { ModelIcon } from "./model-icon"
 import { Button } from "../ui/button"
@@ -39,20 +38,18 @@ export const ModelSelect: FC<ModelSelectProps> = ({
 
   const allModels = [...availableHostedModels]
 
-  const sortedModels = [...allModels].sort((a, b) => {
-    // Prioritize 'openai' to appear first (reverse of previous order)
-    if (a.provider === "openai" && b.provider !== "openai") return -1
-    if (b.provider === "openai" && a.provider !== "openai") return 1
+  // Define the specific order of models
+  const modelOrder: LLMID[] = [
+    "gpt-4-turbo-preview",
+    "mistral-large",
+    "mistral-medium"
+  ]
 
-    // Then prioritize 'mistral'
-    if (a.provider === "mistral" && b.provider !== "mistral") return -1
-    if (b.provider === "mistral" && a.provider !== "mistral") return 1
-
-    // Finally, sort alphabetically by provider name in reverse order
-    return (
-      b.provider.localeCompare(a.provider) ||
-      b.modelName.localeCompare(a.modelName)
-    )
+  // Sort the models based on the predefined order
+  const sortedModels = allModels.sort((a, b) => {
+    const indexA = modelOrder.indexOf(a.modelId as LLMID)
+    const indexB = modelOrder.indexOf(b.modelId as LLMID)
+    return indexA - indexB
   })
 
   // Group the sorted models by provider
