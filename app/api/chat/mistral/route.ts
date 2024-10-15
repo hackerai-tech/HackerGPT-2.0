@@ -17,7 +17,7 @@ import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { detectCategoryAndModeration } from "@/lib/server/moderation"
-import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
+// import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 
 export const runtime: ServerRuntime = "edge"
 
@@ -132,11 +132,6 @@ export async function POST(request: Request) {
       hazardCategory.toUpperCase()
     )
 
-    const shouldUseMiniModel =
-      !isPentestGPTPro &&
-      (moderationLevel === 0 ||
-        (moderationLevel >= 0.0 && moderationLevel <= 0.1))
-
     const includeImages = messagesIncludeImages(messages)
 
     const handleMessages = (
@@ -144,7 +139,7 @@ export async function POST(request: Request) {
       isHighRisk: boolean,
       isPro: boolean
     ) => {
-      if (shouldUseMiniModel || includeImages) {
+      if (includeImages) {
         selectedModel = "openai/gpt-4o-mini"
         return filterEmptyAssistantMessages(messages)
       }
