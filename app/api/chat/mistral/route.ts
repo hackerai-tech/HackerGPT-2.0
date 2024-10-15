@@ -1,8 +1,6 @@
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { ServerRuntime } from "next"
-
 import { updateSystemMessage } from "@/lib/ai-helper"
-
 import {
   filterEmptyAssistantMessages,
   handleAssistantMessages,
@@ -16,8 +14,7 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
-import { detectCategoryAndModeration } from "@/lib/server/moderation"
-// import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
+import { getModerationResult } from "@/lib/server/moderation"
 
 export const runtime: ServerRuntime = "edge"
 
@@ -51,14 +48,17 @@ export async function POST(request: Request) {
       throw new Error("Selected model is undefined")
     }
 
-    const detectionMessages = messages.slice(1, -1).slice(-4)
+    // On normal chat, the last user message is the target standalone message
+    // On continuation, the tartget is the last generated message by the system
+    const targetStandAloneMessage = messages[messages.length - 2].content
+    const filterTargetMessage = isContinuation
+      ? messages[messages.length - 3]
+      : messages[messages.length - 2]
 
-    const { hazardCategory, moderationLevel } =
-      await detectCategoryAndModeration(
-        detectionMessages,
-        detectionMessages[detectionMessages.length - 1].content,
-        llmConfig.openrouter.url,
-        providerHeaders
+    const { moderationLevel, shouldUncensorResponse } =
+      await getModerationResult(
+        filterTargetMessage,
+        llmConfig.openai.apiKey || ""
       )
 
     updateSystemMessage(
@@ -68,13 +68,6 @@ export async function POST(request: Request) {
         : llmConfig.systemPrompts.pgpt35,
       profile.profile_context
     )
-
-    // On normal chat, the last user message is the target standalone message
-    // On continuation, the tartget is the last generated message by the system
-    const targetStandAloneMessage = messages[messages.length - 2].content
-    const filterTargetMessage = isContinuation
-      ? messages[messages.length - 3]
-      : messages[messages.length - 2]
 
     if (
       shouldUseRAG &&
@@ -127,16 +120,11 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
-    const highRiskCategories = ["S4", "S3", "S10", "S11", "S12"]
-    const isHighRiskCategory = highRiskCategories.includes(
-      hazardCategory.toUpperCase()
-    )
-
     const includeImages = messagesIncludeImages(messages)
 
     const handleMessages = (
       modLevel: number,
-      isHighRisk: boolean,
+      shouldUncensor: boolean,
       isPro: boolean
     ) => {
       if (includeImages) {
@@ -150,14 +138,14 @@ export async function POST(request: Request) {
           : "mistralai/mistral-small"
       }
 
-      if (modLevel >= 0.2 && modLevel <= 0.8 && !isHighRisk) {
+      if (shouldUncensor) {
         return handleAssistantMessages(messages)
       }
 
       return filterEmptyAssistantMessages(messages)
     }
 
-    handleMessages(moderationLevel, isHighRiskCategory, isPentestGPTPro)
+    handleMessages(moderationLevel, shouldUncensorResponse, isPentestGPTPro)
 
     try {
       let provider
@@ -178,12 +166,6 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
-      // let tools
-      // if (selectedModel === "openai/gpt-4o-mini") {
-      //   const toolSchemas = createToolSchemas({ profile, data })
-      //   tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
-      // }
-
       const result = await streamText({
         model: provider(selectedModel),
         messages: toVercelChatMessages(messages, includeImages),
@@ -191,11 +173,6 @@ export async function POST(request: Request) {
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
-        // ...(selectedModel === "openai/gpt-4o-mini"
-        //   ? {
-        //       tools
-        //     }
-        //   : {}),
         onFinish: () => {
           data.close()
         }
