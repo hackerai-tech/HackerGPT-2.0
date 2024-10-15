@@ -31,7 +31,15 @@ export async function getModerationResult(
     // )
 
     return { moderationLevel, shouldUncensorResponse }
-  } catch (error) {
+  } catch (error: any) {
+    // Check if the error is a 400 error with the specific message
+    if (
+      error.status === 400 &&
+      error.error?.message?.includes("Input should be a valid string")
+    ) {
+      return { moderationLevel: 0, shouldUncensorResponse: false }
+    }
+
     console.error("Error in getModerationResult:", error)
     return { moderationLevel: 0, shouldUncensorResponse: false }
   }
