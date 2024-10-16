@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       : messages[messages.length - 2]
 
     const { shouldUncensorResponse } = await getModerationResult(
-      filterTargetMessage.content,
+      filterTargetMessage,
       llmConfig.openai.apiKey || ""
     )
 

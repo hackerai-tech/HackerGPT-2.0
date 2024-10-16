@@ -1,15 +1,42 @@
 import OpenAI from "openai"
 
 export async function getModerationResult(
-  lastUserMessage: string,
+  lastUserMessage: any,
   openaiApiKey: string
 ): Promise<{ shouldUncensorResponse: boolean }> {
   const openai = new OpenAI({ apiKey: openaiApiKey })
 
+  let input: string | OpenAI.Moderations.ModerationCreateParams["input"]
+
+  if (typeof lastUserMessage === "string") {
+    input = lastUserMessage
+  } else if (lastUserMessage.content) {
+    if (typeof lastUserMessage.content === "string") {
+      input = lastUserMessage.content
+    } else if (Array.isArray(lastUserMessage.content)) {
+      // Filter out only text and the first image
+      input = lastUserMessage.content.reduce((acc: any[], item: any) => {
+        if (item.type === "text") {
+          acc.push(item)
+        } else if (
+          item.type === "image_url" &&
+          !acc.some(i => i.type === "image_url")
+        ) {
+          acc.push(item)
+        }
+        return acc
+      }, [])
+    } else {
+      return { shouldUncensorResponse: false }
+    }
+  } else {
+    return { shouldUncensorResponse: false }
+  }
+
   try {
     const moderation = await openai.moderations.create({
       model: "omni-moderation-latest",
-      input: lastUserMessage
+      input: input
     })
 
     const result = moderation.results[0]
@@ -23,12 +50,12 @@ export async function getModerationResult(
       hazardCategories
     )
 
-    // console.log(
-    //   JSON.stringify(moderation, null, 2),
-    //   moderationLevel,
-    //   hazardCategories,
-    //   shouldUncensorResponse
-    // )
+    console.log(
+      JSON.stringify(moderation, null, 2),
+      moderationLevel,
+      hazardCategories,
+      shouldUncensorResponse
+    )
 
     return { shouldUncensorResponse }
   } catch (error: any) {
