@@ -55,11 +55,10 @@ export async function POST(request: Request) {
       ? messages[messages.length - 3]
       : messages[messages.length - 2]
 
-    const { moderationLevel, shouldUncensorResponse } =
-      await getModerationResult(
-        filterTargetMessage.content,
-        llmConfig.openai.apiKey || ""
-      )
+    const { shouldUncensorResponse } = await getModerationResult(
+      filterTargetMessage.content,
+      llmConfig.openai.apiKey || ""
+    )
 
     updateSystemMessage(
       messages,
@@ -122,30 +121,23 @@ export async function POST(request: Request) {
 
     const includeImages = messagesIncludeImages(messages)
 
-    const handleMessages = (
-      modLevel: number,
-      shouldUncensor: boolean,
-      isPro: boolean
-    ) => {
+    const handleMessages = (shouldUncensor: boolean, isPro: boolean) => {
       if (includeImages) {
         selectedModel = "openai/gpt-4o-mini"
         return filterEmptyAssistantMessages(messages)
       }
 
-      if (modLevel >= 0.7) {
+      if (shouldUncensor) {
         selectedModel = isPro
           ? "mistralai/mistral-large"
           : "mistralai/mistral-small"
-      }
-
-      if (shouldUncensor) {
         return handleAssistantMessages(messages)
       }
 
       return filterEmptyAssistantMessages(messages)
     }
 
-    handleMessages(moderationLevel, shouldUncensorResponse, isPentestGPTPro)
+    handleMessages(shouldUncensorResponse, isPentestGPTPro)
 
     try {
       let provider

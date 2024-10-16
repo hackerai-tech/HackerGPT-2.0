@@ -3,7 +3,7 @@ import OpenAI from "openai"
 export async function getModerationResult(
   lastUserMessage: string,
   openaiApiKey: string
-): Promise<{ moderationLevel: number; shouldUncensorResponse: boolean }> {
+): Promise<{ shouldUncensorResponse: boolean }> {
   const openai = new OpenAI({ apiKey: openaiApiKey })
 
   try {
@@ -30,10 +30,10 @@ export async function getModerationResult(
     //   shouldUncensorResponse
     // )
 
-    return { moderationLevel, shouldUncensorResponse }
+    return { shouldUncensorResponse }
   } catch (error: any) {
     console.error("Error in getModerationResult:", error)
-    return { moderationLevel: 0, shouldUncensorResponse: false }
+    return { shouldUncensorResponse: false }
   }
 }
 
