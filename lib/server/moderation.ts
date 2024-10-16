@@ -50,12 +50,12 @@ export async function getModerationResult(
       hazardCategories
     )
 
-    console.log(
-      JSON.stringify(moderation, null, 2),
-      moderationLevel,
-      hazardCategories,
-      shouldUncensorResponse
-    )
+    // console.log(
+    //   JSON.stringify(moderation, null, 2),
+    //   moderationLevel,
+    //   hazardCategories,
+    //   shouldUncensorResponse
+    // )
 
     return { shouldUncensorResponse }
   } catch (error: any) {
