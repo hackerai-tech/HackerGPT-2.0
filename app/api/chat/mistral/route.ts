@@ -156,6 +156,12 @@ export async function POST(request: Request) {
           baseURL: providerBaseUrl,
           headers: providerHeaders
         })
+      } else if (selectedModel.includes("meta-llama/llama-3.1-70b-instruct")) {
+        selectedModel = llmConfig.models.pentestgpt_small_fireworks
+        provider = createOpenAI({
+          apiKey: llmConfig.fireworks.apiKey,
+          baseURL: llmConfig.fireworks.baseUrl
+        })
       } else {
         provider = createOpenAI({
           baseURL: providerBaseUrl,
@@ -167,7 +173,7 @@ export async function POST(request: Request) {
       data.append({ ragUsed, ragId })
 
       const result = await streamText({
-        model: provider(selectedModel),
+        model: provider(selectedModel || ""),
         messages: toVercelChatMessages(messages, includeImages),
         temperature: modelTemperature,
         maxTokens: isPentestGPTPro ? 2048 : 1024,

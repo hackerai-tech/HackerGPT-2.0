@@ -21,6 +21,10 @@ const llmConfig = {
     url: `https://openrouter.ai/api/v1/chat/completions`,
     apiKey: process.env.OPENROUTER_API_KEY
   },
+  fireworks: {
+    baseUrl: "https://api.fireworks.ai/inference/v1",
+    apiKey: process.env.FIREWORKS_API_KEY
+  },
   openai: {
     baseUrl: "https://api.openai.com/v1",
     url: "https://api.openai.com/v1/chat/completions",
@@ -49,11 +53,14 @@ const llmConfig = {
     pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, false, "GPT-4o")}\n\n${getPentestGPTToolsInfo(false, false, true, false)}\n${getTerminalResultInstructions()}\n${systemPromptEnding}`
   },
   models: {
+    // OpenRouter
     pentestgpt_default_openrouter:
       process.env.OPENROUTER_PENTESTGPT_DEFAULT_MODEL,
     pentestgpt_standalone_question_openrouter:
       process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
-    pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
+    pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL,
+    // Fireworks AI
+    pentestgpt_small_fireworks: process.env.FIREWORKS_PENTESTGPT_DEFAULT_MODEL
   },
   hackerRAG: {
     enabled:
