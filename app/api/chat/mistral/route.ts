@@ -17,6 +17,25 @@ import { StreamData, streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 
 export const runtime: ServerRuntime = "edge"
+export const preferredRegion = [
+  "iad1",
+  "arn1",
+  "bom1",
+  "cdg1",
+  "cle1",
+  "cpt1",
+  "dub1",
+  "fra1",
+  "gru1",
+  "hnd1",
+  "icn1",
+  "kix1",
+  "lhr1",
+  "pdx1",
+  "sfo1",
+  "sin1",
+  "syd1"
+]
 
 export async function POST(request: Request) {
   const { messages, chatSettings, isRetrieval, isContinuation, isRagEnabled } =
@@ -55,11 +74,10 @@ export async function POST(request: Request) {
       ? messages[messages.length - 3]
       : messages[messages.length - 2]
 
-    const { moderationLevel, shouldUncensorResponse } =
-      await getModerationResult(
-        filterTargetMessage.content,
-        llmConfig.openai.apiKey || ""
-      )
+    const { shouldUncensorResponse } = await getModerationResult(
+      filterTargetMessage,
+      llmConfig.openai.apiKey || ""
+    )
 
     updateSystemMessage(
       messages,
@@ -122,30 +140,23 @@ export async function POST(request: Request) {
 
     const includeImages = messagesIncludeImages(messages)
 
-    const handleMessages = (
-      modLevel: number,
-      shouldUncensor: boolean,
-      isPro: boolean
-    ) => {
+    const handleMessages = (shouldUncensor: boolean, isPro: boolean) => {
       if (includeImages) {
         selectedModel = "openai/gpt-4o-mini"
         return filterEmptyAssistantMessages(messages)
       }
 
-      if (modLevel >= 0.7) {
+      if (shouldUncensor) {
         selectedModel = isPro
           ? "mistralai/mistral-large"
           : "mistralai/mistral-small"
-      }
-
-      if (shouldUncensor) {
         return handleAssistantMessages(messages)
       }
 
       return filterEmptyAssistantMessages(messages)
     }
 
-    handleMessages(moderationLevel, shouldUncensorResponse, isPentestGPTPro)
+    handleMessages(shouldUncensorResponse, isPentestGPTPro)
 
     try {
       let provider
@@ -156,8 +167,15 @@ export async function POST(request: Request) {
           baseURL: providerBaseUrl,
           headers: providerHeaders
         })
-      } else if (selectedModel.includes("meta-llama/llama-3.1-70b-instruct")) {
-        selectedModel = llmConfig.models.pentestgpt_small_fireworks
+      } else if (
+        selectedModel.includes(
+          llmConfig.models.pentestgpt_default_openrouter || ""
+        ) ||
+        selectedModel.includes(llmConfig.models.pentestgpt_pro_openrouter || "")
+      ) {
+        selectedModel = isPentestGPTPro
+          ? llmConfig.models.pentestgpt_large_fireworks
+          : llmConfig.models.pentestgpt_small_fireworks
         provider = createOpenAI({
           apiKey: llmConfig.fireworks.apiKey,
           baseURL: llmConfig.fireworks.baseUrl

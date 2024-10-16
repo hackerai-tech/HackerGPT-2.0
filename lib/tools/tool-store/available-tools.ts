@@ -165,7 +165,7 @@ export const availablePlugins: PluginSummary[] = [
     description: "Detect open ports and fingerprint services",
     githubRepoUrl: pluginUrls.PORT_SCANNER,
     isInstalled: false,
-    isPremium: false,
+    isPremium: true,
     createdAt: "2024-06-29",
     starters: [
       {
@@ -333,7 +333,7 @@ export const availablePlugins: PluginSummary[] = [
       "Perform DNS recon and discover misconfigurations in DNS servers",
     githubRepoUrl: pluginUrls.DNS_SCANNER,
     isInstalled: false,
-    isPremium: false,
+    isPremium: true,
     createdAt: "2024-08-05",
     starters: [
       {
