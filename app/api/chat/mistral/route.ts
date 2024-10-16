@@ -148,8 +148,15 @@ export async function POST(request: Request) {
           baseURL: providerBaseUrl,
           headers: providerHeaders
         })
-      } else if (selectedModel.includes("meta-llama/llama-3.1-70b-instruct")) {
-        selectedModel = llmConfig.models.pentestgpt_small_fireworks
+      } else if (
+        selectedModel.includes(
+          llmConfig.models.pentestgpt_default_openrouter || ""
+        ) ||
+        selectedModel.includes(llmConfig.models.pentestgpt_pro_openrouter || "")
+      ) {
+        selectedModel = isPentestGPTPro
+          ? llmConfig.models.pentestgpt_large_fireworks
+          : llmConfig.models.pentestgpt_small_fireworks
         provider = createOpenAI({
           apiKey: llmConfig.fireworks.apiKey,
           baseURL: llmConfig.fireworks.baseUrl

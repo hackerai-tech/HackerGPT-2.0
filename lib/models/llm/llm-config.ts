@@ -60,7 +60,8 @@ const llmConfig = {
       process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
     pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL,
     // Fireworks AI
-    pentestgpt_small_fireworks: process.env.FIREWORKS_PENTESTGPT_DEFAULT_MODEL
+    pentestgpt_small_fireworks: process.env.FIREWORKS_PENTESTGPT_DEFAULT_MODEL,
+    pentestgpt_large_fireworks: process.env.FIREWORKS_PENTESTGPT_PRO_MODEL
   },
   hackerRAG: {
     enabled:
