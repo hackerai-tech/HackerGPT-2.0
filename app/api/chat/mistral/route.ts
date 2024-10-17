@@ -77,16 +77,9 @@ export async function POST(request: Request) {
     const includeImages = messagesIncludeImages(messages)
 
     let shouldUncensorResponse = false
-    if (
-      !includeImages &&
-      typeof filterTargetMessage.content === "string" &&
-      filterTargetMessage.content.length > llmConfig.hackerRAG.messageLength.min
-    ) {
+    if (!includeImages) {
       const { shouldUncensorResponse: moderationResult } =
-        await getModerationResult(
-          filterTargetMessage,
-          llmConfig.openai.apiKey || ""
-        )
+        await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
       shouldUncensorResponse = moderationResult
     }
 
