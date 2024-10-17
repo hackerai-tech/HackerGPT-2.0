@@ -1,5 +1,7 @@
 import OpenAI from "openai"
 
+const MODERATION_CHAR_LIMIT = 3000
+
 export async function getModerationResult(
   lastUserMessage: any,
   openaiApiKey: string
@@ -9,15 +11,21 @@ export async function getModerationResult(
   let input: string | OpenAI.Moderations.ModerationCreateParams["input"]
 
   if (typeof lastUserMessage === "string") {
-    input = lastUserMessage
+    input = lastUserMessage.slice(0, MODERATION_CHAR_LIMIT)
   } else if (lastUserMessage.content) {
     if (typeof lastUserMessage.content === "string") {
-      input = lastUserMessage.content
+      input = lastUserMessage.content.slice(0, MODERATION_CHAR_LIMIT)
     } else if (Array.isArray(lastUserMessage.content)) {
       // Filter out only text and the first image
       input = lastUserMessage.content.reduce((acc: any[], item: any) => {
         if (item.type === "text") {
-          acc.push(item)
+          const truncatedText = item.text.slice(
+            0,
+            MODERATION_CHAR_LIMIT - acc.join("").length
+          )
+          if (truncatedText.length > 0) {
+            acc.push({ ...item, text: truncatedText })
+          }
         } else if (
           item.type === "image_url" &&
           !acc.some(i => i.type === "image_url")
