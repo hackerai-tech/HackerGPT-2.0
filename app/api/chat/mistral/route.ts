@@ -74,10 +74,14 @@ export async function POST(request: Request) {
       ? messages[messages.length - 3]
       : messages[messages.length - 2]
 
-    const { shouldUncensorResponse } = await getModerationResult(
-      filterTargetMessage,
-      llmConfig.openai.apiKey || ""
-    )
+    const includeImages = messagesIncludeImages(messages)
+
+    let shouldUncensorResponse = false
+    if (!includeImages) {
+      const { shouldUncensorResponse: moderationResult } =
+        await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
+      shouldUncensorResponse = moderationResult
+    }
 
     updateSystemMessage(
       messages,
@@ -137,8 +141,6 @@ export async function POST(request: Request) {
       }
       ragId = data?.resultId
     }
-
-    const includeImages = messagesIncludeImages(messages)
 
     const handleMessages = (shouldUncensor: boolean, isPro: boolean) => {
       if (includeImages) {

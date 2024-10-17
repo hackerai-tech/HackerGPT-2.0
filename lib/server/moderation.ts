@@ -1,37 +1,22 @@
 import OpenAI from "openai"
 
+const MODERATION_CHAR_LIMIT = 3000
+
 export async function getModerationResult(
-  lastUserMessage: any,
-  openaiApiKey: string
+  messages: any[],
+  openaiApiKey: string,
+  hackerRAGMinLength: number
 ): Promise<{ shouldUncensorResponse: boolean }> {
   const openai = new OpenAI({ apiKey: openaiApiKey })
 
-  let input: string | OpenAI.Moderations.ModerationCreateParams["input"]
+  // Find the last user message that exceeds the minimum length
+  const targetMessage = findTargetMessage(messages, hackerRAGMinLength)
 
-  if (typeof lastUserMessage === "string") {
-    input = lastUserMessage
-  } else if (lastUserMessage.content) {
-    if (typeof lastUserMessage.content === "string") {
-      input = lastUserMessage.content
-    } else if (Array.isArray(lastUserMessage.content)) {
-      // Filter out only text and the first image
-      input = lastUserMessage.content.reduce((acc: any[], item: any) => {
-        if (item.type === "text") {
-          acc.push(item)
-        } else if (
-          item.type === "image_url" &&
-          !acc.some(i => i.type === "image_url")
-        ) {
-          acc.push(item)
-        }
-        return acc
-      }, [])
-    } else {
-      return { shouldUncensorResponse: false }
-    }
-  } else {
+  if (!targetMessage) {
     return { shouldUncensorResponse: false }
   }
+
+  const input = prepareInput(targetMessage)
 
   try {
     const moderation = await openai.moderations.create({
@@ -62,6 +47,55 @@ export async function getModerationResult(
     console.error("Error in getModerationResult:", error)
     return { shouldUncensorResponse: false }
   }
+}
+
+function findTargetMessage(messages: any[], minLength: number): any | null {
+  let userMessagesChecked = 0
+
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i]
+    if (message.role === "user") {
+      userMessagesChecked++
+      if (
+        typeof message.content === "string" &&
+        message.content.length > minLength
+      ) {
+        return message
+      }
+      if (userMessagesChecked >= 3) {
+        break // Stop after checking three user messages
+      }
+    }
+  }
+
+  return null
+}
+
+function prepareInput(
+  message: any
+): string | OpenAI.Moderations.ModerationCreateParams["input"] {
+  if (typeof message.content === "string") {
+    return message.content.slice(0, MODERATION_CHAR_LIMIT)
+  } else if (Array.isArray(message.content)) {
+    return message.content.reduce((acc: any[], item: any) => {
+      if (item.type === "text") {
+        const truncatedText = item.text.slice(
+          0,
+          MODERATION_CHAR_LIMIT - acc.join("").length
+        )
+        if (truncatedText.length > 0) {
+          acc.push({ ...item, text: truncatedText })
+        }
+      } else if (
+        item.type === "image_url" &&
+        !acc.some(i => i.type === "image_url")
+      ) {
+        acc.push(item)
+      }
+      return acc
+    }, [])
+  }
+  return ""
 }
 
 function calculateModerationLevel(
