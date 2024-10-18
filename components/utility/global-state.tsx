@@ -129,6 +129,11 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     false
   )
 
+  // Audio
+  const [currentPlayingMessageId, setCurrentPlayingMessageId] = useState<
+    string | null
+  >(null)
+
   // Terminal output setting
   const [showTerminalOutput, setShowTerminalOutput] =
     useLocalStorageState<boolean>("showTerminalOutput", true)
@@ -381,7 +386,11 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
         // Terminal output setting
         showTerminalOutput,
-        setShowTerminalOutput
+        setShowTerminalOutput,
+
+        // Audio
+        currentPlayingMessageId,
+        setCurrentPlayingMessageId
       }}
     >
       {children}
