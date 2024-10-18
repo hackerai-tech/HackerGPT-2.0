@@ -145,8 +145,8 @@ export const Settings: FC = () => {
     { value: "profile", icon: IconSettings, label: "General" },
     { value: "personalization", icon: IconUserHeart, label: "Personalization" },
     { value: "subscription", icon: IconCreditCard, label: "Subscription" },
-    { value: "team", icon: IconUsers, label: "Team" },
-    { value: "data-controls", icon: IconDatabaseCog, label: "Data Controls" }
+    { value: "data-controls", icon: IconDatabaseCog, label: "Data Controls" },
+    { value: "team", icon: IconUsers, label: "Team" }
   ].filter(tab => {
     if (tab.value === "subscription") {
       return !membershipData || membershipData?.member_role === TeamRole.OWNER
@@ -240,11 +240,14 @@ export const Settings: FC = () => {
                   <SubscriptionTab userEmail={userEmail} isMobile={isMobile} />
                 </TabPanel>
                 <TabPanel>
-                  <TeamTab isMobile={isMobile} />
-                </TabPanel>
-                <TabPanel>
                   <DataControlsTab />
                 </TabPanel>
+                {membershipData &&
+                  membershipData?.invitation_status === "accepted" && (
+                    <TabPanel>
+                      <TeamTab isMobile={isMobile} />
+                    </TabPanel>
+                  )}
               </TabPanels>
             </div>
           </TabGroup>
