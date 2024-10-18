@@ -131,6 +131,10 @@ interface PentestGPTContext {
   setShowTerminalOutput: (
     value: boolean | ((prevState: boolean) => boolean)
   ) => void
+
+  // Audio
+  currentPlayingMessageId: string | null
+  setCurrentPlayingMessageId: Dispatch<SetStateAction<string | null>>
 }
 
 export const PentestGPTContext = createContext<PentestGPTContext>({
@@ -247,5 +251,9 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
 
   // Terminal output setting
   showTerminalOutput: false,
-  setShowTerminalOutput: () => {}
+  setShowTerminalOutput: () => {},
+
+  // Audio
+  currentPlayingMessageId: null,
+  setCurrentPlayingMessageId: () => {}
 })

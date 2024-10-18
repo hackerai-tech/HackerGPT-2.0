@@ -98,7 +98,7 @@ function getTimeWindow(): number {
 function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
   let limit
   const fixedModelName = _getFixedModelName(model)
-  const baseKey = `RATELIMITER_LIMIT_${fixedModelName}_`
+  const baseKey = `RATELIMITER_LIMIT_${fixedModelName}`
 
   const suffix = subscriptionInfo.isTeam
     ? "_TEAM"
@@ -208,7 +208,8 @@ function getModelName(model: string): string {
     pentestgpt: "PGPT-3.5",
     "pentestgpt-pro": "PGPT-4",
     "gpt-4": "GPT-4",
-    terminal: "terminal"
+    terminal: "terminal",
+    "tts-1": "text-to-speech"
   }
   return modelNames[model] || model
 }

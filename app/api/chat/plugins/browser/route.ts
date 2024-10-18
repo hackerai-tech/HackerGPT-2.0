@@ -92,7 +92,7 @@ async function getProviderConfig(chatSettings: any, profile: any) {
     chatSettings.model === PGPT4.modelId || chatSettings.model === GPT4o.modelId
 
   const defaultModel = "gpt-4o-mini"
-  const proModel = "gpt-4o-mini"
+  const proModel = "gpt-4o"
 
   let selectedModel = isProModel ? proModel : defaultModel
 
@@ -182,8 +182,10 @@ With the information from the webpage content above, \
 respond to the user's query as if you have comprehensive knowledge of the page. \
 Provide a direct and insightful answer to the query. \
 If the specific details are not present, draw upon related information to \
-offer valuable insights or suggest practical alternatives.
+offer valuable insights or suggest practical alternatives. \
+If the webpage content is empty, irrelevant, or indicates an error, \
+clearly state that you couldn't access the information and explain why.
 
 Important: Do not refer to "the webpage content provided" or "the information given" in your response. \
-Instead, answer as if you have directly viewed the webpage and are sharing your knowledge about it.`
+Instead, answer as if you have directly attempted to view the webpage and are sharing your experience with it.`
 }
