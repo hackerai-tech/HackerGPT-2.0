@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     const includeImages = messagesIncludeImages(messages)
 
     let shouldUncensorResponse = false
-    if (!includeImages) {
+    if (!includeImages && !isContinuation) {
       const { shouldUncensorResponse: moderationResult } =
         await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
       shouldUncensorResponse = moderationResult
@@ -196,7 +196,7 @@ export async function POST(request: Request) {
         model: provider(selectedModel || ""),
         messages: toVercelChatMessages(messages, includeImages),
         temperature: modelTemperature,
-        maxTokens: isPentestGPTPro ? 2048 : 1024,
+        maxTokens: isPentestGPTPro ? 128 : 128,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
         onFinish: () => {
