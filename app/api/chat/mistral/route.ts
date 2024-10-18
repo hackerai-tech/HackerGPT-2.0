@@ -196,7 +196,7 @@ export async function POST(request: Request) {
         model: provider(selectedModel || ""),
         messages: toVercelChatMessages(messages, includeImages),
         temperature: modelTemperature,
-        maxTokens: isPentestGPTPro ? 128 : 128,
+        maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
         onFinish: () => {
