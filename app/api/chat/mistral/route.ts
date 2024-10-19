@@ -149,9 +149,9 @@ export async function POST(request: Request) {
       }
 
       if (shouldUncensor) {
-        selectedModel = isPro
-          ? "mistralai/mistral-large"
-          : "mistralai/mistral-small"
+        if (isPro) {
+          selectedModel = "mistralai/mistral-large"
+        }
         return handleAssistantMessages(messages)
       }
 
@@ -170,9 +170,9 @@ export async function POST(request: Request) {
           headers: providerHeaders
         })
       } else if (
-        selectedModel.includes(
-          llmConfig.models.pentestgpt_default_openrouter || ""
-        ) ||
+        // selectedModel.includes(
+        //   llmConfig.models.pentestgpt_default_openrouter || ""
+        // ) ||
         selectedModel.includes(llmConfig.models.pentestgpt_pro_openrouter || "")
       ) {
         selectedModel = isPentestGPTPro
