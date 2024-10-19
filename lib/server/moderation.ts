@@ -1,6 +1,6 @@
 import OpenAI from "openai"
 
-const MODERATION_CHAR_LIMIT = 3000
+const MODERATION_CHAR_LIMIT = 1000
 
 export async function getModerationResult(
   messages: any[],
