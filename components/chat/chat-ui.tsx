@@ -9,12 +9,7 @@ import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { LLMID, MessageImage } from "@/types"
 import { IconPlayerTrackNext } from "@tabler/icons-react"
-import {
-  useParams,
-  useRouter,
-  useSearchParams,
-  usePathname
-} from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import {
   FC,
   useCallback,
@@ -40,9 +35,6 @@ interface ChatUIProps {}
 export const ChatUI: FC<ChatUIProps> = ({}) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-  const searchParams = useSearchParams()
-  const isTemporaryChat = searchParams.get("temporary-chat") === "true"
-
   useHotkey("o", () => handleNewChat())
   useHotkey("Backspace", () => {
     if (selectedChat) {
@@ -65,7 +57,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     setShowFilesDisplay,
     setUseRetrieval,
     setIsReadyToChat,
-    showSidebar
+    showSidebar,
+    isTemporaryChat
   } = useContext(PentestGPTContext)
 
   const {

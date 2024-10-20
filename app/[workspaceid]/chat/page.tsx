@@ -13,19 +13,20 @@ import { useContext } from "react"
 import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { ChatPluginInfo } from "@/components/chat/chat-plugin-info"
 import { TemporaryChatInfo } from "@/components/chat/temporary-chat-info"
-import { useSearchParams } from "next/navigation"
 
 export default function ChatPage() {
-  const searchParams = useSearchParams()
-  const isTemporaryChat = searchParams.get("temporary-chat") === "true"
-
   useHotkey("o", () => handleNewChat())
   useHotkey("l", () => {
     handleFocusChatInput()
   })
 
-  const { chatMessages, selectedPlugin, isMobile, showSidebar } =
-    useContext(PentestGPTContext)
+  const {
+    chatMessages,
+    selectedPlugin,
+    isMobile,
+    showSidebar,
+    isTemporaryChat
+  } = useContext(PentestGPTContext)
 
   const { handleNewChat, handleFocusChatInput } = useChatHandler()
 

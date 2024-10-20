@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { ModelIcon } from "./model-icon"
 import { Button } from "../ui/button"
 import { Switch } from "../ui/switch"
+import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 
 interface ModelSelectProps {
   selectedModelId: LLMID
@@ -22,26 +23,28 @@ export const ModelSelect: FC<ModelSelectProps> = ({
 }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { isPremiumSubscription, profile, availableHostedModels } =
-    useContext(PentestGPTContext)
+  const {
+    isPremiumSubscription,
+    profile,
+    availableHostedModels,
+    isTemporaryChat
+  } = useContext(PentestGPTContext)
 
-  const isTemporaryChat = searchParams.get("temporary-chat") === "true"
+  const { handleNewChat } = useChatHandler()
 
   const handleToggleTemporaryChat = useCallback(
     (isTemporary: boolean) => {
-      console.log(
-        "handleToggleTemporaryChat called in ModelSelect",
-        isTemporary
-      )
       const newSearchParams = new URLSearchParams(searchParams)
       if (isTemporary) {
         newSearchParams.set("temporary-chat", "true")
+        router.push(`?${newSearchParams.toString()}`)
       } else {
         newSearchParams.delete("temporary-chat")
+        router.push(`?${newSearchParams.toString()}`)
+        handleNewChat()
       }
-      router.push(`?${newSearchParams.toString()}`)
     },
-    [router, searchParams]
+    [handleNewChat, searchParams, router]
   )
 
   const inputRef = useRef<HTMLInputElement>(null)

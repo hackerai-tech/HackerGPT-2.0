@@ -62,7 +62,8 @@ export const MessageActions: FC<MessageActionsProps> = ({
     setCurrentPlayingMessageId,
     selectedChat,
     isMobile,
-    isPremiumSubscription
+    isPremiumSubscription,
+    isTemporaryChat
   } = useContext(PentestGPTContext)
   const { playAudio, stopAudio, isLoading, isPlaying } = useAudioPlayer()
   const [showCheckmark, setShowCheckmark] = useState(false)
@@ -207,7 +208,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {(isHovering || isLast) && isAssistant && (
+      {(isHovering || isLast) && isAssistant && !isTemporaryChat && (
         <WithTooltip
           delayDuration={0}
           side="bottom"
@@ -230,7 +231,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {(isHovering || isLast) && isAssistant && (
+      {(isHovering || isLast) && isAssistant && !isTemporaryChat && (
         <WithTooltip
           delayDuration={0}
           side="bottom"
