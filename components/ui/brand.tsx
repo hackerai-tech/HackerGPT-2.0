@@ -45,7 +45,5 @@ export const BrandSmall: FC<BrandProps> = props => (
   <BrandBase {...props} scale={0.25} />
 )
 export const BrandLarge: FC<BrandProps> = props => (
-  <div className="mb-14">
-    <BrandBase {...props} scale={0.3} />
-  </div>
+  <BrandBase {...props} scale={0.3} />
 )

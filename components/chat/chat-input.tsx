@@ -25,9 +25,11 @@ import { useSelectFileHandler } from "./chat-hooks/use-select-file-handler"
 import { EnhancedMenuPicker } from "./enhance-menu"
 import { UnsupportedFilesDialog } from "./unsupported-files-dialog"
 
-interface ChatInputProps {}
+interface ChatInputProps {
+  isTemporaryChat: boolean
+}
 
-export const ChatInput: FC<ChatInputProps> = ({}) => {
+export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
   const TOOLTIP_DELAY = 1000
 
   useHotkey("l", () => {
@@ -180,33 +182,35 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
           />
         )}
       </div>
-      <div
-        className="flex flex-row items-center"
-        onClick={handleToggleEnhancedMenu}
-      >
-        <WithTooltip
-          delayDuration={TOOLTIP_DELAY}
-          side="top"
-          display={
-            <div className="flex flex-col">
-              <p className="font-medium">Show/Hide Plugins Menu</p>
-            </div>
-          }
-          trigger={
-            isEnhancedMenuOpen ? (
-              <IconPuzzle
-                className="bottom-[12px] left-12 cursor-pointer p-1 hover:opacity-50"
-                size={32}
-              />
-            ) : (
-              <IconPuzzleOff
-                className="bottom-[12px] left-12 cursor-pointer p-1 opacity-50 hover:opacity-100"
-                size={32}
-              />
-            )
-          }
-        />
-      </div>
+      {!isTemporaryChat && (
+        <div
+          className="flex flex-row items-center"
+          onClick={handleToggleEnhancedMenu}
+        >
+          <WithTooltip
+            delayDuration={TOOLTIP_DELAY}
+            side="top"
+            display={
+              <div className="flex flex-col">
+                <p className="font-medium">Show/Hide Plugins Menu</p>
+              </div>
+            }
+            trigger={
+              isEnhancedMenuOpen ? (
+                <IconPuzzle
+                  className="bottom-[12px] left-12 cursor-pointer p-1 hover:opacity-50"
+                  size={32}
+                />
+              ) : (
+                <IconPuzzleOff
+                  className="bottom-[12px] left-12 cursor-pointer p-1 opacity-50 hover:opacity-100"
+                  size={32}
+                />
+              )
+            }
+          />
+        </div>
+      )}
     </>
   )
 
@@ -230,7 +234,13 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
       </div>
 
       <div
-        className={`bg-secondary border-input relative flex min-h-[56px] w-full items-center justify-center rounded-xl border-2 ${selectedPlugin && selectedPlugin !== PluginID.NONE ? "border-primary" : "border-secondary"} ${isEnhancedMenuOpen ? "mt-3" : ""}`}
+        className={`bg-secondary border-input relative flex min-h-[56px] w-full items-center justify-center rounded-xl border-2 ${
+          isTemporaryChat
+            ? "bg-tertiary border-tertiary"
+            : selectedPlugin && selectedPlugin !== PluginID.NONE
+              ? "border-primary"
+              : "border-secondary"
+        } ${isEnhancedMenuOpen ? "mt-3" : ""}`}
         ref={divRef}
       >
         {isPremiumSubscription && (
@@ -275,7 +285,9 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
 
         <TextareaAutosize
           textareaRef={chatInputRef}
-          className="ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 pl-2 pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 pl-2 pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+            isTemporaryChat ? "bg-tertiary" : ""
+          }`}
           placeholder={
             isMobile
               ? `Message` +
