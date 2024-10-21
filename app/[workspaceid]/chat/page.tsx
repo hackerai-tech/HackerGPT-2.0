@@ -12,6 +12,7 @@ import useHotkey from "@/lib/hooks/use-hotkey"
 import { useContext } from "react"
 import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { ChatPluginInfo } from "@/components/chat/chat-plugin-info"
+import { TemporaryChatInfo } from "@/components/chat/temporary-chat-info"
 
 export default function ChatPage() {
   useHotkey("o", () => handleNewChat())
@@ -19,8 +20,14 @@ export default function ChatPage() {
     handleFocusChatInput()
   })
 
-  const { chatMessages, selectedPlugin, isMobile, showSidebar } =
-    useContext(PentestGPTContext)
+  const {
+    chatMessages,
+    temporaryChatMessages,
+    selectedPlugin,
+    isMobile,
+    showSidebar,
+    isTemporaryChat
+  } = useContext(PentestGPTContext)
 
   const { handleNewChat, handleFocusChatInput } = useChatHandler()
 
@@ -29,21 +36,27 @@ export default function ChatPage() {
       ? availablePlugins.find(plugin => plugin.value === selectedPlugin)
       : undefined
 
+  const messagesToDisplay = isTemporaryChat
+    ? temporaryChatMessages
+    : chatMessages
+
   return (
     <>
-      {chatMessages.length === 0 ? (
+      {messagesToDisplay.length === 0 ? (
         <div className="relative flex h-full flex-col items-center justify-center">
           <div
-            className={`absolute left-1/2 -translate-x-1/2 ${isMobile && selectedPluginInfo ? "-translate-y-2/4" : "-translate-y-3/4"}`}
+            className={`absolute left-1/2 -translate-x-1/2 ${isMobile && (selectedPluginInfo || isTemporaryChat) ? "-translate-y-2/4" : "-translate-y-3/4"}`}
           >
-            {selectedPluginInfo ? (
+            {isTemporaryChat ? (
+              <TemporaryChatInfo />
+            ) : selectedPluginInfo ? (
               <ChatPluginInfo pluginInfo={selectedPluginInfo} />
             ) : isMobile ? (
               <div className="mb-12">
                 <BrandSmall />
               </div>
             ) : (
-              <div className="">
+              <div className="mb-14">
                 <BrandLarge />
               </div>
             )}
@@ -59,23 +72,25 @@ export default function ChatPage() {
 
           <div className="flex grow flex-col items-center justify-center" />
 
-          <div
-            className={`z-10 -mx-2 w-full min-w-[300px] items-end px-2 pb-1 sm:w-[600px] md:w-[650px] ${
-              showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
-            } xl:w-[800px]`}
-          >
-            <ChatStarters
-              selectedPlugin={selectedPlugin}
-              chatMessages={chatMessages}
-            />
-          </div>
+          {!isTemporaryChat && (
+            <div
+              className={`z-10 -mx-2 w-full min-w-[300px] items-end px-2 pb-1 sm:w-[600px] md:w-[650px] ${
+                showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
+              } xl:w-[800px]`}
+            >
+              <ChatStarters
+                selectedPlugin={selectedPlugin}
+                chatMessages={chatMessages}
+              />
+            </div>
+          )}
 
           <div
             className={`z-10 w-screen items-end px-2 pb-3 pt-2 sm:w-[600px] sm:pb-8 md:w-[650px] md:min-w-[300px] ${
               showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
             } xl:w-[800px]`}
           >
-            <ChatInput />
+            <ChatInput isTemporaryChat={isTemporaryChat} />
           </div>
 
           <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">

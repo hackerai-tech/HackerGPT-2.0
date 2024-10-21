@@ -1,13 +1,19 @@
 import { PentestGPTContext } from "@/context/context"
 import { LLM, LLMID } from "@/types"
-import { IconCircle, IconCircleCheck } from "@tabler/icons-react"
-import { FC, useContext, useEffect, useRef, useState } from "react"
-import { useRouter } from "next/navigation"
+import {
+  IconCircle,
+  IconCircleCheck,
+  IconMessageOff
+} from "@tabler/icons-react"
+import { FC, useContext, useEffect, useRef, useState, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { ModelIcon } from "./model-icon"
 import { Button } from "../ui/button"
+import { Switch } from "../ui/switch"
+import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 
 interface ModelSelectProps {
-  selectedModelId: string
+  selectedModelId: LLMID
   onSelectModel: (modelId: LLMID) => void
 }
 
@@ -16,8 +22,30 @@ export const ModelSelect: FC<ModelSelectProps> = ({
   onSelectModel
 }) => {
   const router = useRouter()
-  const { isPremiumSubscription, profile, availableHostedModels } =
-    useContext(PentestGPTContext)
+  const searchParams = useSearchParams()
+  const {
+    isPremiumSubscription,
+    profile,
+    availableHostedModels,
+    isTemporaryChat
+  } = useContext(PentestGPTContext)
+
+  const { handleNewChat } = useChatHandler()
+
+  const handleToggleTemporaryChat = useCallback(
+    (isTemporary: boolean) => {
+      const newSearchParams = new URLSearchParams(searchParams)
+      if (isTemporary) {
+        newSearchParams.set("temporary-chat", "true")
+        router.push(`?${newSearchParams.toString()}`)
+      } else {
+        newSearchParams.delete("temporary-chat")
+        router.push(`?${newSearchParams.toString()}`)
+        handleNewChat()
+      }
+    },
+    [handleNewChat, searchParams, router]
+  )
 
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -97,33 +125,36 @@ export const ModelSelect: FC<ModelSelectProps> = ({
       <div className="space-y-1 overflow-y-auto p-3">
         {!isPremiumSubscription
           ? freeUserModels.map(model => (
-              <div
-                key={model.modelId}
-                className="hover:bg-select flex cursor-pointer items-center justify-between space-x-2 rounded-md p-2"
-                onClick={() =>
-                  model.isUpgrade
-                    ? handleUpgradeClick()
-                    : handleSelectModel(model.modelId)
-                }
-              >
-                <div className="flex items-center space-x-2">
-                  <ModelIcon modelId={model.modelId} height={28} width={28} />
-                  <div>
-                    <div className="text-sm font-medium">{model.modelName}</div>
-                    <div className="text-muted-foreground text-xs">
-                      {model.description}
+              <div key={model.modelId}>
+                <div
+                  className="hover:bg-select flex cursor-pointer items-center justify-between space-x-2 rounded-md p-2"
+                  onClick={() =>
+                    model.isUpgrade
+                      ? handleUpgradeClick()
+                      : handleSelectModel(model.modelId)
+                  }
+                >
+                  <div className="flex items-center space-x-2">
+                    <ModelIcon modelId={model.modelId} height={28} width={28} />
+                    <div>
+                      <div className="text-sm font-medium">
+                        {model.modelName}
+                      </div>
+                      <div className="text-muted-foreground text-xs">
+                        {model.description}
+                      </div>
                     </div>
                   </div>
+                  {model.isUpgrade ? (
+                    <Button variant="default" size="sm" className="h-7 text-xs">
+                      Upgrade
+                    </Button>
+                  ) : selectedModelId === model.modelId ? (
+                    <IconCircleCheck size={22} />
+                  ) : (
+                    <IconCircle size={22} className="text-muted-foreground" />
+                  )}
                 </div>
-                {model.isUpgrade ? (
-                  <Button variant="default" size="sm" className="h-7 text-xs">
-                    Upgrade
-                  </Button>
-                ) : selectedModelId === model.modelId ? (
-                  <IconCircleCheck size={22} />
-                ) : (
-                  <IconCircle size={22} className="text-muted-foreground" />
-                )}
               </div>
             ))
           : Object.entries(groupedSortedModels).map(([provider, models]) => {
@@ -169,6 +200,26 @@ export const ModelSelect: FC<ModelSelectProps> = ({
                 </div>
               )
             })}
+
+        <div className="border-muted-foreground mx-2 my-4 border-t" />
+
+        <div
+          className="hover:bg-accent flex cursor-pointer items-center justify-between rounded-md p-2"
+          onClick={() => handleToggleTemporaryChat(!isTemporaryChat)}
+        >
+          <div className="flex items-center space-x-2">
+            <IconMessageOff size={24} />
+            <span className="text-sm">Temporary chat</span>
+          </div>
+          <Switch
+            checked={isTemporaryChat}
+            onCheckedChange={handleToggleTemporaryChat}
+            className={`${
+              isTemporaryChat ? "border-primary" : "border-muted-foreground"
+            }`}
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
       </div>
     </div>
   )

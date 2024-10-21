@@ -9,12 +9,12 @@ import {
   SubscriptionStatus
 } from "@/types"
 import { PluginID } from "@/types/plugins"
-import { Dispatch, SetStateAction, createContext } from "react"
+import { Dispatch, SetStateAction, createContext, useContext } from "react"
 import { ContentType } from "@/types"
 import { ProcessedTeamMember } from "@/lib/team-utils"
 import { User } from "@supabase/supabase-js"
 
-interface PentestGPTContext {
+interface PentestGPTContextType {
   // USER STORE
   user: User | null
 
@@ -66,6 +66,8 @@ interface PentestGPTContext {
   setChatSettings: Dispatch<SetStateAction<ChatSettings>>
   selectedChat: Tables<"chats"> | null
   setSelectedChat: Dispatch<SetStateAction<Tables<"chats"> | null>>
+  temporaryChatMessages: ChatMessage[]
+  setTemporaryChatMessages: Dispatch<SetStateAction<ChatMessage[]>>
 
   // ACTIVE CHAT STORE
   abortController: AbortController | null
@@ -135,9 +137,12 @@ interface PentestGPTContext {
   // Audio
   currentPlayingMessageId: string | null
   setCurrentPlayingMessageId: Dispatch<SetStateAction<string | null>>
+
+  // TEMPORARY CHAT STORE
+  isTemporaryChat: boolean
 }
 
-export const PentestGPTContext = createContext<PentestGPTContext>({
+export const PentestGPTContext = createContext<PentestGPTContextType>({
   // USER STORE
   user: null,
 
@@ -189,6 +194,8 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
   setChatMessages: () => {},
   chatSettings: null,
   setChatSettings: () => {},
+  temporaryChatMessages: [],
+  setTemporaryChatMessages: () => {},
 
   // ACTIVE CHAT STORE
   isGenerating: false,
@@ -255,5 +262,10 @@ export const PentestGPTContext = createContext<PentestGPTContext>({
 
   // Audio
   currentPlayingMessageId: null,
-  setCurrentPlayingMessageId: () => {}
+  setCurrentPlayingMessageId: () => {},
+
+  // TEMPORARY CHAT STORE
+  isTemporaryChat: false
 })
+
+export const usePentestGPT = () => useContext(PentestGPTContext)

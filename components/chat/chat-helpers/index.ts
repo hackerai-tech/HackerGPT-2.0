@@ -741,7 +741,7 @@ export const lastSequenceNumber = (chatMessages: ChatMessage[]) =>
 
 export const handleCreateMessages = async (
   chatMessages: ChatMessage[],
-  currentChat: Tables<"chats">,
+  currentChat: Tables<"chats"> | null,
   profile: Tables<"profiles">,
   modelData: LLM,
   messageContent: string | null,
@@ -750,15 +750,60 @@ export const handleCreateMessages = async (
   isRegeneration: boolean,
   isContinuation: boolean,
   retrievedFileItems: Tables<"file_items">[],
-  setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
+  setMessages: (messages: ChatMessage[]) => void,
   setChatImages: React.Dispatch<React.SetStateAction<MessageImage[]>>,
-  selectedPlugin: PluginID | null,
-  editSequenceNumber: number | undefined,
-  ragUsed: boolean,
-  ragId: string | null,
-  assistantGeneratedImages: string[]
+  selectedPlugin: PluginID,
+  editSequenceNumber?: number,
+  ragUsed?: boolean,
+  ragId?: string | null,
+  assistantGeneratedImages?: string[],
+  isTemporary: boolean = false
 ) => {
   const isEdit = editSequenceNumber !== undefined
+
+  // If it's a temporary chat, don't create messages in the database
+  if (isTemporary || !currentChat) {
+    const tempUserMessage: ChatMessage = {
+      message: {
+        id: uuidv4(),
+        chat_id: "",
+        content: messageContent || "",
+        role: "user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        sequence_number: lastSequenceNumber(chatMessages) + 1,
+        user_id: profile.user_id,
+        model: modelData.modelId,
+        plugin: selectedPlugin,
+        image_paths: newMessageImages.map(image => image.path),
+        rag_used: ragUsed || false,
+        rag_id: ragId || null
+      },
+      fileItems: retrievedFileItems
+    }
+
+    const tempAssistantMessage: ChatMessage = {
+      message: {
+        id: uuidv4(),
+        chat_id: "",
+        content: generatedText,
+        role: "assistant",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        sequence_number: lastSequenceNumber(chatMessages) + 2,
+        user_id: profile.user_id,
+        model: modelData.modelId,
+        plugin: selectedPlugin,
+        image_paths: assistantGeneratedImages || [],
+        rag_used: ragUsed || false,
+        rag_id: ragId || null
+      },
+      fileItems: []
+    }
+
+    setMessages([...chatMessages, tempUserMessage, tempAssistantMessage])
+    return
+  }
 
   const finalUserMessage: TablesInsert<"messages"> = {
     chat_id: currentChat.id,
@@ -769,8 +814,8 @@ export const handleCreateMessages = async (
     role: "user",
     sequence_number: lastSequenceNumber(chatMessages) + 1,
     image_paths: [],
-    rag_used: ragUsed,
-    rag_id: ragId
+    rag_used: ragUsed || false,
+    rag_id: ragId || null
   }
 
   const finalAssistantMessage: TablesInsert<"messages"> = {
@@ -781,9 +826,9 @@ export const handleCreateMessages = async (
     plugin: selectedPlugin,
     role: "assistant",
     sequence_number: lastSequenceNumber(chatMessages) + 2,
-    image_paths: assistantGeneratedImages,
-    rag_used: ragUsed,
-    rag_id: ragId
+    image_paths: assistantGeneratedImages || [],
+    rag_used: ragUsed || false,
+    rag_id: ragId || null
   }
 
   let finalChatMessages: ChatMessage[] = []
@@ -803,20 +848,25 @@ export const handleCreateMessages = async (
 
     const createdMessages = await createMessages([finalAssistantMessage])
 
-    const chatImagesWithUrls = await Promise.all(
-      assistantGeneratedImages.map(async url => {
-        const base64 = await fetchImageData(url)
-        return {
-          messageId: createdMessages[0].id,
-          path: url,
-          base64: base64,
-          url: base64 || url,
-          file: null
-        }
-      })
-    )
+    if (assistantGeneratedImages && assistantGeneratedImages.length > 0) {
+      const chatImagesWithUrls = await Promise.all(
+        assistantGeneratedImages.map(async url => {
+          const base64 = await fetchImageData(url)
+          return {
+            messageId: createdMessages[0].id,
+            path: url,
+            base64: base64,
+            url: base64 || url,
+            file: null
+          } as MessageImage // Explicitly cast to MessageImage
+        })
+      )
 
-    setChatImages(prevChatImages => [...prevChatImages, ...chatImagesWithUrls])
+      setChatImages(prevChatImages => [
+        ...prevChatImages,
+        ...chatImagesWithUrls
+      ])
+    }
 
     finalChatMessages = [
       ...chatMessages.slice(0, -1),
@@ -826,7 +876,7 @@ export const handleCreateMessages = async (
       }
     ]
 
-    setChatMessages(finalChatMessages)
+    setMessages(finalChatMessages)
   } else if (isContinuation) {
     const lastStartingMessage = chatMessages[chatMessages.length - 1].message
 
@@ -839,7 +889,7 @@ export const handleCreateMessages = async (
 
     finalChatMessages = [...chatMessages]
 
-    setChatMessages(finalChatMessages)
+    setMessages(finalChatMessages)
   } else {
     const createdMessages = await createMessages([
       finalUserMessage,
@@ -870,24 +920,25 @@ export const handleCreateMessages = async (
       path: paths[index]
     }))
 
-    const generatedImages = await Promise.all(
-      assistantGeneratedImages.map(async url => {
-        const base64Data = await fetchImageData(url)
-        return {
-          messageId: createdMessages[1].id,
-          path: url,
-          base64: base64Data,
-          url: url,
-          file: null
-        }
-      })
-    )
+    if (assistantGeneratedImages && assistantGeneratedImages.length > 0) {
+      const chatImagesWithUrls = await Promise.all(
+        assistantGeneratedImages.map(async url => {
+          const base64Data = await fetchImageData(url)
+          return {
+            messageId: createdMessages[1].id,
+            path: url,
+            base64: base64Data,
+            url: url,
+            file: null
+          } as MessageImage // Explicitly cast to MessageImage
+        })
+      )
 
-    setChatImages(prevImages => [
-      ...prevImages,
-      ...newImages,
-      ...generatedImages
-    ])
+      setChatImages(prevChatImages => [
+        ...prevChatImages,
+        ...chatImagesWithUrls
+      ])
+    }
 
     const updatedMessage = await updateMessage(createdMessages[0].id, {
       ...createdMessages[0],
@@ -921,6 +972,6 @@ export const handleCreateMessages = async (
       }
     ]
 
-    setChatMessages(finalChatMessages)
+    setMessages(finalChatMessages)
   }
 }

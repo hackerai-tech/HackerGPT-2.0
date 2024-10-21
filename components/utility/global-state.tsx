@@ -31,6 +31,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
 import { ProcessedTeamMember } from "@/lib/team-utils"
 import { User } from "@supabase/supabase-js"
+import { useSearchParams } from "next/navigation"
 
 interface GlobalStateProps {
   children: React.ReactNode
@@ -38,6 +39,7 @@ interface GlobalStateProps {
 
 export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   // USER STORE
   const [user, setUser] = useState<User | null>(null)
@@ -75,6 +77,9 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // PASSIVE CHAT STORE
   const [userInput, setUserInput] = useState<string>("")
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+  const [temporaryChatMessages, setTemporaryChatMessages] = useState<
+    ChatMessage[]
+  >([])
   const [chatSettings, setChatSettings] = useState<ChatSettings>({
     model: "mistral-medium",
     includeProfileContext: false,
@@ -137,6 +142,13 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // Terminal output setting
   const [showTerminalOutput, setShowTerminalOutput] =
     useLocalStorageState<boolean>("showTerminalOutput", true)
+
+  // TEMPORARY CHAT STORE
+  const [isTemporaryChat, setIsTemporaryChat] = useState(false)
+
+  useEffect(() => {
+    setIsTemporaryChat(searchParams.get("temporary-chat") === "true")
+  }, [searchParams])
 
   // Handle window resize to update isMobile
   useEffect(() => {
@@ -319,6 +331,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setUserInput,
         chatMessages,
         setChatMessages,
+        temporaryChatMessages,
+        setTemporaryChatMessages,
         chatSettings,
         setChatSettings,
         selectedChat,
@@ -390,7 +404,10 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
         // Audio
         currentPlayingMessageId,
-        setCurrentPlayingMessageId
+        setCurrentPlayingMessageId,
+
+        // TEMPORARY CHAT STORE
+        isTemporaryChat
       }}
     >
       {children}
