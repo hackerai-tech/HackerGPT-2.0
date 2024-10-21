@@ -8,7 +8,12 @@ import { getMessageImageFromStorage } from "@/db/storage/message-images"
 import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { LLMID, MessageImage } from "@/types"
-import { IconPlayerTrackNext } from "@tabler/icons-react"
+import {
+  IconPlayerTrackNext,
+  IconMessageOff,
+  IconInfoCircle,
+  IconRefresh
+} from "@tabler/icons-react"
 import { useParams, useRouter } from "next/navigation"
 import {
   FC,
@@ -28,6 +33,7 @@ import { ChatScrollButtons } from "./chat-scroll-buttons"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
 import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
+import { WithTooltip } from "../ui/with-tooltip"
 
 const MESSAGES_PER_FETCH = 20
 interface ChatUIProps {}
@@ -59,7 +65,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     setUseRetrieval,
     setIsReadyToChat,
     showSidebar,
-    isTemporaryChat
+    isTemporaryChat,
+    setTemporaryChatMessages
   } = useContext(PentestGPTContext)
 
   const {
@@ -315,15 +322,59 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     [loadMoreMessages, handleScroll]
   )
 
+  const handleCleanChat = () => {
+    setTemporaryChatMessages([])
+  }
+
   if (loading) {
     return <Loading />
   }
 
   return (
     <div className="relative flex h-full flex-col items-center">
-      <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-2">
-        <ChatSecondaryButtons />
-      </div>
+      {!isTemporaryChat ? (
+        <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-2">
+          <ChatSecondaryButtons />
+        </div>
+      ) : (
+        <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-2">
+          <WithTooltip
+            delayDuration={200}
+            display={isTemporaryChat ? "Clean chat" : "New chat"}
+            trigger={
+              isTemporaryChat && (
+                <IconRefresh
+                  className="cursor-pointer hover:opacity-50"
+                  size={24}
+                  onClick={handleCleanChat}
+                />
+              )
+            }
+            side="bottomRight"
+          />
+        </div>
+      )}
+
+      {isTemporaryChat && (
+        <div className="absolute left-1/2 top-4 hidden -translate-x-1/2 md:block">
+          <div className="text-muted-foreground flex items-center gap-1 space-x-1 px-2 py-1 text-sm">
+            <IconMessageOff size={16} />
+            <span>Temporary Chat</span>
+            <WithTooltip
+              delayDuration={300}
+              side="bottom"
+              display={
+                <div className="max-w-[300px] text-center">
+                  Temporary chats won&apos;t appear in your history, and
+                  PentestGPT won&apos;t retain any information from these
+                  conversations.
+                </div>
+              }
+              trigger={<IconInfoCircle size={16} />}
+            />
+          </div>
+        </div>
+      )}
 
       <div
         className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
