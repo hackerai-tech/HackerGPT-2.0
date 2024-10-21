@@ -9,7 +9,8 @@ import {
 } from "react"
 
 export const useScroll = () => {
-  const { isGenerating, chatMessages } = useContext(PentestGPTContext)
+  const { isGenerating, chatMessages, temporaryChatMessages, isTemporaryChat } =
+    useContext(PentestGPTContext)
 
   const messagesStartRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -29,7 +30,13 @@ export const useScroll = () => {
     if (isGenerating && !userScrolled) {
       scrollToBottom()
     }
-  }, [chatMessages, isGenerating, userScrolled])
+  }, [
+    chatMessages,
+    temporaryChatMessages,
+    isGenerating,
+    userScrolled,
+    isTemporaryChat
+  ])
 
   const handleScroll: UIEventHandler<HTMLDivElement> = useCallback(e => {
     const target = e.target as HTMLDivElement
@@ -83,6 +90,7 @@ export const useScroll = () => {
     handleScroll,
     scrollToBottom,
     setIsAtBottom,
-    scrollToBottomAfterFetch
+    scrollToBottomAfterFetch,
+    isTemporaryChat
   }
 }
