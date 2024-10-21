@@ -55,7 +55,10 @@ export const useChatHandler = () => {
     isAtPickerOpen,
     isGenerating,
     setUseRetrieval,
-    setIsReadyToChat
+    setIsReadyToChat,
+    isTemporaryChat,
+    temporaryChatMessages,
+    setTemporaryChatMessages
   } = useContext(PentestGPTContext)
 
   let { selectedPlugin } = useContext(PentestGPTContext)
@@ -251,7 +254,9 @@ export const useChatHandler = () => {
           model: model || chatSettings!.model
         })
 
-      let sentChatMessages = [...chatMessages]
+      let sentChatMessages = isTemporaryChat
+        ? [...temporaryChatMessages]
+        : [...chatMessages]
 
       // If the message is an edit, remove all following messages
       if (isEdit) {
@@ -270,7 +275,13 @@ export const useChatHandler = () => {
       }
 
       // Update the UI with the new messages except for continuations
-      if (!isContinuation) setChatMessages(sentChatMessages)
+      if (!isContinuation) {
+        if (isTemporaryChat) {
+          setTemporaryChatMessages(sentChatMessages)
+        } else {
+          setChatMessages(sentChatMessages)
+        }
+      }
 
       let retrievedFileItems: Tables<"file_items">[] = []
 
@@ -324,7 +335,7 @@ export const useChatHandler = () => {
           chatImages,
           setIsGenerating,
           setFirstTokenReceived,
-          setChatMessages,
+          isTemporaryChat ? setTemporaryChatMessages : setChatMessages,
           setToolInUse,
           alertDispatch,
           selectedPlugin
@@ -352,7 +363,7 @@ export const useChatHandler = () => {
           chatImages,
           setIsGenerating,
           setFirstTokenReceived,
-          setChatMessages,
+          isTemporaryChat ? setTemporaryChatMessages : setChatMessages,
           setToolInUse,
           alertDispatch,
           selectedPlugin
@@ -365,57 +376,67 @@ export const useChatHandler = () => {
         assistantGeneratedImages = assistantGeneratedImagesFromResponse
       }
 
-      if (!currentChat) {
-        currentChat = await handleCreateChat(
-          chatSettings!,
-          profile!,
-          selectedWorkspace!,
-          messageContent || "",
-          newMessageFiles,
-          finishReasonFromResponse,
-          setSelectedChat,
-          setChats,
-          setChatFiles
+      if (isTemporaryChat) {
+        // Update temporary chat messages with the generated response
+        const updatedMessages = sentChatMessages.map(msg =>
+          msg.message.id === tempAssistantChatMessage.message.id
+            ? { ...msg, message: { ...msg.message, content: generatedText } }
+            : msg
         )
+        setTemporaryChatMessages(updatedMessages)
       } else {
-        const updatedChat = await updateChat(currentChat.id, {
-          updated_at: new Date().toISOString(),
-          finish_reason: finishReasonFromResponse,
-          model: chatSettings?.model
-        })
-
-        setChats(prevChats => {
-          const updatedChats = prevChats.map(prevChat =>
-            prevChat.id === updatedChat.id ? updatedChat : prevChat
+        if (!currentChat) {
+          currentChat = await handleCreateChat(
+            chatSettings!,
+            profile!,
+            selectedWorkspace!,
+            messageContent || "",
+            newMessageFiles,
+            finishReasonFromResponse,
+            setSelectedChat,
+            setChats,
+            setChatFiles
           )
+        } else {
+          const updatedChat = await updateChat(currentChat.id, {
+            updated_at: new Date().toISOString(),
+            finish_reason: finishReasonFromResponse,
+            model: chatSettings?.model
+          })
 
-          return updatedChats
-        })
+          setChats(prevChats => {
+            const updatedChats = prevChats.map(prevChat =>
+              prevChat.id === updatedChat.id ? updatedChat : prevChat
+            )
 
-        if (selectedChat?.id === updatedChat.id) {
-          setSelectedChat(updatedChat)
+            return updatedChats
+          })
+
+          if (selectedChat?.id === updatedChat.id) {
+            setSelectedChat(updatedChat)
+          }
         }
-      }
 
-      await handleCreateMessages(
-        chatMessages,
-        currentChat,
-        profile!,
-        modelData!,
-        messageContent,
-        generatedText,
-        newMessageImages,
-        isRegeneration,
-        isContinuation,
-        retrievedFileItems,
-        setChatMessages,
-        setChatImages,
-        selectedPlugin,
-        editSequenceNumber,
-        ragUsed,
-        ragId,
-        assistantGeneratedImages
-      )
+        await handleCreateMessages(
+          chatMessages,
+          currentChat,
+          profile!,
+          modelData!,
+          messageContent,
+          generatedText,
+          newMessageImages,
+          isRegeneration,
+          isContinuation,
+          retrievedFileItems,
+          setChatMessages,
+          setChatImages,
+          selectedPlugin,
+          editSequenceNumber,
+          ragUsed,
+          ragId,
+          assistantGeneratedImages
+        )
+      }
 
       setToolInUse("none")
       setIsGenerating(false)

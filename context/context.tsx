@@ -66,6 +66,8 @@ interface PentestGPTContextType {
   setChatSettings: Dispatch<SetStateAction<ChatSettings>>
   selectedChat: Tables<"chats"> | null
   setSelectedChat: Dispatch<SetStateAction<Tables<"chats"> | null>>
+  temporaryChatMessages: ChatMessage[]
+  setTemporaryChatMessages: Dispatch<SetStateAction<ChatMessage[]>>
 
   // ACTIVE CHAT STORE
   abortController: AbortController | null
@@ -192,6 +194,8 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   setChatMessages: () => {},
   chatSettings: null,
   setChatSettings: () => {},
+  temporaryChatMessages: [],
+  setTemporaryChatMessages: () => {},
 
   // ACTIVE CHAT STORE
   isGenerating: false,

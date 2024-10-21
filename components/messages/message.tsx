@@ -70,12 +70,18 @@ export const Message: FC<MessageProps> = ({
     setIsGenerating,
     firstTokenReceived,
     chatMessages,
+    temporaryChatMessages,
+    isTemporaryChat,
     chatImages,
     toolInUse,
     files,
     isMobile,
     showSidebar
   } = useContext(PentestGPTContext)
+
+  const messagesToDisplay = isTemporaryChat
+    ? temporaryChatMessages
+    : chatMessages
 
   const { handleSendMessage } = useChatHandler()
 
@@ -139,8 +145,9 @@ export const Message: FC<MessageProps> = ({
   const handleRegenerate = async () => {
     setIsGenerating(true)
     await handleSendMessage(
-      editedMessage || chatMessages[chatMessages.length - 2].message.content,
-      chatMessages,
+      editedMessage ||
+        messagesToDisplay[messagesToDisplay.length - 2].message.content,
+      messagesToDisplay,
       true
     )
   }
@@ -149,8 +156,9 @@ export const Message: FC<MessageProps> = ({
     setIsGenerating(true)
 
     await handleSendMessage(
-      editedMessage || chatMessages[chatMessages.length - 2].message.content,
-      chatMessages,
+      editedMessage ||
+        messagesToDisplay[messagesToDisplay.length - 2].message.content,
+      messagesToDisplay,
       true,
       false,
       undefined,

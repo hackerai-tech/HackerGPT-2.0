@@ -77,6 +77,9 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // PASSIVE CHAT STORE
   const [userInput, setUserInput] = useState<string>("")
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+  const [temporaryChatMessages, setTemporaryChatMessages] = useState<
+    ChatMessage[]
+  >([])
   const [chatSettings, setChatSettings] = useState<ChatSettings>({
     model: "mistral-medium",
     includeProfileContext: false,
@@ -328,6 +331,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setUserInput,
         chatMessages,
         setChatMessages,
+        temporaryChatMessages,
+        setTemporaryChatMessages,
         chatSettings,
         setChatSettings,
         selectedChat,

@@ -48,6 +48,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   const {
     setChatMessages,
     chatMessages,
+    temporaryChatMessages,
     selectedChat,
     setSelectedChat,
     setChatSettings,
@@ -86,11 +87,16 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await Promise.all([fetchMessages(), fetchChat()])
+      if (!isTemporaryChat) {
+        await Promise.all([fetchMessages(), fetchChat()])
+      }
       scrollToBottomAfterFetch()
     }
 
-    if ((chatMessages?.length === 0 && !params.chatid) || params.chatid) {
+    if (
+      !isTemporaryChat &&
+      ((chatMessages?.length === 0 && !params.chatid) || params.chatid)
+    ) {
       setIsReadyToChat(false)
       fetchData().then(() => {
         handleFocusChatInput()
@@ -108,6 +114,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     limit?: number,
     beforeSequenceNumber?: number
   ) => {
+    if (isTemporaryChat) {
+      return temporaryChatMessages
+    }
+
     const fetchedMessages = await getMessagesByChatId(
       chatId,
       limit,
@@ -156,6 +166,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   }
 
   const fetchMessages = async () => {
+    if (isTemporaryChat) {
+      return
+    }
+
     const reformatedMessages = await fetchMessagesAndProcess(
       params.chatid as string,
       MESSAGES_PER_FETCH
@@ -186,6 +200,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   }
 
   const fetchChat = async () => {
+    if (isTemporaryChat) {
+      return
+    }
+
     try {
       const chat = await getChatById(params.chatid as string)
       if (!chat) {
@@ -211,7 +229,13 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   }
 
   const loadMoreMessages = useCallback(async () => {
-    if (allMessagesLoaded || isLoadingMore || !chatMessages.length) return
+    if (
+      isTemporaryChat ||
+      allMessagesLoaded ||
+      isLoadingMore ||
+      !chatMessages.length
+    )
+      return
 
     const oldestSequenceNumber = chatMessages[0].message.sequence_number
     const chatId = params.chatid as string
@@ -251,6 +275,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       }, 200)
     }
   }, [
+    isTemporaryChat,
     allMessagesLoaded,
     isLoadingMore,
     chatMessages,
@@ -313,7 +338,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
         className="flex size-full flex-col overflow-auto"
         onScroll={innerHandleScroll}
       >
-        {isLoadingMore && (
+        {isLoadingMore && !isTemporaryChat && (
           <div className="flex justify-center p-4">
             <Loading size={8} />
           </div>

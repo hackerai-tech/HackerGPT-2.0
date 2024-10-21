@@ -22,6 +22,7 @@ export default function ChatPage() {
 
   const {
     chatMessages,
+    temporaryChatMessages,
     selectedPlugin,
     isMobile,
     showSidebar,
@@ -35,9 +36,13 @@ export default function ChatPage() {
       ? availablePlugins.find(plugin => plugin.value === selectedPlugin)
       : undefined
 
+  const messagesToDisplay = isTemporaryChat
+    ? temporaryChatMessages
+    : chatMessages
+
   return (
     <>
-      {chatMessages.length === 0 ? (
+      {messagesToDisplay.length === 0 ? (
         <div className="relative flex h-full flex-col items-center justify-center">
           <div
             className={`absolute left-1/2 -translate-x-1/2 ${isMobile && (selectedPluginInfo || isTemporaryChat) ? "-translate-y-2/4" : "-translate-y-3/4"}`}
