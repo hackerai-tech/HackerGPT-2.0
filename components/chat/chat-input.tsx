@@ -230,7 +230,7 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
       >
         <ChatFilesDisplay />
 
-        {isEnhancedMenuOpen && <EnhancedMenuPicker />}
+        {isEnhancedMenuOpen && !isTemporaryChat && <EnhancedMenuPicker />}
       </div>
 
       <div
