@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     const includeImages = messagesIncludeImages(messages)
 
     let shouldUncensorResponse = false
-    if (!includeImages && !isContinuation) {
+    if (!includeImages && !isContinuation && !shouldUseRAG) {
       const { shouldUncensorResponse: moderationResult } =
         await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
       shouldUncensorResponse = moderationResult
