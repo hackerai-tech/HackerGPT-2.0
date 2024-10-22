@@ -205,8 +205,8 @@ export function getRateLimitErrorMessage(
 
 function getModelName(model: string): string {
   const modelNames: { [key: string]: string } = {
-    pentestgpt: "PGPT-3.5",
-    "pentestgpt-pro": "PGPT-4",
+    pentestgpt: "PGPT-Small",
+    "pentestgpt-pro": "PGPT-Large",
     "gpt-4": "GPT-4",
     terminal: "terminal",
     "tts-1": "text-to-speech"
