@@ -18,6 +18,7 @@ import {
   IconCreditCard,
   IconDatabaseCog,
   IconSettings,
+  IconShield,
   IconUserHeart,
   IconUsers,
   IconX
@@ -35,6 +36,7 @@ import { PersonalizationTab } from "./profile-tabs/personalization-tab"
 import { ProfileTab } from "./profile-tabs/profile-tab"
 import { SubscriptionTab } from "./profile-tabs/subscription-tab"
 import { TeamTab } from "./profile-tabs/team-tab"
+import { SecurityTab } from "./profile-tabs/security-tab"
 
 export const Settings: FC = () => {
   const {
@@ -65,7 +67,7 @@ export const Settings: FC = () => {
   }, [])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
+    await supabase.auth.signOut({ scope: 'local' })
     router.push("/login")
     router.refresh()
   }
@@ -146,7 +148,8 @@ export const Settings: FC = () => {
     { value: "personalization", icon: IconUserHeart, label: "Personalization" },
     { value: "subscription", icon: IconCreditCard, label: "Subscription" },
     { value: "data-controls", icon: IconDatabaseCog, label: "Data Controls" },
-    { value: "team", icon: IconUsers, label: "Team" }
+    { value: "security", icon: IconShield, label: "Security" },
+    { value: "team", icon: IconUsers, label: "Team" },
   ].filter(tab => {
     if (tab.value === "subscription") {
       return !membershipData || membershipData?.member_role === TeamRole.OWNER
@@ -241,6 +244,9 @@ export const Settings: FC = () => {
                 </TabPanel>
                 <TabPanel>
                   <DataControlsTab />
+                </TabPanel>
+                <TabPanel>
+                  <SecurityTab />
                 </TabPanel>
                 {membershipData &&
                   membershipData?.invitation_status === "accepted" && (
