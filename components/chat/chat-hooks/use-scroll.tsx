@@ -9,7 +9,7 @@ import {
 } from "react"
 
 export const useScroll = () => {
-  const { isGenerating, chatMessages, temporaryChatMessages, isTemporaryChat } =
+  const { isGenerating, chatMessages, isTemporaryChat, temporaryChatMessages } =
     useContext(PentestGPTContext)
 
   const messagesStartRef = useRef<HTMLDivElement>(null)
@@ -90,7 +90,6 @@ export const useScroll = () => {
     handleScroll,
     scrollToBottom,
     setIsAtBottom,
-    scrollToBottomAfterFetch,
-    isTemporaryChat
+    scrollToBottomAfterFetch
   }
 }

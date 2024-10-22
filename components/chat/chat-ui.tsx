@@ -101,9 +101,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     }
 
     if (
-      (!isTemporaryChat &&
-        ((chatMessages?.length === 0 && !params.chatid) || params.chatid)) ||
-      (isTemporaryChat && temporaryChatMessages.length === 0)
+      !isTemporaryChat &&
+      ((chatMessages?.length === 0 && !params.chatid) || params.chatid)
     ) {
       setIsReadyToChat(false)
       fetchData().then(() => {
@@ -115,7 +114,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       setLoading(false)
       setIsReadyToChat(true)
     }
-  }, [isTemporaryChat, chatMessages, temporaryChatMessages])
+  }, [])
 
   const fetchMessagesAndProcess = async (
     chatId: string,
