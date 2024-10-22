@@ -67,7 +67,7 @@ export const Settings: FC = () => {
   }, [])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut({ scope: 'local' })
+    await supabase.auth.signOut({ scope: "local" })
     router.push("/login")
     router.refresh()
   }
@@ -149,7 +149,7 @@ export const Settings: FC = () => {
     { value: "subscription", icon: IconCreditCard, label: "Subscription" },
     { value: "data-controls", icon: IconDatabaseCog, label: "Data Controls" },
     { value: "security", icon: IconShield, label: "Security" },
-    { value: "team", icon: IconUsers, label: "Team" },
+    { value: "team", icon: IconUsers, label: "Team" }
   ].filter(tab => {
     if (tab.value === "subscription") {
       return !membershipData || membershipData?.member_role === TeamRole.OWNER

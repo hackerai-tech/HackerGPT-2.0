@@ -12,7 +12,7 @@ export const SecurityTab: FC = () => {
   const handleLogoutAllDevices = async () => {
     setIsLoggingOut(true)
     try {
-      await supabase.auth.signOut({ scope: 'global' })
+      await supabase.auth.signOut({ scope: "global" })
       router.push("/login")
       router.refresh()
       toast.success("Logged out of all devices")
@@ -29,8 +29,10 @@ export const SecurityTab: FC = () => {
       <div className="flex items-center justify-between">
         <div className="space-y-2">
           <Label htmlFor="logoutAllDevices">Log out of all devices</Label>
-          <p className="text-sm text-muted-foreground max-w-[90%]">
-            Log out of all active sessions across all devices, including your current session. It may take up to 30 minutes for other devices to be logged out.
+          <p className="text-muted-foreground max-w-[90%] text-sm">
+            Log out of all active sessions across all devices, including your
+            current session. It may take up to 30 minutes for other devices to
+            be logged out.
           </p>
         </div>
         <Button
@@ -46,4 +48,3 @@ export const SecurityTab: FC = () => {
     </div>
   )
 }
-
