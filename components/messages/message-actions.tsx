@@ -120,20 +120,24 @@ export const MessageActions: FC<MessageActionsProps> = ({
     <div
       className={`text-muted-foreground flex items-center ${isMobile ? "ml-3 space-x-4" : "space-x-3"}`}
     >
-      {(isHovering || isLast) && !isAssistant && !messageHasImage && (
-        <WithTooltip
-          delayDuration={0}
-          side="bottom"
-          display={<div>Edit</div>}
-          trigger={
-            <IconEdit
-              className="cursor-pointer hover:opacity-50"
-              size={MESSAGE_ICON_SIZE}
-              onClick={onEdit}
-            />
-          }
-        />
-      )}
+      {/* Temporary chat doesn't have edit functionality */}
+      {(isHovering || isLast) &&
+        !isAssistant &&
+        !messageHasImage &&
+        !isTemporaryChat && (
+          <WithTooltip
+            delayDuration={0}
+            side="bottom"
+            display={<div>Edit</div>}
+            trigger={
+              <IconEdit
+                className="cursor-pointer hover:opacity-50"
+                size={MESSAGE_ICON_SIZE}
+                onClick={onEdit}
+              />
+            }
+          />
+        )}
 
       {(isHovering || isLast) &&
         isAssistant &&

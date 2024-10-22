@@ -12,7 +12,7 @@ import { redirect } from "next/navigation"
 import { IconAlertCircle } from "@tabler/icons-react"
 import { MicrosoftIcon } from "@/components/icons/microsoft-icon"
 import { GoogleIcon } from "@/components/icons/google-icon"
-import { checkPasswordResetRateLimit } from "@/lib/server/password-reset-ratelimiter"
+import { checkAuthRateLimit } from "@/lib/server/check-auth-ratelimit"
 import { PasswordInput } from "@/components/ui/password-input"
 
 export const metadata: Metadata = {
@@ -32,10 +32,13 @@ const errorMessages: Record<string, string> = {
   "10": "Password reset email sent. Check your email to continue.",
   "11": "The email address is not in a valid format.",
   "12": "Password recovery requires an email.",
-  password_reset_limit:
-    "Too many password reset attempts. Please try again after an hour.",
   auth: "Authentication failed. Please try again or contact support if the issue persists.",
-  default: "An unexpected error occurred."
+  default: "An unexpected error occurred.",
+  ratelimit_defaul: "Too many attempts. Please try again later.",
+  "13": "Too many login attempts. Please try again later.",
+  "14": "Too many signup attempts. Please try again later.",
+  password_reset_limit:
+    "Too many password reset attempts. Please try again later."
 }
 
 const validateEmail = (email: string) => {
@@ -43,31 +46,24 @@ const validateEmail = (email: string) => {
   return emailRegex.test(email)
 }
 
-const validatePassword = (password: string) => {
-  const checks = [
-    { test: password.length >= 8, message: "6" },
-    { test: /[A-Z]/.test(password) && /[a-z]/.test(password), message: "7" },
-    { test: /[0-9]/.test(password), message: "8" },
-    {
-      test: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(password),
-      message: "9"
-    }
-  ]
-
-  for (const check of checks) {
-    if (!check.test) return check.message
-  }
-  return null
-}
-
 export default async function Login({
   searchParams
 }: {
   searchParams: { message?: string }
 }) {
-  const errorMessage = searchParams.message
+  let errorMessage = searchParams.message
     ? errorMessages[searchParams.message] || errorMessages["default"]
     : null
+
+  // Check for the specific Supabase rate limit error
+  if (
+    searchParams.message &&
+    searchParams.message.startsWith(
+      "For security purposes, you can only request"
+    )
+  ) {
+    errorMessage = errorMessages.ratelimit_defaul
+  }
 
   const cookieStore = cookies()
   const supabase = createServerClient<Database>(
@@ -104,6 +100,12 @@ export default async function Login({
 
     const email = formData.get("email") as string
     const password = formData.get("password") as string
+    const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
+
+    const { success } = await checkAuthRateLimit(email, ip, "login")
+    if (!success) {
+      return redirect(`/login?message=13`)
+    }
     const supabase = createClient(cookies())
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -141,6 +143,13 @@ export default async function Login({
 
     const origin = headers().get("origin")
     const email = formData.get("email") as string
+    const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
+
+    const { success } = await checkAuthRateLimit(email, ip, "signup")
+    if (!success) {
+      return redirect(`/login?message=14`)
+    }
+
     const password = formData.get("password") as string
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -225,7 +234,7 @@ export default async function Login({
     const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
     const supabase = createClient(cookies())
 
-    const { success } = await checkPasswordResetRateLimit(email, ip)
+    const { success } = await checkAuthRateLimit(email, ip, "password-reset")
     if (!success) return redirect("/login?message=password_reset_limit")
 
     await new Promise(resolve => setTimeout(resolve, 1000))
