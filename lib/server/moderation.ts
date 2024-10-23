@@ -1,4 +1,5 @@
 import OpenAI from "openai"
+import { performAlternativeModeration } from "./alternative-moderation"
 
 const MODERATION_CHAR_LIMIT = 1000
 
@@ -44,6 +45,9 @@ export async function getModerationResult(
 
     return { shouldUncensorResponse }
   } catch (error: any) {
+    if (error.status === 429) {
+      return await performAlternativeModeration(messages)
+    }
     console.error("Error in getModerationResult:", error)
     return { shouldUncensorResponse: false }
   }
