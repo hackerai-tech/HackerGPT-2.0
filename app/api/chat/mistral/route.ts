@@ -142,23 +142,20 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
-    const handleMessages = (shouldUncensor: boolean, isPro: boolean) => {
+    const handleMessages = (shouldUncensor: boolean) => {
       if (includeImages) {
         selectedModel = "openai/gpt-4o-mini"
         return filterEmptyAssistantMessages(messages)
       }
 
       if (shouldUncensor) {
-        if (isPro) {
-          selectedModel = "mistralai/mistral-large"
-        }
         return handleAssistantMessages(messages)
       }
 
       return filterEmptyAssistantMessages(messages)
     }
 
-    handleMessages(shouldUncensorResponse, isPentestGPTPro)
+    handleMessages(shouldUncensorResponse)
 
     try {
       let provider
@@ -168,19 +165,6 @@ export async function POST(request: Request) {
           apiKey: providerApiKey,
           baseURL: providerBaseUrl,
           headers: providerHeaders
-        })
-      } else if (
-        // selectedModel.includes(
-        //   llmConfig.models.pentestgpt_default_openrouter || ""
-        // ) ||
-        selectedModel.includes(llmConfig.models.pentestgpt_pro_openrouter || "")
-      ) {
-        selectedModel = isPentestGPTPro
-          ? llmConfig.models.pentestgpt_large_fireworks
-          : llmConfig.models.pentestgpt_small_fireworks
-        provider = createOpenAI({
-          apiKey: llmConfig.fireworks.apiKey,
-          baseURL: llmConfig.fireworks.baseUrl
         })
       } else {
         provider = createOpenAI({
