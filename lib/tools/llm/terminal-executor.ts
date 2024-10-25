@@ -1,8 +1,5 @@
-import {
-  CodeInterpreter,
-  ProcessExitError,
-  OutputMessage
-} from "@e2b/code-interpreter"
+import { Sandbox } from "@e2b/code-interpreter"
+import { CustomExecutionError } from "../tool-store/tools-terminal"
 
 const TEMPLATE = "bash-terminal"
 const BASH_SANDBOX_TIMEOUT = 15 * 60 * 1000
@@ -18,7 +15,7 @@ export const terminalExecutor = async ({
   userID,
   command
 }: TerminalExecutorOptions): Promise<ReadableStream<Uint8Array>> => {
-  let sbx: CodeInterpreter | null = null
+  let sbx: Sandbox | null = null
   let hasTerminalOutput = false
 
   const stream = new ReadableStream<Uint8Array>({
@@ -32,19 +29,17 @@ export const terminalExecutor = async ({
           TEMPLATE,
           BASH_SANDBOX_TIMEOUT
         )
-        const bashID = await sbx.notebook.createKernel({ kernelName: "bash" })
 
         let isOutputStarted = false
-        const execution = await sbx.notebook.execCell(command, {
-          kernelID: bashID,
+        const execution = await sbx.commands.run(command, {
           timeoutMs: MAX_EXECUTION_TIME,
-          onStdout: (out: OutputMessage) => {
+          onStdout: data => {
             hasTerminalOutput = true
             if (!isOutputStarted) {
               controller.enqueue(ENCODER.encode("\n```stdout\n"))
               isOutputStarted = true
             }
-            controller.enqueue(ENCODER.encode(out.line))
+            controller.enqueue(ENCODER.encode(data))
           }
         })
 
@@ -98,14 +93,14 @@ function handleExecutionResult(
 function handleError(
   error: unknown,
   controller: ReadableStreamDefaultController,
-  sbx: CodeInterpreter | null,
+  sbx: Sandbox | null,
   userID: string
 ) {
   console.error(`[${userID}] Error:`, error)
   let errorMessage = "An unexpected error occurred during execution."
 
-  if (error instanceof ProcessExitError) {
-    errorMessage = error.stderr
+  if (error instanceof CustomExecutionError) {
+    errorMessage = error.value
   } else if (error instanceof Error) {
     if (isConnectionError(error)) {
       sbx?.kill()
@@ -137,8 +132,8 @@ async function createOrConnectTerminal(
   userID: string,
   template: string,
   timeoutMs: number
-): Promise<CodeInterpreter> {
-  const allSandboxes = await CodeInterpreter.list()
+): Promise<Sandbox> {
+  const allSandboxes = await Sandbox.list()
   const sandboxInfo = allSandboxes.find(
     sbx =>
       sbx.metadata?.userID === userID && sbx.metadata?.template === template
@@ -146,7 +141,7 @@ async function createOrConnectTerminal(
 
   if (!sandboxInfo) {
     try {
-      return await CodeInterpreter.create(template, {
+      return await Sandbox.create(template, {
         metadata: { template, userID },
         timeoutMs
       })
@@ -156,7 +151,7 @@ async function createOrConnectTerminal(
     }
   }
 
-  const sandbox = await CodeInterpreter.connect(sandboxInfo.sandboxId)
+  const sandbox = await Sandbox.connect(sandboxInfo.sandboxId)
   await sandbox.setTimeout(timeoutMs)
   return sandbox
 }

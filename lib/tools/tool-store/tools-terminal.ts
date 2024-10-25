@@ -1,9 +1,5 @@
 import { PluginID } from "@/types/plugins"
-import {
-  CodeInterpreter,
-  ProcessExitError,
-  OutputMessage
-} from "@e2b/code-interpreter"
+import { Sandbox } from "@e2b/code-interpreter"
 
 const DEFAULT_TEMPLATE = "terminal-for-tools"
 const DEFAULT_BASH_SANDBOX_TIMEOUT = 5 * 60 * 1000
@@ -25,7 +21,7 @@ export const terminalExecutor = async ({
   sandboxTimeout = DEFAULT_BASH_SANDBOX_TIMEOUT,
   sandboxTemplate = DEFAULT_TEMPLATE
 }: TerminalExecutorOptions): Promise<ReadableStream<string>> => {
-  let sbx: CodeInterpreter | null = null
+  let sbx: Sandbox | null = null
   let hasTerminalOutput = false
 
   return new ReadableStream({
@@ -37,20 +33,18 @@ export const terminalExecutor = async ({
 
       try {
         sbx = await createTerminal(userID, sandboxTemplate, sandboxTimeout)
-        const bashID = await sbx.notebook.createKernel({ kernelName: "bash" })
 
         let isOutputStarted = false
-        const execution = await sbx.notebook.execCell(command, {
-          kernelID: bashID,
+        const execution = await sbx.commands.run(command, {
           timeoutMs: MAX_EXECUTION_TIME,
-          onStdout: (out: OutputMessage) => {
-            if (shouldProcessOutput(out.line, pluginID)) {
+          onStdout: data => {
+            if (shouldProcessOutput(data, pluginID)) {
               hasTerminalOutput = true
               if (!isOutputStarted) {
                 controller.enqueue("\n```stdout\n")
                 isOutputStarted = true
               }
-              controller.enqueue(`${out.line}`)
+              controller.enqueue(`${data}`)
             }
           }
         })
@@ -107,17 +101,30 @@ function handleExecutionResult(
   }
 }
 
+// Define CustomExecutionError
+export class CustomExecutionError extends Error {
+  value: string
+  traceback: string
+
+  constructor(name: string, value: string, traceback: string) {
+    super(name)
+    this.name = name
+    this.value = value
+    this.traceback = traceback
+  }
+}
+
 function handleError(
   error: unknown,
   controller: ReadableStreamDefaultController,
-  sbx: CodeInterpreter | null,
+  sbx: Sandbox | null,
   userID: string
 ) {
   console.error(`[${userID}] Error:`, error)
   let errorMessage = "An unexpected error occurred during execution."
 
-  if (error instanceof ProcessExitError) {
-    errorMessage = error.stderr
+  if (error instanceof CustomExecutionError) {
+    errorMessage = error.value
   } else if (error instanceof Error) {
     if (isConnectionError(error)) {
       sbx?.kill()
@@ -149,9 +156,9 @@ async function createTerminal(
   userID: string,
   template: string,
   timeoutMs: number
-): Promise<CodeInterpreter> {
+): Promise<Sandbox> {
   try {
-    return await CodeInterpreter.create(template, {
+    return await Sandbox.create(template, {
       metadata: { template, userID },
       timeoutMs
     })
