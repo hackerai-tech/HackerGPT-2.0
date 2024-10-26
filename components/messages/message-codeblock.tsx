@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"
-import { IconCheck, IconCopy, IconDownload } from "@tabler/icons-react"
-import { FC, memo, useCallback } from "react"
+import { IconCheck, IconCopy } from "@tabler/icons-react"
+import { FC, memo } from "react"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism"
 import { cn } from "@/lib/utils"
@@ -84,38 +84,11 @@ CopyButton.displayName = "CopyButton"
 
 export const MessageCodeBlock: FC<MessageCodeBlockProps> = memo(
   ({ language, value }) => {
-    const downloadAsFile = useCallback(() => {
-      const fileExtension =
-        programmingLanguages[language.toLowerCase()] || ".txt"
-      const suggestedFileName = `file-${generateRandomString(3, true)}${fileExtension}`
-      const fileName = window.prompt("Enter file name", suggestedFileName)
-
-      if (!fileName) return
-
-      const blob = new Blob([value], { type: "text/plain" })
-      const url = URL.createObjectURL(blob)
-
-      const link = document.createElement("a")
-      link.href = url
-      link.download = fileName
-      link.click()
-      URL.revokeObjectURL(url)
-    }, [language, value])
-
     return (
       <div className="codeblock relative w-full bg-zinc-950 font-sans">
         <div className="sticky top-0 flex w-full items-center justify-between bg-zinc-700 px-4 text-white">
           <span className="text-xs lowercase">{language}</span>
           <div className="flex items-center space-x-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hover:bg-zinc-800 focus-visible:ring-1 focus-visible:ring-slate-700 focus-visible:ring-offset-0"
-              onClick={downloadAsFile}
-              title="Download as file"
-            >
-              <IconDownload size={16} />
-            </Button>
             <CopyButton value={value} />
           </div>
         </div>
