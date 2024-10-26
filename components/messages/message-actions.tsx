@@ -178,7 +178,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
           />
         )}
 
-      {(isHovering || isLast) && !isMessageLengthTooShort && (
+      {(isHovering || isLast) && !isMessageLengthTooShort && isAssistant && (
         <WithTooltip
           delayDuration={0}
           side="bottom"
