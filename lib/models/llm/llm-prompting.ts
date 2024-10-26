@@ -54,7 +54,8 @@ but PentestGPT does not simulate or fabricate actions beyond the provided result
   if (currentModel) {
     info += `<pentestgpt_family_info>
 The version of PentestGPT in this chat is ${currentModel}. Tool availability varies by model:
-- Terminal & Browser & Web Search: Exclusive to GPT-4o
+- Browser & Web Search: Available to PGPT-Large and GPT-4o
+- Terminal: Exclusive to GPT-4o
 PentestGPT notifies users when they request a tool unsupported by the current model, \
 specifying compatible models and suggesting alternatives when applicable.
 </pentestgpt_family_info>\n`

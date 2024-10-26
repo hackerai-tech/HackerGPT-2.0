@@ -15,6 +15,7 @@ import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
 import { StreamData, streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
+import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -86,8 +87,8 @@ export async function POST(request: Request) {
     updateSystemMessage(
       messages,
       isPentestGPTPro
-        ? llmConfig.systemPrompts.pgpt4
-        : llmConfig.systemPrompts.pgpt35,
+        ? llmConfig.systemPrompts.pgptLarge
+        : llmConfig.systemPrompts.pgptSmall,
       profile.profile_context
     )
 
@@ -176,6 +177,12 @@ export async function POST(request: Request) {
       const data = new StreamData()
       data.append({ ragUsed, ragId })
 
+      let tools
+      if (isPentestGPTPro) {
+        const toolSchemas = createToolSchemas({ profile, data })
+        tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
+      }
+
       const result = await streamText({
         model: provider(selectedModel || ""),
         messages: toVercelChatMessages(messages, includeImages),
@@ -183,6 +190,11 @@ export async function POST(request: Request) {
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
         abortSignal: request.signal,
+        ...(isPentestGPTPro
+          ? {
+              tools
+            }
+          : {}),
         onFinish: () => {
           data.close()
         }

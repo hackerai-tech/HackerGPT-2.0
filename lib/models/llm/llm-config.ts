@@ -40,9 +40,9 @@ const llmConfig = {
     // For PGPT
     pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${systemPromptEnding}`,
     // For PGPT-Small
-    pgpt35: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-Small")}\n${systemPromptEnding}`,
+    pgptSmall: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-Small")}\n${systemPromptEnding}`,
     // For PGPT-Large
-    pgpt4: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-Large")}\n${systemPromptEnding}`,
+    pgptLarge: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-Large")}\n${getPentestGPTToolsInfo(true, true, false, false)}\n${systemPromptEnding}`,
     // For GPT-4o
     gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true)}\n${systemPromptEnding}`,
     // For browser tool
