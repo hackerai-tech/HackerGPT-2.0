@@ -1,7 +1,7 @@
-import { Sandbox } from "@e2b/code-interpreter"
+import { OutputMessage, Sandbox } from "@e2b/code-interpreter"
 import { CustomExecutionError } from "../tool-store/tools-terminal"
 
-const TEMPLATE = "bash-terminal"
+const TEMPLATE = "bash-terminal-v1"
 const BASH_SANDBOX_TIMEOUT = 15 * 60 * 1000
 const MAX_EXECUTION_TIME = 5 * 60 * 1000
 const ENCODER = new TextEncoder()
@@ -31,15 +31,16 @@ export const terminalExecutor = async ({
         )
 
         let isOutputStarted = false
-        const execution = await sbx.commands.run(command, {
+        const execution = await sbx.runCode(command, {
+          language: "bash",
           timeoutMs: MAX_EXECUTION_TIME,
-          onStdout: data => {
+          onStdout: (data: OutputMessage) => {
             hasTerminalOutput = true
             if (!isOutputStarted) {
               controller.enqueue(ENCODER.encode("\n```stdout\n"))
               isOutputStarted = true
             }
-            controller.enqueue(ENCODER.encode(data))
+            controller.enqueue(ENCODER.encode(data.line))
           }
         })
 

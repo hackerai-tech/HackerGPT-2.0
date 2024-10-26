@@ -32,5 +32,5 @@ export const getTerminalTemplate = (plugin: PluginID): string => {
   if (plugin === PluginID.URL_FUZZER) {
     return "terminal-fuzzing"
   }
-  return isFreePlugin(plugin) ? "terminal-for-free-tools" : "terminal-for-tools"
+  return isFreePlugin(plugin) ? "free-terminal-tools-v1" : "pro-terminal-tools"
 }

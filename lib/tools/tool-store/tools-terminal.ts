@@ -1,7 +1,7 @@
 import { PluginID } from "@/types/plugins"
-import { Sandbox } from "@e2b/code-interpreter"
+import { OutputMessage, Sandbox } from "@e2b/code-interpreter"
 
-const DEFAULT_TEMPLATE = "terminal-for-tools"
+const DEFAULT_TEMPLATE = "pro-terminal-tools"
 const DEFAULT_BASH_SANDBOX_TIMEOUT = 5 * 60 * 1000
 const MAX_EXECUTION_TIME = 5 * 60 * 1000
 const ENCODER = new TextEncoder()
@@ -35,16 +35,17 @@ export const terminalExecutor = async ({
         sbx = await createTerminal(userID, sandboxTemplate, sandboxTimeout)
 
         let isOutputStarted = false
-        const execution = await sbx.commands.run(command, {
+        const execution = await sbx.runCode(command, {
+          language: "bash",
           timeoutMs: MAX_EXECUTION_TIME,
-          onStdout: data => {
-            if (shouldProcessOutput(data, pluginID)) {
+          onStdout: (data: OutputMessage) => {
+            if (shouldProcessOutput(data.line, pluginID)) {
               hasTerminalOutput = true
               if (!isOutputStarted) {
                 controller.enqueue("\n```stdout\n")
                 isOutputStarted = true
               }
-              controller.enqueue(`${data}`)
+              controller.enqueue(`${data.line}`)
             }
           }
         })
