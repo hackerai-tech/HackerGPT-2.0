@@ -183,7 +183,7 @@ async function callModel(messages: any): Promise<any> {
       headers: {
         Authorization: `Bearer ${llmConfig.openrouter.apiKey}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": `https://hackerai.com/moderation`,
+        "HTTP-Referer": `https://pentestgpt.com/moderation`,
         "X-Title": "moderation"
       },
       body: JSON.stringify(requestBody)
