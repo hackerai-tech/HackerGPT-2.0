@@ -7,7 +7,7 @@ import { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import { cookies } from "next/headers"
 import { ReactNode } from "react"
-import { Analytics } from "@vercel/analytics/react"
+// import { Analytics } from "@vercel/analytics/react"
 import "./globals.css"
 import { GlobalAlertDialog } from "./global-alert-dialog"
 import { PluginProvider } from "@/components/chat/chat-hooks/PluginProvider"
@@ -115,7 +115,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             <GlobalAlertDialog />
           </PluginProvider>
         </Providers>
-        <Analytics />
+        {/* <Analytics /> */}
       </body>
     </html>
   )
