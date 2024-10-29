@@ -441,8 +441,8 @@ export const Message: FC<MessageProps> = ({
         <div className="mt-3 flex flex-wrap gap-2"></div>
 
         {isEditing && (
-          <div className="mt-4 flex justify-center space-x-2">
-            <Button size="sm" variant="outline" onClick={onCancelEdit}>
+          <div className="mt-2 flex justify-end space-x-2">
+            <Button size="sm" variant="secondary" onClick={onCancelEdit}>
               Cancel
             </Button>
             <Button size="sm" onClick={handleSendEdit}>
