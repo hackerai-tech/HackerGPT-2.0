@@ -252,46 +252,54 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
           </div>
         )}
 
-        <div className="ml-3 flex flex-row">
-          <Input
-            ref={fileInputRef}
-            className="hidden w-0"
-            type="file"
-            onChange={e => {
-              if (!e.target.files) return
-              handleFileUpload(
-                Array.from(e.target.files),
-                chatSettings,
-                setShowConfirmationDialog,
-                setPendingFiles,
-                handleSelectDeviceFile
-              )
-            }}
-            accept={filesToAccept}
-          />
+        <Input
+          ref={fileInputRef}
+          className="hidden w-0"
+          type="file"
+          onChange={e => {
+            if (!e.target.files) return
+            handleFileUpload(
+              Array.from(e.target.files),
+              chatSettings,
+              setShowConfirmationDialog,
+              setPendingFiles,
+              handleSelectDeviceFile
+            )
+          }}
+          accept={filesToAccept}
+        />
 
-          {isMobile && isPremiumSubscription && optionsCollapsed ? (
-            <div className="flex flex-row items-center">
-              <IconCirclePlus
-                className="cursor-pointer p-1 hover:opacity-50"
-                onClick={() => setOptionsCollapsed(false)}
-                size={34}
-              />
-            </div>
-          ) : (
+        {isMobile && isPremiumSubscription && optionsCollapsed ? (
+          <div className="absolute bottom-[10px] left-3 flex flex-row">
+            <IconCirclePlus
+              className="cursor-pointer p-1 hover:opacity-50"
+              onClick={() => setOptionsCollapsed(false)}
+              size={34}
+            />
+          </div>
+        ) : (
+          <div className="absolute bottom-[10px] left-3 flex flex-row">
             <ToolOptions />
-          )}
-        </div>
+          </div>
+        )}
 
         <TextareaAutosize
           textareaRef={chatInputRef}
-          className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 pl-2 pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 ${
+            isMobile && isPremiumSubscription && optionsCollapsed
+              ? "pl-12" // Mobile collapsed
+              : isPremiumSubscription
+                ? "pl-[84px]" // Premium expanded
+                : "pl-12" // Free plan (no file upload)
+          } pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
             isTemporaryChat ? "bg-tertiary" : ""
           }`}
           placeholder={
             isMobile
               ? `Message` +
-                (!isPremiumSubscription ? "" : `. Type "#" for files.`)
+                (!isPremiumSubscription
+                  ? " PentestGPT"
+                  : `. Type "#" for files.`)
               : `Message PentestGPT` +
                 (!isPremiumSubscription ? "" : `. Type "#" for files.`)
           }
