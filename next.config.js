@@ -3,7 +3,9 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 })
 
 const withPWA = require("next-pwa")({
-  dest: "public"
+  dest: "public",
+  register: true,
+  skipWaiting: true,
 })
 
 const baseConfig = {

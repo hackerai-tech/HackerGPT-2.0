@@ -1,10 +1,11 @@
 {
   "short_name": "PentestGPT",
   "name": "PentestGPT",
+  "description": "PentestGPT: AI-Powered Automated Penetration Testing Tool",
   "icons": [
     {
       "src": "/icon-192x192.png",
-      "type": "image/ico",
+      "type": "image/png",
       "sizes": "192x192"
     },
     {
@@ -19,6 +20,7 @@
       "purpose":"maskable"
     }
   ],
+  "scope": "/",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#000000",
