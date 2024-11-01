@@ -33,7 +33,12 @@ export const metadata: Metadata = {
   },
   description: APP_DESCRIPTION,
   manifest: "/manifest.json",
-  keywords: ["pentestgpt", "pentest ai", "penetration testing ai", "pentesting ai"],
+  keywords: [
+    "pentestgpt",
+    "pentest ai",
+    "penetration testing ai",
+    "pentesting ai"
+  ],
   appleWebApp: {
     capable: true,
     statusBarStyle: "black",
