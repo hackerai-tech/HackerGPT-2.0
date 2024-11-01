@@ -38,9 +38,12 @@ import { SecurityTab } from "./profile-tabs/security-tab"
 import { SubscriptionTab } from "./profile-tabs/subscription-tab"
 import { TeamTab } from "./profile-tabs/team-tab"
 import { TeamRole } from "@/lib/team-utils"
+import { cancelSubscription, getStripe } from "@/lib/server/stripe"
 
 export const Settings: FC = () => {
   const {
+    user,
+    subscription,
     profile,
     setProfile,
     envKeyMap,
@@ -57,7 +60,8 @@ export const Settings: FC = () => {
   const [profileInstructions, setProfileInstructions] = useState(
     profile?.profile_context || ""
   )
-  const [showDeleteAccountConfirmation, setShowDeleteAccountConfirmation] = useState(false)
+  const [showDeleteAccountConfirmation, setShowDeleteAccountConfirmation] =
+    useState(false)
   const [activeTab, setActiveTab] = useState("profile")
 
   useEffect(() => {
@@ -146,9 +150,30 @@ export const Settings: FC = () => {
   }
 
   const handleConfirmDeleteAccount = async () => {
+    if (!user?.id) {
+      console.error("User ID not found", user)
+      toast.error("Failed to delete account")
+      return
+    }
+
     setShowDeleteAccountConfirmation(false)
-    // Implement account deletion logic here
-    // After successful deletion, sign out and redirect to login page
+    try {
+      const { error } = await supabase.rpc("delete_user", {
+        sel_user_id: user.id
+      })
+
+      if (error) {
+        toast.error("Failed to delete account")
+        return
+      }
+    } catch (error) {
+      toast.error("Failed to delete account")
+      return
+    }
+    if (subscription?.id && subscription.status === "active") {
+      const stripe = getStripe()
+      await cancelSubscription(stripe, subscription.id)
+    }
     await handleSignOut()
   }
 
@@ -262,10 +287,7 @@ export const Settings: FC = () => {
                   <SubscriptionTab userEmail={userEmail} isMobile={isMobile} />
                 </TabPanel>
                 <TabPanel>
-                  <DataControlsTab
-                    value="data-controls"
-                    onDeleteAccount={handleDeleteAccount}
-                  />
+                  <DataControlsTab onDeleteAccount={handleDeleteAccount} />
                 </TabPanel>
                 <TabPanel>
                   <SecurityTab />

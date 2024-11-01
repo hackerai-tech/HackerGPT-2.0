@@ -8,7 +8,6 @@ interface DataControlsTabProps {
   onDeleteAccount: () => void
 }
 
-
 export const DataControlsTab: FC<DataControlsTabProps> = ({
   onDeleteAccount
 }) => {
@@ -16,22 +15,36 @@ export const DataControlsTab: FC<DataControlsTabProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label>Shared links</Label>
-        <Button
-          variant="secondary"
-          onClick={() => setIsSharedChatsPopupOpen(true)}
-        >
-          Manage
-        </Button>
-        <h2 className="text-lg font-semibold">Account Deletion</h2>
-        <p className="text-muted-foreground text-sm">
-          Warning: This action is irreversible. All your data will be
-          permanently deleted.
-        </p>
-        <Button variant="destructive" onClick={onDeleteAccount}>
-          Delete Account
-        </Button>
+      <div className="space-y-4 ">
+        <div className="flex items-center justify-between">
+          <Label>Shared links</Label>
+          <Button
+            variant="secondary"
+            onClick={() => setIsSharedChatsPopupOpen(true)}
+            className="w-[120px]"
+          >
+            Manage
+          </Button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex flex-row justify-between">
+            <div className="flex flex-col gap-2">
+              <Label>Account Deletion</Label>
+              <p className="text-muted-foreground text-sm">
+                Warning: This action is irreversible. All your data will be
+                permanently deleted.
+              </p>
+            </div>
+            <Button
+              variant="destructive"
+              onClick={onDeleteAccount}
+              className="w-[120px]"
+            >
+              Delete Account
+            </Button>
+          </div>
+        </div>
       </div>
       <Dialog
         open={isSharedChatsPopupOpen}
