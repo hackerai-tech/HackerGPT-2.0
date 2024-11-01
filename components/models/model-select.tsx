@@ -1,13 +1,19 @@
-import { ChatbotUIContext } from "@/context/context"
-import { LLM, LLMID, ModelProvider } from "@/types"
-import { IconCircle, IconCircleCheck, IconLock } from "@tabler/icons-react"
-import { FC, useContext, useEffect, useRef, useState } from "react"
-import { DropdownMenu, DropdownMenuTrigger } from "../ui/dropdown-menu"
-import { ModelOption } from "./model-option"
-import { PlanDialog } from "../utility/plan-dialog"
+import { PentestGPTContext } from "@/context/context"
+import { LLM, LLMID } from "@/types"
+import {
+  IconCircle,
+  IconCircleCheck,
+  IconMessageOff
+} from "@tabler/icons-react"
+import { FC, useContext, useEffect, useRef, useState, useCallback } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { ModelIcon } from "./model-icon"
+import { Button } from "../ui/button"
+import { Switch } from "../ui/switch"
+import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 
 interface ModelSelectProps {
-  selectedModelId: string
+  selectedModelId: LLMID
   onSelectModel: (modelId: LLMID) => void
 }
 
@@ -15,16 +21,35 @@ export const ModelSelect: FC<ModelSelectProps> = ({
   selectedModelId,
   onSelectModel
 }) => {
-  const { subscription, profile, availableHostedModels } =
-    useContext(ChatbotUIContext)
-  const [showPlanDialog, setShowPlanDialog] = useState(false)
-  const isPremium = subscription !== null
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const {
+    isPremiumSubscription,
+    profile,
+    availableHostedModels,
+    isTemporaryChat
+  } = useContext(PentestGPTContext)
+
+  const { handleNewChat } = useChatHandler()
+
+  const handleToggleTemporaryChat = useCallback(
+    (isTemporary: boolean) => {
+      const newSearchParams = new URLSearchParams(searchParams)
+      if (isTemporary) {
+        newSearchParams.set("temporary-chat", "true")
+        router.push(`?${newSearchParams.toString()}`)
+      } else {
+        newSearchParams.delete("temporary-chat")
+        router.push(`?${newSearchParams.toString()}`)
+        handleNewChat()
+      }
+    },
+    [handleNewChat, searchParams, router]
+  )
 
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [isOpen, setIsOpen] = useState(false)
-  const [search, setSearch] = useState("")
-  const [tab, setTab] = useState<"hosted" | "local">("hosted")
 
   useEffect(() => {
     if (isOpen) {
@@ -41,20 +66,18 @@ export const ModelSelect: FC<ModelSelectProps> = ({
 
   const allModels = [...availableHostedModels]
 
-  const sortedModels = [...allModels].sort((a, b) => {
-    // Prioritize 'mistral' to appear first
-    if (a.provider === "mistral" && b.provider !== "mistral") return -1
-    if (b.provider === "mistral" && a.provider !== "mistral") return 1
+  // Define the specific order of models
+  const modelOrder: LLMID[] = [
+    "gpt-4-turbo-preview",
+    "mistral-large",
+    "mistral-medium"
+  ]
 
-    // Then prioritize 'openai'
-    if (a.provider === "openai" && b.provider !== "openai") return -1
-    if (b.provider === "openai" && a.provider !== "openai") return 1
-
-    // Finally, sort alphabetically by provider name, or any other criteria you see fit
-    return (
-      a.provider.localeCompare(b.provider) ||
-      a.modelName.localeCompare(b.modelName)
-    )
+  // Sort the models based on the predefined order
+  const sortedModels = allModels.sort((a, b) => {
+    const indexA = modelOrder.indexOf(a.modelId as LLMID)
+    const indexB = modelOrder.indexOf(b.modelId as LLMID)
+    return indexA - indexB
   })
 
   // Group the sorted models by provider
@@ -72,77 +95,132 @@ export const ModelSelect: FC<ModelSelectProps> = ({
 
   if (!profile) return null
 
+  const handleUpgradeClick = () => {
+    router.push("/upgrade")
+  }
+
+  const freeUserModels = [
+    {
+      modelId: "gpt-4-turbo-preview" as LLMID,
+      modelName: "PentestGPT Pro",
+      description: "Our smartest model & more",
+      isUpgrade: true
+    },
+    {
+      modelId: "mistral-medium" as LLMID,
+      modelName: "PentestGPT",
+      description: "Great for everyday tasks",
+      provider: "mistral"
+    }
+  ]
+
+  const modelDescriptions: Record<string, string> = {
+    "gpt-4-turbo-preview": "Advanced model with tools",
+    "mistral-large": "Advanced model for complex tasks",
+    "mistral-medium": "Great for everyday tasks"
+  }
+
   return (
-    <DropdownMenu
-      open={isOpen}
-      onOpenChange={isOpen => {
-        setIsOpen(isOpen)
-        setSearch("")
-      }}
-    >
-      <DropdownMenuTrigger
-        className="bg-background w-full justify-start"
-        asChild
-        disabled={allModels.length === 0}
-      >
-        <div className="max-h-[300px] overflow-auto">
-          {Object.entries(groupedSortedModels).map(([provider, models]) => {
-            const filteredModels = models
-              .filter(model => model.provider !== "openrouter")
-              .filter(model => {
-                if (tab === "hosted") return true
-                if (tab === "local") return false
-                if (tab === "openrouter") return model.provider === "openrouter"
-              })
-              .filter(model =>
-                model.modelName.toLowerCase().includes(search.toLowerCase())
-              )
-
-            if (filteredModels.length === 0) return null
-
-            return (
-              <div key={provider}>
-                <div className="">
-                  {filteredModels.map(model => (
-                    <div
-                      key={model.modelId}
-                      className="hover:bg-accent flex w-full cursor-not-allowed items-center justify-between space-x-3 truncate rounded p-1"
-                      onClick={() => {
-                        if (!isPremium && model.provider === "openai") {
-                          setShowPlanDialog(true) // Show dialog for non-premium users trying to select an OpenAI model
-                        } else if (
-                          model.modelId === "mistral-large" &&
-                          !isPremium
-                        ) {
-                          setShowPlanDialog(true) // Show dialog for non-premium users trying to select a Mistral Large model
-                        } else {
-                          handleSelectModel(model.modelId) // Allow selection for premium users or non-OpenAI models
-                        }
-                      }}
-                    >
-                      <ModelOption model={model} onSelect={() => {}} />
-                      {selectedModelId === model.modelId ? (
-                        <IconCircleCheck className="" size={28} />
-                      ) : !isPremium &&
-                        (model.provider === "openai" ||
-                          model.modelId === "mistral-large") ? (
-                        <IconLock className="opacity-50" size={28} />
-                      ) : (
-                        <IconCircle className="opacity-50" size={28} />
-                      )}
+    <div className="flex size-full flex-col">
+      <div className="space-y-1 overflow-y-auto p-3">
+        {!isPremiumSubscription
+          ? freeUserModels.map(model => (
+              <div key={model.modelId}>
+                <div
+                  className="hover:bg-select flex cursor-pointer items-center justify-between space-x-2 rounded-md p-2"
+                  onClick={() =>
+                    model.isUpgrade
+                      ? handleUpgradeClick()
+                      : handleSelectModel(model.modelId)
+                  }
+                >
+                  <div className="flex items-center space-x-2">
+                    <ModelIcon modelId={model.modelId} height={28} width={28} />
+                    <div>
+                      <div className="text-sm font-medium">
+                        {model.modelName}
+                      </div>
+                      <div className="text-muted-foreground text-xs">
+                        {model.description}
+                      </div>
                     </div>
-                  ))}
+                  </div>
+                  {model.isUpgrade ? (
+                    <Button variant="default" size="sm" className="h-7 text-xs">
+                      Upgrade
+                    </Button>
+                  ) : selectedModelId === model.modelId ? (
+                    <IconCircleCheck size={22} />
+                  ) : (
+                    <IconCircle size={22} className="text-muted-foreground" />
+                  )}
                 </div>
               </div>
-            )
-          })}
+            ))
+          : Object.entries(groupedSortedModels).map(([provider, models]) => {
+              const filteredModels = models
+
+              if (filteredModels.length === 0) return null
+
+              return (
+                <div key={provider}>
+                  <div className="space-y-2">
+                    {filteredModels.map(model => (
+                      <div
+                        key={model.modelId}
+                        className="hover:bg-accent flex w-full cursor-pointer items-center space-x-3 truncate rounded p-2"
+                        onClick={() => handleSelectModel(model.modelId)}
+                      >
+                        <div className="flex min-w-0 flex-1 items-center space-x-3">
+                          <ModelIcon
+                            modelId={model.modelId}
+                            height={28}
+                            width={28}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-medium">
+                              {model.modelName}
+                            </div>
+                            <div className="text-muted-foreground truncate text-xs">
+                              {modelDescriptions[model.modelId] ||
+                                "Advanced AI model"}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="shrink-0">
+                          {selectedModelId === model.modelId ? (
+                            <IconCircleCheck size={22} />
+                          ) : (
+                            <IconCircle size={22} className="opacity-50" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+
+        <div className="border-muted-foreground mx-2 my-4 border-t" />
+
+        <div
+          className="hover:bg-accent flex cursor-pointer items-center justify-between rounded-md p-2"
+          onClick={() => handleToggleTemporaryChat(!isTemporaryChat)}
+        >
+          <div className="flex items-center space-x-2">
+            <IconMessageOff size={24} />
+            <span className="text-sm">Temporary chat</span>
+          </div>
+          <Switch
+            checked={isTemporaryChat}
+            onCheckedChange={handleToggleTemporaryChat}
+            className={`${
+              isTemporaryChat ? "border-primary" : "border-muted-foreground"
+            }`}
+            onClick={e => e.stopPropagation()}
+          />
         </div>
-      </DropdownMenuTrigger>
-      <PlanDialog
-        showIcon={false}
-        open={showPlanDialog}
-        onOpenChange={setShowPlanDialog}
-      />
-    </DropdownMenu>
+      </div>
+    </div>
   )
 }

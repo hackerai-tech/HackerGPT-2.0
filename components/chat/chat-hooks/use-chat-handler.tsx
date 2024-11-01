@@ -1,13 +1,11 @@
 import { useAlertContext } from "@/context/alert-context"
-import { ChatbotUIContext } from "@/context/context"
+import { PentestGPTContext } from "@/context/context"
 import { updateChat } from "@/db/chats"
-import { getFileById } from "@/db/files"
 import { Tables, TablesInsert } from "@/supabase/types"
-import { ChatMessage, ChatPayload, LLMID, ModelProvider } from "@/types"
+import { ChatMessage, ChatPayload, LLMID } from "@/types"
 import { PluginID } from "@/types/plugins"
 import { useRouter } from "next/navigation"
 import { useContext, useEffect, useRef } from "react"
-import { toast } from "sonner"
 import { LLM_LIST } from "../../../lib/models/llm/llm-list"
 
 import { createMessageFeedback } from "@/db/message-feedback"
@@ -20,12 +18,10 @@ import {
   handleRetrieval,
   validateChatSettings
 } from "../chat-helpers"
-import { usePromptAndCommand } from "./use-prompt-and-command"
 
 export const useChatHandler = () => {
   const router = useRouter()
   const { dispatch: alertDispatch } = useAlertContext()
-  const { handleSelectUserFile } = usePromptAndCommand()
 
   const {
     userInput,
@@ -52,20 +48,20 @@ export const useChatHandler = () => {
     setShowFilesDisplay,
     newMessageFiles,
     setToolInUse,
-    setFiles,
     useRetrieval,
     sourceCount,
     setIsAtPickerOpen,
     setChatSettings,
     isAtPickerOpen,
-    subscription,
-    isRagEnabled,
     isGenerating,
     setUseRetrieval,
-    setIsReadyToChat
-  } = useContext(ChatbotUIContext)
+    setIsReadyToChat,
+    isTemporaryChat,
+    temporaryChatMessages,
+    setTemporaryChatMessages
+  } = useContext(PentestGPTContext)
 
-  let { selectedPlugin } = useContext(ChatbotUIContext)
+  let { selectedPlugin } = useContext(PentestGPTContext)
 
   const isGeneratingRef = useRef(isGenerating)
 
@@ -187,19 +183,37 @@ export const useChatHandler = () => {
     await handleSendMessage(null, chatMessages, false, true)
   }
 
+  const handleSendTerminalContinuation = async () => {
+    await handleSendMessage(
+      null,
+      chatMessages,
+      false,
+      true,
+      undefined,
+      undefined,
+      true
+    )
+  }
+
   const handleSendMessage = async (
     messageContent: string | null,
     chatMessages: ChatMessage[],
     isRegeneration: boolean,
     isContinuation: boolean = false,
     editSequenceNumber?: number,
-    model?: LLMID
+    model?: LLMID,
+    isTerminalContinuation: boolean = false
   ) => {
     const isEdit = editSequenceNumber !== undefined
+    const isRagEnabled = selectedPlugin === PluginID.ENHANCED_SEARCH
 
     try {
       if (!isRegeneration) {
         setUserInput("")
+      }
+
+      if (isContinuation) {
+        setFirstTokenReceived(true)
       }
       setIsGenerating(true)
       setIsAtPickerOpen(false)
@@ -230,17 +244,19 @@ export const useChatHandler = () => {
       const b64Images = newMessageImages.map(image => image.base64)
 
       const { tempUserChatMessage, tempAssistantChatMessage } =
-        createTempMessages(
+        createTempMessages({
           messageContent,
           chatMessages,
-          chatSettings!,
+          chatSettings: chatSettings!,
           b64Images,
           isContinuation,
           selectedPlugin,
-          model || chatSettings!.model
-        )
+          model: model || chatSettings!.model
+        })
 
-      let sentChatMessages = [...chatMessages]
+      let sentChatMessages = isTemporaryChat
+        ? [...temporaryChatMessages]
+        : [...chatMessages]
 
       // If the message is an edit, remove all following messages
       if (isEdit) {
@@ -258,8 +274,14 @@ export const useChatHandler = () => {
         if (!isContinuation) sentChatMessages.push(tempAssistantChatMessage)
       }
 
-      // Update the UI with the new messages
-      setChatMessages(sentChatMessages)
+      // Update the UI with the new messages except for continuations
+      if (!isContinuation) {
+        if (isTemporaryChat) {
+          setTemporaryChatMessages(sentChatMessages)
+        } else {
+          setChatMessages(sentChatMessages)
+        }
+      }
 
       let retrievedFileItems: Tables<"file_items">[] = []
 
@@ -292,91 +314,31 @@ export const useChatHandler = () => {
       let finishReasonFromResponse = ""
       let ragUsed = false
       let ragId = null
-
-      let detectedModerationLevel = -1
-      if (!isContinuation && selectedPlugin === PluginID.NONE) {
-        const { detectedPlugin, moderationLevel } = await handleDetectPlugin(
-          payload,
-          selectedPlugin
-        )
-        selectedPlugin = detectedPlugin
-        detectedModerationLevel = moderationLevel
-      }
+      let assistantGeneratedImages: string[] = []
 
       if (
         selectedPlugin.length > 0 &&
         selectedPlugin !== PluginID.NONE &&
-        selectedPlugin !== PluginID.WEB_SEARCH
+        selectedPlugin !== PluginID.WEB_SEARCH &&
+        selectedPlugin !== PluginID.ENHANCED_SEARCH &&
+        selectedPlugin !== PluginID.TERMINAL
       ) {
-        let fileData: { fileName: string; fileContent: string }[] = []
-
-        const nonExcludedPluginsForFilesCommand = [
-          PluginID.NUCLEI,
-          PluginID.ALTERX,
-          PluginID.DNSX,
-          PluginID.HTTPX,
-          PluginID.KATANA
-        ]
-
-        const isCommand = (allowedCommands: string[], message: string) => {
-          if (!message.startsWith("/")) return false
-          const trimmedMessage = message.trim().toLowerCase()
-
-          // Check if the message matches any of the allowed commands
-          return allowedCommands.some(commandName => {
-            const commandPattern = new RegExp(
-              `^\\/${commandName}(?:\\s+(-[a-z]+|\\S+))*$`
-            )
-            return commandPattern.test(trimmedMessage)
-          })
-        }
-
-        if (
-          messageContent &&
-          newMessageFiles.length > 0 &&
-          newMessageFiles[0].type === "text" &&
-          (nonExcludedPluginsForFilesCommand.includes(selectedPlugin) ||
-            isCommand(nonExcludedPluginsForFilesCommand, messageContent))
-        ) {
-          const fileIds = newMessageFiles
-            .filter(file => file.type === "text")
-            .map(file => file.id)
-
-          if (fileIds.length > 0) {
-            const response = await fetch(`/api/retrieval/file-2v`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({ fileIds: fileIds })
-            })
-
-            if (!response.ok) {
-              const errorData = await response.json()
-              toast.warning(errorData.message)
-            }
-
-            const data = await response.json()
-            fileData.push(...data.files)
-          }
-        }
-
         const { fullText, finishReason } = await handleHostedPluginsChat(
           payload,
           profile!,
           modelData!,
           tempAssistantChatMessage,
           isRegeneration,
+          isTerminalContinuation,
           newAbortController,
           newMessageImages,
           chatImages,
           setIsGenerating,
           setFirstTokenReceived,
-          setChatMessages,
+          isTemporaryChat ? setTemporaryChatMessages : setChatMessages,
           setToolInUse,
           alertDispatch,
-          selectedPlugin,
-          fileData
+          selectedPlugin
         )
         generatedText = fullText
         finishReasonFromResponse = finishReason
@@ -385,88 +347,104 @@ export const useChatHandler = () => {
           fullText,
           finishReason,
           ragUsed: ragUsedFromResponse,
-          ragId: ragIdFromResponse
+          ragId: ragIdFromResponse,
+          selectedPlugin: updatedSelectedPlugin,
+          assistantGeneratedImages: assistantGeneratedImagesFromResponse
         } = await handleHostedChat(
           payload,
+          profile!,
           modelData!,
           tempAssistantChatMessage,
           isRegeneration,
           isRagEnabled,
           isContinuation,
+          isTerminalContinuation,
           newAbortController,
           chatImages,
           setIsGenerating,
           setFirstTokenReceived,
-          setChatMessages,
+          isTemporaryChat ? setTemporaryChatMessages : setChatMessages,
           setToolInUse,
           alertDispatch,
-          selectedPlugin,
-          detectedModerationLevel
+          selectedPlugin
         )
         generatedText = fullText
         finishReasonFromResponse = finishReason
         ragUsed = ragUsedFromResponse
         ragId = ragIdFromResponse
+        selectedPlugin = updatedSelectedPlugin
+        assistantGeneratedImages = assistantGeneratedImagesFromResponse
       }
 
-      if (!currentChat) {
-        currentChat = await handleCreateChat(
-          chatSettings!,
-          profile!,
-          selectedWorkspace!,
-          messageContent || "",
-          newMessageFiles,
-          finishReasonFromResponse,
-          setSelectedChat,
-          setChats,
-          setChatFiles
+      if (isTemporaryChat) {
+        // Update temporary chat messages with the generated response
+        const updatedMessages = sentChatMessages.map(msg =>
+          msg.message.id === tempAssistantChatMessage.message.id
+            ? { ...msg, message: { ...msg.message, content: generatedText } }
+            : msg
         )
+        setTemporaryChatMessages(updatedMessages)
       } else {
-        const updatedChat = await updateChat(currentChat.id, {
-          updated_at: new Date().toISOString(),
-          finish_reason: finishReasonFromResponse,
-          model: chatSettings?.model
-        })
-
-        setChats(prevChats => {
-          const updatedChats = prevChats.map(prevChat =>
-            prevChat.id === updatedChat.id ? updatedChat : prevChat
+        if (!currentChat) {
+          currentChat = await handleCreateChat(
+            chatSettings!,
+            profile!,
+            selectedWorkspace!,
+            messageContent || "",
+            newMessageFiles,
+            finishReasonFromResponse,
+            setSelectedChat,
+            setChats,
+            setChatFiles
           )
+        } else {
+          const updatedChat = await updateChat(currentChat.id, {
+            updated_at: new Date().toISOString(),
+            finish_reason: finishReasonFromResponse,
+            model: chatSettings?.model
+          })
 
-          return updatedChats
-        })
+          setChats(prevChats => {
+            const updatedChats = prevChats.map(prevChat =>
+              prevChat.id === updatedChat.id ? updatedChat : prevChat
+            )
 
-        if (selectedChat?.id === updatedChat.id) {
-          setSelectedChat(updatedChat)
+            return updatedChats
+          })
+
+          if (selectedChat?.id === updatedChat.id) {
+            setSelectedChat(updatedChat)
+          }
         }
+
+        await handleCreateMessages(
+          chatMessages,
+          currentChat,
+          profile!,
+          modelData!,
+          messageContent,
+          generatedText,
+          newMessageImages,
+          isRegeneration,
+          isContinuation,
+          retrievedFileItems,
+          setChatMessages,
+          setChatImages,
+          selectedPlugin,
+          editSequenceNumber,
+          ragUsed,
+          ragId,
+          assistantGeneratedImages
+        )
       }
 
-      await handleCreateMessages(
-        chatMessages,
-        currentChat,
-        profile!,
-        modelData!,
-        messageContent,
-        generatedText,
-        newMessageImages,
-        isRegeneration,
-        isContinuation,
-        retrievedFileItems,
-        setChatMessages,
-        setChatImages,
-        selectedPlugin,
-        editSequenceNumber,
-        ragUsed,
-        ragId
-      )
-
+      setToolInUse("none")
       setIsGenerating(false)
       setFirstTokenReceived(false)
     } catch (error) {
+      setToolInUse("none")
       setIsGenerating(false)
       setFirstTokenReceived(false)
-      // Restore the chat messages to the previous state
-      setChatMessages(chatMessages)
     }
   }
 
@@ -479,35 +457,6 @@ export const useChatHandler = () => {
     handleSendMessage(editedContent, chatMessages, false, false, sequenceNumber)
   }
 
-  const handleDetectPlugin = async (
-    payload: ChatPayload,
-    selectedPlugin: PluginID
-  ): Promise<{ detectedPlugin: PluginID; moderationLevel: number }> => {
-    const response = await fetch("/api/v2/chat/plugin-detector", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ payload, selectedPlugin })
-    })
-
-    if (response.ok) {
-      const { plugin: detectedPlugin, moderationLevel } = await response.json()
-      return {
-        detectedPlugin:
-          detectedPlugin && detectedPlugin !== "None"
-            ? detectedPlugin
-            : selectedPlugin,
-        moderationLevel: moderationLevel
-      }
-    }
-
-    return {
-      detectedPlugin: selectedPlugin,
-      moderationLevel: -1
-    }
-  }
-
   return {
     chatInputRef,
     handleNewChat,
@@ -515,6 +464,7 @@ export const useChatHandler = () => {
     handleFocusChatInput,
     handleStopMessage,
     handleSendContinuation,
+    handleSendTerminalContinuation,
     handleSendEdit,
     handleSendFeedback,
     handleSelectChat

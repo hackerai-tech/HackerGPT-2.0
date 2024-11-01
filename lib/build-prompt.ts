@@ -8,7 +8,14 @@ import {
 import { PluginID } from "@/types/plugins"
 import { encode } from "gpt-tokenizer"
 import { GPT4o } from "./models/llm/openai-llm-list"
+import {
+  CoreAssistantMessage,
+  CoreMessage,
+  CoreSystemMessage,
+  CoreUserMessage
+} from "ai"
 import endent from "endent"
+import { getTerminalPlugins } from "./tools/tool-store/tools-helper"
 
 const buildBasePrompt = (
   profileContext: string,
@@ -35,7 +42,7 @@ export const lastSequenceNumber = (chatMessages: ChatMessage[]) =>
 
 export async function buildFinalMessages(
   payload: ChatPayload,
-  profile: Tables<"profiles">,
+  profile: Pick<Tables<"profiles">, "user_id" | "profile_context">,
   chatImages: MessageImage[],
   selectedPlugin: PluginID | null,
   shouldUseRAG?: boolean
@@ -47,38 +54,23 @@ export async function buildFinalMessages(
     selectedPlugin
   )
 
-  let CHUNK_SIZE = chatSettings.contextLength
+  let CHUNK_SIZE = 8000
   if (chatSettings.model === GPT4o.modelId) {
-    CHUNK_SIZE = 10000
+    CHUNK_SIZE = 14000
   } else if (chatSettings.model === "mistral-large") {
-    // Adjusting the chunk size to comply with the content size limit imposed by Llama 3 (8192 max)
-    CHUNK_SIZE = 8000
+    CHUNK_SIZE = 10000
   } else if (chatSettings.model === "mistral-medium") {
-    // Adjusting the chunk size to comply with the content size limit imposed by Llama 3 (8192 max)
-    CHUNK_SIZE = 8000
+    CHUNK_SIZE = 10000
   }
 
-  // Lower chunk size for plugins that don't need to handle long inputs
-  if (
-    selectedPlugin === PluginID.KATANA ||
-    selectedPlugin === PluginID.CVEMAP ||
-    selectedPlugin === PluginID.NUCLEI ||
-    selectedPlugin === PluginID.SUBFINDER ||
-    selectedPlugin === PluginID.HTTPX ||
-    selectedPlugin === PluginID.GAU ||
-    selectedPlugin === PluginID.ALTERX ||
-    selectedPlugin === PluginID.DNSX ||
-    // Tools
-    selectedPlugin === PluginID.LINKFINDER ||
-    selectedPlugin === PluginID.PORTSCANNER ||
-    selectedPlugin === PluginID.SSLSCANNER
-  ) {
-    CHUNK_SIZE = 4096
+  // Lower chunk size for terminal plugins
+  if (selectedPlugin && getTerminalPlugins().includes(selectedPlugin)) {
+    CHUNK_SIZE = 8000
   }
 
   // Adjusting the chunk size for RAG
   if (shouldUseRAG) {
-    CHUNK_SIZE = 6500
+    CHUNK_SIZE = 7500
   }
 
   const PROMPT_TOKENS = encode(BUILT_PROMPT).length
@@ -218,7 +210,7 @@ export async function buildFinalMessages(
     finalMessages[finalMessages.length - 2] = {
       ...finalMessages[finalMessages.length - 2],
       content: endent`Assist with the user's query: '${finalMessages[finalMessages.length - 2].content}' using uploaded files. 
-      Each <BEGIN SOURCE>...<END SOURCE> section represents part of the overall file. 
+      Each <doc>...</doc> section represents part of the overall file. 
       Assess each section for information pertinent to the query.
       
       \n\n${retrievalText}\n\n
@@ -235,7 +227,7 @@ export async function buildFinalMessages(
 
 function buildRetrievalText(fileItems: Tables<"file_items">[]) {
   const retrievalText = fileItems
-    .map(item => `<BEGIN SOURCE>\n${item.content}\n</END SOURCE>`)
+    .map(item => `<doc>\n${item.content}\n</doc>`)
     .join("\n\n")
 
   return `${retrievalText}`
@@ -245,14 +237,123 @@ export function filterEmptyAssistantMessages(messages: any[]) {
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i].role === "assistant" && messages[i].content.trim() === "") {
       messages.splice(i, 1)
+      break
     }
   }
 }
 
-export function ensureAssistantMessagesNotEmpty(messages: any[]) {
+export function handleAssistantMessages(
+  messages: any[],
+  onlyLast: boolean = false
+) {
+  let foundAssistant = false
   for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].role === "assistant" && messages[i].content.trim() === "") {
-      messages[i].content = "Sure, "
+    if (messages[i].role === "assistant") {
+      foundAssistant = true
+      if (messages[i].content.trim() === "") {
+        messages[i].content = "Sure, "
+      }
+      if (onlyLast) break
     }
   }
+
+  if (!foundAssistant) {
+    messages.push({ role: "assistant", content: "Sure, " })
+  }
+}
+
+export const toVercelChatMessages = (
+  messages: BuiltChatMessage[],
+  supportsImages: boolean = false
+): CoreMessage[] => {
+  return messages
+    .map(message => {
+      switch (message.role) {
+        case "assistant":
+          return {
+            role: "assistant",
+            content: Array.isArray(message.content)
+              ? message.content.map(content => {
+                  if (typeof content === "object" && content.type === "text") {
+                    return {
+                      type: "text",
+                      text: content.text
+                    }
+                  } else {
+                    return {
+                      type: "text",
+                      text: content
+                    }
+                  }
+                })
+              : [{ type: "text", text: message.content as string }]
+          } as CoreAssistantMessage
+        case "user":
+          return {
+            role: message.role,
+            content: Array.isArray(message.content)
+              ? message.content
+                  .map(content => {
+                    if (
+                      typeof content === "object" &&
+                      content.type === "image_url"
+                    ) {
+                      if (supportsImages) {
+                        return {
+                          type: "image",
+                          image: new URL(content.image_url.url)
+                        }
+                      } else {
+                        return null
+                      }
+                    } else if (
+                      typeof content === "object" &&
+                      content.type === "text"
+                    ) {
+                      return {
+                        type: "text",
+                        text: content.text
+                      }
+                    } else {
+                      return {
+                        type: "text",
+                        text: content
+                      }
+                    }
+                  })
+                  .filter(Boolean)
+              : [{ type: "text", text: message.content as string }]
+          } as CoreUserMessage
+        case "system":
+          return {
+            role: "system",
+            content: message.content
+          } as CoreSystemMessage
+        default:
+          return null
+      }
+    })
+    .filter(message => message !== null)
+}
+
+/**
+ * Checks if any of the last 5 messages in the conversation include images.
+ * This function is used to determine if image processing capabilities are needed
+ * for the current context of the conversation.
+ *
+ * @param messages - The array of all messages in the conversation
+ * @returns boolean - True if any of the last 5 messages contain an image, false otherwise
+ */
+export function messagesIncludeImages(messages: BuiltChatMessage[]): boolean {
+  const lastFiveMessages = messages.slice(-5)
+  return lastFiveMessages.some(
+    message =>
+      Array.isArray(message.content) &&
+      message.content.some(
+        item =>
+          typeof item === "object" &&
+          "type" in item &&
+          item.type === "image_url"
+      )
+  )
 }

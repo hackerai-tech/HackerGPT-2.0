@@ -1,6 +1,6 @@
-import { generateLocalEmbedding } from "@/lib/generate-local-embedding"
+import llmConfig from "@/lib/models/llm/llm-config"
 import { processDocX } from "@/lib/retrieval/processing"
-import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
+import { getServerProfile } from "@/lib/server/server-chat-helpers"
 import { Database } from "@/supabase/types"
 import { FileItemChunk } from "@/types"
 import { createClient } from "@supabase/supabase-js"
@@ -24,10 +24,6 @@ export async function POST(req: Request) {
 
     const profile = await getServerProfile()
 
-    if (embeddingsProvider === "openai") {
-      checkApiKey(profile.openai_api_key, "OpenAI")
-    }
-
     let chunks: FileItemChunk[] = []
 
     switch (fileExtension) {
@@ -44,8 +40,7 @@ export async function POST(req: Request) {
 
     let openai
     openai = new OpenAI({
-      apiKey: profile.openai_api_key || "",
-      organization: profile.openai_organization_id
+      apiKey: llmConfig.openai.apiKey
     })
 
     if (embeddingsProvider === "openai") {
@@ -57,17 +52,6 @@ export async function POST(req: Request) {
       embeddings = response.data.map((item: any) => {
         return item.embedding
       })
-    } else if (embeddingsProvider === "local") {
-      const embeddingPromises = chunks.map(async chunk => {
-        try {
-          return await generateLocalEmbedding(chunk.content)
-        } catch (error) {
-          console.error(`Error generating embedding for chunk: ${chunk}`, error)
-          return null
-        }
-      })
-
-      embeddings = await Promise.all(embeddingPromises)
     }
 
     const file_items = chunks.map((chunk, index) => ({

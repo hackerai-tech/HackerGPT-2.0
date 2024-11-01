@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from "@/components/ui/dialog"
-import { ChatbotUIContext } from "@/context/context"
+import { PentestGPTContext } from "@/context/context"
 import { deleteChat } from "@/db/chats"
 import { deleteFile } from "@/db/files"
 import { deleteFileFromStorage } from "@/db/storage/files"
@@ -25,7 +25,7 @@ export const SidebarDeleteItem: FC<SidebarDeleteItemProps> = ({
   item,
   contentType
 }) => {
-  const { setChats, setFiles } = useContext(ChatbotUIContext)
+  const { setChats, setFiles } = useContext(PentestGPTContext)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -38,12 +38,14 @@ export const SidebarDeleteItem: FC<SidebarDeleteItemProps> = ({
     files: async (file: Tables<"files">) => {
       await deleteFileFromStorage(file.file_path)
       await deleteFile(file.id)
-    }
+    },
+    gpts: null
   }
 
   const stateUpdateFunctions = {
     chats: setChats,
-    files: setFiles
+    files: setFiles,
+    gpts: null
   }
 
   const handleDelete = async () => {

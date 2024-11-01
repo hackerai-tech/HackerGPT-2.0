@@ -2,7 +2,7 @@
 
 import React, { createContext, useReducer, useContext, useEffect } from "react"
 import { PluginSummary } from "@/types/plugins"
-import { availablePlugins } from "@/lib/plugins/available-plugins"
+import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 
 export enum ActionTypes {
   INSTALL_PLUGIN = "INSTALL_PLUGIN",
@@ -65,7 +65,7 @@ export const PluginProvider: React.FC<{
       let installedPluginIds: number[] = localData ? JSON.parse(localData) : []
 
       if (!localData) {
-        const defaultPluginIds = [1, 2, 3, 4, 5]
+        const defaultPluginIds = [1, 2, 3, 10, 11]
         installedPluginIds = defaultPluginIds
         localStorage.setItem(
           "installedPluginIds",

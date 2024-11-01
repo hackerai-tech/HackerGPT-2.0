@@ -3,12 +3,14 @@ import { PluginID } from "@/types/plugins"
 import { FC } from "react"
 import { MessageMarkdown } from "./message-markdown"
 import { MessagePluginFile } from "./message-plugin-file"
+import { MessageTerminal } from "./e2b-messages/message-terminal"
 
 interface MessageTypeResolverProps {
   message: Tables<"messages">
   previousMessage: Tables<"messages"> | undefined
   messageSizeLimit: number
   isLastMessage: boolean
+  toolInUse: string
 }
 
 const extractOutputFilename = (content: string) => {
@@ -19,11 +21,27 @@ const extractOutputFilename = (content: string) => {
   return filenameMatch ? filenameMatch[1].trim() : undefined
 }
 
+export const terminalPlugins = [
+  PluginID.TERMINAL,
+  PluginID.SQLI_EXPLOITER,
+  PluginID.SSL_SCANNER,
+  PluginID.DNS_SCANNER,
+  PluginID.PORT_SCANNER,
+  PluginID.WAF_DETECTOR,
+  PluginID.WHOIS_LOOKUP,
+  PluginID.SUBDOMAIN_FINDER,
+  PluginID.CVE_MAP,
+  PluginID.URL_FUZZER,
+  PluginID.WORDPRESS_SCANNER,
+  PluginID.XSS_EXPLOITER
+]
+
 export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   previousMessage,
   message,
   messageSizeLimit,
-  isLastMessage
+  isLastMessage,
+  toolInUse
 }) => {
   const isPluginOutput =
     message.plugin !== null &&
@@ -35,6 +53,19 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   //   plugin: message.plugin,
   //   role: message.role
   // })
+
+  if (
+    (isPluginOutput && terminalPlugins.includes(message.plugin as PluginID)) ||
+    terminalPlugins.includes(toolInUse as PluginID)
+  ) {
+    return (
+      <MessageTerminal
+        content={message.content}
+        messageId={message.id}
+        isAssistant={message.role === "assistant"}
+      />
+    )
+  }
 
   // If the previous message is a plugin command and the current message is the output
   if (
@@ -83,7 +114,10 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
     )
   }
 
-  if (message.content.length > messageSizeLimit) {
+  if (
+    typeof message.content === "string" &&
+    message.content.length > messageSizeLimit
+  ) {
     return (
       <MessagePluginFile
         created_at={message.created_at}

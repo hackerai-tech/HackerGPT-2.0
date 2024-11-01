@@ -3,41 +3,68 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 })
 
 const withPWA = require("next-pwa")({
-  dest: "public"
+  dest: "public",
+  register: true,
+  skipWaiting: true,
 })
 
-module.exports = withBundleAnalyzer(
-  withPWA({
-    reactStrictMode: true,
-    images: {
-      remotePatterns: [
-        {
-          protocol: "http",
-          hostname: "localhost"
-        },
-        {
-          protocol: "http",
-          hostname: "127.0.0.1"
-        },
-        {
-          protocol: "https",
-          hostname: "**"
-        }
-      ],
-      unoptimized: true
-    },
-    experimental: {
-      serverComponentsExternalPackages: ["sharp", "onnxruntime-node"]
-    }
-  })
-)
+const baseConfig = {
+  reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost"
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1"
+      },
+      {
+        protocol: "https",
+        hostname: "**"
+      }
+    ],
+    unoptimized: true
+  },
+  experimental: {
+    serverComponentsExternalPackages: ["sharp", "onnxruntime-node"]
+  },
+  // Security headers configuration
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'none'"
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin'
+          }
+        ]
+      }
+    ]
+  }
+}
 
-// Injected content via Sentry wizard below
+// Apply the configurations in order
+const configWithAnalyzerAndPWA = withBundleAnalyzer(withPWA(baseConfig))
 
 const { withSentryConfig } = require("@sentry/nextjs")
 
 module.exports = withSentryConfig(
-  module.exports,
+  configWithAnalyzerAndPWA,
   {
     // For all available options, see:
     // https://github.com/getsentry/sentry-webpack-plugin#options

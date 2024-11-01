@@ -1,12 +1,12 @@
-import { ChatbotUIContext } from "@/context/context"
-import { updateChat } from "@/db/chats"
-import { updateFile } from "@/db/files"
+import { PentestGPTContext } from "@/context/context"
 import { cn } from "@/lib/utils"
 import { Tables } from "@/supabase/types"
 import { ContentType, DataItemType, DataListType } from "@/types"
-import { FC, useContext, useEffect, useRef, useState } from "react"
+import { FC, useCallback, useContext, useEffect, useRef, useState } from "react"
 import { ChatItem } from "./items/chat/chat-item"
 import { FileItem } from "./items/files/file-item"
+import { getMoreChatsByWorkspaceId } from "@/db/chats"
+import { Loader2 } from "lucide-react"
 
 interface SidebarDataListProps {
   contentType: ContentType
@@ -17,12 +17,61 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
   contentType,
   data
 }) => {
-  const { setChats, setFiles } = useContext(ChatbotUIContext)
+  const { setChats, isTemporaryChat } = useContext(PentestGPTContext)
 
   const divRef = useRef<HTMLDivElement>(null)
+  const loaderRef = useRef<HTMLDivElement>(null)
 
   const [isOverflowing, setIsOverflowing] = useState(false)
-  const [isDragOver, setIsDragOver] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [hasMoreChats, setHasMoreChats] = useState(true)
+
+  const fetchMoreChats = useCallback(async () => {
+    if (
+      contentType === "chats" &&
+      data.length > 0 &&
+      !isLoadingMore &&
+      hasMoreChats
+    ) {
+      setIsLoadingMore(true)
+      const lastChat = data[data.length - 1] as Tables<"chats">
+      const moreChats = await getMoreChatsByWorkspaceId(
+        lastChat.workspace_id,
+        lastChat.created_at
+      )
+      if (moreChats.length > 0) {
+        setChats((prevChats: Tables<"chats">[]) => [...prevChats, ...moreChats])
+      } else {
+        setHasMoreChats(false)
+      }
+      setIsLoadingMore(false)
+    }
+  }, [contentType, data, isLoadingMore, hasMoreChats, setChats])
+
+  useEffect(() => {
+    const options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 1.0
+    }
+
+    const observer = new IntersectionObserver(entries => {
+      const [entry] = entries
+      if (entry.isIntersecting && !isLoadingMore && hasMoreChats) {
+        fetchMoreChats()
+      }
+    }, options)
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current)
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current)
+      }
+    }
+  }, [loaderRef, isLoadingMore, hasMoreChats, fetchMoreChats])
 
   const getDataListComponent = (
     contentType: ContentType,
@@ -31,9 +80,11 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     switch (contentType) {
       case "chats":
         return <ChatItem key={item.id} chat={item as Tables<"chats">} />
-
       case "files":
         return <FileItem key={item.id} file={item as Tables<"files">} />
+
+      case "gpts":
+        return null
 
       default:
         return null
@@ -89,68 +140,6 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
       )
   }
 
-  const updateFunctions = {
-    chats: updateChat,
-    files: updateFile
-  }
-
-  const stateUpdateFunctions = {
-    chats: setChats,
-    files: setFiles
-  }
-
-  const updateFolder = async (itemId: string, folderId: string | null) => {
-    const item: any = data.find(item => item.id === itemId)
-
-    if (!item) return null
-
-    const updateFunction = updateFunctions[contentType]
-    const setStateFunction = stateUpdateFunctions[contentType]
-
-    if (!updateFunction || !setStateFunction) return
-
-    const updatedItem = await updateFunction(item.id, {
-      folder_id: folderId
-    })
-
-    setStateFunction((items: any) =>
-      items.map((item: any) =>
-        item.id === updatedItem.id ? updatedItem : item
-      )
-    )
-  }
-
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragOver(true)
-  }
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragOver(false)
-  }
-
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
-    e.dataTransfer.setData("text/plain", id)
-  }
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-  }
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-
-    const target = e.target as Element
-
-    if (!target.closest("#folder")) {
-      const itemId = e.dataTransfer.getData("text/plain")
-      updateFolder(itemId, null)
-    }
-
-    setIsDragOver(false)
-  }
-
   useEffect(() => {
     if (divRef.current) {
       setIsOverflowing(
@@ -159,29 +148,38 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     }
   }, [data])
 
-  const dataWithFolders = data.filter(item => item.folder_id)
-  const dataWithoutFolders = data.filter(item => item.folder_id === null)
-
   return (
-    <>
+    <div
+      ref={divRef}
+      className={cn(
+        "relative mt-2 flex h-full flex-col",
+        isTemporaryChat ? "overflow-hidden" : "overflow-auto"
+      )}
+    >
+      {isTemporaryChat && (
+        <div className="bg-tertiary/80 pointer-events-auto absolute inset-0 z-50" />
+      )}
       <div
-        ref={divRef}
-        className="mt-2 flex flex-col overflow-auto"
-        onDrop={handleDrop}
+        className={cn(
+          "relative z-10",
+          isTemporaryChat && "pointer-events-none"
+        )}
       >
         {data.length === 0 && (
           <div className="flex grow flex-col items-center justify-center">
-            <div className=" text-centertext-muted-foreground p-8 text-lg italic">
+            <div className="text-muted-foreground p-8 text-center text-lg italic">
               No {contentType}.
             </div>
           </div>
         )}
 
-        {(dataWithFolders.length > 0 || dataWithoutFolders.length > 0) && (
+        {data.length > 0 && (
           <div
             className={`h-full ${
-              isOverflowing ? "w-[calc(100%-8px)]" : "w-full"
-            } space-y-2 pt-2 ${isOverflowing ? "mr-2" : ""}`}
+              isOverflowing && !isTemporaryChat
+                ? "w-[calc(100%-8px)]"
+                : "w-full"
+            } space-y-3 pt-4 ${isOverflowing && !isTemporaryChat ? "mr-2" : ""}`}
           >
             {contentType === "chats" ? (
               <>
@@ -193,7 +191,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
                   "Older"
                 ].map(dateCategory => {
                   const sortedData = getSortedData(
-                    dataWithoutFolders,
+                    data,
                     dateCategory as
                       | "Today"
                       | "Yesterday"
@@ -209,22 +207,9 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
                           {dateCategory}
                         </div>
 
-                        <div
-                          className={cn(
-                            "flex grow flex-col",
-                            isDragOver && "bg-accent"
-                          )}
-                          onDrop={handleDrop}
-                          onDragEnter={handleDragEnter}
-                          onDragLeave={handleDragLeave}
-                          onDragOver={handleDragOver}
-                        >
+                        <div className={cn("flex grow flex-col")}>
                           {sortedData.map((item: any) => (
-                            <div
-                              key={item.id}
-                              draggable
-                              onDragStart={e => handleDragStart(e, item.id)}
-                            >
+                            <div key={item.id}>
                               {getDataListComponent(contentType, item)}
                             </div>
                           ))}
@@ -233,39 +218,29 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
                     )
                   )
                 })}
+                {contentType === "chats" &&
+                  data.length > 0 &&
+                  hasMoreChats &&
+                  !isTemporaryChat && (
+                    <div ref={loaderRef} className="mt-4 flex justify-center">
+                      {isLoadingMore && (
+                        <Loader2 className="text-primary size-4 animate-spin" />
+                      )}
+                    </div>
+                  )}
               </>
             ) : (
-              <div
-                className={cn("flex grow flex-col", isDragOver && "bg-accent")}
-                onDrop={handleDrop}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-              >
-                {dataWithoutFolders.map(item => {
-                  return (
-                    <div
-                      key={item.id}
-                      draggable
-                      onDragStart={e => handleDragStart(e, item.id)}
-                    >
-                      {getDataListComponent(contentType, item)}
-                    </div>
-                  )
-                })}
+              <div className={cn("flex grow flex-col")}>
+                {data.map(item => (
+                  <div key={item.id}>
+                    {getDataListComponent(contentType, item)}
+                  </div>
+                ))}
               </div>
             )}
           </div>
         )}
       </div>
-
-      <div
-        className={cn("flex grow", isDragOver && "bg-accent")}
-        onDrop={handleDrop}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-      />
-    </>
+    </div>
   )
 }

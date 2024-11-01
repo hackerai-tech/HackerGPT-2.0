@@ -111,8 +111,8 @@ export const ChangeModelIcon: FC<ChangeModelIconProps> = ({
             <DropdownMenuContent side="top">
               {[
                 { id: GPT4o.modelId, name: "GPT-4o" },
-                { id: "mistral-large", name: "HGPT-4" },
-                { id: "mistral-medium", name: "HGPT-3.5" }
+                { id: "mistral-large", name: "PGPT-Large" },
+                { id: "mistral-medium", name: "PGPT-Small" }
               ].map(({ id, name }) => (
                 <DropdownMenuItem
                   key={id}

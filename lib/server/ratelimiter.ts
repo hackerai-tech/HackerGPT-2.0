@@ -1,7 +1,8 @@
 // must not describe 'use server' here to avoid security issues.
 import { epochTimeToNaturalLanguage } from "../utils"
 import { getRedis } from "./redis"
-import { isPremiumUser } from "./subscription-utils"
+import { getSubscriptionInfo } from "./subscription-utils"
+import { SubscriptionInfo } from "@/types"
 
 export type RateLimitResult =
   | {
@@ -28,41 +29,46 @@ export async function ratelimit(
   if (!isRateLimiterEnabled()) {
     return { allowed: true, remaining: -1, timeRemaining: null }
   }
-  const isPremium = await isPremiumUser(userId)
-  return _ratelimit(model, userId, isPremium)
+  const subscriptionInfo = await getSubscriptionInfo(userId)
+  return _ratelimit(model, userId, subscriptionInfo)
 }
 
 function isRateLimiterEnabled(): boolean {
-  return process.env.RATELIMITER_ENABLED?.toLowerCase() === "true"
+  return process.env.RATELIMITER_ENABLED?.toLowerCase() !== "false"
 }
 
 export async function _ratelimit(
   model: string,
   userId: string,
-  isPremium: boolean
+  subscriptionInfo: SubscriptionInfo
 ): Promise<RateLimitResult> {
-  const storageKey = _makeStorageKey(userId, model)
-  const [remaining, timeRemaining] = await getRemaining(
-    userId,
-    model,
-    isPremium
-  )
-  if (remaining === 0) {
-    return { allowed: false, remaining, timeRemaining: timeRemaining! }
+  try {
+    const storageKey = _makeStorageKey(userId, model)
+    const [remaining, timeRemaining] = await getRemaining(
+      userId,
+      model,
+      subscriptionInfo
+    )
+    if (remaining === 0) {
+      return { allowed: false, remaining, timeRemaining: timeRemaining! }
+    }
+    await _addRequest(storageKey)
+    return { allowed: true, remaining: remaining - 1, timeRemaining: null }
+  } catch (error) {
+    console.error("Redis rate limiter error:", error)
+    return { allowed: false, remaining: 0, timeRemaining: 60000 }
   }
-  await _addRequest(storageKey, model)
-  return { allowed: true, remaining: remaining - 1, timeRemaining: null }
 }
 
 export async function getRemaining(
   userId: string,
   model: string,
-  isPremium: boolean
+  subscriptionInfo: SubscriptionInfo
 ): Promise<[number, number | null]> {
   const storageKey = _makeStorageKey(userId, model)
-  const timeWindow = getTimeWindow(model)
+  const timeWindow = getTimeWindow()
   const now = Date.now()
-  const limit = _getLimit(model, isPremium)
+  const limit = _getLimit(model, subscriptionInfo)
 
   const redis = getRedis()
   const [[firstMessageTime], count] = await Promise.all([
@@ -84,58 +90,64 @@ export async function getRemaining(
   return [remaining, remaining === 0 ? windowEndTime - now : null]
 }
 
-function getTimeWindow(model: string): number {
-  const key =
-    model === "plugins"
-      ? "RATELIMITER_TIME_PLUGINS_WINDOW_MINUTES"
-      : "RATELIMITER_TIME_WINDOW_MINUTES"
+function getTimeWindow(): number {
+  const key = "RATELIMITER_TIME_WINDOW_MINUTES"
   return Number(process.env[key]) * 60 * 1000
 }
 
-function _getLimit(model: string, isPremium: boolean): number {
+function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
   let limit
-  if (model === "plugins") {
-    const limitKey = `RATELIMITER_LIMIT_${model.toUpperCase()}_${isPremium ? "PREMIUM" : "FREE"}`
-    limit =
-      process.env[limitKey] === undefined
-        ? isPremium
+  const fixedModelName = _getFixedModelName(model)
+  const baseKey = `RATELIMITER_LIMIT_${fixedModelName}`
+
+  const suffix = subscriptionInfo.isTeam
+    ? "_TEAM"
+    : subscriptionInfo.isPremium
+      ? "_PREMIUM"
+      : "_FREE"
+
+  const limitKey = baseKey + suffix
+
+  limit =
+    process.env[limitKey] === undefined
+      ? subscriptionInfo.isTeam
+        ? 50
+        : subscriptionInfo.isPremium
           ? 30
           : 15
-        : Number(process.env[limitKey])
-  } else {
-    const fixedModelName = _getFixedModelName(model)
-    const limitKey = `RATELIMITER_LIMIT_${fixedModelName}_${isPremium ? "PREMIUM" : "FREE"}`
-    limit =
-      process.env[limitKey] === undefined
-        ? isPremium
-          ? 30
-          : 15
-        : Number(process.env[limitKey])
-  }
+      : Number(process.env[limitKey])
+
   if (isNaN(limit) || limit < 0) {
     throw new Error("Invalid limit configuration")
   }
   return limit
 }
 
-async function _addRequest(key: string, model: string) {
+async function _addRequest(key: string) {
   const now = Date.now()
-  const timeWindow = getTimeWindow(model)
+  const timeWindow = getTimeWindow()
 
   const redis = getRedis()
-  const [firstMessageTime] = await redis.zrange(key, 0, 0, { withScores: true })
+  try {
+    const [firstMessageTime] = await redis.zrange(key, 0, 0, {
+      withScores: true
+    })
 
-  if (!firstMessageTime || now - Number(firstMessageTime) >= timeWindow) {
-    // Start a new window
-    await redis
-      .multi()
-      .del(key)
-      .zadd(key, { score: now, member: now })
-      .expire(key, Math.ceil(timeWindow / 1000))
-      .exec()
-  } else {
-    // Add to existing window
-    await redis.zadd(key, { score: now, member: now })
+    if (!firstMessageTime || now - Number(firstMessageTime) >= timeWindow) {
+      // Start a new window
+      await redis
+        .multi()
+        .del(key)
+        .zadd(key, { score: now, member: now })
+        .expire(key, Math.ceil(timeWindow / 1000))
+        .exec()
+    } else {
+      // Add to existing window
+      await redis.zadd(key, { score: now, member: now })
+    }
+  } catch (error) {
+    console.error("Redis _addRequest error:", error)
+    throw error // Re-throw to be caught in _ratelimit
   }
 }
 
@@ -161,30 +173,31 @@ export function getRateLimitErrorMessage(
   model: string
 ): string {
   const remainingText = epochTimeToNaturalLanguage(timeRemaining)
-  const baseMessage = `⚠️ You've reached the rate limit for ${getModelName(model)}\n⏰ Access will be restored in ${remainingText}`
 
-  if (["plugins", "tts-1", "stt-1"].includes(model)) {
-    return premium
+  if (model === "terminal") {
+    const baseMessage = `⚠️ You've reached the limit for terminal usage.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
+    return !premium
       ? baseMessage
-      : `${baseMessage}\n🚀 Consider upgrading for higher limits and more features`
+      : `${baseMessage}\n\n🚀 Consider upgrading to Pro or Team for higher terminal usage limits and more features.`
   }
 
   let message = `⚠️ Usage Limit Reached for ${getModelName(model)}\n⏰ Access will be restored in ${remainingText}`
 
   if (premium) {
-    if (model === "hackergpt") {
-      message += `\n\nIn the meantime, you can use HGPT-4 or GPT-4o`
-    } else if (model === "hackergpt-pro") {
-      message += `\n\nIn the meantime, you can use GPT-4o or HGPT-3.5`
+    if (model === "pentestgpt") {
+      message += `\n\nIn the meantime, you can use PGPT-Large or GPT-4o`
+    } else if (model === "pentestgpt-pro") {
+      message += `\n\nIn the meantime, you can use GPT-4o or PGPT-Small`
     } else if (model === "gpt-4") {
-      message += `\n\nIn the meantime, you can use HGPT-4 or HGPT-3.5`
+      message += `\n\nIn the meantime, you can use PGPT-Large or PGPT-Small`
     }
   } else {
-    message += `\n\n🔓 Want more? Upgrade to Pro and unlock a world of features:
+    message += `\n\n🔓 Want more? Upgrade to Pro or Team and unlock a world of features:
 - Higher usage limits
-- Exclusive access to HGPT-4 and GPT-4o
-- Advanced features like vision, web browsing, and file uploads
-- Access to premium tools such as Nuclei, Katana, PortScanner, and more`
+- Access to PGPT-Large and GPT-4o
+- Access to file uploads, vision, web search and browsing
+- Access to advanced plugins like SQLi Exploiter, XSS Exploiter, and more
+- Access to terminal`
   }
 
   return message.trim()
@@ -192,12 +205,11 @@ export function getRateLimitErrorMessage(
 
 function getModelName(model: string): string {
   const modelNames: { [key: string]: string } = {
-    plugins: "plugins",
-    "tts-1": "text-to-speech",
-    "stt-1": "speech-to-text",
-    hackergpt: "HGPT-3.5",
-    "hackergpt-pro": "HGPT-4",
-    "gpt-4": "GPT-4"
+    pentestgpt: "PGPT-Small",
+    "pentestgpt-pro": "PGPT-Large",
+    "gpt-4": "GPT-4",
+    terminal: "terminal",
+    "tts-1": "text-to-speech"
   }
   return modelNames[model] || model
 }
@@ -210,10 +222,10 @@ export async function checkRatelimitOnApi(
   if (result.allowed) {
     return null
   }
-  const premium = await isPremiumUser(userId)
+  const subscriptionInfo = await getSubscriptionInfo(userId)
   const message = getRateLimitErrorMessage(
     result.timeRemaining!,
-    premium,
+    subscriptionInfo.isPremium,
     model
   )
   const response = new Response(
@@ -236,11 +248,11 @@ export async function checkRateLimitWithoutIncrementing(
   if (!isRateLimiterEnabled()) {
     return { allowed: true, remaining: -1, timeRemaining: null }
   }
-  const isPremium = await isPremiumUser(userId)
+  const subscriptionInfo = await getSubscriptionInfo(userId)
   const [remaining, timeRemaining] = await getRemaining(
     userId,
     model,
-    isPremium
+    subscriptionInfo
   )
   if (remaining === 0) {
     return { allowed: false, remaining: 0, timeRemaining: timeRemaining! }

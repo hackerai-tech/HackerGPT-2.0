@@ -1,41 +1,49 @@
 "use client"
 
-import Link from "next/link"
-import { FC } from "react"
-import { ChatbotUISVG } from "../icons/chatbotui-svg"
+import { FC, useEffect, useState, memo } from "react"
+import { PentestGPTSVG } from "../icons/pentestgpt-svg"
+import { useTheme } from "next-themes"
 
 interface BrandProps {
-  theme?: "dark" | "light"
+  forceTheme?: "dark" | "light"
+  scale?: number
 }
 
-export const Brand: FC<BrandProps> = ({ theme = "dark" }) => {
+const BrandBase: FC<BrandProps> = memo(({ forceTheme, scale = 0.4 }) => {
+  const { theme, systemTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const currentTheme = mounted
+    ? theme === "system"
+      ? systemTheme
+      : theme
+    : "dark"
+  const brandTheme = forceTheme || (currentTheme === "dark" ? "dark" : "light")
+
   return (
-    <>
-      <div className="flex cursor-pointer flex-col items-center">
-        <div className="mb-2">
-          <ChatbotUISVG
-            theme={theme === "dark" ? "dark" : "light"}
-            scale={0.4}
-          />
-        </div>
-
-        <div className="text-3xl font-bold tracking-wide">HackerGPT</div>
+    <div className="flex cursor-pointer flex-col items-center">
+      <div className="mb-2">
+        <PentestGPTSVG theme={brandTheme} scale={scale} />
       </div>
-    </>
+      {scale === 0.4 && (
+        <div className="text-3xl font-bold tracking-wide">PentestGPT</div>
+      )}
+    </div>
   )
-}
+})
 
-export const BrandSmall: FC<BrandProps> = ({ theme = "dark" }) => {
-  return (
-    <>
-      <div className="flex cursor-pointer flex-col items-center">
-        <div className="mb-2">
-          <ChatbotUISVG
-            theme={theme === "dark" ? "dark" : "light"}
-            scale={0.25}
-          />
-        </div>
-      </div>
-    </>
-  )
-}
+BrandBase.displayName = "BrandBase"
+
+export const Brand: FC<BrandProps> = props => (
+  <BrandBase {...props} scale={0.4} />
+)
+export const BrandSmall: FC<BrandProps> = props => (
+  <BrandBase {...props} scale={0.25} />
+)
+export const BrandLarge: FC<BrandProps> = props => (
+  <BrandBase {...props} scale={0.3} />
+)

@@ -1,4 +1,4 @@
-import { ChatbotUIContext } from "@/context/context"
+import { PentestGPTContext } from "@/context/context"
 import {
   type UIEventHandler,
   useCallback,
@@ -9,7 +9,8 @@ import {
 } from "react"
 
 export const useScroll = () => {
-  const { isGenerating, chatMessages } = useContext(ChatbotUIContext)
+  const { isGenerating, chatMessages, isTemporaryChat, temporaryChatMessages } =
+    useContext(PentestGPTContext)
 
   const messagesStartRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -29,7 +30,13 @@ export const useScroll = () => {
     if (isGenerating && !userScrolled) {
       scrollToBottom()
     }
-  }, [chatMessages, isGenerating, userScrolled])
+  }, [
+    chatMessages,
+    temporaryChatMessages,
+    isGenerating,
+    userScrolled,
+    isTemporaryChat
+  ])
 
   const handleScroll: UIEventHandler<HTMLDivElement> = useCallback(e => {
     const target = e.target as HTMLDivElement
@@ -67,6 +74,13 @@ export const useScroll = () => {
     [userScrolled]
   )
 
+  const scrollToBottomAfterFetch = useCallback(() => {
+    setTimeout(() => {
+      scrollToBottom(true)
+      setIsAtBottom(true)
+    }, 100)
+  }, [scrollToBottom])
+
   return {
     messagesEndRef,
     messagesStartRef,
@@ -75,6 +89,7 @@ export const useScroll = () => {
     isOverflowing,
     handleScroll,
     scrollToBottom,
-    setIsAtBottom
+    setIsAtBottom,
+    scrollToBottomAfterFetch
   }
 }

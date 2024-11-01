@@ -5,25 +5,37 @@ import {
   ChatSettings,
   LLM,
   MessageImage,
-  OpenRouterLLM,
-  WorkspaceImage
+  WorkspaceImage,
+  SubscriptionStatus
 } from "@/types"
 import { PluginID } from "@/types/plugins"
-import { VALID_ENV_KEYS } from "@/types/valid-keys"
-import { Dispatch, SetStateAction, createContext } from "react"
+import { Dispatch, SetStateAction, createContext, useContext } from "react"
+import { ContentType } from "@/types"
+import { ProcessedTeamMember } from "@/lib/team-utils"
+import { User } from "@supabase/supabase-js"
 
-interface ChatbotUIContext {
+interface PentestGPTContextType {
+  // USER STORE
+  user: User | null
+
   // PROFILE STORE
   profile: Tables<"profiles"> | null
   setProfile: Dispatch<SetStateAction<Tables<"profiles"> | null>>
 
-  // USER ROLE STORE
-  userRole: Tables<"user_role"> | null
-  setUserRole: Dispatch<SetStateAction<Tables<"user_role"> | null>>
+  // CONTENT TYPE STORE
+  contentType: ContentType
+  setContentType: React.Dispatch<React.SetStateAction<ContentType>>
 
   // SUBSCRIPTION STORE
   subscription: Tables<"subscriptions"> | null
   setSubscription: Dispatch<SetStateAction<Tables<"subscriptions"> | null>>
+  subscriptionStatus: SubscriptionStatus
+  setSubscriptionStatus: Dispatch<SetStateAction<SubscriptionStatus>>
+  updateSubscription: (newSubscription: Tables<"subscriptions"> | null) => void
+  isPremiumSubscription: boolean
+  teamMembers: ProcessedTeamMember[] | null
+  refreshTeamMembers: () => Promise<void>
+  membershipData: ProcessedTeamMember | null
 
   // ITEMS STORE
   chats: Tables<"chats">[]
@@ -34,8 +46,8 @@ interface ChatbotUIContext {
   setWorkspaces: Dispatch<SetStateAction<Tables<"workspaces">[]>>
 
   // MODELS STORE
-  envKeyMap: Record<string, VALID_ENV_KEYS>
-  setEnvKeyMap: Dispatch<SetStateAction<Record<string, VALID_ENV_KEYS>>>
+  envKeyMap: Record<string, boolean>
+  setEnvKeyMap: Dispatch<SetStateAction<Record<string, boolean>>>
   availableHostedModels: LLM[]
   setAvailableHostedModels: Dispatch<SetStateAction<LLM[]>>
 
@@ -54,6 +66,8 @@ interface ChatbotUIContext {
   setChatSettings: Dispatch<SetStateAction<ChatSettings>>
   selectedChat: Tables<"chats"> | null
   setSelectedChat: Dispatch<SetStateAction<Tables<"chats"> | null>>
+  temporaryChatMessages: ChatMessage[]
+  setTemporaryChatMessages: Dispatch<SetStateAction<ChatMessage[]>>
 
   // ACTIVE CHAT STORE
   abortController: AbortController | null
@@ -70,10 +84,6 @@ interface ChatbotUIContext {
   setSelectedPluginType: Dispatch<SetStateAction<string>>
   selectedPlugin: PluginID
   setSelectedPlugin: Dispatch<SetStateAction<PluginID>>
-
-  // RAG
-  isRagEnabled: boolean
-  setIsRagEnabled: Dispatch<SetStateAction<boolean>>
 
   // CHAT INPUT COMMAND STORE
   slashCommand: string
@@ -114,33 +124,46 @@ interface ChatbotUIContext {
   isReadyToChat: boolean
   setIsReadyToChat: Dispatch<SetStateAction<boolean>>
 
-  // Audio
-  currentPlayingMessageId: string | null
-  setCurrentPlayingMessageId: Dispatch<SetStateAction<string | null>>
-  isMicSupported: boolean
-  setIsMicSupported: Dispatch<SetStateAction<boolean>>
-
-  // Conversational AI
-  isConversationalAIOpen: boolean
-  setIsConversationalAIOpen: Dispatch<SetStateAction<boolean>>
-
   // Sidebar
   showSidebar: boolean
   setShowSidebar: (value: boolean | ((prevState: boolean) => boolean)) => void
+
+  // Terminal output setting
+  showTerminalOutput: boolean
+  setShowTerminalOutput: (
+    value: boolean | ((prevState: boolean) => boolean)
+  ) => void
+
+  // Audio
+  currentPlayingMessageId: string | null
+  setCurrentPlayingMessageId: Dispatch<SetStateAction<string | null>>
+
+  // TEMPORARY CHAT STORE
+  isTemporaryChat: boolean
 }
 
-export const ChatbotUIContext = createContext<ChatbotUIContext>({
+export const PentestGPTContext = createContext<PentestGPTContextType>({
+  // USER STORE
+  user: null,
+
   // PROFILE STORE
   profile: null,
   setProfile: () => {},
 
-  // USER ROLE STORE
-  userRole: null,
-  setUserRole: () => {},
+  // CONTENT TYPE STORE
+  contentType: "chats",
+  setContentType: () => {},
 
   // SUBSCRIPTION STORE
   subscription: null,
   setSubscription: () => {},
+  subscriptionStatus: "free",
+  setSubscriptionStatus: () => {},
+  updateSubscription: () => {},
+  isPremiumSubscription: false,
+  teamMembers: null,
+  refreshTeamMembers: async () => {},
+  membershipData: null,
 
   // ITEMS STORE
   chats: [],
@@ -171,6 +194,8 @@ export const ChatbotUIContext = createContext<ChatbotUIContext>({
   setChatMessages: () => {},
   chatSettings: null,
   setChatSettings: () => {},
+  temporaryChatMessages: [],
+  setTemporaryChatMessages: () => {},
 
   // ACTIVE CHAT STORE
   isGenerating: false,
@@ -187,10 +212,6 @@ export const ChatbotUIContext = createContext<ChatbotUIContext>({
   setSelectedPluginType: () => {},
   selectedPlugin: PluginID.NONE,
   setSelectedPlugin: () => {},
-
-  // RAG
-  isRagEnabled: false,
-  setIsRagEnabled: () => {},
 
   // CHAT INPUT COMMAND STORE
   slashCommand: "",
@@ -231,17 +252,20 @@ export const ChatbotUIContext = createContext<ChatbotUIContext>({
   isReadyToChat: false,
   setIsReadyToChat: () => {},
 
+  // Sidebar
+  showSidebar: false,
+  setShowSidebar: () => {},
+
+  // Terminal output setting
+  showTerminalOutput: false,
+  setShowTerminalOutput: () => {},
+
   // Audio
   currentPlayingMessageId: null,
   setCurrentPlayingMessageId: () => {},
-  isMicSupported: true,
-  setIsMicSupported: () => {},
 
-  // Conversational AI
-  isConversationalAIOpen: false,
-  setIsConversationalAIOpen: () => {},
-
-  // Sidebar
-  showSidebar: false,
-  setShowSidebar: () => {}
+  // TEMPORARY CHAT STORE
+  isTemporaryChat: false
 })
+
+export const usePentestGPT = () => useContext(PentestGPTContext)

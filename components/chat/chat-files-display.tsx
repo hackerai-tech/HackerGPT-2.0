@@ -1,6 +1,4 @@
-import { ChatbotUIContext } from "@/context/context"
-import { getFileFromStorage } from "@/db/storage/files"
-import useHotkey from "@/lib/hooks/use-hotkey"
+import { PentestGPTContext } from "@/context/context"
 import { cn } from "@/lib/utils"
 import { ChatFile, MessageImage } from "@/types"
 import {
@@ -26,11 +24,7 @@ import { dragHelper } from "@/components/chat/chat-helpers/drag"
 interface ChatFilesDisplayProps {}
 
 export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
-  useHotkey("f", () => setShowFilesDisplay(prev => !prev))
-  useHotkey("e", () => setUseRetrieval(prev => !prev))
-
   const {
-    files,
     newMessageImages,
     setNewMessageImages,
     newMessageFiles,
@@ -42,7 +36,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
     setChatImages,
     setChatFiles,
     setUseRetrieval
-  } = useContext(ChatbotUIContext)
+  } = useContext(PentestGPTContext)
 
   const [selectedFile, setSelectedFile] = useState<ChatFile | null>(null)
   const [selectedImage, setSelectedImage] = useState<MessageImage | null>(null)
@@ -65,15 +59,6 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
   const onlyImages = messageImages.length > 0 && combinedChatFiles.length == 0
 
   const combinedMessageFiles = [...messageImages, ...combinedChatFiles]
-
-  const getLinkAndView = async (file: ChatFile) => {
-    const fileRecord = files.find(f => f.id === file.id)
-
-    if (!fileRecord) return
-
-    const link = await getFileFromStorage(fileRecord.file_path)
-    window.open(link, "_blank")
-  }
 
   return onlyImages || (showFilesDisplay && combinedMessageFiles.length > 0) ? (
     <>
@@ -184,7 +169,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
                 <div
                   key={file.id}
                   className="relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl border-2 px-4 py-3 hover:opacity-50"
-                  onClick={() => getLinkAndView(file)}
+                  // onClick={() => getLinkAndView(file)}
                 >
                   <div className="rounded bg-blue-500 p-2">
                     {(() => {
@@ -259,7 +244,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
 }
 
 const RetrievalToggle = ({}) => {
-  const { useRetrieval, setUseRetrieval } = useContext(ChatbotUIContext)
+  const { useRetrieval, setUseRetrieval } = useContext(PentestGPTContext)
 
   return (
     <div className="flex items-center">

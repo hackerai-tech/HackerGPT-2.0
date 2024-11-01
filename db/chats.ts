@@ -17,8 +17,28 @@ export const getChatsByWorkspaceId = async (workspaceId: string) => {
     .select("*")
     .eq("workspace_id", workspaceId)
     .order("created_at", { ascending: false })
+    .limit(25)
 
-  if (!chats) {
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return chats
+}
+
+export const getMoreChatsByWorkspaceId = async (
+  workspaceId: string,
+  lastChatCreatedAt: string
+) => {
+  const { data: chats, error } = await supabase
+    .from("chats")
+    .select("*")
+    .eq("workspace_id", workspaceId)
+    .lt("created_at", lastChatCreatedAt)
+    .order("created_at", { ascending: false })
+    .limit(25)
+
+  if (error) {
     throw new Error(error.message)
   }
 

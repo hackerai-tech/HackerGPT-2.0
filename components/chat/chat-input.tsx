@@ -1,26 +1,17 @@
-import Modal from "@/components/chat/dialog-portal"
-import { ChatbotUIContext } from "@/context/context"
+import { PentestGPTContext } from "@/context/context"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
-import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 import { cn } from "@/lib/utils"
 import { PluginID } from "@/types/plugins"
 import {
-  IconBook,
-  IconBookOff,
   IconCirclePlus,
-  IconHelp,
   IconPaperclip,
   IconPlayerStopFilled,
   IconPuzzle,
   IconPuzzleOff,
-  IconArrowUp,
-  IconLoader2,
-  IconMicrophone,
-  IconHeadphones
+  IconArrowUp
 } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
-import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Input } from "../ui/input"
 import { TextareaAutosize } from "../ui/textarea-autosize"
@@ -33,14 +24,12 @@ import { usePromptAndCommand } from "./chat-hooks/use-prompt-and-command"
 import { useSelectFileHandler } from "./chat-hooks/use-select-file-handler"
 import { EnhancedMenuPicker } from "./enhance-menu"
 import { UnsupportedFilesDialog } from "./unsupported-files-dialog"
-import useSpeechRecognition from "./chat-hooks/use-speech-recognition"
-import VoiceRecordingBar from "@/components/ui/voice-recording-bar"
-import VoiceLoadingBar from "../ui/voice-loading-bar"
 
-interface ChatInputProps {}
+interface ChatInputProps {
+  isTemporaryChat: boolean
+}
 
-export const ChatInput: FC<ChatInputProps> = ({}) => {
-  const { t } = useTranslation()
+export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
   const TOOLTIP_DELAY = 1000
 
   useHotkey("l", () => {
@@ -53,24 +42,6 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
 
   const [optionsCollapsed, setOptionsCollapsed] = useState(false)
-  const [showMobileHelp, setShowMobileHelp] = useState(false)
-
-  const useIsMobile = () => {
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 640)
-
-    useEffect(() => {
-      const handleResize = () => {
-        setIsMobile(window.innerWidth <= 640)
-      }
-
-      window.addEventListener("resize", handleResize)
-      return () => window.removeEventListener("resize", handleResize)
-    }, [])
-
-    return isMobile
-  }
-
-  const isMobile = useIsMobile()
 
   const {
     userInput,
@@ -85,12 +56,9 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     isEnhancedMenuOpen,
     setIsEnhancedMenuOpen,
     selectedPlugin,
-    isRagEnabled: isRagEnabled,
-    setIsRagEnabled: setIsRagEnabled,
-    subscription,
-    setIsConversationalAIOpen,
-    isMicSupported
-  } = useContext(ChatbotUIContext)
+    isPremiumSubscription,
+    isMobile
+  } = useContext(PentestGPTContext)
 
   const {
     chatInputRef,
@@ -99,15 +67,8 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
     handleFocusChatInput
   } = useChatHandler()
 
-  const VOICE_ASSISTANT_ENABLED =
-    process.env.NEXT_PUBLIC_VOICE_ASSISTANT_ENABLED?.toLowerCase() === "true"
-
   const handleToggleEnhancedMenu = () => {
     setIsEnhancedMenuOpen(!isEnhancedMenuOpen)
-  }
-
-  const handleToggleRAG = (e: React.MouseEvent) => {
-    setIsRagEnabled(!isRagEnabled)
   }
 
   const divRef = useRef<HTMLDivElement>(null)
@@ -145,25 +106,6 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
       setOptionsCollapsed(true)
     }
   }, [isTyping])
-
-  const handleTranscriptChange = (transcript: string) => {
-    if (transcript !== userInput) {
-      handleInputChange(transcript)
-    }
-  }
-
-  const {
-    isListening,
-    transcript,
-    setIsListening,
-    hasMicAccess,
-    startListening,
-    cancelListening,
-    isSpeechToTextLoading,
-    hasSupportedMimeType,
-    isRequestingMicAccess,
-    requestMicAccess
-  } = useSpeechRecognition(handleTranscriptChange)
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     setOptionsCollapsed(true)
@@ -222,7 +164,7 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
         className="flex flex-row items-center"
         onClick={() => fileInputRef.current?.click()}
       >
-        {subscription && (
+        {isPremiumSubscription && (
           <WithTooltip
             delayDuration={TOOLTIP_DELAY}
             side="top"
@@ -240,75 +182,35 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
           />
         )}
       </div>
-      <div
-        className="flex flex-row items-center"
-        onClick={handleToggleEnhancedMenu}
-      >
-        <WithTooltip
-          delayDuration={TOOLTIP_DELAY}
-          side="top"
-          display={
-            <div className="flex flex-col">
-              <p className="font-medium">Show/Hide Plugins Menu</p>
-            </div>
-          }
-          trigger={
-            isEnhancedMenuOpen ? (
-              <IconPuzzle
-                className="bottom-[12px] left-12 cursor-pointer p-1 hover:opacity-50"
-                size={32}
-              />
-            ) : (
-              <IconPuzzleOff
-                className="bottom-[12px] left-12 cursor-pointer p-1 opacity-50 hover:opacity-100"
-                size={32}
-              />
-            )
-          }
-        />
-      </div>
-      <div className="flex flex-row items-center" onClick={handleToggleRAG}>
-        <WithTooltip
-          delayDuration={TOOLTIP_DELAY}
-          side="top"
-          display={
-            <div className="flex flex-col">
-              <p className="font-medium">Enable/Disable Enhanced Search</p>
-              <p className="text-sm opacity-80">
-                Enhanced Search adds curated
-                <br />
-                HackerGPT knowledge to the Model
-              </p>
-            </div>
-          }
-          trigger={
-            chatSettings?.model &&
-            chatSettings?.model !== GPT4o.modelId &&
-            selectedPlugin === PluginID.NONE &&
-            (isRagEnabled ? (
-              <IconBook
-                className="bottom-[12px] cursor-pointer p-1 hover:opacity-50"
-                size={32}
-              />
-            ) : (
-              <IconBookOff
-                className="bottom-[12px] cursor-pointer p-1 opacity-50 hover:opacity-100"
-                size={32}
-              />
-            ))
-          }
-        />
-      </div>
-      {isMobile &&
-        chatSettings?.model &&
-        chatSettings?.model !== GPT4o.modelId &&
-        selectedPlugin === PluginID.NONE && (
-          <IconHelp
-            className="bottom-[12px] cursor-pointer p-1 hover:opacity-50"
-            size={32}
-            onClick={() => setShowMobileHelp(true)}
+      {!isTemporaryChat && (
+        <div
+          className="flex flex-row items-center"
+          onClick={handleToggleEnhancedMenu}
+        >
+          <WithTooltip
+            delayDuration={TOOLTIP_DELAY}
+            side="top"
+            display={
+              <div className="flex flex-col">
+                <p className="font-medium">Show/Hide Plugins Menu</p>
+              </div>
+            }
+            trigger={
+              isEnhancedMenuOpen ? (
+                <IconPuzzle
+                  className="bottom-[12px] left-12 cursor-pointer p-1 hover:opacity-50"
+                  size={32}
+                />
+              ) : (
+                <IconPuzzleOff
+                  className="bottom-[12px] left-12 cursor-pointer p-1 opacity-50 hover:opacity-100"
+                  size={32}
+                />
+              )
+            }
           />
-        )}
+        </div>
+      )}
     </>
   )
 
@@ -323,220 +225,121 @@ export const ChatInput: FC<ChatInputProps> = ({}) => {
         />
       )}
 
-      <Modal isOpen={showMobileHelp}>
-        <div className="size-screen fixed inset-0 z-50 bg-black/50 backdrop-blur-sm dark:bg-black/75"></div>
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="bg-background w-full max-w-md rounded-md p-6 text-center">
-            <h3 className="mb-4 text-lg font-semibold">Chat Input Options</h3>
-            <div className="flex flex-col text-left">
-              {subscription && (
-                <div
-                  className="flex flex-row items-center"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <div className="ml-2 flex flex-col">
-                    <span className="mb-1 flex flex-row items-center">
-                      <IconPaperclip size={32} />
-                      <span className="ml-2">Upload a file</span>
-                    </span>
-                  </div>
-                </div>
-              )}
-              <div
-                className="mt-4 flex flex-row items-center"
-                onClick={handleToggleEnhancedMenu}
-              >
-                <div className="ml-2 flex flex-col">
-                  <span className="mb-1 flex flex-row items-center">
-                    {isEnhancedMenuOpen ? (
-                      <IconPuzzle size={32} />
-                    ) : (
-                      <IconPuzzleOff size={32} />
-                    )}
-                    <span className="ml-2">Show/Hide the plugins menu</span>
-                  </span>
-                </div>
-              </div>
-              <div
-                className="mt-4 flex flex-row items-center"
-                onClick={handleToggleRAG}
-              >
-                <div className="ml-2 flex flex-col">
-                  <span className="mb-1 flex  flex-row items-center">
-                    {isRagEnabled ? (
-                      <IconBook size={32} />
-                    ) : (
-                      <IconBookOff size={32} />
-                    )}
-                    <span className="ml-2">Enable/Disable Enhanced Search</span>
-                  </span>
-                  <p className="text-sm opacity-90">
-                    The enhanced search adds curated HackerGPT knowledge to the
-                    Model improving the answers
-                  </p>
-                </div>
-              </div>
-            </div>
-            <button
-              className="mt-4 rounded-md bg-gray-300 px-4 py-2 text-black hover:bg-gray-400"
-              onClick={() => setShowMobileHelp(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </Modal>
-
       <div
         className={`flex flex-col flex-wrap justify-center ${newMessageFiles.length > 0 || newMessageImages.length > 0 ? "my-2" : ""} gap-2`}
       >
         <ChatFilesDisplay />
 
-        {isEnhancedMenuOpen && <EnhancedMenuPicker />}
+        {isEnhancedMenuOpen && !isTemporaryChat && <EnhancedMenuPicker />}
       </div>
 
-      {isListening ? (
-        <VoiceRecordingBar
-          isListening={isListening}
-          stopListening={() => setIsListening(false)}
-          cancelListening={() => {
-            setIsListening(false)
-            cancelListening()
+      <div
+        className={`bg-secondary border-input relative flex min-h-[56px] w-full items-center justify-center rounded-xl border-2 ${
+          isTemporaryChat
+            ? "bg-tertiary border-tertiary"
+            : selectedPlugin && selectedPlugin !== PluginID.NONE
+              ? "border-primary"
+              : "border-secondary"
+        } ${isEnhancedMenuOpen ? "mt-3" : ""}`}
+        ref={divRef}
+      >
+        {isPremiumSubscription && (
+          <div
+            className={`absolute left-0 w-full overflow-auto rounded-xl dark:border-none`}
+            style={{ bottom: `${bottomSpacingPx}px` }}
+          >
+            <ChatCommandInput />
+          </div>
+        )}
+
+        <Input
+          ref={fileInputRef}
+          className="hidden w-0"
+          type="file"
+          onChange={e => {
+            if (!e.target.files) return
+            handleFileUpload(
+              Array.from(e.target.files),
+              chatSettings,
+              setShowConfirmationDialog,
+              setPendingFiles,
+              handleSelectDeviceFile
+            )
           }}
+          accept={filesToAccept}
         />
-      ) : isSpeechToTextLoading ? (
-        <VoiceLoadingBar isLoading={isSpeechToTextLoading} />
-      ) : (
-        <div
-          className={`bg-secondary border-input relative flex min-h-[56px] w-full items-center justify-center rounded-xl border-2 ${selectedPlugin && selectedPlugin !== PluginID.NONE ? "border-primary" : "border-secondary"} ${isEnhancedMenuOpen ? "mt-3" : ""}`}
-          ref={divRef}
-        >
-          {subscription && (
-            <div
-              className={`absolute left-0 w-full overflow-auto rounded-xl dark:border-none`}
-              style={{ bottom: `${bottomSpacingPx}px` }}
-            >
-              <ChatCommandInput />
-            </div>
-          )}
 
-          <div className="ml-3 flex flex-row">
-            <Input
-              ref={fileInputRef}
-              className="hidden w-0"
-              type="file"
-              onChange={e => {
-                if (!e.target.files) return
-                handleFileUpload(
-                  Array.from(e.target.files),
-                  chatSettings,
-                  setShowConfirmationDialog,
-                  setPendingFiles,
-                  handleSelectDeviceFile
-                )
-              }}
-              accept={filesToAccept}
+        {isMobile && isPremiumSubscription && optionsCollapsed ? (
+          <div className="absolute bottom-[10px] left-3 flex flex-row">
+            <IconCirclePlus
+              className="cursor-pointer p-1 hover:opacity-50"
+              onClick={() => setOptionsCollapsed(false)}
+              size={34}
             />
-
-            {isMobile && optionsCollapsed && (
-              <div className="flex flex-row items-center">
-                <IconCirclePlus
-                  className="cursor-pointer p-1 hover:opacity-50"
-                  onClick={() => setOptionsCollapsed(false)}
-                  size={34}
-                />
-              </div>
-            )}
-
-            {(!isMobile || !optionsCollapsed) && <ToolOptions />}
           </div>
+        ) : (
+          <div className="absolute bottom-[10px] left-3 flex flex-row">
+            <ToolOptions />
+          </div>
+        )}
 
-          <TextareaAutosize
-            textareaRef={chatInputRef}
-            className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 pl-4 ${
-              isMicSupported &&
-              hasSupportedMimeType &&
-              !userInput &&
-              !isGenerating
-                ? "pr-20"
-                : "pr-14"
-            } focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
-            placeholder={
-              isMobile
-                ? t(`Message`) +
-                  (!subscription ? "" : t(`. Type "#" for files.`))
-                : t(`Message HackerGPT`) +
-                  (!subscription ? "" : t(`. Type "#" for files.`))
-            }
-            onValueChange={handleInputChange} // This function updates the userInput state
-            value={userInput} // This state should display the transcribed text
-            minRows={1}
-            maxRows={isMobile ? 6 : 12}
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
-            onCompositionStart={() => setIsTyping(true)}
-            onCompositionEnd={() => setIsTyping(false)}
-            onClick={() => setOptionsCollapsed(true)}
-          />
+        <TextareaAutosize
+          textareaRef={chatInputRef}
+          className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 ${
+            isMobile && isPremiumSubscription && optionsCollapsed
+              ? "pl-12" // Mobile collapsed
+              : isPremiumSubscription
+                ? "pl-[84px]" // Premium expanded
+                : "pl-12" // Free plan (no file upload)
+          } pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+            isTemporaryChat ? "bg-tertiary" : ""
+          }`}
+          placeholder={
+            isMobile
+              ? `Message` +
+                (!isPremiumSubscription
+                  ? " PentestGPT"
+                  : `. Type "#" for files.`)
+              : `Message PentestGPT` +
+                (!isPremiumSubscription ? "" : `. Type "#" for files.`)
+          }
+          onValueChange={handleInputChange} // This function updates the userInput state
+          value={userInput} // This state should display the transcribed text
+          minRows={1}
+          maxRows={isMobile ? 6 : 12}
+          onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
+          onCompositionStart={() => setIsTyping(true)}
+          onCompositionEnd={() => setIsTyping(false)}
+          onClick={() => setOptionsCollapsed(true)}
+        />
 
-          <div className="absolute bottom-[10px] right-3 flex cursor-pointer items-center space-x-2">
-            {isMicSupported &&
-              hasSupportedMimeType &&
-              !userInput &&
-              !isGenerating && (
-                <>
-                  {isRequestingMicAccess ? (
-                    <IconLoader2
-                      className="animate-spin cursor-pointer p-1 hover:opacity-50"
-                      size={30}
-                    />
-                  ) : (
-                    <IconMicrophone
-                      className="cursor-pointer p-1 hover:opacity-50"
-                      onClick={hasMicAccess ? startListening : requestMicAccess}
-                      size={30}
-                    />
-                  )}
-                </>
+        <div className="absolute bottom-[10px] right-3 flex cursor-pointer items-center space-x-2">
+          {isGenerating ? (
+            <IconPlayerStopFilled
+              className={cn(
+                "md:hover:bg-background animate-pulse rounded bg-transparent p-1 md:hover:opacity-50"
               )}
-            {isGenerating ? (
-              <IconPlayerStopFilled
-                className={cn(
-                  "md:hover:bg-background animate-pulse rounded bg-transparent p-1 md:hover:opacity-50"
-                )}
-                onClick={handleStopMessage}
-                size={30}
-              />
-            ) : userInput ||
-              !isMicSupported ||
-              !subscription ||
-              !VOICE_ASSISTANT_ENABLED ? (
-              <IconArrowUp
-                className={cn(
-                  "bg-primary text-secondary rounded p-1 hover:opacity-50",
-                  !userInput && "cursor-not-allowed opacity-50"
-                )}
-                stroke={2.5}
-                onClick={() => {
-                  if (isTyping) setOptionsCollapsed(true)
-                  if (!userInput) return
-                  handleSendMessage(userInput, chatMessages, false)
-                }}
-                size={30}
-              />
-            ) : (
-              subscription &&
-              VOICE_ASSISTANT_ENABLED && (
-                <IconHeadphones
-                  className="bg-primary text-secondary rounded p-1 hover:opacity-50"
-                  onClick={() => setIsConversationalAIOpen(true)}
-                  size={30}
-                />
-              )
-            )}
-          </div>
+              onClick={handleStopMessage}
+              size={30}
+            />
+          ) : (
+            <IconArrowUp
+              className={cn(
+                "bg-primary text-secondary rounded p-1 hover:opacity-50",
+                !userInput && "cursor-not-allowed opacity-50"
+              )}
+              stroke={2.5}
+              onClick={() => {
+                if (isTyping) setOptionsCollapsed(true)
+                if (!userInput) return
+                handleSendMessage(userInput, chatMessages, false)
+              }}
+              size={30}
+            />
+          )}
         </div>
-      )}
+      </div>
     </>
   )
 }

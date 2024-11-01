@@ -1,55 +1,50 @@
-import { ChatbotUIContext } from "@/context/context"
-import { CHAT_SETTING_LIMITS } from "@/lib/chat-setting-limits"
-import useHotkey from "@/lib/hooks/use-hotkey"
+import { PentestGPTContext } from "@/context/context"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { IconChevronDown } from "@tabler/icons-react"
-import { FC, useContext, useEffect, useRef } from "react"
+import { FC, useContext, useEffect, useRef, useState } from "react"
 import { Button } from "../ui/button"
-import { ChatSettingsForm } from "../ui/chat-settings-form"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
+import { ModelSelect } from "../models/model-select"
 
 interface ChatSettingsProps {}
 
 export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
-  useHotkey("i", () => handleClick())
+  const {
+    chatSettings,
+    setChatSettings,
+    isMobile,
+    profile,
+    isPremiumSubscription
+  } = useContext(PentestGPTContext)
 
-  const { chatSettings, setChatSettings, isMobile } =
-    useContext(ChatbotUIContext)
+  const [isOpen, setIsOpen] = useState(false)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
-
-  const handleClick = () => {
-    if (buttonRef.current) {
-      buttonRef.current.click()
-    }
-  }
 
   useEffect(() => {
     if (!chatSettings) return
 
     setChatSettings({
-      ...chatSettings,
-      contextLength: Math.min(
-        chatSettings.contextLength,
-        CHAT_SETTING_LIMITS[chatSettings.model]?.MAX_CONTEXT_LENGTH || 4096
-      )
+      ...chatSettings
     })
   }, [chatSettings?.model])
 
-  if (!chatSettings) return null
+  if (!chatSettings || !profile) return null
 
   const fullModel = LLM_LIST.find(llm => llm.modelId === chatSettings.model)
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger>
         <Button
           ref={buttonRef}
-          className="flex items-center space-x-1"
+          className={`flex items-center space-x-1 ${isOpen ? "bg-accent" : ""}`}
           variant="ghost"
         >
           <div className="text-xl">
-            {fullModel?.modelName || chatSettings.model}
+            {!isPremiumSubscription
+              ? "PentestGPT"
+              : fullModel?.modelName || chatSettings.model}
           </div>
 
           <IconChevronDown className="ml-1 mt-1" size={18} />
@@ -57,12 +52,14 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
       </PopoverTrigger>
 
       <PopoverContent
-        className="bg-background border-input relative flex max-h-[calc(100vh-60px)] w-[300px] flex-col space-y-4 overflow-auto rounded-lg border-2 p-3 dark:border-none"
+        className="bg-secondary relative mt-1 flex max-h-[calc(100vh-120px)] w-full min-w-[340px] max-w-xs flex-col overflow-hidden p-0"
         align={isMobile ? "center" : "start"}
       >
-        <ChatSettingsForm
-          chatSettings={chatSettings}
-          onChangeChatSettings={setChatSettings}
+        <ModelSelect
+          selectedModelId={chatSettings.model}
+          onSelectModel={model => {
+            setChatSettings({ ...chatSettings, model })
+          }}
         />
       </PopoverContent>
     </Popover>

@@ -10,7 +10,7 @@ import Modal from "../chat/dialog-portal"
 import { Button } from "../ui/button"
 import { MessageMarkdown } from "./message-markdown"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
-import { ChatbotUIContext } from "@/context/context"
+import { PentestGPTContext } from "@/context/context"
 
 interface MessagePluginFileProps {
   autoDownloadEnabled: boolean
@@ -45,7 +45,7 @@ export const MessagePluginFile: FC<MessagePluginFileProps> = ({
 }) => {
   const [showModal, setShowModal] = useState(false)
   const { handleSelectDeviceFile } = useSelectFileHandler()
-  const { subscription } = useContext(ChatbotUIContext)
+  const { isPremiumSubscription } = useContext(PentestGPTContext)
 
   const handleViewContent = () => {
     setShowModal(true)
@@ -125,7 +125,7 @@ export const MessagePluginFile: FC<MessagePluginFileProps> = ({
                 </span>
               </div>
             </Button>
-            {subscription && (
+            {isPremiumSubscription && (
               <Button
                 variant="outline"
                 className="text-primary bg-primary-foreground hover:bg-muted px-2 py-1 text-sm md:px-4 md:py-2 md:text-base"
@@ -150,7 +150,7 @@ export const MessagePluginFile: FC<MessagePluginFileProps> = ({
         )}
       </div>
       <Modal isOpen={showModal}>
-        <div className="size-screen fixed inset-0 z-50 bg-black/50 backdrop-blur-sm dark:bg-black/75"></div>
+        <div className="size-screen fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm dark:bg-opacity-75"></div>
         <div
           className="fixed inset-0 z-50 flex size-full items-center justify-center"
           onClick={handleCloseModal}

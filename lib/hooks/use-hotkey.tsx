@@ -1,9 +1,23 @@
 import { useEffect } from "react"
 
-const useHotkey = (key: string, callback: () => void): void => {
+const useHotkey = (
+  key: string,
+  callback: () => void,
+  options: { ctrlKey?: boolean; shiftKey?: boolean } = {
+    ctrlKey: true,
+    shiftKey: true
+  }
+): void => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.metaKey && event.shiftKey && event.key === key) {
+      const isMac = /macintosh|mac os x/i.test(navigator.userAgent)
+      const modifierKey = isMac ? event.metaKey : event.ctrlKey
+
+      if (
+        modifierKey &&
+        (options.shiftKey ? event.shiftKey : true) &&
+        event.key.toLowerCase() === key.toLowerCase()
+      ) {
         event.preventDefault()
         callback()
       }
@@ -14,7 +28,7 @@ const useHotkey = (key: string, callback: () => void): void => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown)
     }
-  }, [key, callback])
+  }, [key, callback, options.ctrlKey, options.shiftKey])
 }
 
 export default useHotkey

@@ -1,5 +1,5 @@
 import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
-import { ChatbotUIContext } from "@/context/context"
+import { PentestGPTContext } from "@/context/context"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { cn } from "@/lib/utils"
 import { Tables } from "@/supabase/types"
@@ -13,8 +13,10 @@ import {
   IconFileFilled,
   IconFileText,
   IconFileTypePdf,
-  IconCode,
-  IconDatabaseSearch
+  IconDatabaseSearch,
+  // IconCode,
+  IconTerminal2
+  // IconPhoto
 } from "@tabler/icons-react"
 import Image from "next/image"
 import { FC, useContext, useEffect, useRef, useState } from "react"
@@ -26,6 +28,9 @@ import { MessageActions } from "./message-actions"
 import MessageDetailedFeedback from "./message-detailed-feedback"
 import { MessageQuickFeedback } from "./message-quick-feedback"
 import { MessageTypeResolver } from "./message-type-solver"
+import { PluginID } from "@/types/plugins"
+import useHotkey from "@/lib/hooks/use-hotkey"
+import { toast } from "sonner"
 
 const ICON_SIZE = 28
 
@@ -61,16 +66,22 @@ export const Message: FC<MessageProps> = ({
   onSendFeedback
 }) => {
   const {
-    profile,
     isGenerating,
     setIsGenerating,
     firstTokenReceived,
     chatMessages,
+    temporaryChatMessages,
+    isTemporaryChat,
     chatImages,
     toolInUse,
     files,
-    isMobile
-  } = useContext(ChatbotUIContext)
+    isMobile,
+    showSidebar
+  } = useContext(PentestGPTContext)
+
+  const messagesToDisplay = isTemporaryChat
+    ? temporaryChatMessages
+    : chatMessages
 
   const { handleSendMessage } = useChatHandler()
 
@@ -111,6 +122,15 @@ export const Message: FC<MessageProps> = ({
     }
   }
 
+  useHotkey("c", () => {
+    if (isLast && message.role === "assistant") {
+      handleCopy()
+      toast.success("Last response copied to clipboard", {
+        duration: 3000
+      })
+    }
+  })
+
   const handleSendEdit = () => {
     onSubmitEdit(editedMessage, message.sequence_number)
     onCancelEdit()
@@ -125,8 +145,9 @@ export const Message: FC<MessageProps> = ({
   const handleRegenerate = async () => {
     setIsGenerating(true)
     await handleSendMessage(
-      editedMessage || chatMessages[chatMessages.length - 2].message.content,
-      chatMessages,
+      editedMessage ||
+        messagesToDisplay[messagesToDisplay.length - 2].message.content,
+      messagesToDisplay,
       true
     )
   }
@@ -135,8 +156,9 @@ export const Message: FC<MessageProps> = ({
     setIsGenerating(true)
 
     await handleSendMessage(
-      editedMessage || chatMessages[chatMessages.length - 2].message.content,
-      chatMessages,
+      editedMessage ||
+        messagesToDisplay[messagesToDisplay.length - 2].message.content,
+      messagesToDisplay,
       true,
       false,
       undefined,
@@ -207,125 +229,148 @@ export const Message: FC<MessageProps> = ({
       onKeyDown={handleKeyDown}
     >
       <div
-        className={`relative flex w-full flex-col px-8 py-6 sm:w-[550px] sm:px-0 md:w-[650px] lg:w-[650px] xl:w-[700px] ${
-          isLast ? "mb-8" : ""
-        }`}
+        className={`relative flex w-full flex-col px-8 py-6 sm:w-[550px] sm:px-0 md:w-[650px] xl:w-[800px] 
+        ${showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"}
+        ${isLast ? "mb-8" : ""}`}
       >
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3">
-            {message.role === "assistant" && (
+        <div className="flex space-x-3">
+          {message.role === "assistant" && !isMobile && (
+            <div className="shrink-0">
               <ModelIcon
                 modelId={modelDetails?.modelId || "custom"}
                 height={ICON_SIZE}
                 width={ICON_SIZE}
               />
-            )}
-
-            <div className="font-semibold">
-              {message.role === "assistant" && MODEL_DATA?.modelName}
-            </div>
-          </div>
-
-          {!firstTokenReceived &&
-          isGenerating &&
-          isLast &&
-          message.role === "assistant" ? (
-            <>
-              {(() => {
-                switch (toolInUse) {
-                  case "none":
-                    return (
-                      <IconCircleFilled className="animate-pulse" size={20} />
-                    )
-                  case "retrieval":
-                    return (
-                      <div className="flex animate-pulse items-center space-x-2">
-                        <IconFileText size={20} />
-
-                        <div>Searching files...</div>
-                      </div>
-                    )
-                  case "websearch":
-                    return (
-                      <div className="flex animate-pulse items-center space-x-2">
-                        <IconWorld size={20} />
-
-                        <div>Searching the web...</div>
-                      </div>
-                    )
-                  case "Enhanced Search":
-                    return (
-                      <div className="flex animate-pulse items-center space-x-2">
-                        <IconDatabaseSearch size={20} />
-
-                        <div>Using Enhanced Search...</div>
-                      </div>
-                    )
-                  default:
-                    return (
-                      <div className="flex animate-pulse items-center space-x-2">
-                        <IconPuzzle size={20} />
-
-                        <div>Using {toolInUse}...</div>
-                      </div>
-                    )
-                }
-              })()}
-            </>
-          ) : isEditing ? (
-            <TextareaAutosize
-              textareaRef={editInputRef}
-              className="text-md"
-              value={editedMessage}
-              onValueChange={setEditedMessage}
-              maxRows={isMobile ? 6 : 12}
-            />
-          ) : (
-            <div>
-              <div className="mb-2 flex flex-wrap justify-end gap-2">
-                {message.image_paths.map((path, index) => {
-                  const item = chatImages.find(image => image.path === path)
-
-                  return (
-                    <Image
-                      key={index}
-                      className="cursor-pointer rounded hover:opacity-50"
-                      src={path.startsWith("data") ? path : item?.base64}
-                      alt="message image"
-                      width={300}
-                      height={300}
-                      onClick={() => {
-                        setSelectedImage({
-                          messageId: message.id,
-                          path,
-                          base64: path.startsWith("data")
-                            ? path
-                            : item?.base64 || "",
-                          url: path.startsWith("data") ? "" : item?.url || "",
-                          file: null
-                        })
-
-                        setShowImagePreview(true)
-                      }}
-                      loading="lazy"
-                    />
-                  )
-                })}
-              </div>
-              <div
-                className={`${message.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div>
-                  <MessageTypeResolver
-                    previousMessage={previousMessage}
-                    message={message}
-                    messageSizeLimit={messageSizeLimit}
-                    isLastMessage={isLast}
-                  />
-                </div>
-              </div>
             </div>
           )}
+          <div
+            className={`grow ${isMobile && "space-y-3"} min-w-0 ${message.role === "user" ? "flex justify-end" : ""}`}
+          >
+            <div className="flex items-center">
+              {message.role === "assistant" && isMobile && (
+                <ModelIcon
+                  modelId={modelDetails?.modelId || "custom"}
+                  height={ICON_SIZE}
+                  width={ICON_SIZE}
+                />
+              )}
+              {isMobile && (
+                <div className="ml-2 font-semibold">
+                  {message.role === "assistant" && MODEL_DATA?.shortModelName}
+                </div>
+              )}
+            </div>
+
+            {!firstTokenReceived &&
+            isGenerating &&
+            isLast &&
+            message.role === "assistant" ? (
+              <>
+                {(() => {
+                  switch (toolInUse) {
+                    case "none":
+                      return (
+                        <IconCircleFilled className="animate-pulse" size={20} />
+                      )
+                    case "retrieval":
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <IconFileText size={20} />
+
+                          <div>Searching files...</div>
+                        </div>
+                      )
+                    case PluginID.WEB_SEARCH:
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <IconWorld size={20} />
+
+                          <div>Searching the web...</div>
+                        </div>
+                      )
+                    case PluginID.BROWSER:
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <IconWorld size={20} />
+
+                          <div>Browsing the web...</div>
+                        </div>
+                      )
+                    case PluginID.TERMINAL:
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <IconTerminal2 size={20} />
+                          <div>Using Terminal...</div>
+                        </div>
+                      )
+                    case PluginID.REASON_LLM:
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <div>Thinking with OpenAI o1...</div>
+                        </div>
+                      )
+                    default:
+                      return (
+                        <div className="flex animate-pulse items-center space-x-2">
+                          <IconPuzzle size={20} />
+
+                          <div>Using {toolInUse}...</div>
+                        </div>
+                      )
+                  }
+                })()}
+              </>
+            ) : isEditing ? (
+              <TextareaAutosize
+                textareaRef={editInputRef}
+                className="text-md"
+                value={editedMessage}
+                onValueChange={setEditedMessage}
+                maxRows={isMobile ? 6 : 12}
+              />
+            ) : (
+              <div>
+                <div
+                  className={`flex flex-wrap ${message.role === "user" ? "justify-end" : "justify-start"} gap-2`}
+                >
+                  {message.image_paths.map((path, index) => {
+                    const item = chatImages.find(image => image.path === path)
+                    const src = path.startsWith("data") ? path : item?.base64
+                    if (!src) return null
+                    return (
+                      <Image
+                        key={index}
+                        className="mb-2 cursor-pointer rounded hover:opacity-50"
+                        src={src}
+                        alt="message image"
+                        width={400}
+                        height={400}
+                        onClick={() => {
+                          setSelectedImage({
+                            messageId: message.id,
+                            path,
+                            base64: src,
+                            url: path.startsWith("data") ? "" : item?.url || "",
+                            file: null
+                          })
+
+                          setShowImagePreview(true)
+                        }}
+                        loading="lazy"
+                      />
+                    )
+                  })}
+                </div>
+                <MessageTypeResolver
+                  previousMessage={previousMessage}
+                  message={message}
+                  messageSizeLimit={messageSizeLimit}
+                  isLastMessage={isLast}
+                  toolInUse={toolInUse}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {fileItems.length > 0 && (
@@ -396,8 +441,8 @@ export const Message: FC<MessageProps> = ({
         <div className="mt-3 flex flex-wrap gap-2"></div>
 
         {isEditing && (
-          <div className="mt-4 flex justify-center space-x-2">
-            <Button size="sm" variant="outline" onClick={onCancelEdit}>
+          <div className="mt-2 flex justify-end space-x-2">
+            <Button size="sm" variant="secondary" onClick={onCancelEdit}>
               Cancel
             </Button>
             <Button size="sm" onClick={handleSendEdit}>
@@ -408,7 +453,7 @@ export const Message: FC<MessageProps> = ({
 
         {!quickFeedback && !sendReportQuery && !isEditing && (
           <div
-            className={`absolute bottom-1 ${message.role === "user" ? "right-10 sm:right-0" : "left-5 sm:left-0"}`}
+            className={`absolute bottom-1 ${message.role === "user" ? "right-10 sm:right-0" : "left-5 sm:left-10"}`}
           >
             <MessageActions
               onCopy={handleCopy}
@@ -424,7 +469,7 @@ export const Message: FC<MessageProps> = ({
               onRegenerateSpecificModel={handleRegenerateSpecificModel}
               onGoodResponse={handleGoodResponse}
               onBadResponse={handleBadResponse}
-              messageContent={message.content}
+              messageContent={message.content || ""}
               messageModel={message.model}
               messageSequenceNumber={message.sequence_number}
             />

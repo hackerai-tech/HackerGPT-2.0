@@ -1,15 +1,17 @@
-import endent from "endent"
 import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
+import { createOpenAI } from "@ai-sdk/openai"
+import { generateText } from "ai"
+import endent from "endent"
 
 export async function generateStandaloneQuestion(
   messages: any[],
   latestUserMessage: any,
-  openRouterUrl: string | URL | Request,
-  openRouterHeaders: any,
-  selectedStandaloneQuestionModel: string | undefined,
   systemMessageContent: string,
   generateAtomicQuestions: boolean = false,
-  numAtomicQuestions: number = 4
+  numAtomicQuestions: number = 4,
+  openRouterBaseUrl: string | undefined,
+  openRouterHeaders: any,
+  selectedStandaloneQuestionModel: string | undefined
 ) {
   filterEmptyAssistantMessages(messages)
 
@@ -24,7 +26,7 @@ export async function generateStandaloneQuestion(
 
   if (generateAtomicQuestions) {
     template = endent`
-      Your are HackerGPT is an expert in hacking, particularly in the areas of bug bounty, hacking, penetration testing. You are having a conversation with an user and you want to enrich your answer with some expert knowledge.
+      Your are PentestGPT is an expert in hacking, particularly in the areas of bug bounty, hacking, penetration testing. You are having a conversation with an user and you want to enrich your answer with some expert knowledge.
       Objective 1: Craft a standalone question for a specialist who is unfamiliar with the conversation, based on the given follow-up question and chat history. The question should:
     
       1. Emphasize relevant keywords
@@ -50,41 +52,27 @@ export async function generateStandaloneQuestion(
       </Atomic Questions>`
   }
 
-  const firstMessage = { role: "system", content: `${systemMessageContent}` }
-
   try {
-    const requestBody = {
-      model: selectedStandaloneQuestionModel,
-      route: "fallback",
-      messages: [
-        { role: firstMessage.role, content: firstMessage.content },
-        { role: "user", content: template }
-      ],
-      temperature: 1.0,
-      max_tokens: 512
-    }
-
-    const res = await fetch(openRouterUrl, {
-      method: "POST",
+    const openrouter = createOpenAI({
+      baseURL: openRouterBaseUrl,
       headers: {
         ...openRouterHeaders,
-        "HTTP-Referer": "https://hackergpt.com/question-generator",
+        "HTTP-Referer": "https://pentestgpt.com/question-generator",
         "X-Title": "question-generator"
-      },
-      body: JSON.stringify(requestBody)
+      }
     })
 
-    if (!res.ok) {
-      const errorBody = await res.text()
-      console.error("Error Response Body:", errorBody)
-      throw new Error(
-        `HTTP error! status: ${res.status}. Error Body: ${errorBody}`
-      )
-    }
+    const result = await generateText({
+      model: openrouter(`${selectedStandaloneQuestionModel}`),
+      temperature: 0.5,
+      maxTokens: 1024,
+      messages: [
+        { role: "system", content: systemMessageContent },
+        { role: "user", content: template }
+      ]
+    })
 
-    const data = await res.json()
-
-    const returnText = data.choices?.[0]?.message?.content?.trim()
+    const returnText = result.text
 
     let standaloneQuestion = ""
     let atomicQuestions: string[] = []

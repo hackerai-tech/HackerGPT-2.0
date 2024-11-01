@@ -1,5 +1,10 @@
-const KnowledgeCutOFFOpenAI = "Knowledge cutoff: 2023-10"
-const KnowledgeCutOFFMeta = "Knowledge cutoff: 2023-12"
+import { getTerminalResultInstructions } from "@/lib/tools/tool-store/prompts/system-prompt"
+import {
+  getPentestGPTInfo,
+  systemPromptEnding,
+  getPentestGPTToolsInfo
+} from "./llm-prompting"
+
 const options: Intl.DateTimeFormatOptions = {
   year: "numeric",
   month: "long",
@@ -7,44 +12,57 @@ const options: Intl.DateTimeFormatOptions = {
 }
 const currentDate = `Current date: ${new Date().toLocaleDateString("en-US", options)}`
 
+const initialSystemPrompt = `${process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT}`
+const openaiInitialSystemPrompt = `${process.env.SECRET_OPENAI_SYSTEM_PROMPT}`
+
 const llmConfig = {
   openrouter: {
+    baseUrl: "https://openrouter.ai/api/v1",
     url: `https://openrouter.ai/api/v1/chat/completions`,
-    providerRouting: {
-      order: [`${process.env.OPENROUTER_FIRST_PROVIDER}`]
-    },
     apiKey: process.env.OPENROUTER_API_KEY
   },
-  together: {
-    url: `https://api.together.xyz/v1/chat/completions`,
-    apiKey: process.env.TOGETHER_API_KEY
+  fireworks: {
+    baseUrl: "https://api.fireworks.ai/inference/v1",
+    apiKey: process.env.FIREWORKS_API_KEY
   },
   openai: {
+    baseUrl: "https://api.openai.com/v1",
     url: "https://api.openai.com/v1/chat/completions",
     apiKey: process.env.OPENAI_API_KEY
   },
   systemPrompts: {
-    hackerGPT: `${process.env.SECRET_HACKERGPT_SYSTEM_PROMPT}\n${KnowledgeCutOFFMeta}\n${currentDate}`,
-    hackerGPTCurrentDateOnly: `${process.env.SECRET_HACKERGPT_SYSTEM_PROMPT}\n${currentDate}`,
-    openai: `${process.env.SECRET_OPENAI_SYSTEM_PROMPT}\n${KnowledgeCutOFFOpenAI}\n${currentDate}`,
-    openaiCurrentDateOnly: `${process.env.SECRET_OPENAI_SYSTEM_PROMPT}\n${currentDate}`,
-    RAG: `${process.env.SECRET_HACKERGPT_SYSTEM_PROMPT} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`
+    // For question generator
+    pentestgptCurrentDateOnly: `${initialSystemPrompt}\n${currentDate}`,
+    // For transforming user query into tool command
+    openaiCurrentDateOnly: `${openaiInitialSystemPrompt}\n${currentDate}`,
+    // For Hacker RAG
+    RAG: `${initialSystemPrompt} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
+    // For PGPT
+    pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${systemPromptEnding}`,
+    // For PGPT-Small
+    pgptSmall: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-Small")}\n${systemPromptEnding}`,
+    // For PGPT-Large
+    pgptLarge: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-Large")}\n${getPentestGPTToolsInfo(true, true, false, false)}\n${systemPromptEnding}`,
+    // For GPT-4o
+    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true)}\n${systemPromptEnding}`,
+    // For browser tool
+    pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${systemPromptEnding}`,
+    // For webSearch tool
+    pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`,
+    // For terminal tool
+    pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, false, "GPT-4o")}\n\n${getPentestGPTToolsInfo(false, false, true, false)}\n${getTerminalResultInstructions()}\n${systemPromptEnding}`
   },
   models: {
-    hackerGPT_default_openrouter:
-      process.env.OPENROUTER_HACKERGPT_DEFUALT_MODEL,
-    hackerGPT_default_together: process.env.TOGETHER_HACKERGPT_DEFAULT_MODEL,
-    hackerGPT_RAG_openrouter: process.env.OPENROUTER_HACKERGPT_RAG_MODEL,
-    hackerGPT_RAG_together: process.env.TOGETHER_HACKERGPT_RAG_MODEL,
-    hackerGPT_standalone_question_openrouter:
+    // OpenRouter
+    pentestgpt_default_openrouter:
+      process.env.OPENROUTER_PENTESTGPT_DEFAULT_MODEL,
+    pentestgpt_standalone_question_openrouter:
       process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
-    hackerGPT_standalone_question_together:
-      process.env.TOGETHER_STANDALONE_QUESTION_MODEL,
-    hackerGPT_pro_openrouter: process.env.OPENROUTER_HACKERGPT_PRO_MODEL,
-    hackerGPT_pro_together: process.env.TOGETHER_HACKERGPT_PRO_MODEL
+    pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL,
+    // Fireworks AI
+    pentestgpt_small_fireworks: process.env.FIREWORKS_PENTESTGPT_DEFAULT_MODEL,
+    pentestgpt_large_fireworks: process.env.FIREWORKS_PENTESTGPT_PRO_MODEL
   },
-  useOpenRouter:
-    (process.env.USE_OPENROUTER?.toLowerCase() || "true") === "true",
   hackerRAG: {
     enabled:
       (process.env.HACKER_RAG_ENABLED?.toLowerCase() || "false") === "true",

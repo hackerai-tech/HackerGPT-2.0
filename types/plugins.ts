@@ -7,7 +7,6 @@ export interface ChatStarter {
 export interface PluginSummary {
   id: number
   name: string
-  selectorName: string
   categories: string[]
   value: PluginID
   icon?: string
@@ -26,22 +25,27 @@ export interface Plugin {
 
 export enum PluginID {
   NONE = "none",
-  CVEMAP = "cvemap",
-  NUCLEI = "nuclei",
-  SUBFINDER = "subfinder",
-  KATANA = "katana",
-  HTTPX = "httpx",
-  GAU = "gau",
-  ALTERX = "alterx",
-  DNSX = "dnsx",
-  WEB_SEARCH = "websearch",
-  ENHANCED_SEARCH = "enhancedsearch",
+  ENHANCED_SEARCH = "enhanced-search",
   PLUGINS_STORE = "pluginselector",
   // Tools
-  PORTSCANNER = "portscanner",
-  LINKFINDER = "linkfinder",
-  SSLSCANNER = "sslscanner",
-  SQLIEXPLOITER = "sqliexploiter"
+  WEB_SEARCH = "websearch",
+  BROWSER = "browser",
+  TERMINAL = "terminal",
+  REASON_LLM = "reason-llm",
+
+  // Pentest tools
+  SSL_SCANNER = "ssl-scanner",
+  DNS_SCANNER = "dns-scanner",
+  PORT_SCANNER = "port-scanner",
+  WAF_DETECTOR = "waf-detector",
+  WHOIS_LOOKUP = "whois-lookup",
+  SUBDOMAIN_FINDER = "subdomain-finder",
+  CVE_MAP = "cve-map",
+  URL_FUZZER = "url-fuzzer",
+  WORDPRESS_SCANNER = "wordpress-scanner",
+  // Exploit Tools
+  SQLI_EXPLOITER = "sqli-exploiter",
+  XSS_EXPLOITER = "xss-exploiter"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -53,18 +57,18 @@ export const PluginList = Object.values(Plugins)
 type PluginUrls = Record<string, string>
 
 export const pluginUrls: PluginUrls = {
-  HACKERGPT: "https://github.com/Hacker-GPT/HackerGPT-2.0",
-  CVEMAP: "https://github.com/projectdiscovery/cvemap",
-  SUBFINDER: "https://github.com/projectdiscovery/subfinder",
-  NUCLEI: "https://github.com/projectdiscovery/nuclei",
-  KATANA: "https://github.com/projectdiscovery/katana",
-  HTTPX: "https://github.com/projectdiscovery/httpx",
-  GAU: "https://github.com/lc/gau",
-  ALTERX: "https://github.com/projectdiscovery/alterx",
-  DNSX: "https://github.com/projectdiscovery/dnsx",
-  // Tools
-  PORTSCANNER: "https://github.com/projectdiscovery/naabu",
-  LINKFINDER: "https://github.com/0xsha/GoLinkFinder",
-  SSLSCANNER: "https://github.com/drwetter/testssl.sh/",
-  SQLIEXPLOITER: "https://github.com/sqlmapproject/sqlmap"
+  PENTESTGPT: "https://github.com/hackerai-tech/PentestGPT",
+  // Pentest tools
+  SSL_SCANNER: "https://github.com/drwetter/testssl.sh/",
+  DNS_SCANNER: "https://github.com/darkoperator/dnsrecon",
+  PORT_SCANNER: "https://github.com/projectdiscovery/naabu",
+  WAF_DETECTOR: "https://github.com/EnableSecurity/wafw00f",
+  WHOIS_LOOKUP: "https://www.whois.com/whois/",
+  SUBDOMAIN_FINDER: "https://github.com/projectdiscovery/subfinder",
+  CVE_MAP: "https://github.com/projectdiscovery/cvemap",
+  URL_FUZZER: "https://github.com/ffuf/ffuf",
+  WORDPRESS_SCANNER: "https://github.com/wpscanteam/wpscan",
+  // Exploit Tools
+  SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap",
+  XSS_EXPLOITER: "https://github.com/hahwul/dalfox"
 }

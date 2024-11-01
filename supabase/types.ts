@@ -82,45 +82,45 @@ export interface Database {
       }
       chats: {
         Row: {
-          context_length: number
           created_at: string
-          embeddings_provider: string
           finish_reason: string | null
-          folder_id: string | null
           id: string
           include_profile_context: boolean
+          last_shared_message_id: string | null
           model: string
           name: string
+          shared_at: string | null
+          shared_by: string | null
           sharing: string
           updated_at: string | null
           user_id: string
           workspace_id: string
         }
         Insert: {
-          context_length: number
           created_at?: string
-          embeddings_provider: string
           finish_reason?: string | null
-          folder_id?: string | null
           id?: string
           include_profile_context: boolean
+          last_shared_message_id?: string | null
           model: string
           name: string
+          shared_at?: string | null
+          shared_by?: string | null
           sharing?: string
           updated_at?: string | null
           user_id: string
           workspace_id: string
         }
         Update: {
-          context_length?: number
           created_at?: string
-          embeddings_provider?: string
           finish_reason?: string | null
-          folder_id?: string | null
           id?: string
           include_profile_context?: boolean
+          last_shared_message_id?: string | null
           model?: string
           name?: string
+          shared_at?: string | null
+          shared_by?: string | null
           sharing?: string
           updated_at?: string | null
           user_id?: string
@@ -128,10 +128,17 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "chats_folder_id_fkey"
-            columns: ["folder_id"]
+            foreignKeyName: "chats_last_shared_message_id_fkey"
+            columns: ["last_shared_message_id"]
+            isOneToOne: true
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_shared_by_fkey"
+            columns: ["shared_by"]
             isOneToOne: false
-            referencedRelation: "folders"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
@@ -376,7 +383,6 @@ export interface Database {
           created_at: string
           description: string
           file_path: string
-          folder_id: string | null
           id: string
           name: string
           sharing: string
@@ -390,7 +396,6 @@ export interface Database {
           created_at?: string
           description: string
           file_path: string
-          folder_id?: string | null
           id?: string
           name: string
           sharing?: string
@@ -404,7 +409,6 @@ export interface Database {
           created_at?: string
           description?: string
           file_path?: string
-          folder_id?: string | null
           id?: string
           name?: string
           sharing?: string
@@ -416,65 +420,10 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "files_folder_id_fkey"
-            columns: ["folder_id"]
-            isOneToOne: false
-            referencedRelation: "folders"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "files_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      folders: {
-        Row: {
-          created_at: string
-          description: string
-          id: string
-          name: string
-          type: string
-          updated_at: string | null
-          user_id: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          description: string
-          id?: string
-          name: string
-          type: string
-          updated_at?: string | null
-          user_id: string
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string
-          description?: string
-          id?: string
-          name?: string
-          type?: string
-          updated_at?: string | null
-          user_id?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "folders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "folders_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           }
         ]
@@ -590,58 +539,37 @@ export interface Database {
       }
       profiles: {
         Row: {
-          azure_openai_embeddings_id: string | null
-          bio: string
           created_at: string
-          display_name: string
           has_onboarded: boolean
           id: string
           image_path: string
           image_url: string
-          mistral_api_key: string | null
-          openai_api_key: string | null
-          openai_organization_id: string | null
-          openrouter_api_key: string | null
           profile_context: string
+          role: string
           updated_at: string | null
           user_id: string
-          username: string
         }
         Insert: {
-          azure_openai_embeddings_id?: string | null
-          bio: string
           created_at?: string
-          display_name: string
           has_onboarded?: boolean
           id?: string
           image_path: string
           image_url: string
-          mistral_api_key?: string | null
-          openai_api_key?: string | null
-          openai_organization_id?: string | null
-          openrouter_api_key?: string | null
           profile_context: string
+          role?: string
           updated_at?: string | null
           user_id: string
-          username: string
         }
         Update: {
-          azure_openai_embeddings_id?: string | null
-          bio?: string
           created_at?: string
-          display_name?: string
           has_onboarded?: boolean
           id?: string
           image_path?: string
           image_url?: string
-          mistral_api_key?: string | null
-          openai_api_key?: string | null
-          openai_organization_id?: string | null
-          openrouter_api_key?: string | null
           profile_context?: string
+          role?: string
           updated_at?: string | null
           user_id?: string
-          username?: string
         }
         Relationships: [
           {
@@ -661,9 +589,13 @@ export interface Database {
           customer_id: string
           ended_at: string | null
           id: string
+          plan_type: string
+          quantity: number | null
           start_date: string | null
           status: string
           subscription_id: string
+          team_id: string | null
+          team_name: string | null
           updated_at: string | null
           user_id: string
         }
@@ -674,9 +606,13 @@ export interface Database {
           customer_id: string
           ended_at?: string | null
           id?: string
+          plan_type: string
+          quantity?: number | null
           start_date?: string | null
           status: string
           subscription_id: string
+          team_id?: string | null
+          team_name?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -687,13 +623,24 @@ export interface Database {
           customer_id?: string
           ended_at?: string | null
           id?: string
+          plan_type?: string
+          quantity?: number | null
           start_date?: string | null
           status?: string
           subscription_id?: string
+          team_id?: string | null
+          team_name?: string | null
           updated_at?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "subscriptions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subscriptions_user_id_fkey"
             columns: ["user_id"]
@@ -702,6 +649,121 @@ export interface Database {
             referencedColumns: ["id"]
           }
         ]
+      }
+      team_invitations: {
+        Row: {
+          created_at: string
+          id: string
+          invitee_email: string
+          inviter_id: string
+          status: string
+          team_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invitee_email: string
+          inviter_id: string
+          status?: string
+          team_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invitee_email?: string
+          inviter_id?: string
+          status?: string
+          team_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          invitation_id: string | null
+          role: string
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invitation_id?: string | null
+          role?: string
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invitation_id?: string | null
+          role?: string
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "team_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       user_role: {
         Row: {
@@ -762,12 +824,7 @@ export interface Database {
       workspaces: {
         Row: {
           created_at: string
-          default_context_length: number
           default_model: string
-          default_prompt: string
-          default_temperature: number
-          description: string
-          embeddings_provider: string
           id: string
           image_path: string
           include_profile_context: boolean
@@ -779,12 +836,7 @@ export interface Database {
         }
         Insert: {
           created_at?: string
-          default_context_length: number
           default_model: string
-          default_prompt: string
-          default_temperature: number
-          description: string
-          embeddings_provider: string
           id?: string
           image_path?: string
           include_profile_context: boolean
@@ -796,12 +848,7 @@ export interface Database {
         }
         Update: {
           created_at?: string
-          default_context_length?: number
           default_model?: string
-          default_prompt?: string
-          default_temperature?: number
-          description?: string
-          embeddings_provider?: string
           id?: string
           image_path?: string
           include_profile_context?: boolean
@@ -826,6 +873,18 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
+      accept_team_invitation: {
+        Args: {
+          p_invitation_id: string
+        }
+        Returns: boolean
+      }
+      check_user_has_team_or_subscription_or_invitation: {
+        Args: {
+          p_user_email: string
+        }
+        Returns: boolean
+      }
       create_duplicate_messages_for_new_chat: {
         Args: {
           old_chat_id: string
@@ -884,6 +943,31 @@ export interface Database {
           user_id: string
         }[]
       }
+      get_team_members: {
+        Args: {
+          p_team_id: string
+        }
+        Returns: {
+          team_id: string
+          team_name: string
+          member_id: string
+          member_user_id: string
+          member_created_at: string
+          member_role: string
+          invitation_id: string
+          invitee_email: string
+          invitation_status: string
+          invitation_created_at: string
+          invitation_updated_at: string
+        }[]
+      }
+      invite_user_to_team: {
+        Args: {
+          p_team_id: string
+          p_invitee_email: string
+        }
+        Returns: boolean
+      }
       is_moderator: {
         Args: {
           test_user_id: string
@@ -927,6 +1011,19 @@ export interface Database {
       non_private_workspace_exists: {
         Args: {
           p_name: string
+        }
+        Returns: boolean
+      }
+      reject_team_invitation: {
+        Args: {
+          p_invitation_id: string
+        }
+        Returns: boolean
+      }
+      remove_user_from_team: {
+        Args: {
+          p_team_id: string
+          p_user_email: string
         }
         Returns: boolean
       }

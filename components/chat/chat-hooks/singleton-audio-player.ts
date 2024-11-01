@@ -73,7 +73,7 @@ class SingletonAudioPlayer {
     this.notifySubscribers()
 
     try {
-      const response = await fetch("/api/v2/chat/text-to-speech", {
+      const response = await fetch("/api/chat/text-to-speech", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

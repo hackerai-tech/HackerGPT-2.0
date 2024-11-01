@@ -1,19 +1,22 @@
 import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 import { ContentType } from "@/types"
-import { IconPlus } from "@tabler/icons-react"
-import { FC, useState } from "react"
+import { IconPlus, IconRefresh } from "@tabler/icons-react"
+import { FC, useContext, useState } from "react"
 import { Button } from "../ui/button"
 import { CreateFile } from "./items/files/create-file"
+import { PentestGPTContext } from "@/context/context"
 
 interface SidebarCreateButtonsProps {
   contentType: ContentType
-  hasData: boolean
+  handleSidebarVisibility: () => void
 }
 
 export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
   contentType,
-  hasData
+  handleSidebarVisibility
 }) => {
+  const { isTemporaryChat, setTemporaryChatMessages } =
+    useContext(PentestGPTContext)
   const { handleNewChat } = useChatHandler()
 
   const [isCreatingFile, setIsCreatingFile] = useState(false)
@@ -21,8 +24,15 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
   const getCreateFunction = () => {
     switch (contentType) {
       case "chats":
+        if (isTemporaryChat) {
+          return () => {
+            setTemporaryChatMessages([])
+            handleSidebarVisibility()
+          }
+        }
         return async () => {
           handleNewChat()
+          handleSidebarVisibility()
         }
 
       case "files":
@@ -38,10 +48,17 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
   return (
     <div className="flex w-full space-x-2">
       <Button className="flex h-[36px] grow" onClick={getCreateFunction()}>
-        <IconPlus className="mr-1" size={20} />
-        New{" "}
-        {contentType.charAt(0).toUpperCase() +
-          contentType.slice(1, contentType.length - 1)}
+        {isTemporaryChat && contentType === "chats" ? (
+          <IconRefresh className="mr-1" size={20} />
+        ) : (
+          <IconPlus className="mr-1" size={20} />
+        )}
+        {isTemporaryChat && contentType === "chats"
+          ? "Clear Chat"
+          : `New ${
+              contentType.charAt(0).toUpperCase() +
+              contentType.slice(1, contentType.length - 1)
+            }`}
       </Button>
 
       {isCreatingFile && (

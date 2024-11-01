@@ -1,5 +1,5 @@
-import { generateLocalEmbedding } from "@/lib/generate-local-embedding"
-import { checkApiKey, getServerProfile } from "@/lib/server/server-chat-helpers"
+import llmConfig from "@/lib/models/llm/llm-config"
+import { getServerProfile } from "@/lib/server/server-chat-helpers"
 import { Database } from "@/supabase/types"
 import { createClient } from "@supabase/supabase-js"
 import OpenAI from "openai"
@@ -39,16 +39,11 @@ export async function POST(request: Request) {
       throw new Error("One or more files are not accessible by the user")
     }
 
-    if (embeddingsProvider === "openai") {
-      checkApiKey(profile.openai_api_key, "OpenAI")
-    }
-
     let chunks: any[] = []
 
     let openai
     openai = new OpenAI({
-      apiKey: profile.openai_api_key || "",
-      organization: profile.openai_organization_id
+      apiKey: llmConfig.openai.apiKey
     })
 
     if (embeddingsProvider === "openai") {
@@ -71,21 +66,6 @@ export async function POST(request: Request) {
       }
 
       chunks = openaiFileItems
-    } else if (embeddingsProvider === "local") {
-      const localEmbedding = await generateLocalEmbedding(userInput)
-
-      const { data: localFileItems, error: localFileItemsError } =
-        await supabaseAdmin.rpc("match_file_items_local", {
-          query_embedding: localEmbedding as any,
-          match_count: sourceCount,
-          file_ids: uniqueFileIds
-        })
-
-      if (localFileItemsError) {
-        throw localFileItemsError
-      }
-
-      chunks = localFileItems
     }
 
     const mostSimilarChunks = chunks?.sort(

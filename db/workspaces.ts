@@ -23,8 +23,13 @@ export const getWorkspaceById = async (workspaceId: string) => {
     .eq("id", workspaceId)
     .single()
 
-  if (!workspace) {
-    throw new Error(error.message)
+  if (error) {
+    if (error.code === "PGRST116") {
+      // No rows returned, workspace not found
+      return null
+    }
+    // For other types of errors, we still throw
+    throw new Error(`Error fetching workspace: ${error.message}`)
   }
 
   return workspace

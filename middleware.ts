@@ -1,12 +1,7 @@
 import { createClient } from "@/lib/supabase/middleware"
-import { i18nRouter } from "next-i18n-router"
 import { NextResponse, type NextRequest } from "next/server"
-import i18nConfig from "./i18nConfig"
 
 export async function middleware(request: NextRequest) {
-  const i18nResult = i18nRouter(request, i18nConfig)
-  if (i18nResult) return i18nResult
-
   try {
     const { supabase, response } = createClient(request)
 

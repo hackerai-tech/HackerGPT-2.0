@@ -6,7 +6,7 @@ import {
   SheetHeader,
   SheetTitle
 } from "@/components/ui/sheet"
-import { ChatbotUIContext } from "@/context/context"
+import { PentestGPTContext } from "@/context/context"
 import { createChat } from "@/db/chats"
 import { createFileBasedOnExtension } from "@/db/files"
 import { TablesInsert } from "@/supabase/types"
@@ -31,7 +31,8 @@ export const SidebarCreateItem: FC<SidebarCreateItemProps> = ({
   createState,
   isTyping
 }) => {
-  const { selectedWorkspace, setChats, setFiles } = useContext(ChatbotUIContext)
+  const { selectedWorkspace, setChats, setFiles } =
+    useContext(PentestGPTContext)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -50,17 +51,18 @@ export const SidebarCreateItem: FC<SidebarCreateItemProps> = ({
       const createdFile = await createFileBasedOnExtension(
         file,
         rest,
-        workspaceId,
-        selectedWorkspace.embeddings_provider as "openai" | "local"
+        workspaceId
       )
 
       return createdFile
-    }
+    },
+    gpts: null
   }
 
   const stateUpdateFunctions = {
     chats: setChats,
-    files: setFiles
+    files: setFiles,
+    gpts: null
   }
 
   const handleCreate = async () => {

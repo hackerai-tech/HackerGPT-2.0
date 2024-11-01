@@ -1,12 +1,13 @@
-import useHotkey from "@/lib/hooks/use-hotkey"
 import {
   IconBrandGithub,
   IconBrandX,
-  IconHelpCircle,
-  IconQuestionMark
+  IconKeyboard,
+  IconQuestionMark,
+  IconCopy,
+  IconExternalLink
 } from "@tabler/icons-react"
 import Link from "next/link"
-import { FC, useState } from "react"
+import { FC, useState, useEffect } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,158 +16,137 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "../ui/dropdown-menu"
+import { KeyboardShortcutsPopup } from "./keyboard-shortcuts-popup"
+import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"
+import { Button } from "../ui/button"
+import { toast } from "sonner"
+import { supabase } from "@/lib/supabase/browser-client"
 
 interface ChatHelpProps {}
 
-export const ChatHelp: FC<ChatHelpProps> = ({}) => {
-  useHotkey("/", () => setIsOpen(prevState => !prevState))
-
+export const ChatHelp: FC<ChatHelpProps> = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
+  const { copyToClipboard } = useCopyToClipboard({ timeout: 2000 })
+  const [userEmail, setUserEmail] = useState("")
+
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      const user = await supabase.auth.getUser()
+      setUserEmail(user?.data.user?.email || "Not available")
+    }
+    fetchUserEmail()
+  }, [])
+
+  const socialLinks = [
+    { icon: IconBrandX, href: "https://x.com/PentestGPT" },
+    {
+      icon: IconBrandGithub,
+      href: "https://github.com/hackerai-tech/PentestGPT"
+    }
+  ]
+
+  const truncateEmail = (email: string, maxLength: number = 25) => {
+    if (email.length <= maxLength) return email
+    const [username, domain] = email.split("@")
+    if (!domain) return email.slice(0, maxLength) + "..."
+    const truncatedUsername =
+      username.slice(0, maxLength - domain.length - 3) + "..."
+    return `${truncatedUsername}@${domain}`
+  }
+
+  const handleCopyEmail = () => {
+    copyToClipboard(userEmail)
+    toast.success("Email copied to clipboard", {
+      duration: 3000
+    })
+  }
+
+  const menuItems = [
+    {
+      icon: IconCopy,
+      text: truncateEmail(userEmail),
+      onClick: handleCopyEmail
+    },
+    {
+      icon: IconExternalLink,
+      text: "Help & FAQ",
+      href: "https://help.hackerai.co/en/collections/10615918-pentestgpt"
+    },
+    {
+      icon: IconKeyboard,
+      text: "Keyboard shortcuts",
+      onClick: () => setIsKeyboardShortcutsOpen(true)
+    }
+  ]
 
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuTrigger asChild>
-        <IconQuestionMark className="bg-primary text-secondary size-[20px] cursor-pointer rounded-full p-0.5 opacity-60 hover:opacity-50 lg:size-[20px]" />
-      </DropdownMenuTrigger>
+    <>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger asChild>
+          <IconQuestionMark className="bg-primary text-secondary size-[20px] cursor-pointer rounded-full p-0.5 opacity-60 hover:opacity-50 lg:size-[20px]" />
+        </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel className="flex items-center justify-between">
-          <div className="flex space-x-2">
-            <Link
-              className="cursor-pointer hover:opacity-50"
-              href="https://twitter.com/thehackergpt"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <IconBrandX />
-            </Link>
-
-            <Link
-              className="cursor-pointer hover:opacity-50"
-              href="https://github.com/Hacker-GPT/HackerGPT-2.0/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <IconBrandGithub />
-            </Link>
-          </div>
-
-          <div className="flex space-x-2">
-            <Link
-              className="cursor-pointer hover:opacity-50"
-              href="/aboutus"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <IconHelpCircle size={24} />
-            </Link>
-          </div>
-        </DropdownMenuLabel>
-
-        <DropdownMenuSeparator />
-
-        <div className="flex justify-center py-2">
-          <div className="cursor-text select-text text-sm opacity-60">
-            contact@hackerai.co
-          </div>
-        </div>
-
-        <DropdownMenuItem className="flex justify-between">
-          <div>Show Help</div>
-          <div className="flex opacity-60">
-            <div className="min-w-[30px] rounded border p-1 text-center">⌘</div>
-            <div className="min-w-[30px] rounded border p-1 text-center">
-              Shift
+        <DropdownMenuContent
+          align="end"
+          className="z-50 min-w-[280px] max-w-xs overflow-hidden rounded-2xl p-4 py-2"
+        >
+          <DropdownMenuLabel className="mb-2 flex items-center justify-between">
+            <div className="flex space-x-4">
+              {socialLinks.map(({ icon: Icon, href }, index) => (
+                <Link
+                  key={index}
+                  className="cursor-pointer hover:opacity-50"
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon size={24} />
+                </Link>
+              ))}
             </div>
-            <div className="min-w-[30px] rounded border p-1 text-center">/</div>
-          </div>
-        </DropdownMenuItem>
+          </DropdownMenuLabel>
 
-        <DropdownMenuItem className="flex w-[300px] justify-between">
-          <div>New Chat</div>
-          <div className="flex opacity-60">
-            <div className="min-w-[30px] rounded border p-1 text-center">⌘</div>
-            <div className="min-w-[30px] rounded border p-1 text-center">
-              Shift
-            </div>
-            <div className="min-w-[30px] rounded border p-1 text-center">O</div>
-          </div>
-        </DropdownMenuItem>
+          <DropdownMenuSeparator className="my-2" />
 
-        <DropdownMenuItem className="flex justify-between">
-          <div>Focus Chat</div>
-          <div className="flex opacity-60">
-            <div className="min-w-[30px] rounded border p-1 text-center">⌘</div>
-            <div className="min-w-[30px] rounded border p-1 text-center">
-              Shift
-            </div>
-            <div className="min-w-[30px] rounded border p-1 text-center">L</div>
-          </div>
-        </DropdownMenuItem>
+          {menuItems.map(({ icon: Icon, text, onClick, href }, index) => (
+            <DropdownMenuItem key={index} className="cursor-pointer py-1">
+              {href ? (
+                <Link
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
+                >
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex w-full items-center justify-start space-x-2 p-0 hover:bg-transparent"
+                  >
+                    <Icon className="mr-2 size-5" />
+                    <span className="text-sm">{text}</span>
+                  </Button>
+                </Link>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex w-full items-center justify-start space-x-2 p-0 hover:bg-transparent"
+                  onClick={onClick}
+                >
+                  <Icon className="mr-2 size-5" />
+                  <span className="text-sm">{text}</span>
+                </Button>
+              )}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
-        <DropdownMenuItem className="flex justify-between">
-          <div>Toggle Files</div>
-          <div className="flex opacity-60">
-            <div className="min-w-[30px] rounded border p-1 text-center">⌘</div>
-            <div className="min-w-[30px] rounded border p-1 text-center">
-              Shift
-            </div>
-            <div className="min-w-[30px] rounded border p-1 text-center">F</div>
-          </div>
-        </DropdownMenuItem>
-
-        {/* <DropdownMenuItem className="flex justify-between">
-          <div>Toggle Retrieval</div>
-          <div className="flex opacity-60">
-            <div className="min-w-[30px] rounded border-[1px] p-1 text-center">
-              ⌘
-            </div>
-            <div className="min-w-[30px] rounded border-[1px] p-1 text-center">
-              Shift
-            </div>
-            <div className="min-w-[30px] rounded border-[1px] p-1 text-center">
-              E
-            </div>
-          </div>
-        </DropdownMenuItem> */}
-
-        <DropdownMenuItem className="flex justify-between">
-          <div>Open Settings</div>
-          <div className="flex opacity-60">
-            <div className="min-w-[30px] rounded border p-1 text-center">⌘</div>
-            <div className="min-w-[30px] rounded border p-1 text-center">
-              Shift
-            </div>
-            <div className="min-w-[30px] rounded border p-1 text-center">I</div>
-          </div>
-        </DropdownMenuItem>
-
-        {/* <DropdownMenuItem className="flex justify-between">
-          <div>Open Quick Settings</div>
-          <div className="flex opacity-60">
-            <div className="min-w-[30px] rounded border-[1px] p-1 text-center">
-              ⌘
-            </div>
-            <div className="min-w-[30px] rounded border-[1px] p-1 text-center">
-              Shift
-            </div>
-            <div className="min-w-[30px] rounded border-[1px] p-1 text-center">
-              P
-            </div>
-          </div>
-        </DropdownMenuItem> */}
-
-        <DropdownMenuItem className="flex justify-between">
-          <div>Toggle Sidebar</div>
-          <div className="flex opacity-60">
-            <div className="min-w-[30px] rounded border p-1 text-center">⌘</div>
-            <div className="min-w-[30px] rounded border p-1 text-center">
-              Shift
-            </div>
-            <div className="min-w-[30px] rounded border p-1 text-center">S</div>
-          </div>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <KeyboardShortcutsPopup
+        isOpen={isKeyboardShortcutsOpen}
+        onClose={() => setIsKeyboardShortcutsOpen(false)}
+      />
+    </>
   )
 }

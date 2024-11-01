@@ -2,11 +2,15 @@
 
 "use client"
 
-import { ChatbotUIContext } from "@/context/context"
+import { PentestGPTContext } from "@/context/context"
 import { getProfileByUserId } from "@/db/profile"
 import { getWorkspaceImageFromStorage } from "@/db/storage/workspace-images"
-import { getSubscriptionByUserId } from "@/db/subscriptions"
+import {
+  getSubscriptionByTeamId,
+  getSubscriptionByUserId
+} from "@/db/subscriptions"
 import { getWorkspacesByUserId } from "@/db/workspaces"
+import { getTeamMembersByTeamId } from "@/db/teams"
 import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import { fetchHostedModels } from "@/lib/models/fetch-models"
 import { supabase } from "@/lib/supabase/browser-client"
@@ -15,16 +19,19 @@ import {
   ChatFile,
   ChatMessage,
   ChatSettings,
+  ContentType,
   LLM,
   MessageImage,
+  SubscriptionStatus,
   WorkspaceImage
 } from "@/types"
 import { PluginID } from "@/types/plugins"
-import { VALID_ENV_KEYS } from "@/types/valid-keys"
 import { useRouter } from "next/navigation"
-import { FC, useEffect, useState } from "react"
+import { FC, useCallback, useEffect, useMemo, useState } from "react"
 import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
-import { getUserRole } from "@/db/user-role"
+import { ProcessedTeamMember } from "@/lib/team-utils"
+import { User } from "@supabase/supabase-js"
+import { useSearchParams } from "next/navigation"
 
 interface GlobalStateProps {
   children: React.ReactNode
@@ -32,24 +39,34 @@ interface GlobalStateProps {
 
 export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // USER STORE
+  const [user, setUser] = useState<User | null>(null)
 
   // PROFILE STORE
   const [profile, setProfile] = useState<Tables<"profiles"> | null>(null)
 
-  // User Role
-  const [userRole, setUserRole] = useState<Tables<"user_role"> | null>(null)
+  // CONTENT TYPE STORE
+  const [contentType, setContentType] = useState<ContentType>("chats")
 
   // SUBSCRIPTION STORE
   const [subscription, setSubscription] =
     useState<Tables<"subscriptions"> | null>(null)
-
+  const [subscriptionStatus, setSubscriptionStatus] =
+    useState<SubscriptionStatus>("free")
+  const [teamMembers, setTeamMembers] = useState<ProcessedTeamMember[] | null>(
+    null
+  )
+  const [membershipData, setMembershipData] =
+    useState<ProcessedTeamMember | null>(null)
   // ITEMS STORE
   const [chats, setChats] = useState<Tables<"chats">[]>([])
   const [files, setFiles] = useState<Tables<"files">[]>([])
   const [workspaces, setWorkspaces] = useState<Tables<"workspaces">[]>([])
 
   // MODELS STORE
-  const [envKeyMap, setEnvKeyMap] = useState<Record<string, VALID_ENV_KEYS>>({})
+  const [envKeyMap, setEnvKeyMap] = useState<Record<string, boolean>>({})
   const [availableHostedModels, setAvailableHostedModels] = useState<LLM[]>([])
 
   // WORKSPACE STORE
@@ -60,9 +77,11 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // PASSIVE CHAT STORE
   const [userInput, setUserInput] = useState<string>("")
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+  const [temporaryChatMessages, setTemporaryChatMessages] = useState<
+    ChatMessage[]
+  >([])
   const [chatSettings, setChatSettings] = useState<ChatSettings>({
     model: "mistral-medium",
-    contextLength: 1024,
     includeProfileContext: false,
     embeddingsProvider: "openai"
   })
@@ -81,9 +100,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   )
   const [selectedPluginType, setSelectedPluginType] = useState("")
   const [selectedPlugin, setSelectedPlugin] = useState(PluginID.NONE)
-
-  // RAG ENABLED STORE
-  const [isRagEnabled, setIsRagEnabled] = useState<boolean>(false)
 
   // CHAT INPUT COMMAND STORE
   const [slashCommand, setSlashCommand] = useState("")
@@ -112,20 +128,27 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // Define is ready to chat state
   const [isReadyToChat, setIsReadyToChat] = useState<boolean>(true)
 
+  // SIDEBAR
+  const [showSidebar, setShowSidebar] = useLocalStorageState(
+    "showSidebar",
+    false
+  )
+
   // Audio
   const [currentPlayingMessageId, setCurrentPlayingMessageId] = useState<
     string | null
   >(null)
-  const [isMicSupported, setIsMicSupported] = useState(true)
 
-  // Conversational AI
-  const [isConversationalAIOpen, setIsConversationalAIOpen] = useState(false)
+  // Terminal output setting
+  const [showTerminalOutput, setShowTerminalOutput] =
+    useLocalStorageState<boolean>("showTerminalOutput", true)
 
-  // SIDEBAR
-  const [showSidebar, setShowSidebar] = useLocalStorageState(
-    "showSidebar",
-    true
-  )
+  // TEMPORARY CHAT STORE
+  const [isTemporaryChat, setIsTemporaryChat] = useState(false)
+
+  useEffect(() => {
+    setIsTemporaryChat(searchParams.get("temporary-chat") === "true")
+  }, [searchParams])
 
   // Handle window resize to update isMobile
   useEffect(() => {
@@ -159,27 +182,71 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     })()
   }, [])
 
+  const updateSubscription = useCallback(
+    (newSubscription: Tables<"subscriptions"> | null) => {
+      setSubscription(newSubscription)
+      if (newSubscription) {
+        setSubscriptionStatus(newSubscription.plan_type as SubscriptionStatus)
+      } else {
+        setSubscriptionStatus("free")
+      }
+    },
+    []
+  )
+
+  const isPremiumSubscription = useMemo(
+    () => subscriptionStatus !== "free",
+    [subscriptionStatus]
+  )
+
   const fetchStartingData = async () => {
     const session = (await supabase.auth.getSession()).data.session
 
     if (session) {
-      const user = session.user
+      const userFromSession = session.user
+      setUser(userFromSession)
 
-      const profile = await getProfileByUserId(user.id)
+      const profile = await getProfileByUserId(userFromSession.id)
       setProfile(profile)
-
-      const userRole = await getUserRole(user.id)
-      setUserRole(userRole)
 
       if (!profile.has_onboarded) {
         return router.push("/setup")
       }
 
-      const subscription = await getSubscriptionByUserId(user.id)
-      setSubscription(subscription)
+      const subscription = await getSubscriptionByUserId(userFromSession.id)
+      updateSubscription(subscription)
 
-      const workspaces = await getWorkspacesByUserId(user.id)
+      const workspaces = await getWorkspacesByUserId(userFromSession.id)
       setWorkspaces(workspaces)
+
+      const members = await getTeamMembersByTeamId(
+        userFromSession.id,
+        userFromSession.email,
+        subscription?.team_id
+      )
+
+      const membershipData = members?.find(
+        member =>
+          member.member_user_id === userFromSession.id ||
+          member.invitee_email === userFromSession.email
+      )
+
+      if (membershipData?.invitation_status !== "rejected") {
+        setTeamMembers(members)
+        setMembershipData(membershipData ?? null)
+      } else {
+        setTeamMembers(null)
+        setMembershipData(null)
+      }
+
+      if (
+        (!subscription || subscription.status !== "active") &&
+        members &&
+        members.length > 0
+      ) {
+        const subscription = await getSubscriptionByTeamId(members[0].team_id)
+        updateSubscription(subscription)
+      }
 
       for (const workspace of workspaces) {
         let workspaceImageUrl = ""
@@ -210,20 +277,34 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     }
   }
 
+  const refreshTeamMembers = async () => {
+    await fetchStartingData()
+  }
+
   return (
-    <ChatbotUIContext.Provider
+    <PentestGPTContext.Provider
       value={{
+        // USER STORE
+        user,
+
         // PROFILE STORE
         profile,
         setProfile,
 
-        // USER ROLE STORE
-        userRole,
-        setUserRole,
+        // CONTENT TYPE STORE
+        contentType,
+        setContentType,
 
         // SUBSCRIPTION STORE
         subscription,
         setSubscription,
+        subscriptionStatus,
+        setSubscriptionStatus,
+        updateSubscription,
+        isPremiumSubscription,
+        teamMembers,
+        refreshTeamMembers,
+        membershipData,
 
         // ITEMS STORE
         chats,
@@ -250,6 +331,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setUserInput,
         chatMessages,
         setChatMessages,
+        temporaryChatMessages,
+        setTemporaryChatMessages,
         chatSettings,
         setChatSettings,
         selectedChat,
@@ -270,10 +353,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setSelectedPluginType,
         selectedPlugin,
         setSelectedPlugin,
-
-        // RAG ENABLED STORE
-        isRagEnabled: isRagEnabled,
-        setIsRagEnabled: setIsRagEnabled,
 
         // CHAT INPUT COMMAND STORE
         slashCommand,
@@ -315,22 +394,23 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         isReadyToChat,
         setIsReadyToChat,
 
+        // Sidebar
+        showSidebar,
+        setShowSidebar,
+
+        // Terminal output setting
+        showTerminalOutput,
+        setShowTerminalOutput,
+
         // Audio
         currentPlayingMessageId,
         setCurrentPlayingMessageId,
-        isMicSupported,
-        setIsMicSupported,
 
-        // Conversational AI
-        isConversationalAIOpen,
-        setIsConversationalAIOpen,
-
-        // Sidebar
-        showSidebar,
-        setShowSidebar
+        // TEMPORARY CHAT STORE
+        isTemporaryChat
       }}
     >
       {children}
-    </ChatbotUIContext.Provider>
+    </PentestGPTContext.Provider>
   )
 }

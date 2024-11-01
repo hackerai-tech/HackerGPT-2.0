@@ -26,6 +26,11 @@ import { PluginID } from "@/types/plugins"
 import React from "react"
 import { toast } from "sonner"
 import { v4 as uuidv4 } from "uuid"
+import { readDataStream } from "ai"
+import { CONTINUE_PROMPT } from "@/lib/models/llm/llm-prompting"
+import { buildFinalMessages } from "@/lib/build-prompt-v2"
+import { supabase } from "@/lib/supabase/browser-client"
+import { getTerminalPlugins } from "@/lib/tools/tool-store/tools-helper"
 
 export const validateChatSettings = (
   chatSettings: ChatSettings | null,
@@ -56,6 +61,40 @@ export const validateChatSettings = (
   }
 }
 
+export const fetchImageData = async (url: string) => {
+  const { data, error } = await supabase.storage
+    .from("message_images")
+    .createSignedUrl(url, 60 * 60)
+
+  if (error) {
+    console.error(error)
+    return null
+  }
+
+  return data?.signedUrl || null
+}
+
+export const bulkFetchImageData = async (urls: string[]) => {
+  const { data, error } = await supabase.storage
+    .from("message_images")
+    .createSignedUrls(urls, 60 * 60)
+
+  if (error) {
+    console.error(error)
+    throw new Error("Error fetching image data")
+  }
+
+  return data?.map(
+    ({ signedUrl, error }: { signedUrl: string; error: any }) => {
+      if (error) {
+        console.error(error)
+        return null
+      }
+      return signedUrl
+    }
+  )
+}
+
 export const handleRetrieval = async (
   userInput: string,
   newMessageFiles: ChatFile[],
@@ -84,24 +123,31 @@ export const handleRetrieval = async (
   return results
 }
 
-const CONTINUE_PROMPT =
-  "You got cut off in the middle of your message. Continue exactly from where you stopped. Whatever you output will be appended to your last message, so DO NOT repeat any of the previous message text. Do NOT apologize or add any unrelated text; just continue."
-
-export const createTempMessages = (
-  messageContent: string | null,
-  chatMessages: ChatMessage[],
-  chatSettings: ChatSettings,
-  b64Images: string[],
-  isContinuation: boolean,
-  selectedPlugin: PluginID | null,
+export const createTempMessages = ({
+  messageContent,
+  chatMessages,
+  chatSettings,
+  b64Images,
+  isContinuation,
+  selectedPlugin,
+  model
+}: {
+  messageContent: string | null
+  chatMessages: ChatMessage[]
+  chatSettings: ChatSettings
+  b64Images: string[]
+  isContinuation: boolean
+  selectedPlugin: PluginID | null
   model: LLMID
-) => {
-  if (!messageContent || isContinuation) messageContent = CONTINUE_PROMPT
+}) => {
+  const messageContentInternal = isContinuation
+    ? CONTINUE_PROMPT
+    : messageContent || CONTINUE_PROMPT
 
   let tempUserChatMessage: ChatMessage = {
     message: {
       chat_id: "",
-      content: messageContent,
+      content: messageContentInternal,
       created_at: "",
       id: uuidv4(),
       image_paths: b64Images,
@@ -144,11 +190,13 @@ export const createTempMessages = (
 
 export const handleHostedChat = async (
   payload: ChatPayload,
+  profile: Tables<"profiles">,
   modelData: LLM,
   tempAssistantChatMessage: ChatMessage,
   isRegeneration: boolean,
   isRagEnabled: boolean,
   isContinuation: boolean,
+  isTerminalContinuation: boolean,
   newAbortController: AbortController,
   chatImages: MessageImage[],
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
@@ -156,42 +204,60 @@ export const handleHostedChat = async (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
-  selectedPlugin: PluginID | null,
-  detectedModerationLevel: number
+  selectedPlugin: PluginID
 ) => {
-  const { provider } = modelData
-  const isWebSearch = selectedPlugin === PluginID.WEB_SEARCH
-  const apiEndpoint = isWebSearch
-    ? "/api/v2/chat/plugins/web-search"
-    : `/api/v2/chat/${provider}`
+  let { provider } = modelData
+  let apiEndpoint = `/api/chat/${provider}`
 
-  setToolInUse(
-    isRagEnabled && selectedPlugin === PluginID.NONE && provider !== "openai"
-      ? "Enhanced Search"
-      : selectedPlugin && selectedPlugin !== PluginID.NONE
-        ? selectedPlugin
-        : "none"
-  )
-
-  if (isWebSearch || provider === "mistral") {
-    chatImages = []
+  if (isTerminalContinuation || selectedPlugin === PluginID.TERMINAL) {
+    apiEndpoint = `/api/chat/tools/terminal`
+    setToolInUse(PluginID.TERMINAL)
+    selectedPlugin = PluginID.TERMINAL
+  } else {
+    setToolInUse(
+      isRagEnabled && provider !== "openai"
+        ? "Enhanced Search"
+        : selectedPlugin && selectedPlugin !== PluginID.NONE
+          ? selectedPlugin
+          : "none"
+    )
   }
 
-  const requestBody = {
-    payload: payload,
-    chatImages: chatImages,
-    selectedPlugin: selectedPlugin,
-    detectedModerationLevel: detectedModerationLevel,
-    isRetrieval:
-      payload.messageFileItems && payload.messageFileItems.length > 0,
-    isContinuation,
+  const formattedMessages = await buildFinalMessages(
+    payload,
+    profile,
+    chatImages,
+    selectedPlugin,
     isRagEnabled
+  )
+  const chatSettings = payload.chatSettings
+
+  let requestBody: any
+
+  if (isTerminalContinuation) {
+    requestBody = {
+      messages: formattedMessages,
+      isTerminalContinuation: isTerminalContinuation
+    }
+  } else if (provider === "openai") {
+    requestBody = {
+      messages: formattedMessages,
+      chatSettings
+    }
+  } else {
+    requestBody = {
+      messages: formattedMessages,
+      chatSettings: chatSettings,
+      isRetrieval:
+        payload.messageFileItems && payload.messageFileItems.length > 0,
+      isContinuation,
+      isRagEnabled
+    }
   }
 
   const chatResponse = await fetchChatResponse(
     apiEndpoint,
     requestBody,
-    true,
     newAbortController,
     setIsGenerating,
     setChatMessages,
@@ -211,7 +277,11 @@ export const handleHostedChat = async (
     newAbortController,
     setFirstTokenReceived,
     setChatMessages,
-    setToolInUse
+    setToolInUse,
+    requestBody,
+    setIsGenerating,
+    alertDispatch,
+    selectedPlugin
   )
 }
 
@@ -221,6 +291,7 @@ export const handleHostedPluginsChat = async (
   modelData: LLM,
   tempAssistantChatMessage: ChatMessage,
   isRegeneration: boolean,
+  isTerminalContinuation: boolean,
   newAbortController: AbortController,
   newMessageImages: MessageImage[],
   chatImages: MessageImage[],
@@ -229,51 +300,54 @@ export const handleHostedPluginsChat = async (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
-  selectedPlugin: PluginID,
-  fileData?: { fileName: string; fileContent: string }[]
+  selectedPlugin: PluginID
 ) => {
-  const apiEndpoint = "/api/v2/chat/plugins"
+  const apiEndpoint = "/api/chat/plugins"
 
   const requestBody: any = {
     payload: payload,
     chatImages: chatImages,
-    selectedPlugin: selectedPlugin
-  }
-
-  if (fileData) {
-    requestBody.fileData = fileData
+    selectedPlugin: selectedPlugin,
+    isTerminalContinuation: isTerminalContinuation
   }
 
   if (selectedPlugin && selectedPlugin !== PluginID.NONE) {
     setToolInUse(selectedPlugin)
   }
 
-  const response = await fetchChatResponse(
+  const chatResponse = await fetchChatResponse(
     apiEndpoint,
     requestBody,
-    true,
     newAbortController,
     setIsGenerating,
     setChatMessages,
     alertDispatch
   )
 
-  return await processResponsePlugins(
-    response,
-    isRegeneration
-      ? payload.chatMessages[payload.chatMessages.length - 1]
-      : tempAssistantChatMessage,
+  const lastMessage =
+    isRegeneration || isTerminalContinuation
+      ? payload.chatMessages[
+          payload.chatMessages.length - (isTerminalContinuation ? 2 : 1)
+        ]
+      : tempAssistantChatMessage
+
+  return processResponse(
+    chatResponse,
+    lastMessage,
     newAbortController,
     setFirstTokenReceived,
     setChatMessages,
-    setToolInUse
+    setToolInUse,
+    requestBody,
+    setIsGenerating,
+    alertDispatch,
+    selectedPlugin
   )
 }
 
 export const fetchChatResponse = async (
   url: string,
   body: object,
-  isHosted: boolean,
   controller: AbortController,
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
@@ -315,12 +389,12 @@ export const processResponse = async (
   controller: AbortController,
   setFirstTokenReceived: React.Dispatch<React.SetStateAction<boolean>>,
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
-  setToolInUse: React.Dispatch<React.SetStateAction<string>>
+  setToolInUse: React.Dispatch<React.SetStateAction<string>>,
+  requestBody: object,
+  setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
+  alertDispatch: React.Dispatch<AlertAction>,
+  selectedPlugin: PluginID
 ) => {
-  let fullText = ""
-  let contentToAdd = ""
-  let finishReason = ""
-
   if (!response.ok) {
     const result = await response.json()
     let errorMessage = result.error?.message || "An unknown error occurred"
@@ -355,117 +429,269 @@ export const processResponse = async (
   }
 
   if (response.body) {
-    let jsonBuffer = ""
+    let fullText = ""
+    let finishReason = ""
+    // let toolCallId = ""
     let ragUsed = false
     let ragId = null
+    let isFirstChunk = true
+    let updatedPlugin = selectedPlugin
+    let assistantGeneratedImages: string[] = []
+    let toolExecuted = false
+    const reader = response.body.getReader()
+    const stream = readDataStream(reader, {
+      isAborted: () => controller.signal.aborted
+    })
 
-    await consumeReadableStream(
-      response.body,
-      chunk => {
-        setFirstTokenReceived(true)
-        setToolInUse("none")
-        let contentToAdd = ""
-        jsonBuffer += chunk
+    try {
+      for await (const streamPart of stream) {
+        // console.log(streamPart)
 
-        // Process complete JSON objects
-        while (true) {
-          const lastIndex = jsonBuffer.indexOf("\n")
-          if (lastIndex === -1) break
+        // const isReasonLLMResult = (
+        //   part: any
+        // ): part is {
+        //   type: "data"
+        //   value: Array<{ reason: string }>
+        // } =>
+        //   part.type === "data" &&
+        //   Array.isArray(part.value) &&
+        //   part.value.length > 0 &&
+        //   typeof part.value[0] === "object" &&
+        //   "reason" in part.value[0]
 
-          const jsonLine = jsonBuffer.slice(0, lastIndex).trim()
-          jsonBuffer = jsonBuffer.slice(lastIndex + 1)
+        const processStreamPart = (
+          streamPart: any
+          // toolCallId: string
+        ): { contentToAdd: string; newImagePath: string | null } => {
+          if (streamPart.type === "text")
+            return { contentToAdd: streamPart.value, newImagePath: null }
 
-          if (jsonLine.startsWith("RAG: ")) {
-            const ragData = JSON.parse(jsonLine.substring(5))
-            ragUsed = ragData.ragUsed
-            ragId = ragData.ragId
-          }
+          // if (isReasonLLMResult(streamPart)) {
+          //   return {
+          //     contentToAdd: streamPart.value[0].reason,
+          //     newImagePath: null
+          //   }
+          // }
 
-          if (jsonLine.startsWith("data: ")) {
-            if (jsonLine.substring(6) === "[DONE]") {
-              // Stream has ended
-              break
-            }
-
-            const data = JSON.parse(jsonLine.substring(6))
-
-            const choice = data.choices[0]
-            finishReason = choice.finish_reason || finishReason
-
-            if (choice.delta.content) {
-              contentToAdd += choice.delta.content
-            }
-          }
+          return { contentToAdd: "", newImagePath: null }
         }
 
-        if (contentToAdd) {
-          fullText += contentToAdd
+        switch (streamPart.type) {
+          case "text":
+          case "tool_result":
+          case "data":
+            const { contentToAdd, newImagePath } = processStreamPart(
+              streamPart
+              // toolCallId
+            )
 
-          setChatMessages(prev =>
-            prev.map(chatMessage => {
-              if (chatMessage.message.id === lastChatMessage.message.id) {
-                return {
-                  ...chatMessage,
-                  message: {
-                    ...chatMessage.message,
-                    content: chatMessage.message.content + contentToAdd
-                  }
-                }
+            if (contentToAdd || newImagePath) {
+              if (isFirstChunk) {
+                setFirstTokenReceived(true)
+                isFirstChunk = false
               }
-              return chatMessage
-            })
-          )
-        }
-      },
-      controller.signal
-    )
+              fullText += contentToAdd
 
-    return { fullText, finishReason, ragUsed, ragId }
-  } else {
-    throw new Error("Response body is null")
-  }
-}
-
-export const processResponsePlugins = async (
-  response: Response,
-  lastChatMessage: ChatMessage,
-  controller: AbortController,
-  setFirstTokenReceived: React.Dispatch<React.SetStateAction<boolean>>,
-  setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
-  setToolInUse: React.Dispatch<React.SetStateAction<string>>
-) => {
-  let fullText = ""
-  let contentToAdd = ""
-
-  if (response.body) {
-    await consumeReadableStream(
-      response.body,
-      chunk => {
-        setFirstTokenReceived(true)
-        setToolInUse("none")
-        fullText += chunk
-        setChatMessages(prev =>
-          prev.map(chatMessage => {
-            if (chatMessage.message.id === lastChatMessage.message.id) {
-              const updatedChatMessage: ChatMessage = {
-                message: {
-                  ...chatMessage.message,
-                  content: chatMessage.message.content + chunk
-                },
-                fileItems: chatMessage.fileItems
+              if (newImagePath) {
+                assistantGeneratedImages.push(newImagePath)
               }
 
-              return updatedChatMessage
+              setChatMessages(prev =>
+                prev.map(chatMessage =>
+                  chatMessage.message.id === lastChatMessage.message.id
+                    ? {
+                        ...chatMessage,
+                        message: {
+                          ...chatMessage.message,
+                          content: chatMessage.message.content + contentToAdd,
+                          image_paths: newImagePath
+                            ? [...chatMessage.message.image_paths, newImagePath]
+                            : chatMessage.message.image_paths
+                        }
+                      }
+                    : chatMessage
+                )
+              )
+            } else if (
+              typeof streamPart.value === "object" &&
+              streamPart.value !== null &&
+              "ragUsed" in streamPart.value &&
+              "ragId" in streamPart.value
+            ) {
+              ragUsed = Boolean(streamPart.value.ragUsed)
+              ragId =
+                streamPart.value.ragId !== null
+                  ? String(streamPart.value.ragId)
+                  : null
             }
+            break
 
-            return chatMessage
-          })
-        )
-      },
-      controller.signal
-    )
+          case "tool_call":
+            if (toolExecuted) break
 
-    return { fullText, finishReason: "" }
+            const { toolName } = streamPart.value
+
+            if (toolName === "browser" && streamPart.value.args.open_url) {
+              setToolInUse(PluginID.BROWSER)
+              updatedPlugin = PluginID.BROWSER
+
+              const urlToOpen = streamPart.value.args.open_url
+
+              const browserRequestBody = {
+                ...requestBody,
+                open_url: urlToOpen
+              }
+
+              const browserResponse = await fetchChatResponse(
+                "/api/chat/plugins/browser",
+                browserRequestBody,
+                controller,
+                setIsGenerating,
+                setChatMessages,
+                alertDispatch
+              )
+
+              const browserResult = await processResponse(
+                browserResponse,
+                lastChatMessage,
+                controller,
+                setFirstTokenReceived,
+                setChatMessages,
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
+              )
+
+              fullText += browserResult.fullText
+            } else if (toolName === "terminal") {
+              setToolInUse(PluginID.TERMINAL)
+              updatedPlugin = PluginID.TERMINAL
+
+              const terminalResponse = await fetchChatResponse(
+                "/api/chat/tools/terminal",
+                requestBody,
+                controller,
+                setIsGenerating,
+                setChatMessages,
+                alertDispatch
+              )
+
+              const terminalResult = await processResponse(
+                terminalResponse,
+                lastChatMessage,
+                controller,
+                setFirstTokenReceived,
+                setChatMessages,
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
+              )
+
+              fullText += terminalResult.fullText
+
+              finishReason = terminalResult.finishReason
+
+              if (finishReason === "tool-calls") {
+                finishReason = "terminal-calls"
+              }
+            } else if (toolName === "webSearch") {
+              setToolInUse(PluginID.WEB_SEARCH)
+              updatedPlugin = PluginID.WEB_SEARCH
+
+              const webSearchResponse = await fetchChatResponse(
+                "/api/chat/plugins/web-search",
+                requestBody,
+                controller,
+                setIsGenerating,
+                setChatMessages,
+                alertDispatch
+              )
+
+              const webSearchResult = await processResponse(
+                webSearchResponse,
+                lastChatMessage,
+                controller,
+                setFirstTokenReceived,
+                setChatMessages,
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
+              )
+
+              fullText += webSearchResult.fullText
+            } else if (toolName === "reasonLLM") {
+              setToolInUse(PluginID.REASON_LLM)
+              updatedPlugin = PluginID.REASON_LLM
+
+              const reasonLLMResponse = await fetchChatResponse(
+                "/api/chat/tools/reason-llm",
+                requestBody,
+                controller,
+                setIsGenerating,
+                setChatMessages,
+                alertDispatch
+              )
+
+              const reasonLLMResult = await processResponse(
+                reasonLLMResponse,
+                lastChatMessage,
+                controller,
+                setFirstTokenReceived,
+                setChatMessages,
+                setToolInUse,
+                requestBody,
+                setIsGenerating,
+                alertDispatch,
+                updatedPlugin
+              )
+
+              fullText += reasonLLMResult.fullText
+            }
+            toolExecuted = true
+            break
+
+          case "finish_message":
+            if (finishReason === "") {
+              // Only set finishReason if it hasn't been set before
+              if (
+                streamPart.value.finishReason === "tool-calls" &&
+                getTerminalPlugins().includes(updatedPlugin)
+              ) {
+                // To use continue generating for terminal
+                finishReason = "terminal-calls"
+              } else {
+                finishReason = streamPart.value.finishReason
+              }
+            }
+            break
+        }
+
+        if (controller.signal.aborted) {
+          break
+        }
+      }
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        console.error("Unexpected error processing stream:", error)
+      }
+    } finally {
+      reader.releaseLock()
+    }
+
+    return {
+      fullText,
+      finishReason,
+      ragUsed,
+      ragId,
+      selectedPlugin: updatedPlugin,
+      assistantGeneratedImages
+    }
   } else {
     throw new Error("Response body is null")
   }
@@ -485,11 +711,9 @@ export const handleCreateChat = async (
   const createdChat = await createChat({
     user_id: profile.user_id,
     workspace_id: selectedWorkspace.id,
-    context_length: chatSettings.contextLength,
     include_profile_context: chatSettings.includeProfileContext,
     model: chatSettings.model,
     name: messageContent.substring(0, 100),
-    embeddings_provider: chatSettings.embeddingsProvider,
     finish_reason: finishReason
   })
 
@@ -517,7 +741,7 @@ export const lastSequenceNumber = (chatMessages: ChatMessage[]) =>
 
 export const handleCreateMessages = async (
   chatMessages: ChatMessage[],
-  currentChat: Tables<"chats">,
+  currentChat: Tables<"chats"> | null,
   profile: Tables<"profiles">,
   modelData: LLM,
   messageContent: string | null,
@@ -526,14 +750,60 @@ export const handleCreateMessages = async (
   isRegeneration: boolean,
   isContinuation: boolean,
   retrievedFileItems: Tables<"file_items">[],
-  setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
+  setMessages: (messages: ChatMessage[]) => void,
   setChatImages: React.Dispatch<React.SetStateAction<MessageImage[]>>,
-  selectedPlugin: PluginID | null,
-  editSequenceNumber: number | undefined,
-  ragUsed: boolean,
-  ragId: string | null
+  selectedPlugin: PluginID,
+  editSequenceNumber?: number,
+  ragUsed?: boolean,
+  ragId?: string | null,
+  assistantGeneratedImages?: string[],
+  isTemporary: boolean = false
 ) => {
   const isEdit = editSequenceNumber !== undefined
+
+  // If it's a temporary chat, don't create messages in the database
+  if (isTemporary || !currentChat) {
+    const tempUserMessage: ChatMessage = {
+      message: {
+        id: uuidv4(),
+        chat_id: "",
+        content: messageContent || "",
+        role: "user",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        sequence_number: lastSequenceNumber(chatMessages) + 1,
+        user_id: profile.user_id,
+        model: modelData.modelId,
+        plugin: selectedPlugin,
+        image_paths: newMessageImages.map(image => image.path),
+        rag_used: ragUsed || false,
+        rag_id: ragId || null
+      },
+      fileItems: retrievedFileItems
+    }
+
+    const tempAssistantMessage: ChatMessage = {
+      message: {
+        id: uuidv4(),
+        chat_id: "",
+        content: generatedText,
+        role: "assistant",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        sequence_number: lastSequenceNumber(chatMessages) + 2,
+        user_id: profile.user_id,
+        model: modelData.modelId,
+        plugin: selectedPlugin,
+        image_paths: assistantGeneratedImages || [],
+        rag_used: ragUsed || false,
+        rag_id: ragId || null
+      },
+      fileItems: []
+    }
+
+    setMessages([...chatMessages, tempUserMessage, tempAssistantMessage])
+    return
+  }
 
   const finalUserMessage: TablesInsert<"messages"> = {
     chat_id: currentChat.id,
@@ -544,8 +814,8 @@ export const handleCreateMessages = async (
     role: "user",
     sequence_number: lastSequenceNumber(chatMessages) + 1,
     image_paths: [],
-    rag_used: ragUsed,
-    rag_id: ragId
+    rag_used: ragUsed || false,
+    rag_id: ragId || null
   }
 
   const finalAssistantMessage: TablesInsert<"messages"> = {
@@ -556,9 +826,9 @@ export const handleCreateMessages = async (
     plugin: selectedPlugin,
     role: "assistant",
     sequence_number: lastSequenceNumber(chatMessages) + 2,
-    image_paths: [],
-    rag_used: ragUsed,
-    rag_id: ragId
+    image_paths: assistantGeneratedImages || [],
+    rag_used: ragUsed || false,
+    rag_id: ragId || null
   }
 
   let finalChatMessages: ChatMessage[] = []
@@ -578,6 +848,26 @@ export const handleCreateMessages = async (
 
     const createdMessages = await createMessages([finalAssistantMessage])
 
+    if (assistantGeneratedImages && assistantGeneratedImages.length > 0) {
+      const chatImagesWithUrls = await Promise.all(
+        assistantGeneratedImages.map(async url => {
+          const base64 = await fetchImageData(url)
+          return {
+            messageId: createdMessages[0].id,
+            path: url,
+            base64: base64,
+            url: base64 || url,
+            file: null
+          } as MessageImage // Explicitly cast to MessageImage
+        })
+      )
+
+      setChatImages(prevChatImages => [
+        ...prevChatImages,
+        ...chatImagesWithUrls
+      ])
+    }
+
     finalChatMessages = [
       ...chatMessages.slice(0, -1),
       {
@@ -586,7 +876,7 @@ export const handleCreateMessages = async (
       }
     ]
 
-    setChatMessages(finalChatMessages)
+    setMessages(finalChatMessages)
   } else if (isContinuation) {
     const lastStartingMessage = chatMessages[chatMessages.length - 1].message
 
@@ -599,7 +889,7 @@ export const handleCreateMessages = async (
 
     finalChatMessages = [...chatMessages]
 
-    setChatMessages(finalChatMessages)
+    setMessages(finalChatMessages)
   } else {
     const createdMessages = await createMessages([
       finalUserMessage,
@@ -624,21 +914,38 @@ export const handleCreateMessages = async (
       Boolean
     ) as string[]
 
-    setChatImages(prevImages => [
-      ...prevImages,
-      ...newMessageImages.map((obj, index) => ({
-        ...obj,
-        messageId: createdMessages[0].id,
-        path: paths[index]
-      }))
-    ])
+    const newImages = newMessageImages.map((obj, index) => ({
+      ...obj,
+      messageId: createdMessages[0].id,
+      path: paths[index]
+    }))
+
+    if (assistantGeneratedImages && assistantGeneratedImages.length > 0) {
+      const chatImagesWithUrls = await Promise.all(
+        assistantGeneratedImages.map(async url => {
+          const base64Data = await fetchImageData(url)
+          return {
+            messageId: createdMessages[1].id,
+            path: url,
+            base64: base64Data,
+            url: url,
+            file: null
+          } as MessageImage // Explicitly cast to MessageImage
+        })
+      )
+
+      setChatImages(prevChatImages => [
+        ...prevChatImages,
+        ...chatImagesWithUrls
+      ])
+    }
 
     const updatedMessage = await updateMessage(createdMessages[0].id, {
       ...createdMessages[0],
       image_paths: paths
     })
 
-    const createdMessageFileItems = await createMessageFileItems(
+    await createMessageFileItems(
       retrievedFileItems.map(fileItem => {
         return {
           user_id: profile.user_id,
@@ -665,6 +972,6 @@ export const handleCreateMessages = async (
       }
     ]
 
-    setChatMessages(finalChatMessages)
+    setMessages(finalChatMessages)
   }
 }

@@ -1,4 +1,4 @@
-import { ChatbotUIContext } from "@/context/context"
+import { PentestGPTContext } from "@/context/context"
 import { createDocXFile, createFile } from "@/db/files"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import mammoth from "mammoth"
@@ -25,7 +25,7 @@ export const useSelectFileHandler = () => {
     setShowFilesDisplay,
     setFiles,
     setUseRetrieval
-  } = useContext(ChatbotUIContext)
+  } = useContext(PentestGPTContext)
 
   const [filesToAccept, setFilesToAccept] = useState(ACCEPTED_FILE_TYPES)
 
@@ -69,9 +69,9 @@ export const useSelectFileHandler = () => {
           simplifiedFileType = "pdf"
         } else if (
           simplifiedFileType.includes(
-            "vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-              "docx"
-          )
+            "vnd.openxmlformats-officedocument.wordprocessingml.document"
+          ) ||
+          simplifiedFileType.includes("docx")
         ) {
           simplifiedFileType = "docx"
         }
@@ -89,9 +89,9 @@ export const useSelectFileHandler = () => {
         // Handle docx files
         if (
           file.type.includes(
-            "vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-              "docx"
-          )
+            "vnd.openxmlformats-officedocument.wordprocessingml.document"
+          ) ||
+          file.type.includes("docx")
         ) {
           const arrayBuffer = await file.arrayBuffer()
           const result = await mammoth.extractRawText({
@@ -110,8 +110,7 @@ export const useSelectFileHandler = () => {
               tokens: 0,
               type: simplifiedFileType
             },
-            selectedWorkspace.id,
-            chatSettings.embeddingsProvider
+            selectedWorkspace.id
           )
 
           if (!createdFile) {
@@ -201,8 +200,7 @@ export const useSelectFileHandler = () => {
                 tokens: 0,
                 type: simplifiedFileType
               },
-              selectedWorkspace.id,
-              chatSettings.embeddingsProvider
+              selectedWorkspace.id
             )
 
             if (!createdFile) {

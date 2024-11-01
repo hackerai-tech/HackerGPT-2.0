@@ -1,35 +1,34 @@
-import { FC, useContext, useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { TabsContent } from "@/components/ui/tabs"
-import { ChatbotUIContext } from "@/context/context"
+import { Label } from "@/components/ui/label"
+import { PentestGPTContext } from "@/context/context"
 import { getBillingPortalUrl } from "@/lib/server/stripe-url"
-import { restoreSubscription } from "@/lib/server/restore"
-import { PlanDialog } from "../plan-dialog"
-import { toast } from "sonner"
+import { SubscriptionStatus } from "@/types/chat"
 import * as Sentry from "@sentry/nextjs"
 import { IconRefresh } from "@tabler/icons-react"
+import { useRouter } from "next/navigation"
+import { FC, useContext, useState } from "react"
+import { toast } from "sonner"
 
 interface SubscriptionTabProps {
-  value: string
   userEmail: string
   isMobile: boolean
 }
 
 export const SubscriptionTab: FC<SubscriptionTabProps> = ({
-  value,
   userEmail,
   isMobile
 }) => {
   const router = useRouter()
   const isLongEmail = userEmail.length > 30
-  const [showPlanDialog, setShowPlanDialog] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { subscription, setSubscription, profile } =
-    useContext(ChatbotUIContext)
-  const isPremium = subscription !== null
+  const {
+    isPremiumSubscription,
+    subscriptionStatus,
+    updateSubscription,
+    profile,
+    refreshTeamMembers
+  } = useContext(PentestGPTContext)
 
   const redirectToBillingPortal = async () => {
     setLoading(true)
@@ -45,39 +44,59 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
   const handleRestoreButtonClick = async () => {
     try {
       setLoading(true)
-      const restoreResult = await restoreSubscription()
-      if (restoreResult.type === "error") {
-        Sentry.withScope(scope => {
-          scope.setExtra("user.id", profile?.user_id)
-          Sentry.captureMessage(restoreResult.error.message)
-        })
-        toast.error(restoreResult.error.message)
-      } else {
-        if (restoreResult.value === null) {
-          toast.warning("You have no subscription to restore.")
-        } else {
-          toast.success("Your subscription has been restored.")
-          setSubscription(restoreResult.value)
+      const response = await fetch("/api/stripe/restore", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
         }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "An error occurred while restoring the subscription"
+        )
       }
+
+      await refreshTeamMembers()
+
+      if (data.message) {
+        toast.warning(data.message)
+      } else if (data.subscription) {
+        toast.success("Your subscription has been restored.")
+        updateSubscription(data.subscription)
+      }
+    } catch (error: any) {
+      console.error("Error restoring subscription:", error)
+      Sentry.withScope(scope => {
+        scope.setExtra("user.id", profile?.user_id)
+        Sentry.captureMessage(error.message)
+      })
+      toast.error(error.message)
     } finally {
       setLoading(false)
     }
   }
 
+  const handleUpgradeClick = () => {
+    router.push("/upgrade")
+  }
+
   const showRestoreSubscription =
-    !isPremium && process.env.NEXT_PUBLIC_ENABLE_STRIPE_RESTORE === "true"
+    subscriptionStatus === "free" &&
+    process.env.NEXT_PUBLIC_ENABLE_STRIPE_RESTORE === "true"
 
   return (
-    <TabsContent className="space-y-4" value={value}>
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <Label className="text-sm font-medium">Current plan</Label>
           <p className="mt-1">
-            <PlanName isPremium={isPremium} />
+            <PlanName subscriptionStatus={subscriptionStatus} />
           </p>
         </div>
-        {isPremium ? (
+        {isPremiumSubscription ? (
           <Button
             variant="secondary"
             disabled={loading}
@@ -90,7 +109,7 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
           <Button
             variant="secondary"
             disabled={loading}
-            onClick={() => setShowPlanDialog(true)}
+            onClick={handleUpgradeClick}
             className="flex items-center"
           >
             Upgrade to Pro
@@ -130,26 +149,23 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
           className="bg-secondary w-full cursor-default truncate sm:w-2/3"
         />
       </div>
-
-      <PlanDialog
-        showIcon={false}
-        open={showPlanDialog}
-        onOpenChange={setShowPlanDialog}
-      />
-    </TabsContent>
+    </div>
   )
 }
 
 interface PlanNameProps {
-  isPremium: boolean
+  subscriptionStatus: SubscriptionStatus
 }
 
-export const PlanName: FC<PlanNameProps> = ({ isPremium }) => {
+export const PlanName: FC<PlanNameProps> = ({ subscriptionStatus }) => {
+  const planName =
+    subscriptionStatus?.charAt(0).toUpperCase() + subscriptionStatus?.slice(1)
+
   return (
     <span
-      className={`text-xl font-bold ${isPremium ? "text-primary" : "text-muted-foreground"}`}
+      className={`text-xl font-bold ${subscriptionStatus !== "free" ? "text-primary" : "text-muted-foreground"}`}
     >
-      {isPremium ? "Pro" : "Free"}
+      {planName}
     </span>
   )
 }

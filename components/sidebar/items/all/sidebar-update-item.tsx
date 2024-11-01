@@ -8,8 +8,7 @@ import {
   SheetTitle,
   SheetTrigger
 } from "@/components/ui/sheet"
-import { AssignWorkspaces } from "@/components/workspace/assign-workspaces"
-import { ChatbotUIContext } from "@/context/context"
+import { PentestGPTContext } from "@/context/context"
 import { updateChat } from "@/db/chats"
 import {
   createFileWorkspaces,
@@ -41,7 +40,7 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
   isTyping
 }) => {
   const { workspaces, selectedWorkspace, setChats, setFiles } =
-    useContext(ChatbotUIContext)
+    useContext(PentestGPTContext)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -73,14 +72,16 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
 
   const renderState = {
     chats: null,
-    files: null
+    files: null,
+    gpts: null
   }
 
   const fetchDataFunctions: {
     [key in ContentType]: ((id: string) => Promise<void>) | null
   } = {
     chats: null,
-    files: null
+    files: null,
+    gpts: null
   }
 
   const fetchWorkpaceFunctions = {
@@ -88,7 +89,8 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
     files: async (fileId: string) => {
       const item = await getFileWorkspacesByFileId(fileId)
       return item.workspaces
-    }
+    },
+    gpts: null
   }
 
   const fetchSelectedWorkspaces = async () => {
@@ -170,12 +172,14 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
       )
 
       return updatedFile
-    }
+    },
+    gpts: null
   }
 
   const stateUpdateFunctions = {
     chats: setChats,
-    files: setFiles
+    files: setFiles,
+    gpts: null
   }
 
   const handleUpdate = async () => {
@@ -242,17 +246,6 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
           </SheetHeader>
 
           <div className="mt-4 space-y-3">
-            {workspaces.length > 1 && (
-              <div className="space-y-1">
-                <Label>Assigned Workspaces</Label>
-
-                <AssignWorkspaces
-                  selectedWorkspaces={selectedWorkspaces}
-                  onSelectWorkspace={handleSelectWorkspace}
-                />
-              </div>
-            )}
-
             {renderInputs(renderState[contentType])}
           </div>
         </div>

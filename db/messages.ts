@@ -15,29 +15,29 @@ export const getMessageById = async (messageId: string) => {
   return message
 }
 
-export const getMessagesByChatId = async (chatId: string) => {
-  const { data: messages } = await supabase
+export const getMessagesByChatId = async (
+  chatId: string,
+  limit = 20,
+  lastSequenceNumber?: number
+) => {
+  let query = supabase
     .from("messages")
     .select("*, feedback(*), file_items (*)")
     .eq("chat_id", chatId)
+    .order("sequence_number", { ascending: false })
+    .limit(limit)
+
+  if (lastSequenceNumber !== undefined) {
+    query = query.lt("sequence_number", lastSequenceNumber)
+  }
+
+  const { data: messages } = await query
 
   if (!messages) {
     throw new Error("Messages not found")
   }
 
-  return messages
-}
-
-export const getMessagesByFeedbackId = async (feedbackId: string) => {
-  const { data: messages, error } = await supabase
-    .rpc("get_chat_messages_by_feedback_id", { p_feedback_id: feedbackId })
-    .select("*")
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return messages
+  return messages.reverse()
 }
 
 export const createMessage = async (message: TablesInsert<"messages">) => {

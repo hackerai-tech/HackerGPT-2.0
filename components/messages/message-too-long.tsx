@@ -45,12 +45,12 @@ export const MessageTooLong: FC<MessageTooLongProps> = ({
 
   return (
     <>
-      <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 w-[80vw] min-w-full space-y-6 break-words md:w-full">
-        <p>
-          The response is too long to be displayed. You can choose one of the
-          options below:
-        </p>
-        <div className="bg-secondary flex justify-center space-x-2 p-1 md:space-x-4">
+      <div
+        className={`prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 w-[70vw] min-w-full space-y-6 break-words md:w-full`}
+      >
+        <p>The response is too long to be displayed.</p>
+        <p>You can choose one of the options below:</p>
+        <div className="justify-left flex space-x-2 p-1 md:space-x-4">
           <Button
             variant="outline"
             className="text-primary bg-primary-foreground hover:bg-muted px-2 py-1 text-sm md:px-4 md:py-2 md:text-base"
@@ -71,7 +71,7 @@ export const MessageTooLong: FC<MessageTooLongProps> = ({
               <span className="text-sm font-medium md:text-base">Download</span>
             </div>
           </Button>
-          <Button
+          {/* <Button
             variant="outline"
             className="text-primary bg-primary-foreground hover:bg-muted px-2 py-1 text-sm md:px-4 md:py-2 md:text-base"
             onClick={() => {
@@ -87,11 +87,11 @@ export const MessageTooLong: FC<MessageTooLongProps> = ({
               <IconUpload className="mr-1 md:mr-2" size={16} />
               <span className="text-sm font-medium md:text-base">Upload</span>
             </div>
-          </Button>
+          </Button> */}
         </div>
       </div>
       <Modal isOpen={showModal}>
-        <div className="size-screen fixed inset-0 z-50 bg-black/50 backdrop-blur-sm dark:bg-black/75"></div>
+        <div className="size-screen fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm dark:bg-opacity-75"></div>
         <div
           className="fixed inset-0 z-50 flex size-full items-center justify-center"
           onClick={handleCloseModal}
@@ -101,7 +101,7 @@ export const MessageTooLong: FC<MessageTooLongProps> = ({
             style={{ maxHeight: "90vh" }}
             onClick={e => e.stopPropagation()}
           >
-            <div className="message-content-scrollable grow overflow-y-auto  p-4">
+            <div className="message-content-scrollable grow overflow-y-auto p-4">
               <MessageMarkdown content={content} isAssistant={true} />
             </div>
             <div className="flex justify-between space-x-2 pt-4">

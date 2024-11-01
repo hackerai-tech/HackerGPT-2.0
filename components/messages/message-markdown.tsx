@@ -1,10 +1,13 @@
 import React, { FC } from "react"
 import remarkGfm from "remark-gfm"
 import remarkMath from "remark-math"
+import rehypeMathjax from "rehype-mathjax"
 import { MessageCodeBlock } from "./message-codeblock"
 import { MessageMarkdownMemoized } from "./message-markdown-memoized"
 import { defaultUrlTransform } from "react-markdown"
 import { ImageWithPreview } from "@/components/image/image-with-preview"
+import { Table, Th, Td } from "@/components/ui/table-components"
+import { MessageTerminalBlock } from "./e2b-messages/message-terminal-block"
 
 interface MessageMarkdownProps {
   content: string
@@ -24,10 +27,8 @@ export const MessageMarkdown: FC<MessageMarkdownProps> = ({
 }) => {
   if (!isAssistant) {
     return (
-      <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 flex w-full justify-end break-words">
-        <p className="bg-secondary border-secondary mb-2 inline-block max-w-[90%] whitespace-pre-wrap break-words rounded border p-2 last:mb-0">
-          {content}
-        </p>
+      <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 bg-secondary min-w-full max-w-[80vw] space-y-6 break-words rounded border p-2 md:w-full">
+        <p className="mb-2 whitespace-pre-wrap last:mb-0">{content}</p>
       </div>
     )
   }
@@ -35,7 +36,8 @@ export const MessageMarkdown: FC<MessageMarkdownProps> = ({
   return (
     <MessageMarkdownMemoized
       className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 w-[80vw] min-w-full space-y-6 break-words md:w-full"
-      remarkPlugins={[remarkGfm, remarkMath]}
+      remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
+      rehypePlugins={[rehypeMathjax]}
       urlTransform={urlTransform}
       components={{
         a({ children, ...props }) {
@@ -61,6 +63,9 @@ export const MessageMarkdown: FC<MessageMarkdownProps> = ({
         img({ node, src, ...props }) {
           return <ImageWithPreview src={src!} alt={props.alt || "image"} />
         },
+        table: ({ children, ...props }) => <Table {...props}>{children}</Table>,
+        th: ({ children, ...props }) => <Th {...props}>{children}</Th>,
+        td: ({ children, ...props }) => <Td {...props}>{children}</Td>,
         code({ node, className, children, ...props }) {
           const childArray = React.Children.toArray(children)
           const firstChild = childArray[0] as React.ReactElement
@@ -86,6 +91,15 @@ export const MessageMarkdown: FC<MessageMarkdownProps> = ({
               <code className={className} {...props}>
                 {childArray}
               </code>
+            )
+          }
+
+          if (match && match[1] === "stdout") {
+            return (
+              <MessageTerminalBlock
+                key={Math.random()}
+                value={String(childArray).replace(/\n$/, "")}
+              />
             )
           }
 

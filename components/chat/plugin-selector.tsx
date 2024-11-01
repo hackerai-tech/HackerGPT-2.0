@@ -2,50 +2,51 @@ import React, { useContext, useState, useEffect } from "react"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
-  DropdownMenuContentTop,
-  DropdownMenuItem
+  DropdownMenuItem,
+  DropdownMenuContent
 } from "../ui/dropdown-menu"
 import {
   IconChevronDown,
   IconLock,
   IconBuildingStore
 } from "@tabler/icons-react"
-import PluginStoreModal from "./plugin-store"
 import { PluginID, PluginSummary } from "@/types/plugins"
-import { ChatbotUIContext } from "@/context/context"
-import Modal from "./dialog-portal"
-import { PlanDialog } from "../utility/plan-dialog"
+import { PentestGPTContext } from "@/context/context"
 import {
   usePluginContext,
-  ActionTypes,
   getInstalledPlugins
 } from "./chat-hooks/PluginProvider"
-import { availablePlugins } from "@/lib/plugins/available-plugins"
+import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { DialogPanel } from "@headlessui/react"
+import { usePathname, useRouter } from "next/navigation"
 
 interface PluginSelectorProps {
   onPluginSelect: (type: string) => void
 }
 
 const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
-  const { subscription, setSelectedPlugin, selectedPlugin, chatSettings } =
-    useContext(ChatbotUIContext)
+  const {
+    isPremiumSubscription,
+    setSelectedPlugin,
+    selectedPlugin,
+    chatSettings,
+    setContentType
+  } = useContext(PentestGPTContext)
   const [selectedPluginName, setSelectedPluginName] =
     useState("No plugin selected")
-  const [isPluginStoreModalOpen, setIsPluginStoreModalOpen] = useState(false)
   const [showLockedPluginDialog, setShowLockedPluginDialog] = useState(false)
   const [currentPlugin, setCurrentPlugin] = useState<PluginSummary | null>(null)
-  const [showPlanDialog, setShowPlanDialog] = useState(false)
-  const { state: pluginState, dispatch: pluginDispatch } = usePluginContext()
+  const { state: pluginState } = usePluginContext()
+
+  const router = useRouter()
+  const pathname = usePathname()
 
   const defaultPluginIds = [0, 99]
 
-  const isPremium = subscription !== null
-
   const handleUpgradeToPlus = () => {
     setShowLockedPluginDialog(false)
-    setShowPlanDialog(true)
+    router.push("/upgrade")
   }
 
   useEffect(() => {
@@ -53,23 +54,19 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
       plugin => plugin.value === selectedPlugin
     )
     if (foundPlugin) {
-      setSelectedPluginName(foundPlugin.selectorName)
+      setSelectedPluginName(foundPlugin.name)
     }
-  }, [selectedPlugin])
 
-  const installPlugin = (pluginId: number) => {
-    pluginDispatch({
-      type: ActionTypes.INSTALL_PLUGIN,
-      payload: pluginId
-    })
-  }
-
-  const uninstallPlugin = (pluginId: number) => {
-    pluginDispatch({
-      type: ActionTypes.UNINSTALL_PLUGIN,
-      payload: pluginId
-    })
-  }
+    // Check if GPT-4 is selected and ENHANCE_SEARCH is active
+    if (
+      chatSettings?.model.includes("gpt-4-turbo-preview") &&
+      selectedPlugin === PluginID.ENHANCED_SEARCH
+    ) {
+      setSelectedPlugin(PluginID.NONE)
+      setSelectedPluginName("No plugin selected")
+      onPluginSelect(PluginID.NONE)
+    }
+  }, [selectedPlugin, chatSettings?.model])
 
   const installedPlugins = getInstalledPlugins(pluginState.installedPluginIds)
 
@@ -79,20 +76,30 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
   }))
 
   const selectorPlugins = updatedAvailablePlugins.filter(
-    plugin => plugin.isInstalled || defaultPluginIds.includes(plugin.id)
+    plugin =>
+      (plugin.isInstalled || defaultPluginIds.includes(plugin.id)) &&
+      !(
+        chatSettings?.model.includes("gpt-4-turbo-preview") &&
+        plugin.value === PluginID.ENHANCED_SEARCH
+      )
   )
+
+  const handleOpenGPTsStore = () => {
+    setContentType("gpts")
+    router.replace(`${pathname}?tab=gpts`)
+  }
 
   const renderPluginOptions = () => {
     return selectorPlugins.map(plugin => (
       <DropdownMenuItem
         key={plugin.id}
         onSelect={() => {
-          if (!plugin.isPremium || isPremium) {
+          if (!plugin.isPremium || isPremiumSubscription) {
             if (plugin.value === PluginID.PLUGINS_STORE) {
-              setIsPluginStoreModalOpen(true)
+              handleOpenGPTsStore()
             } else {
               onPluginSelect(plugin.value)
-              setSelectedPluginName(plugin.selectorName)
+              setSelectedPluginName(plugin.name)
               setSelectedPlugin(plugin.value)
             }
           } else {
@@ -100,10 +107,10 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
             setShowLockedPluginDialog(true)
           }
         }}
-        className={`flex items-center justify-between ${plugin.isPremium && !isPremium ? "cursor-not-allowed opacity-50" : ""}`}
+        className={`flex items-center justify-between ${plugin.isPremium && !isPremiumSubscription ? "cursor-not-allowed opacity-50" : ""}`}
       >
-        <span>{plugin.selectorName}</span>
-        {plugin.isPremium && !isPremium ? (
+        <span>{plugin.name}</span>
+        {plugin.isPremium && !isPremiumSubscription ? (
           <IconLock size={18} className="ml-2" />
         ) : plugin.value === PluginID.PLUGINS_STORE ? (
           <IconBuildingStore size={18} className="ml-2" />
@@ -124,33 +131,20 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
             </button>
           </div>
         </DropdownMenuTrigger>
-        <div className="flex">
-          <DropdownMenuContentTop
-            side="top"
-            className="bg-secondary mx-14 mb-3 sm:mx-0"
-          >
-            {renderPluginOptions()}
-          </DropdownMenuContentTop>
-        </div>
+        <DropdownMenuContent
+          side="top"
+          align="start"
+          className="bg-secondary z-50 min-w-32 overflow-hidden rounded-md border p-1 shadow-md"
+        >
+          {renderPluginOptions()}
+        </DropdownMenuContent>
       </DropdownMenu>
-      <PluginStoreModal
-        isOpen={isPluginStoreModalOpen}
-        setIsOpen={setIsPluginStoreModalOpen}
-        pluginsData={updatedAvailablePlugins}
-        installPlugin={installPlugin}
-        uninstallPlugin={uninstallPlugin}
-      />
       <LockedPluginModal
         isOpen={showLockedPluginDialog}
         currentPlugin={currentPlugin}
         handleCancelUpgrade={() => setShowLockedPluginDialog(false)}
         handleUpgradeToPlus={handleUpgradeToPlus}
-        isPremium={isPremium}
-      />
-      <PlanDialog
-        showIcon={false}
-        open={showPlanDialog}
-        onOpenChange={setShowPlanDialog}
+        isPremium={isPremiumSubscription}
       />
     </div>
   )

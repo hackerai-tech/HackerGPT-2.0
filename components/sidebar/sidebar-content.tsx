@@ -1,8 +1,13 @@
 import { ContentType, DataListType } from "@/types"
-import { FC, useState } from "react"
+import { FC, useContext, useEffect, useState } from "react"
 import { SidebarCreateButtons } from "./sidebar-create-buttons"
 import { SidebarDataList } from "./sidebar-data-list"
-import { SidebarSearch } from "./sidebar-search"
+import { PentestGPTContext } from "@/context/context"
+import { SidebarUpgrade } from "./sidebar-upgrade"
+import { SidebarInviteButton } from "./sidebar-invite-button"
+import { InviteMembersDialog } from "@/components/utility/invite-members-dialog"
+import { AcceptInvitationDialog } from "@/components/utility/accept-invitation-dialog"
+import { isTeamAdmin } from "@/lib/team-utils"
 
 interface SidebarContentProps {
   contentType: ContentType
@@ -13,30 +18,85 @@ export const SidebarContent: FC<SidebarContentProps> = ({
   contentType,
   data
 }) => {
-  const [searchTerm, setSearchTerm] = useState("")
+  const {
+    isPremiumSubscription,
+    setShowSidebar,
+    isMobile,
+    subscription,
+    membershipData,
+    teamMembers
+  } = useContext(PentestGPTContext)
+  const isInvitationPending = membershipData?.invitation_status === "pending"
 
-  const filteredData: any = data.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
+  const [isAcceptInviteDialogOpen, setIsAcceptInviteDialogOpen] =
+    useState(isInvitationPending)
+
+  useEffect(() => {
+    setIsAcceptInviteDialogOpen(isInvitationPending)
+  }, [isInvitationPending])
+
+  // console.log(isAcceptInviteDialogOpen, membershipData, isInvitationPending)
+  const canInviteMembers =
+    isTeamAdmin(membershipData) &&
+    teamMembers &&
+    teamMembers.length < (subscription?.quantity || 0)
+
+  const handleSidebarVisibility = () => {
+    if (isMobile) {
+      setShowSidebar(false)
+    }
+  }
+
+  const handleInvite = () => {
+    setIsInviteDialogOpen(true)
+  }
+
+  const handleAcceptInvitation = () => {
+    setIsAcceptInviteDialogOpen(true)
+  }
 
   return (
     <div className="flex max-h-[calc(100%-10px)] grow flex-col">
       <div className="flex items-center">
         <SidebarCreateButtons
           contentType={contentType}
-          hasData={data.length > 0}
+          handleSidebarVisibility={handleSidebarVisibility}
         />
       </div>
 
-      <div className="mt-2">
-        <SidebarSearch
-          contentType={contentType}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-        />
-      </div>
+      <SidebarDataList contentType={contentType} data={data} />
 
-      <SidebarDataList contentType={contentType} data={filteredData} />
+      {canInviteMembers && (
+        <div className="mt-4">
+          <SidebarInviteButton onInvite={handleInvite} />
+        </div>
+      )}
+      {isInvitationPending && (
+        <div className="mt-4">
+          <SidebarInviteButton
+            onInvite={handleAcceptInvitation}
+            title="Accept Invitation"
+            subtitle={`Join ${membershipData?.team_name} team.`}
+          />
+        </div>
+      )}
+
+      {!isPremiumSubscription && !isInvitationPending && <SidebarUpgrade />}
+
+      {canInviteMembers && subscription?.team_id && (
+        <InviteMembersDialog
+          isOpen={isInviteDialogOpen}
+          onClose={() => setIsInviteDialogOpen(false)}
+        />
+      )}
+
+      {isInvitationPending && (
+        <AcceptInvitationDialog
+          isOpen={isAcceptInviteDialogOpen}
+          onClose={() => setIsAcceptInviteDialogOpen(false)}
+        />
+      )}
     </div>
   )
 }
