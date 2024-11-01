@@ -154,7 +154,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
               file.id.startsWith("loading") ? (
                 <div
                   key={index}
-                  className="relative flex h-[64px] items-center space-x-4 rounded-xl border-2 px-4 py-3"
+                  className="bg-secondary relative flex h-[64px] items-center space-x-4 rounded-xl px-4 py-3"
                 >
                   <div className="rounded bg-blue-500 p-2">
                     <IconLoader2 className="animate-spin" />
@@ -168,7 +168,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
               ) : (
                 <div
                   key={file.id}
-                  className="relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl border-2 px-4 py-3 hover:opacity-50"
+                  className="bg-secondary relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl px-4 py-3 hover:opacity-50"
                   // onClick={() => getLinkAndView(file)}
                 >
                   <div className="rounded bg-blue-500 p-2">

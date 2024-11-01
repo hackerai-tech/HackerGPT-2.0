@@ -374,7 +374,7 @@ export const Message: FC<MessageProps> = ({
         </div>
 
         {fileItems.length > 0 && (
-          <div className="my-6 text-lg font-bold">
+          <div className="my-2 ml-10 text-lg font-bold">
             {!viewSources ? (
               <div
                 className="flex cursor-pointer items-center hover:opacity-50"
