@@ -144,7 +144,7 @@ export async function POST(request: Request) {
     }
 
     const handleMessages = (shouldUncensor: boolean) => {
-      if (includeImages) {
+      if (includeImages || (!shouldUncensor && !isPentestGPTPro)) {
         selectedModel = "openai/gpt-4o-mini"
         return filterEmptyAssistantMessages(messages)
       }
