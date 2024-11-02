@@ -923,6 +923,12 @@ export interface Database {
         }
         Returns: Record<string, unknown>
       }
+      delete_user: {
+        Args: {
+          sel_user_id: string
+        }
+        Returns: undefined
+      }
       get_chat_messages_by_feedback_id: {
         Args: {
           p_feedback_id: string
@@ -1295,4 +1301,4 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never
-
+  

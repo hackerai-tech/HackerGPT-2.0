@@ -4,15 +4,14 @@ import { PROFILE_CONTEXT_MAX } from "@/db/limits"
 import { updateProfile } from "@/db/profile"
 import { LLM_LIST_MAP } from "@/lib/models/llm/llm-list"
 import { supabase } from "@/lib/supabase/browser-client"
-import { TeamRole } from "@/lib/team-utils"
 import {
+  DialogPanel,
+  DialogTitle,
+  Tab,
   TabGroup,
   TabList,
-  Tab,
-  TabPanels,
   TabPanel,
-  DialogPanel,
-  DialogTitle
+  TabPanels
 } from "@headlessui/react"
 import {
   IconCreditCard,
@@ -29,17 +28,22 @@ import { FC, useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { SIDEBAR_ICON_SIZE } from "../sidebar/sidebar-switcher"
 import { Button } from "../ui/button"
+import { MultiStepDeleteAccountDialog } from "../ui/mutil-step-deletion"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
-import { DeleteAllChatsDialog } from "./delete-all-chats-dialog"
+import { DeleteDialog } from "./delete-all-chats-dialog"
 import { DataControlsTab } from "./profile-tabs/data-controls-tab"
 import { PersonalizationTab } from "./profile-tabs/personalization-tab"
 import { ProfileTab } from "./profile-tabs/profile-tab"
+import { SecurityTab } from "./profile-tabs/security-tab"
 import { SubscriptionTab } from "./profile-tabs/subscription-tab"
 import { TeamTab } from "./profile-tabs/team-tab"
-import { SecurityTab } from "./profile-tabs/security-tab"
+import { TeamRole } from "@/lib/team-utils"
+import { cancelSubscription, getStripe } from "@/lib/server/stripe"
 
 export const Settings: FC = () => {
   const {
+    user,
+    subscription,
     profile,
     setProfile,
     envKeyMap,
@@ -56,6 +60,8 @@ export const Settings: FC = () => {
   const [profileInstructions, setProfileInstructions] = useState(
     profile?.profile_context || ""
   )
+  const [showDeleteAccountConfirmation, setShowDeleteAccountConfirmation] =
+    useState(false)
   const [activeTab, setActiveTab] = useState("profile")
 
   useEffect(() => {
@@ -138,8 +144,46 @@ export const Settings: FC = () => {
     }
   }
 
+  const handleDeleteAccount = () => {
+    setIsOpen(false)
+    setShowDeleteAccountConfirmation(true)
+  }
+
+  const handleConfirmDeleteAccount = async () => {
+    if (!user?.id) {
+      console.error("User ID not found", user)
+      toast.error("Failed to delete account")
+      return
+    }
+
+    setShowDeleteAccountConfirmation(false)
+    try {
+      const { error } = await supabase.rpc("delete_user", {
+        sel_user_id: user.id
+      })
+
+      if (error) {
+        toast.error("Failed to delete account")
+        return
+      }
+    } catch (error) {
+      toast.error("Failed to delete account")
+      return
+    }
+    if (subscription?.id && subscription.status === "active") {
+      const stripe = getStripe()
+      await cancelSubscription(stripe, subscription.id)
+    }
+    await handleSignOut()
+  }
+
   const handleCancelDelete = () => {
     setShowConfirmationDialog(false)
+    setIsOpen(true)
+  }
+
+  const handleCancelDeleteAccount = () => {
+    setShowDeleteAccountConfirmation(false)
     setIsOpen(true)
   }
 
@@ -243,7 +287,7 @@ export const Settings: FC = () => {
                   <SubscriptionTab userEmail={userEmail} isMobile={isMobile} />
                 </TabPanel>
                 <TabPanel>
-                  <DataControlsTab />
+                  <DataControlsTab onDeleteAccount={handleDeleteAccount} />
                 </TabPanel>
                 <TabPanel>
                   <SecurityTab />
@@ -266,10 +310,20 @@ export const Settings: FC = () => {
         </DialogPanel>
       </TransitionedDialog>
 
-      <DeleteAllChatsDialog
+      <DeleteDialog
         isOpen={showConfirmationDialog}
         onClose={handleCancelDelete}
         onConfirm={handleConfirm}
+        title="Delete All Chats"
+        message="Are you sure you want to delete all chats? This action cannot be undone."
+        confirmButtonText="Delete All"
+      />
+
+      <MultiStepDeleteAccountDialog
+        isOpen={showDeleteAccountConfirmation}
+        onClose={handleCancelDeleteAccount}
+        onConfirm={handleConfirmDeleteAccount}
+        userEmail={userEmail}
       />
     </>
   )
