@@ -4,14 +4,12 @@
 
 import { PentestGPTContext } from "@/context/context"
 import { getProfileByUserId } from "@/db/profile"
-import { getWorkspaceImageFromStorage } from "@/db/storage/workspace-images"
 import {
   getSubscriptionByTeamId,
   getSubscriptionByUserId
 } from "@/db/subscriptions"
 import { getWorkspacesByUserId } from "@/db/workspaces"
 import { getTeamMembersByTeamId } from "@/db/teams"
-import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import { fetchHostedModels } from "@/lib/models/fetch-models"
 import { supabase } from "@/lib/supabase/browser-client"
 import { Tables } from "@/supabase/types"
@@ -22,8 +20,7 @@ import {
   ContentType,
   LLM,
   MessageImage,
-  SubscriptionStatus,
-  WorkspaceImage
+  SubscriptionStatus
 } from "@/types"
 import { PluginID } from "@/types/plugins"
 import { useRouter } from "next/navigation"
@@ -72,7 +69,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // WORKSPACE STORE
   const [selectedWorkspace, setSelectedWorkspace] =
     useState<Tables<"workspaces"> | null>(null)
-  const [workspaceImages, setWorkspaceImages] = useState<WorkspaceImage[]>([])
 
   // PASSIVE CHAT STORE
   const [userInput, setUserInput] = useState<string>("")
@@ -248,31 +244,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         updateSubscription(subscription)
       }
 
-      for (const workspace of workspaces) {
-        let workspaceImageUrl = ""
-
-        if (workspace.image_path) {
-          workspaceImageUrl =
-            (await getWorkspaceImageFromStorage(workspace.image_path)) || ""
-        }
-
-        if (workspaceImageUrl) {
-          const response = await fetch(workspaceImageUrl)
-          const blob = await response.blob()
-          const base64 = await convertBlobToBase64(blob)
-
-          setWorkspaceImages(prev => [
-            ...prev,
-            {
-              workspaceId: workspace.id,
-              path: workspace.image_path,
-              base64: base64,
-              url: workspaceImageUrl
-            }
-          ])
-        }
-      }
-
       return profile
     }
   }
@@ -323,8 +294,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         // WORKSPACE STORE
         selectedWorkspace,
         setSelectedWorkspace,
-        workspaceImages,
-        setWorkspaceImages,
 
         // PASSIVE CHAT STORE
         userInput,
