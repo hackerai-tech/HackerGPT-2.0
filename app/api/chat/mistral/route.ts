@@ -144,7 +144,7 @@ export async function POST(request: Request) {
     }
 
     const handleMessages = (shouldUncensor: boolean) => {
-      if (includeImages || (!shouldUncensor && !isPentestGPTPro)) {
+      if (includeImages) {
         selectedModel = "openai/gpt-4o-mini"
         return filterEmptyAssistantMessages(messages)
       }
@@ -182,7 +182,7 @@ export async function POST(request: Request) {
         const toolSchemas = createToolSchemas({ profile, data })
         tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
       }
-
+      console.log("selectedModel", selectedModel)
       const result = await streamText({
         model: provider(selectedModel || ""),
         messages: toVercelChatMessages(messages, includeImages),
