@@ -286,14 +286,14 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
         <TextareaAutosize
           textareaRef={chatInputRef}
           className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 ${
-            isMobile && isPremiumSubscription && optionsCollapsed
-              ? "pl-12" // Mobile collapsed
-              : isPremiumSubscription
-                ? "pl-[84px]" // Premium expanded
-                : "pl-12" // Free plan (no file upload)
-          } pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
-            isTemporaryChat ? "bg-tertiary" : ""
-          }`}
+            isTemporaryChat
+              ? "bg-tertiary" // No padding for temporary chat
+              : isMobile && isPremiumSubscription && optionsCollapsed
+                ? "pl-12" // Mobile collapsed
+                : isPremiumSubscription
+                  ? "pl-[84px]" // Premium expanded
+                  : "pl-12" // Free plan (no file upload)
+          } pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
           placeholder={
             isMobile
               ? `Message` +
