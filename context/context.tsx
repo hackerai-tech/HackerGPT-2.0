@@ -5,7 +5,6 @@ import {
   ChatSettings,
   LLM,
   MessageImage,
-  WorkspaceImage,
   SubscriptionStatus
 } from "@/types"
 import { PluginID } from "@/types/plugins"
@@ -54,8 +53,6 @@ interface PentestGPTContextType {
   // WORKSPACE STORE
   selectedWorkspace: Tables<"workspaces"> | null
   setSelectedWorkspace: Dispatch<SetStateAction<Tables<"workspaces"> | null>>
-  workspaceImages: WorkspaceImage[]
-  setWorkspaceImages: Dispatch<SetStateAction<WorkspaceImage[]>>
 
   // PASSIVE CHAT STORE
   userInput: string
@@ -182,8 +179,6 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   // WORKSPACE STORE
   selectedWorkspace: null,
   setSelectedWorkspace: () => {},
-  workspaceImages: [],
-  setWorkspaceImages: () => {},
 
   // PASSIVE CHAT STORE
   userInput: "",
