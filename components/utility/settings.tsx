@@ -63,6 +63,7 @@ export const Settings: FC = () => {
   const [showDeleteAccountConfirmation, setShowDeleteAccountConfirmation] =
     useState(false)
   const [activeTab, setActiveTab] = useState("profile")
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     const fetchUserEmail = async () => {
@@ -156,7 +157,7 @@ export const Settings: FC = () => {
       return
     }
 
-    setShowDeleteAccountConfirmation(false)
+    setIsDeleting(true)
     try {
       const { error } = await supabase.rpc("delete_user", {
         sel_user_id: user.id
@@ -164,17 +165,20 @@ export const Settings: FC = () => {
 
       if (error) {
         toast.error("Failed to delete account")
+        setIsDeleting(false)
         return
       }
+
+      if (subscription?.id && subscription.status === "active") {
+        const stripe = getStripe()
+        await cancelSubscription(stripe, subscription.id)
+      }
+
+      await handleSignOut()
     } catch (error) {
       toast.error("Failed to delete account")
-      return
+      setIsDeleting(false)
     }
-    if (subscription?.id && subscription.status === "active") {
-      const stripe = getStripe()
-      await cancelSubscription(stripe, subscription.id)
-    }
-    await handleSignOut()
   }
 
   const handleCancelDelete = () => {
@@ -287,7 +291,10 @@ export const Settings: FC = () => {
                   <SubscriptionTab userEmail={userEmail} isMobile={isMobile} />
                 </TabPanel>
                 <TabPanel>
-                  <DataControlsTab onDeleteAccount={handleDeleteAccount} />
+                  <DataControlsTab
+                    onDeleteAccount={handleDeleteAccount}
+                    isDeleting={isDeleting}
+                  />
                 </TabPanel>
                 <TabPanel>
                   <SecurityTab />
@@ -324,6 +331,7 @@ export const Settings: FC = () => {
         onClose={handleCancelDeleteAccount}
         onConfirm={handleConfirmDeleteAccount}
         userEmail={userEmail}
+        isDeleting={isDeleting}
       />
     </>
   )

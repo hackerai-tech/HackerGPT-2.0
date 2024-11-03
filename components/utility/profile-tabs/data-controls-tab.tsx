@@ -6,10 +6,12 @@ import { SharedChatsPopup } from "./shared-chats-popup"
 
 interface DataControlsTabProps {
   onDeleteAccount: () => void
+  isDeleting?: boolean
 }
 
 export const DataControlsTab: FC<DataControlsTabProps> = ({
-  onDeleteAccount
+  onDeleteAccount,
+  isDeleting = false
 }) => {
   const [isSharedChatsPopupOpen, setIsSharedChatsPopupOpen] = useState(false)
 
@@ -33,6 +35,7 @@ export const DataControlsTab: FC<DataControlsTabProps> = ({
             <Button
               variant="destructive"
               onClick={onDeleteAccount}
+              disabled={isDeleting}
               className="w-[120px]"
             >
               Delete

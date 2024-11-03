@@ -3,17 +3,19 @@ import { DialogPanel, DialogTitle } from "@headlessui/react"
 import { Button } from "../ui/button"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { Input } from "../ui/input"
+import { Loader2 } from "lucide-react"
 
 interface MultiStepDeleteAccountDialogProps {
   isOpen: boolean
   onClose: () => void
-  onConfirm: () => void
+  onConfirm: () => Promise<void>
   userEmail: string
+  isDeleting: boolean
 }
 
 export const MultiStepDeleteAccountDialog: FC<
   MultiStepDeleteAccountDialogProps
-> = ({ isOpen, onClose, onConfirm, userEmail }) => {
+> = ({ isOpen, onClose, onConfirm, userEmail, isDeleting }) => {
   const [step, setStep] = useState(1)
   const [confirmEmail, setConfirmEmail] = useState("")
 
@@ -29,9 +31,9 @@ export const MultiStepDeleteAccountDialog: FC<
     }
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (confirmEmail.toLowerCase() === userEmail.toLowerCase()) {
-      onConfirm()
+      await onConfirm()
     }
   }
 
@@ -45,8 +47,14 @@ export const MultiStepDeleteAccountDialog: FC<
               be undone.
             </p>
             <div className="mt-4 flex justify-center space-x-4">
-              <Button onClick={onClose}>Cancel</Button>
-              <Button variant="destructive" onClick={handleNextStep}>
+              <Button onClick={onClose} disabled={isDeleting}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleNextStep}
+                disabled={isDeleting}
+              >
                 Continue
               </Button>
             </div>
@@ -60,8 +68,14 @@ export const MultiStepDeleteAccountDialog: FC<
               settings, and personal information.
             </p>
             <div className="mt-4 flex justify-center space-x-4">
-              <Button onClick={handlePreviousStep}>Back</Button>
-              <Button variant="destructive" onClick={handleNextStep}>
+              <Button onClick={handlePreviousStep} disabled={isDeleting}>
+                Back
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleNextStep}
+                disabled={isDeleting}
+              >
                 I understand, continue
               </Button>
             </div>
@@ -80,17 +94,28 @@ export const MultiStepDeleteAccountDialog: FC<
               onChange={e => setConfirmEmail(e.target.value)}
               placeholder="Enter your email"
               className="mb-4"
+              disabled={isDeleting}
             />
             <div className="flex justify-center space-x-4">
-              <Button onClick={handlePreviousStep}>Back</Button>
+              <Button onClick={handlePreviousStep} disabled={isDeleting}>
+                Back
+              </Button>
               <Button
                 variant="destructive"
                 onClick={handleConfirm}
                 disabled={
-                  confirmEmail.toLowerCase() !== userEmail.toLowerCase()
+                  confirmEmail.toLowerCase() !== userEmail.toLowerCase() ||
+                  isDeleting
                 }
               >
-                Delete Account
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    Deleting Account...
+                  </>
+                ) : (
+                  "Delete Account"
+                )}
               </Button>
             </div>
           </>
@@ -99,7 +124,10 @@ export const MultiStepDeleteAccountDialog: FC<
   }
 
   return (
-    <TransitionedDialog isOpen={isOpen} onClose={onClose}>
+    <TransitionedDialog
+      isOpen={isOpen}
+      onClose={() => !isDeleting && onClose()}
+    >
       <DialogPanel className="bg-popover w-full max-w-md overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all">
         <DialogTitle
           as="h3"
