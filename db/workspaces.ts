@@ -2,6 +2,10 @@ import { supabase } from "@/lib/supabase/browser-client"
 import { TablesInsert, TablesUpdate } from "@/supabase/types"
 
 export const getHomeWorkspaceByUserId = async (userId: string) => {
+  if (!userId) {
+    throw new Error("User ID is required")
+  }
+
   const { data: homeWorkspace, error } = await supabase
     .from("workspaces")
     .select("*")
@@ -9,8 +13,12 @@ export const getHomeWorkspaceByUserId = async (userId: string) => {
     .eq("is_home", true)
     .single()
 
-  if (!homeWorkspace) {
+  if (error) {
     throw new Error(error.message)
+  }
+
+  if (!homeWorkspace) {
+    throw new Error("Home workspace not found")
   }
 
   return homeWorkspace.id
