@@ -753,10 +753,10 @@ export const handleCreateMessages = async (
   setMessages: (messages: ChatMessage[]) => void,
   setChatImages: React.Dispatch<React.SetStateAction<MessageImage[]>>,
   selectedPlugin: PluginID,
+  assistantGeneratedImages: string[],
   editSequenceNumber?: number,
   ragUsed?: boolean,
   ragId?: string | null,
-  assistantGeneratedImages?: string[],
   isTemporary: boolean = false
 ) => {
   const isEdit = editSequenceNumber !== undefined
@@ -848,25 +848,20 @@ export const handleCreateMessages = async (
 
     const createdMessages = await createMessages([finalAssistantMessage])
 
-    if (assistantGeneratedImages && assistantGeneratedImages.length > 0) {
-      const chatImagesWithUrls = await Promise.all(
-        assistantGeneratedImages.map(async url => {
-          const base64 = await fetchImageData(url)
-          return {
-            messageId: createdMessages[0].id,
-            path: url,
-            base64: base64,
-            url: base64 || url,
-            file: null
-          } as MessageImage // Explicitly cast to MessageImage
-        })
-      )
+    const chatImagesWithUrls = await Promise.all(
+      assistantGeneratedImages.map(async url => {
+        const base64 = await fetchImageData(url)
+        return {
+          messageId: createdMessages[0].id,
+          path: url,
+          base64: base64,
+          url: base64 || url,
+          file: null
+        }
+      })
+    )
 
-      setChatImages(prevChatImages => [
-        ...prevChatImages,
-        ...chatImagesWithUrls
-      ])
-    }
+    setChatImages(prevChatImages => [...prevChatImages, ...chatImagesWithUrls])
 
     finalChatMessages = [
       ...chatMessages.slice(0, -1),
@@ -920,25 +915,24 @@ export const handleCreateMessages = async (
       path: paths[index]
     }))
 
-    if (assistantGeneratedImages && assistantGeneratedImages.length > 0) {
-      const chatImagesWithUrls = await Promise.all(
-        assistantGeneratedImages.map(async url => {
-          const base64Data = await fetchImageData(url)
-          return {
-            messageId: createdMessages[1].id,
-            path: url,
-            base64: base64Data,
-            url: url,
-            file: null
-          } as MessageImage // Explicitly cast to MessageImage
-        })
-      )
+    const generatedImages = await Promise.all(
+      assistantGeneratedImages.map(async url => {
+        const base64Data = await fetchImageData(url)
+        return {
+          messageId: createdMessages[1].id,
+          path: url,
+          base64: base64Data,
+          url: url,
+          file: null
+        }
+      })
+    )
 
-      setChatImages(prevChatImages => [
-        ...prevChatImages,
-        ...chatImagesWithUrls
-      ])
-    }
+    setChatImages(prevImages => [
+      ...prevImages,
+      ...newImages,
+      ...generatedImages
+    ])
 
     const updatedMessage = await updateMessage(createdMessages[0].id, {
       ...createdMessages[0],

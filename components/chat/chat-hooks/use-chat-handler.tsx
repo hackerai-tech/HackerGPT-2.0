@@ -431,10 +431,10 @@ export const useChatHandler = () => {
           setChatMessages,
           setChatImages,
           selectedPlugin,
+          assistantGeneratedImages,
           editSequenceNumber,
           ragUsed,
-          ragId,
-          assistantGeneratedImages
+          ragId
         )
       }
 

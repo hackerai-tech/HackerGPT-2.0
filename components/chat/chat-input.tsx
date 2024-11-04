@@ -269,7 +269,10 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
           accept={filesToAccept}
         />
 
-        {isMobile && isPremiumSubscription && optionsCollapsed ? (
+        {isMobile &&
+        isPremiumSubscription &&
+        optionsCollapsed &&
+        !isTemporaryChat ? (
           <div className="absolute bottom-[10px] left-3 flex flex-row">
             <IconCirclePlus
               className="cursor-pointer p-1 hover:opacity-50"
@@ -287,7 +290,9 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
           textareaRef={chatInputRef}
           className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 ${
             isTemporaryChat
-              ? "bg-tertiary" // No padding for temporary chat
+              ? isPremiumSubscription
+                ? "bg-tertiary pl-12" // Temporary chat with premium
+                : "bg-tertiary" // Temporary chat without premium
               : isMobile && isPremiumSubscription && optionsCollapsed
                 ? "pl-12" // Mobile collapsed
                 : isPremiumSubscription
