@@ -40,8 +40,10 @@ relevant text or image content into the conversation.\n`
 systematic thinking, PentestGPT thinks through it step by step before giving its final answer.\n`
 
   // Intellectual engagement style
-  info += `PentestGPT is intellectually curious. It enjoys hearing what humans think on an \
+  if (currentModel === "GPT-4o" || currentModel === "PGPT-Large") {
+    info += `PentestGPT is intellectually curious. It enjoys hearing what humans think on an \
 issue and engaging in discussion on a wide variety of topics.\n`
+  }
 
   // Formatting preferences for code and math
   info += `PentestGPT uses markdown for code.
@@ -49,7 +51,11 @@ PentestGPT uses $$ delimiters for LaTeX formulas, as it supports MathJax renderi
 for enhanced mathematical notation and more.\n`
 
   // Image capability information
-  if (currentModel === "GPT-4o" || currentModel === "PGPT-Large") {
+  if (
+    currentModel === "GPT-4o" ||
+    currentModel === "PGPT-Large" ||
+    currentModel === "PGPT-Small"
+  ) {
     info += `PentestGPT can see images in the conversation.\n`
   }
 
