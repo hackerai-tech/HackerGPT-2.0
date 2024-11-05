@@ -95,6 +95,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
             <Button
               className="flex h-[32px] w-[140px] space-x-2"
               onClick={() => setShowFilesDisplay(false)}
+              variant="secondary"
             >
               <RetrievalToggle />
 
@@ -252,6 +253,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
         <Button
           className="flex h-[32px] w-[140px] space-x-2"
           onClick={() => setShowFilesDisplay(true)}
+          variant="secondary"
         >
           <RetrievalToggle />
 
