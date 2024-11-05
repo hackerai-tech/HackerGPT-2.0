@@ -1,16 +1,13 @@
 import { Toaster } from "@/components/ui/sonner"
 import { GlobalState } from "@/components/utility/global-state"
 import { Providers } from "@/components/utility/providers"
-import { Database } from "@/supabase/types"
-import { createServerClient } from "@supabase/ssr"
 import { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
-import { cookies } from "next/headers"
 import { ReactNode } from "react"
-// import { Analytics } from "@vercel/analytics/react"
 import "./globals.css"
 import { GlobalAlertDialog } from "./global-alert-dialog"
 import { PluginProvider } from "@/components/chat/chat-hooks/PluginProvider"
+import { createClient } from "@/lib/supabase/server"
 
 const inter = Inter({ subsets: ["latin"] })
 const APP_NAME = "PentestGPT"
@@ -88,18 +85,7 @@ export const viewport: Viewport = {
 }
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  const cookieStore = cookies()
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        }
-      }
-    }
-  )
+  const supabase = await createClient()
 
   const {
     data: { user }
@@ -124,7 +110,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             <GlobalAlertDialog />
           </PluginProvider>
         </Providers>
-        {/* <Analytics /> */}
       </body>
     </html>
   )

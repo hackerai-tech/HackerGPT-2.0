@@ -3,11 +3,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/server"
-import { Database } from "@/supabase/types"
-import { createServerClient } from "@supabase/ssr"
 import { get } from "@vercel/edge-config"
 import { Metadata } from "next"
-import { cookies, headers } from "next/headers"
+import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { IconAlertCircle } from "@tabler/icons-react"
 import { MicrosoftIcon } from "@/components/icons/microsoft-icon"
@@ -65,18 +63,7 @@ export default async function Login({
     errorMessage = errorMessages.ratelimit_defaul
   }
 
-  const cookieStore = cookies()
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        }
-      }
-    }
-  )
+  const supabase = await createClient()
 
   const {
     data: { user }
@@ -108,7 +95,7 @@ export default async function Login({
     if (!success) {
       return redirect(`/login?message=13`)
     }
-    const supabase = createClient(cookies())
+    const supabase = await createClient()
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
@@ -203,7 +190,7 @@ export default async function Login({
       return redirect(`/login?message=1`)
     }
 
-    const supabase = createClient(cookies())
+    const supabase = await createClient()
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -234,7 +221,7 @@ export default async function Login({
     if (!validateEmail(email)) return redirect("/login?message=11")
 
     const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
-    const supabase = createClient(cookies())
+    const supabase = await createClient()
 
     const { success } = await checkAuthRateLimit(email, ip, "password-reset")
     if (!success) return redirect("/login?message=password_reset_limit")
@@ -252,7 +239,7 @@ export default async function Login({
 
   const handleSignInWithGoogle = async () => {
     "use server"
-    const supabase = createClient(cookies())
+    const supabase = await createClient()
     const origin = headers().get("origin")
 
     const { error, data } = await supabase.auth.signInWithOAuth({
@@ -271,7 +258,7 @@ export default async function Login({
 
   const handleSignInWithMicrosoft = async () => {
     "use server"
-    const supabase = createClient(cookies())
+    const supabase = await createClient()
     const origin = headers().get("origin")
 
     const { data, error } = await supabase.auth.signInWithOAuth({
