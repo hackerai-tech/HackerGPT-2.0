@@ -17,15 +17,14 @@ export default function SetupPage() {
   useEffect(() => {
     ;(async () => {
       const {
-        data: { session }
-      } = await supabase.auth.getSession()
+        data: { user }
+      } = await supabase.auth.getUser()
 
-      if (!session) {
+      if (!user) {
         router.push("/login")
         return
       }
 
-      const user = session.user
       const profile = await getProfileByUserId(user.id)
       setProfile(profile)
 

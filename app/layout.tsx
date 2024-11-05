@@ -100,7 +100,10 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       }
     }
   )
-  const session = (await supabase.auth.getSession()).data.session
+
+  const {
+    data: { user }
+  } = await supabase.auth.getUser()
 
   return (
     <html lang="en" suppressHydrationWarning className="h-full">
@@ -113,10 +116,10 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body className={inter.className + " h-full"}>
         <Providers attribute="class" defaultTheme="dark">
-          <PluginProvider isLoggedIn={!!session}>
+          <PluginProvider isLoggedIn={!!user}>
             <Toaster richColors position="top-center" duration={3000} />
             <div className="bg-background text-foreground flex h-dvh flex-col items-center overflow-x-auto">
-              {session ? <GlobalState>{children}</GlobalState> : children}
+              {user ? <GlobalState>{children}</GlobalState> : children}
             </div>
             <GlobalAlertDialog />
           </PluginProvider>

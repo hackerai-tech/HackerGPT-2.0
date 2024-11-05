@@ -78,7 +78,9 @@ export default async function Login({
     }
   )
 
-  const { data: { user } = {} } = await supabase.auth.getUser()
+  const {
+    data: { user }
+  } = await supabase.auth.getUser()
 
   if (user) {
     const { data: homeWorkspace, error } = await supabase
