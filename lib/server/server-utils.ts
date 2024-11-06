@@ -13,14 +13,15 @@ export function createResponse(data: object, status: number): Response {
 }
 
 export function createSupabaseAppServerClient() {
+  const cookieStore = cookies()
+
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name) {
-          //return cookie with the name 'name' here
-          return cookies().get(name)?.value
+        getAll() {
+          return cookieStore.getAll()
         }
       }
     }

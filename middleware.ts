@@ -5,15 +5,15 @@ export async function middleware(request: NextRequest) {
   try {
     const { supabase, response } = createClient(request)
 
-    const session = await supabase.auth.getSession()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    const redirectToChat = session && request.nextUrl.pathname === "/"
+    const redirectToChat = user && request.nextUrl.pathname === "/"
 
     if (redirectToChat) {
       const { data: homeWorkspace, error } = await supabase
         .from("workspaces")
         .select("*")
-        .eq("user_id", session.data.session?.user.id)
+        .eq("user_id", user.id)
         .eq("is_home", true)
         .single()
 

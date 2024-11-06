@@ -35,12 +35,15 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
     chatImages,
     setChatImages,
     setChatFiles,
-    setUseRetrieval
+    setUseRetrieval,
+    isMobile
   } = useContext(PentestGPTContext)
 
   const [selectedFile, setSelectedFile] = useState<ChatFile | null>(null)
   const [selectedImage, setSelectedImage] = useState<MessageImage | null>(null)
   const [showPreview, setShowPreview] = useState(false)
+
+  const [isHovering, setIsHovering] = useState(false)
 
   const messageImages = [
     ...newMessageImages.filter(
@@ -92,6 +95,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
             <Button
               className="flex h-[32px] w-[140px] space-x-2"
               onClick={() => setShowFilesDisplay(false)}
+              variant="secondary"
             >
               <RetrievalToggle />
 
@@ -108,6 +112,8 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
           <div
             className="scrollbar-hide sm:scrollbar-show flex gap-2 overflow-auto pt-2"
             onMouseDown={dragHelper}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
           >
             {messageImages.map((image, index) => (
               <div
@@ -133,20 +139,31 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
                   }}
                 />
 
-                <IconX
-                  className="bg-muted-foreground border-primary absolute right-[-6px] top-[-2px] flex size-5 cursor-pointer items-center justify-center rounded-full border text-[10px] hover:border-red-500 hover:bg-white hover:text-red-500"
-                  onClick={e => {
-                    e.stopPropagation()
-                    setNewMessageImages(
-                      newMessageImages.filter(
-                        f => f.messageId !== image.messageId
-                      )
-                    )
-                    setChatImages(
-                      chatImages.filter(f => f.messageId !== image.messageId)
-                    )
-                  }}
-                />
+                {(isMobile || isHovering) && (
+                  <WithTooltip
+                    delayDuration={0}
+                    side="top"
+                    display={<div>Remove image</div>}
+                    trigger={
+                      <IconX
+                        className="bg-secondary border-primary absolute right-[-6px] top-[-2px] flex size-5 cursor-pointer items-center justify-center rounded-full border text-[10px] hover:border-red-500 hover:bg-white hover:text-red-500"
+                        onClick={e => {
+                          e.stopPropagation()
+                          setNewMessageImages(
+                            newMessageImages.filter(
+                              f => f.messageId !== image.messageId
+                            )
+                          )
+                          setChatImages(
+                            chatImages.filter(
+                              f => f.messageId !== image.messageId
+                            )
+                          )
+                        }}
+                      />
+                    }
+                  />
+                )}
               </div>
             ))}
 
@@ -169,7 +186,6 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
                 <div
                   key={file.id}
                   className="bg-secondary relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl px-4 py-3 hover:opacity-50"
-                  // onClick={() => getLinkAndView(file)}
                 >
                   <div className="rounded bg-blue-500 p-2">
                     {(() => {
@@ -200,19 +216,30 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
                     <div className="truncate">{file.name}</div>
                   </div>
 
-                  <IconX
-                    className="bg-muted-foreground border-primary absolute right-[-6px] top-[-6px] flex size-5 cursor-pointer items-center justify-center rounded-full border text-[10px] hover:border-red-500 hover:bg-white hover:text-red-500"
-                    onClick={e => {
-                      e.stopPropagation()
-                      if (combinedChatFiles.length == 1) {
-                        setUseRetrieval(false)
+                  {(isMobile || isHovering) && (
+                    <WithTooltip
+                      delayDuration={0}
+                      side="top"
+                      display={<div>Remove file</div>}
+                      trigger={
+                        <IconX
+                          className="bg-secondary border-primary absolute right-[-6px] top-[-6px] flex size-5 cursor-pointer items-center justify-center rounded-full border text-[10px] hover:border-red-500 hover:bg-white hover:text-red-500"
+                          onClick={e => {
+                            e.stopPropagation()
+                            if (combinedChatFiles.length == 1) {
+                              setUseRetrieval(false)
+                            }
+                            setNewMessageFiles(
+                              newMessageFiles.filter(f => f.id !== file.id)
+                            )
+                            setChatFiles(
+                              chatFiles.filter(f => f.id !== file.id)
+                            )
+                          }}
+                        />
                       }
-                      setNewMessageFiles(
-                        newMessageFiles.filter(f => f.id !== file.id)
-                      )
-                      setChatFiles(chatFiles.filter(f => f.id !== file.id))
-                    }}
-                  />
+                    />
+                  )}
                 </div>
               )
             )}
@@ -226,6 +253,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
         <Button
           className="flex h-[32px] w-[140px] space-x-2"
           onClick={() => setShowFilesDisplay(true)}
+          variant="secondary"
         >
           <RetrievalToggle />
 

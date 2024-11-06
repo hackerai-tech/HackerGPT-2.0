@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server"
-import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
 export async function GET(request: Request) {
@@ -8,8 +7,7 @@ export async function GET(request: Request) {
   const next = requestUrl.searchParams.get("next") || "/"
 
   if (code) {
-    const cookieStore = cookies()
-    const supabase = createClient(cookieStore)
+    const supabase = await createClient()
 
     try {
       const { error } = await supabase.auth.exchangeCodeForSession(code)
@@ -22,9 +20,5 @@ export async function GET(request: Request) {
     }
   }
 
-  const redirectUrl = new URL(
-    next,
-    process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN || requestUrl.origin
-  )
-  return NextResponse.redirect(redirectUrl.toString())
+  return NextResponse.redirect(new URL(next, request.url))
 }

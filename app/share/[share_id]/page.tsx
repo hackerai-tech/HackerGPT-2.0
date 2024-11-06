@@ -17,7 +17,7 @@ export default async function SharedChatPage({
 }: {
   params: { share_id: string; locale: string }
 }) {
-  const supabase = createClient(cookies())
+  const supabase = await createClient()
 
   const { data: chatData } = await supabase
     .from("chats")

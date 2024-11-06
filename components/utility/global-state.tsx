@@ -1,5 +1,3 @@
-// TODO: Separate into multiple contexts, keeping simple for now
-
 "use client"
 
 import { PentestGPTContext } from "@/context/context"
@@ -196,35 +194,36 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   )
 
   const fetchStartingData = async () => {
-    const session = (await supabase.auth.getSession()).data.session
+    const {
+      data: { user: userFromAuth }
+    } = await supabase.auth.getUser()
 
-    if (session) {
-      const userFromSession = session.user
-      setUser(userFromSession)
+    if (userFromAuth) {
+      setUser(userFromAuth)
 
-      const profile = await getProfileByUserId(userFromSession.id)
+      const profile = await getProfileByUserId(userFromAuth.id)
       setProfile(profile)
 
       if (!profile.has_onboarded) {
         return router.push("/setup")
       }
 
-      const subscription = await getSubscriptionByUserId(userFromSession.id)
+      const subscription = await getSubscriptionByUserId(userFromAuth.id)
       updateSubscription(subscription)
 
-      const workspaces = await getWorkspacesByUserId(userFromSession.id)
+      const workspaces = await getWorkspacesByUserId(userFromAuth.id)
       setWorkspaces(workspaces)
 
       const members = await getTeamMembersByTeamId(
-        userFromSession.id,
-        userFromSession.email,
+        userFromAuth.id,
+        userFromAuth.email,
         subscription?.team_id
       )
 
       const membershipData = members?.find(
         member =>
-          member.member_user_id === userFromSession.id ||
-          member.invitee_email === userFromSession.email
+          member.member_user_id === userFromAuth.id ||
+          member.invitee_email === userFromAuth.email
       )
 
       if (membershipData?.invitation_status !== "rejected") {

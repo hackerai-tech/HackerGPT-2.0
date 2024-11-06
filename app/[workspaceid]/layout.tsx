@@ -42,9 +42,11 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
 
   useEffect(() => {
     ;(async () => {
-      const session = (await supabase.auth.getSession()).data.session
+      const {
+        data: { user }
+      } = await supabase.auth.getUser()
 
-      if (!session) {
+      if (!user) {
         return router.push("/login")
       } else {
         await fetchWorkspaceData(workspaceId)
