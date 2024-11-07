@@ -9,7 +9,9 @@ import {
   IconPlayerStopFilled,
   IconPuzzle,
   IconPuzzleOff,
-  IconArrowUp
+  IconArrowUp,
+  IconLoader2,
+  IconMicrophone
 } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -24,6 +26,9 @@ import { usePromptAndCommand } from "./chat-hooks/use-prompt-and-command"
 import { useSelectFileHandler } from "./chat-hooks/use-select-file-handler"
 import { EnhancedMenuPicker } from "./enhance-menu"
 import { UnsupportedFilesDialog } from "./unsupported-files-dialog"
+import useSpeechRecognition from "./chat-hooks/use-speech-recognition"
+import VoiceRecordingBar from "@/components/ui/voice-recording-bar"
+import VoiceLoadingBar from "@/components/ui/voice-loading-bar"
 
 interface ChatInputProps {
   isTemporaryChat: boolean
@@ -57,7 +62,8 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
     setIsEnhancedMenuOpen,
     selectedPlugin,
     isPremiumSubscription,
-    isMobile
+    isMobile,
+    isMicSupported
   } = useContext(PentestGPTContext)
 
   const {
@@ -106,6 +112,24 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
       setOptionsCollapsed(true)
     }
   }, [isTyping])
+
+  const handleTranscriptChange = (transcript: string) => {
+    if (transcript !== userInput) {
+      handleInputChange(transcript)
+    }
+  }
+
+  const {
+    isListening,
+    setIsListening,
+    hasMicAccess,
+    startListening,
+    cancelListening,
+    isSpeechToTextLoading,
+    hasSupportedMimeType,
+    isRequestingMicAccess,
+    requestMicAccess
+  } = useSpeechRecognition(handleTranscriptChange)
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     setOptionsCollapsed(true)
@@ -233,118 +257,176 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
         {isEnhancedMenuOpen && !isTemporaryChat && <EnhancedMenuPicker />}
       </div>
 
-      <div
-        className={`bg-secondary border-input relative flex min-h-[56px] w-full items-center justify-center rounded-xl border-2 ${
-          isTemporaryChat
-            ? "bg-tertiary border-tertiary"
-            : selectedPlugin && selectedPlugin !== PluginID.NONE
-              ? "border-primary"
-              : "border-secondary"
-        } ${isEnhancedMenuOpen ? "mt-3" : ""}`}
-        ref={divRef}
-      >
-        {isPremiumSubscription && (
-          <div
-            className={`absolute left-0 w-full overflow-auto rounded-xl dark:border-none`}
-            style={{ bottom: `${bottomSpacingPx}px` }}
-          >
-            <ChatCommandInput />
-          </div>
-        )}
-
-        <Input
-          ref={fileInputRef}
-          className="hidden w-0"
-          type="file"
-          onChange={e => {
-            if (!e.target.files) return
-            handleFileUpload(
-              Array.from(e.target.files),
-              chatSettings,
-              setShowConfirmationDialog,
-              setPendingFiles,
-              handleSelectDeviceFile
-            )
+      {isListening ? (
+        <VoiceRecordingBar
+          isListening={isListening}
+          stopListening={() => setIsListening(false)}
+          cancelListening={() => {
+            setIsListening(false)
+            cancelListening()
           }}
-          accept={filesToAccept}
         />
-
-        {isMobile &&
-        isPremiumSubscription &&
-        optionsCollapsed &&
-        !isTemporaryChat ? (
-          <div className="absolute bottom-[10px] left-3 flex flex-row">
-            <IconCirclePlus
-              className="cursor-pointer p-1 hover:opacity-50"
-              onClick={() => setOptionsCollapsed(false)}
-              size={34}
-            />
-          </div>
-        ) : (
-          <div className="absolute bottom-[10px] left-3 flex flex-row">
-            <ToolOptions />
-          </div>
-        )}
-
-        <TextareaAutosize
-          textareaRef={chatInputRef}
-          className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 ${
+      ) : isSpeechToTextLoading ? (
+        <VoiceLoadingBar isLoading={isSpeechToTextLoading} />
+      ) : (
+        <div
+          className={`bg-secondary border-input relative flex min-h-[56px] w-full items-center justify-center rounded-xl border-2 ${
             isTemporaryChat
-              ? isPremiumSubscription
-                ? "bg-tertiary pl-12" // Temporary chat with premium
-                : "bg-tertiary" // Temporary chat without premium
-              : isMobile && isPremiumSubscription && optionsCollapsed
-                ? "pl-12" // Mobile collapsed
-                : isPremiumSubscription
-                  ? "pl-[84px]" // Premium expanded
-                  : "pl-12" // Free plan (no file upload)
-          } pr-14 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
-          placeholder={
-            isMobile
-              ? `Message` +
-                (!isPremiumSubscription
-                  ? " PentestGPT"
-                  : `. Type "#" for files.`)
-              : `Message PentestGPT` +
-                (!isPremiumSubscription ? "" : `. Type "#" for files.`)
-          }
-          onValueChange={handleInputChange} // This function updates the userInput state
-          value={userInput} // This state should display the transcribed text
-          minRows={1}
-          maxRows={isMobile ? 6 : 12}
-          onKeyDown={handleKeyDown}
-          onPaste={handlePaste}
-          onCompositionStart={() => setIsTyping(true)}
-          onCompositionEnd={() => setIsTyping(false)}
-          onClick={() => setOptionsCollapsed(true)}
-        />
-
-        <div className="absolute bottom-[10px] right-3 flex cursor-pointer items-center space-x-2">
-          {isGenerating ? (
-            <IconPlayerStopFilled
-              className={cn(
-                "md:hover:bg-background animate-pulse rounded bg-transparent p-1 md:hover:opacity-50"
-              )}
-              onClick={handleStopMessage}
-              size={30}
-            />
-          ) : (
-            <IconArrowUp
-              className={cn(
-                "bg-primary text-secondary rounded p-1 hover:opacity-50",
-                !userInput && "cursor-not-allowed opacity-50"
-              )}
-              stroke={2.5}
-              onClick={() => {
-                if (isTyping) setOptionsCollapsed(true)
-                if (!userInput) return
-                handleSendMessage(userInput, chatMessages, false)
-              }}
-              size={30}
-            />
+              ? "bg-tertiary border-tertiary"
+              : selectedPlugin && selectedPlugin !== PluginID.NONE
+                ? "border-primary"
+                : "border-secondary"
+          } ${isEnhancedMenuOpen ? "mt-3" : ""}`}
+          ref={divRef}
+        >
+          {isPremiumSubscription && (
+            <div
+              className={`absolute left-0 w-full overflow-auto rounded-xl dark:border-none`}
+              style={{ bottom: `${bottomSpacingPx}px` }}
+            >
+              <ChatCommandInput />
+            </div>
           )}
+
+          <Input
+            ref={fileInputRef}
+            className="hidden w-0"
+            type="file"
+            onChange={e => {
+              if (!e.target.files) return
+              handleFileUpload(
+                Array.from(e.target.files),
+                chatSettings,
+                setShowConfirmationDialog,
+                setPendingFiles,
+                handleSelectDeviceFile
+              )
+            }}
+            accept={filesToAccept}
+          />
+
+          {isMobile &&
+          isPremiumSubscription &&
+          optionsCollapsed &&
+          !isTemporaryChat ? (
+            <div className="absolute bottom-[10px] left-3 flex flex-row">
+              <IconCirclePlus
+                className="cursor-pointer p-1 hover:opacity-50"
+                onClick={() => setOptionsCollapsed(false)}
+                size={34}
+              />
+            </div>
+          ) : (
+            <div className="absolute bottom-[10px] left-3 flex flex-row">
+              <ToolOptions />
+            </div>
+          )}
+
+          <TextareaAutosize
+            textareaRef={chatInputRef}
+            className={`ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring text-md bg-secondary flex w-full resize-none rounded-md border-none py-2 ${
+              isTemporaryChat
+                ? isPremiumSubscription
+                  ? "bg-tertiary pl-12" // Temporary chat with premium
+                  : "bg-tertiary" // Temporary chat without premium
+                : isMobile && isPremiumSubscription && optionsCollapsed
+                  ? "pl-12" // Mobile collapsed
+                  : isPremiumSubscription
+                    ? "pl-[84px]" // Premium expanded
+                    : "pl-12" // Free plan (no file upload)
+            } ${
+              isPremiumSubscription &&
+              isMicSupported &&
+              hasSupportedMimeType &&
+              !userInput &&
+              !isGenerating
+                ? "pr-20" // More space for mic + send button
+                : "pr-14" // Normal space for send button only
+            } focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50`}
+            placeholder={
+              isMobile
+                ? `Message` +
+                  (!isPremiumSubscription
+                    ? " PentestGPT"
+                    : `. Type "#" for files.`)
+                : `Message PentestGPT` +
+                  (!isPremiumSubscription ? "" : `. Type "#" for files.`)
+            }
+            onValueChange={handleInputChange} // This function updates the userInput state
+            value={userInput} // This state should display the transcribed text
+            minRows={1}
+            maxRows={isMobile ? 6 : 12}
+            onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            onCompositionStart={() => setIsTyping(true)}
+            onCompositionEnd={() => setIsTyping(false)}
+            onClick={() => setOptionsCollapsed(true)}
+          />
+
+          <div className="absolute bottom-[10px] right-3 flex cursor-pointer items-center space-x-3">
+            {isPremiumSubscription &&
+              isMicSupported &&
+              hasSupportedMimeType &&
+              !userInput &&
+              !isGenerating && (
+                <>
+                  {isRequestingMicAccess ? (
+                    <IconLoader2
+                      className="animate-spin cursor-pointer p-1 hover:opacity-50"
+                      size={30}
+                    />
+                  ) : (
+                    <WithTooltip
+                      delayDuration={TOOLTIP_DELAY}
+                      side="top"
+                      display={
+                        <div className="flex flex-col">
+                          <p className="font-medium">
+                            {hasMicAccess
+                              ? "Hold to record"
+                              : "Enable microphone"}
+                          </p>
+                        </div>
+                      }
+                      trigger={
+                        <IconMicrophone
+                          className="cursor-pointer p-1 hover:opacity-50"
+                          onClick={
+                            hasMicAccess ? startListening : requestMicAccess
+                          }
+                          size={30}
+                        />
+                      }
+                    />
+                  )}
+                </>
+              )}
+            {isGenerating ? (
+              <IconPlayerStopFilled
+                className={cn(
+                  "md:hover:bg-background animate-pulse rounded bg-transparent p-1 md:hover:opacity-50"
+                )}
+                onClick={handleStopMessage}
+                size={30}
+              />
+            ) : (
+              <IconArrowUp
+                className={cn(
+                  "bg-primary text-secondary rounded p-1 hover:opacity-50",
+                  !userInput && "cursor-not-allowed opacity-50"
+                )}
+                stroke={2.5}
+                onClick={() => {
+                  if (isTyping) setOptionsCollapsed(true)
+                  if (!userInput) return
+                  handleSendMessage(userInput, chatMessages, false)
+                }}
+                size={30}
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </>
   )
 }

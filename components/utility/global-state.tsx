@@ -132,6 +132,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [currentPlayingMessageId, setCurrentPlayingMessageId] = useState<
     string | null
   >(null)
+  const [isMicSupported, setIsMicSupported] = useState(true)
 
   // Terminal output setting
   const [showTerminalOutput, setShowTerminalOutput] =
@@ -373,6 +374,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         // Audio
         currentPlayingMessageId,
         setCurrentPlayingMessageId,
+        isMicSupported,
+        setIsMicSupported,
 
         // TEMPORARY CHAT STORE
         isTemporaryChat

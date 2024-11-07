@@ -134,6 +134,8 @@ interface PentestGPTContextType {
   // Audio
   currentPlayingMessageId: string | null
   setCurrentPlayingMessageId: Dispatch<SetStateAction<string | null>>
+  isMicSupported: boolean
+  setIsMicSupported: Dispatch<SetStateAction<boolean>>
 
   // TEMPORARY CHAT STORE
   isTemporaryChat: boolean
@@ -258,6 +260,8 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   // Audio
   currentPlayingMessageId: null,
   setCurrentPlayingMessageId: () => {},
+  isMicSupported: false,
+  setIsMicSupported: () => {},
 
   // TEMPORARY CHAT STORE
   isTemporaryChat: false
