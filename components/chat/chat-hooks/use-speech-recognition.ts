@@ -153,24 +153,35 @@ const useSpeechRecognition = (
     }
   }, [mediaRecorder, onTranscriptChange, getSupportedMimeType])
 
-  const requestMicAccess = useCallback(() => {
-    setIsRequestingMicAccess(true)
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then(() => {
-        setHasMicAccess(true)
-        setIsListening(true)
-      })
-      .catch(() => {
-        setHasMicAccess(false)
-      })
-      .finally(() => {
-        setIsRequestingMicAccess(false)
-      })
+  const requestMicAccess = useCallback(async () => {
+    try {
+      setIsRequestingMicAccess(true)
+      console.log("Requesting microphone access...")
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // Stop the test stream immediately
+      stream.getTracks().forEach(track => track.stop())
+
+      setHasMicAccess(true)
+      setIsListening(true)
+      console.log("Microphone access granted")
+    } catch (err) {
+      console.error("Microphone access denied:", err)
+      setHasMicAccess(false)
+      toast.error("Please allow microphone access to use this feature")
+    } finally {
+      setIsRequestingMicAccess(false)
+    }
   }, [])
 
   const startRecording = useCallback(() => {
     if (!hasMicAccess || isRecordingRef.current) {
+      console.log(
+        "Early return - hasMicAccess:",
+        hasMicAccess,
+        "isRecording:",
+        isRecordingRef.current
+      )
       return
     }
 
@@ -184,16 +195,18 @@ const useSpeechRecognition = (
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true,
-          sampleRate: 44100 // Add stable sample rate
+          sampleRate: 44100
         }
       })
       .then(stream => {
         const mimeType = getSupportedMimeType()
         if (!mimeType) {
+          console.error("No supported MIME type found")
           throw new Error("No supported audio format found")
         }
 
         try {
+          console.log("Starting recording with MIME type:", mimeType)
           const recorder = new MediaRecorder(stream, {
             mimeType,
             audioBitsPerSecond: 128000
@@ -212,12 +225,13 @@ const useSpeechRecognition = (
           setMediaRecorder(recorder)
           setIsListening(true)
         } catch (err) {
+          console.error("Failed to create MediaRecorder:", err)
           isRecordingRef.current = false
           throw new Error("Failed to start recording")
         }
       })
       .catch(err => {
-        console.error("MediaRecorder error:", err)
+        console.error("getUserMedia error:", err)
         isRecordingRef.current = false
         setIsListening(false)
         toast.error(`Microphone error: ${err.message}`)

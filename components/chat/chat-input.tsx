@@ -391,9 +391,13 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
                       trigger={
                         <IconMicrophone
                           className="cursor-pointer p-1 hover:opacity-50"
-                          onClick={
-                            hasMicAccess ? startListening : requestMicAccess
-                          }
+                          onClick={async () => {
+                            if (hasMicAccess) {
+                              startListening()
+                            } else {
+                              await requestMicAccess()
+                            }
+                          }}
                           size={30}
                         />
                       }
