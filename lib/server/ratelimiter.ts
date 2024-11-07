@@ -209,7 +209,8 @@ function getModelName(model: string): string {
     "pentestgpt-pro": "PGPT-Large",
     "gpt-4": "GPT-4",
     terminal: "terminal",
-    "tts-1": "text-to-speech"
+    "tts-1": "text-to-speech",
+    "stt-1": "speech-to-text"
   }
   return modelNames[model] || model
 }
