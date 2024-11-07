@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "ai.pentestgpt.twa",
+        "sha256_cert_fingerprints": ["8D:44:31:09:99:89:67:FB:FE:03:AE:74:17:2C:64:12:39:43:57:07:B9:9B:D6:4E:C0:CE:A2:7C:04:56:82:63"]
+      }
+    }]
