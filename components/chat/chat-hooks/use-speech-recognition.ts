@@ -29,23 +29,34 @@ const useSpeechRecognition = (
   const getSupportedMimeType = useCallback((): string | null => {
     const isAppleDevice = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent)
 
-    // For Apple devices, return mp4 directly
     if (isAppleDevice) {
-      return "audio/mp4"
+      // Try Apple-specific MIME types first
+      const appleMimeTypes = [
+        "audio/mp4",
+        "audio/x-m4a",
+        "audio/aac",
+        "audio/mpeg",
+        "audio/webm"
+      ]
+
+      for (const type of appleMimeTypes) {
+        try {
+          if (MediaRecorder.isTypeSupported(type)) {
+            return type
+          }
+        } catch {
+          continue
+        }
+      }
     }
 
-    // For all other devices, try these MIME types in order
+    // For all other devices or if Apple-specific types failed
     const mimeTypes = [
-      "audio/flac",
-      "audio/m4a",
-      "audio/mp3",
+      "audio/webm",
       "audio/mp4",
-      "audio/mpeg",
-      "audio/mpga",
-      "audio/oga",
       "audio/ogg",
       "audio/wav",
-      "audio/webm"
+      "audio/mpeg"
     ]
 
     for (const type of mimeTypes) {
@@ -192,13 +203,13 @@ const useSpeechRecognition = (
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          autoGainControl: true,
-          sampleRate: 44100
+          autoGainControl: true
         }
       })
       .then(stream => {
         const mimeType = getSupportedMimeType()
         if (!mimeType) {
+          console.error("No supported MIME type found")
           throw new Error("No supported audio format found")
         }
 
