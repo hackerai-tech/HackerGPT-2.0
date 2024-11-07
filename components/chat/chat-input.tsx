@@ -128,7 +128,8 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
     isSpeechToTextLoading,
     hasSupportedMimeType,
     isRequestingMicAccess,
-    requestMicAccess
+    requestMicAccess,
+    micPermissionDenied
   } = useSpeechRecognition(handleTranscriptChange)
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -265,9 +266,13 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
             setIsListening(false)
             cancelListening()
           }}
+          isEnhancedMenuOpen={isEnhancedMenuOpen}
         />
       ) : isSpeechToTextLoading ? (
-        <VoiceLoadingBar isLoading={isSpeechToTextLoading} />
+        <VoiceLoadingBar
+          isLoading={isSpeechToTextLoading}
+          isEnhancedMenuOpen={isEnhancedMenuOpen}
+        />
       ) : (
         <div
           className={`bg-secondary border-input relative flex min-h-[56px] w-full items-center justify-center rounded-xl border-2 ${
@@ -368,7 +373,8 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
               isMicSupported &&
               hasSupportedMimeType &&
               !userInput &&
-              !isGenerating && (
+              !isGenerating &&
+              !micPermissionDenied && (
                 <>
                   {isRequestingMicAccess ? (
                     <IconLoader2
@@ -383,7 +389,7 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
                         <div className="flex flex-col">
                           <p className="font-medium">
                             {hasMicAccess
-                              ? "Hold to record"
+                              ? "Click to record"
                               : "Enable microphone"}
                           </p>
                         </div>

@@ -29,32 +29,23 @@ const useSpeechRecognition = (
   const getSupportedMimeType = useCallback((): string | null => {
     const isAppleDevice = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent)
 
-    // For Apple devices
+    // For Apple devices, return mp4 directly
     if (isAppleDevice) {
-      const appleMimeTypes = [
-        "audio/mp4;codecs=mp4a",
-        "audio/mp4",
-        "audio/mpeg",
-        "audio/aac"
-      ]
-
-      for (const type of appleMimeTypes) {
-        try {
-          if (MediaRecorder.isTypeSupported(type)) {
-            return type
-          }
-        } catch {
-          continue
-        }
-      }
+      return "audio/mp4"
     }
 
-    // For other devices
+    // For all other devices, try these MIME types in order
     const mimeTypes = [
-      "audio/webm",
-      "audio/webm;codecs=opus",
-      "audio/ogg;codecs=opus",
-      "audio/wav"
+      "audio/flac",
+      "audio/m4a",
+      "audio/mp3",
+      "audio/mp4",
+      "audio/mpeg",
+      "audio/mpga",
+      "audio/oga",
+      "audio/ogg",
+      "audio/wav",
+      "audio/webm"
     ]
 
     for (const type of mimeTypes) {
@@ -96,11 +87,11 @@ const useSpeechRecognition = (
       return
     }
 
-    const mimeType = getSupportedMimeType()
-    if (!mimeType) {
-      toast.error("No supported audio format found for your browser.")
-      return
-    }
+    const isAppleDevice = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent)
+
+    const mimeType = isAppleDevice
+      ? "audio/mp4"
+      : mediaRecorder?.mimeType || "audio/webm"
 
     try {
       const audioBlob = new Blob(audioChunksRef.current, { type: mimeType })
@@ -156,7 +147,6 @@ const useSpeechRecognition = (
   const requestMicAccess = useCallback(async () => {
     try {
       setIsRequestingMicAccess(true)
-      console.log("Requesting microphone access...")
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       // Stop the test stream immediately
@@ -164,11 +154,25 @@ const useSpeechRecognition = (
 
       setHasMicAccess(true)
       setIsListening(true)
-      console.log("Microphone access granted")
-    } catch (err) {
-      console.error("Microphone access denied:", err)
+    } catch (err: any) {
       setHasMicAccess(false)
-      toast.error("Please allow microphone access to use this feature")
+      setMicPermissionDenied(true)
+
+      // Handle specific error messages
+      if (err.message.includes("not allowed by the user agent")) {
+        toast.error(
+          "Microphone access is blocked. Please enable it in your browser settings."
+        )
+      } else if (
+        err.name === "NotAllowedError" ||
+        err.name === "PermissionDeniedError"
+      ) {
+        toast.error(
+          "Microphone access was denied. Please allow access to use this feature."
+        )
+      } else {
+        toast.error("Failed to access microphone. Please check your settings.")
+      }
     } finally {
       setIsRequestingMicAccess(false)
     }
@@ -176,12 +180,6 @@ const useSpeechRecognition = (
 
   const startRecording = useCallback(() => {
     if (!hasMicAccess || isRecordingRef.current) {
-      console.log(
-        "Early return - hasMicAccess:",
-        hasMicAccess,
-        "isRecording:",
-        isRecordingRef.current
-      )
       return
     }
 
@@ -201,12 +199,10 @@ const useSpeechRecognition = (
       .then(stream => {
         const mimeType = getSupportedMimeType()
         if (!mimeType) {
-          console.error("No supported MIME type found")
           throw new Error("No supported audio format found")
         }
 
         try {
-          console.log("Starting recording with MIME type:", mimeType)
           const recorder = new MediaRecorder(stream, {
             mimeType,
             audioBitsPerSecond: 128000
@@ -269,6 +265,8 @@ const useSpeechRecognition = (
     setIsListening(false)
   }
 
+  const [micPermissionDenied, setMicPermissionDenied] = useState(false)
+
   return {
     isListening,
     setIsListening,
@@ -278,7 +276,8 @@ const useSpeechRecognition = (
     requestMicAccess,
     startListening,
     cancelListening,
-    isSpeechToTextLoading
+    isSpeechToTextLoading,
+    micPermissionDenied
   }
 }
 
