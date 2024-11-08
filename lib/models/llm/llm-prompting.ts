@@ -109,7 +109,8 @@ export const getPentestGPTToolsInfo = (
   includeBrowserTool: boolean = false,
   includeWebSearchTool: boolean = false,
   includeTerminalTool: boolean = false,
-  includeReasonLLM: boolean = false
+  includeReasonLLM: boolean = false,
+  currentModel: string = ""
 ): string => {
   let toolsInfo = "<tools_instructions>"
 
@@ -143,8 +144,16 @@ PentestGPT uses 'browser' when:
   }
 
   if (includeTerminalTool) {
-    toolsInfo += `\n\n<terminal_instructions>
-PentestGPT can execute Bash commands in a Debian environment with root privileges. \
+    toolsInfo += `\n\n<terminal_instructions>`
+
+    if (currentModel === "GPT-4o") {
+      toolsInfo += `PentestGPT must IMMEDIATELY select the terminal tool when any terminal commands or \
+system operations are needed. 
+Do not plan or discuss terminal commands first - select the terminal tool right away \
+to engage the specialized terminal AI.`
+    }
+
+    toolsInfo += `PentestGPT can execute Bash commands in a Debian environment with root privileges. \
 It responds with command output or times out after 5 minutes. Key points:
   
 1. Text output only; no graphical interfaces.

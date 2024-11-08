@@ -33,12 +33,13 @@ export const createToolSchemas = (context: ToolContext) => {
       })
     },
     terminal: {
-      description: "Run terminal commands.",
+      description:
+        "Run terminal commands. Select this tool IMMEDIATELY when any terminal operations are needed.",
       parameters: z.object({
         terminal: z
           .boolean()
           .describe(
-            "Set to true to use the terminal for executing bash commands"
+            "Set to true to use the terminal for executing bash commands. Select immediately when terminal operations are needed."
           )
       })
     }

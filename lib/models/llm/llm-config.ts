@@ -47,7 +47,7 @@ const llmConfig = {
     // For PGPT-Large
     pgptLarge: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-Large")}\n${getPentestGPTToolsInfo(true, true, false, false)}\n${systemPromptEnding}`,
     // For GPT-4o
-    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true)}\n${systemPromptEnding}`,
+    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, true, "GPT-4o")}\n${systemPromptEnding}`,
     // For browser tool
     pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${systemPromptEnding}`,
     // For webSearch tool
