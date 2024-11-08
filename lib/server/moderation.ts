@@ -8,6 +8,8 @@ export async function getModerationResult(
   openaiApiKey: string,
   hackerRAGMinLength: number
 ): Promise<{ shouldUncensorResponse: boolean }> {
+  return await performAlternativeModeration(messages)
+
   const openai = new OpenAI({ apiKey: openaiApiKey })
 
   // Find the last user message that exceeds the minimum length
