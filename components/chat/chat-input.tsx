@@ -195,7 +195,7 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
             side="top"
             display={
               <div className="flex flex-col">
-                <p className="font-medium">Upload a File</p>
+                <p className="font-medium">Upload Files</p>
               </div>
             }
             trigger={
@@ -297,11 +297,19 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
             ref={fileInputRef}
             className="hidden w-0"
             type="file"
+            multiple
             onChange={e => {
               if (!e.target.files) return
+
+              const files = Array.from(e.target.files)
+
+              if (files.length > 4) {
+                toast.error("Maximum of 4 files can be uploaded at once.")
+                return
+              }
+
               handleFileUpload(
-                Array.from(e.target.files),
-                chatSettings,
+                files,
                 setShowConfirmationDialog,
                 setPendingFiles,
                 handleSelectDeviceFile

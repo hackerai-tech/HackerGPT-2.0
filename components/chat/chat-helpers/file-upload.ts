@@ -1,9 +1,9 @@
-import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 import { toast } from "sonner"
+
+const MAX_FILES = 4
 
 export const handleFileUpload = (
   files: File[],
-  chatSettings: any,
   setShowConfirmationDialog: (show: boolean) => void,
   setPendingFiles: (files: File[]) => void,
   handleSelectDeviceFile: (file: File) => void
@@ -23,16 +23,14 @@ export const handleFileUpload = (
 
   const unsupportedFiles: File[] = []
 
+  if (files.length > MAX_FILES) {
+    toast.error(`Maximum of ${MAX_FILES} files can be uploaded at once.`)
+    return
+  }
+
   files.forEach(file => {
     const fileExtension = file.name.split(".").pop()?.toLowerCase() || ""
 
-    // if (
-    //   imageExtensions.includes(fileExtension) &&
-    //   chatSettings?.model !== GPT4o.modelId
-    // ) {
-    //   toast.error(
-    //     `${file.name}: Image files are only supported by GPT-4 for now.`
-    //   )
     if (videoExtensions.includes(fileExtension)) {
       toast.error(`${file.name}: Video files are not supported yet.`)
     } else if (fileExtension && !supportedExtensions.includes(fileExtension)) {

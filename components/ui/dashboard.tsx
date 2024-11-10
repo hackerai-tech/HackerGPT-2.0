@@ -149,15 +149,14 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
       }
       handleFileUpload(
         files,
-        chatSettings,
         setShowConfirmationDialog,
         setPendingFiles,
         handleSelectDeviceFile
       )
     }
 
-    if (items.length > 5) {
-      toast.error("Maximum of 5 files can be dropped at a time.")
+    if (items.length > 4) {
+      toast.error("Maximum of 4 files can be dropped at a time.")
     }
 
     setIsDragging(false)
