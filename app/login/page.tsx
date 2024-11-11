@@ -47,55 +47,55 @@ const validateEmail = (email: string) => {
 export default async function Login({
   searchParams
 }: {
-  searchParams: { message?: string }
+  searchParams: Promise<{ message?: string }>
 }) {
-  let errorMessage = searchParams.message
-    ? errorMessages[searchParams.message] || errorMessages["default"]
+  const params = await searchParams
+  let errorMessage = params.message
+    ? errorMessages[params.message] || errorMessages["default"]
     : null
 
-  // Check for the specific Supabase rate limit error
   if (
-    searchParams.message &&
-    searchParams.message.startsWith(
-      "For security purposes, you can only request"
-    )
+    params.message &&
+    params.message.startsWith("For security purposes, you can only request")
   ) {
     errorMessage = errorMessages.ratelimit_defaul
   }
 
-  const supabase = await createClient()
+  const checkAuth = async () => {
+    const supabase = await createClient()
+    const {
+      data: { user }
+    } = await supabase.auth.getUser()
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser()
+    if (user) {
+      const { data: homeWorkspace } = await supabase
+        .from("workspaces")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("is_home", true)
+        .single()
 
-  if (user) {
-    const { data: homeWorkspace, error } = await supabase
-      .from("workspaces")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("is_home", true)
-      .single()
-
-    if (!homeWorkspace) {
-      return { message: "default" }
+      if (homeWorkspace) {
+        return redirect(`/${homeWorkspace.id}/chat`)
+      }
     }
-
-    return redirect(`/${homeWorkspace.id}/chat`)
   }
+
+  await checkAuth()
 
   const signIn = async (formData: FormData) => {
     "use server"
 
+    const supabase = await createClient()
     const email = formData.get("email") as string
     const password = formData.get("password") as string
-    const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
+    const headersList = await headers()
+    const ip = headersList.get("x-forwarded-for")?.split(",")[0] || "unknown"
 
     const { success } = await checkAuthRateLimit(email, ip, "login")
     if (!success) {
       return redirect(`/login?message=13`)
     }
-    const supabase = await createClient()
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
@@ -130,9 +130,11 @@ export default async function Login({
   const signUp = async (formData: FormData) => {
     "use server"
 
-    const origin = headers().get("origin")
+    const supabase = await createClient()
+    const headersList = await headers()
+    const origin = headersList.get("origin")
     const email = formData.get("email") as string
-    const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
+    const ip = headersList.get("x-forwarded-for")?.split(",")[0] || "unknown"
 
     const { success } = await checkAuthRateLimit(email, ip, "signup")
     if (!success) {
@@ -190,8 +192,6 @@ export default async function Login({
       return redirect(`/login?message=1`)
     }
 
-    const supabase = await createClient()
-
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -214,14 +214,14 @@ export default async function Login({
   const handleResetPassword = async (formData: FormData) => {
     "use server"
 
-    const origin = headers().get("origin")
+    const supabase = await createClient()
+    const headersList = await headers()
+    const origin = headersList.get("origin")
     const email = formData.get("email") as string
+    const ip = headersList.get("x-forwarded-for")?.split(",")[0] || "unknown"
 
     if (!email || email.trim() === "") return redirect("/login?message=12")
     if (!validateEmail(email)) return redirect("/login?message=11")
-
-    const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
-    const supabase = await createClient()
 
     const { success } = await checkAuthRateLimit(email, ip, "password-reset")
     if (!success) return redirect("/login?message=password_reset_limit")
@@ -239,8 +239,10 @@ export default async function Login({
 
   const handleSignInWithGoogle = async () => {
     "use server"
+
     const supabase = await createClient()
-    const origin = headers().get("origin")
+    const headersList = await headers()
+    const origin = headersList.get("origin")
 
     const { error, data } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -258,8 +260,10 @@ export default async function Login({
 
   const handleSignInWithMicrosoft = async () => {
     "use server"
+
     const supabase = await createClient()
-    const origin = headers().get("origin")
+    const headersList = await headers()
+    const origin = headersList.get("origin")
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "azure",

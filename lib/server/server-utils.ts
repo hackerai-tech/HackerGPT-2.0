@@ -12,8 +12,8 @@ export function createResponse(data: object, status: number): Response {
   })
 }
 
-export function createSupabaseAppServerClient() {
-  const cookieStore = cookies()
+export async function createSupabaseAppServerClient() {
+  const cookieStore = await cookies()
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

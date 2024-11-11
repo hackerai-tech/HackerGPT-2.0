@@ -15,14 +15,15 @@ const truncateChatName = (name: string) => {
 export default async function SharedChatPage({
   params
 }: {
-  params: { share_id: string; locale: string }
+  params: Promise<{ share_id: string; locale: string }>
 }) {
+  const { share_id, locale } = await params
   const supabase = await createClient()
 
   const { data: chatData } = await supabase
     .from("chats")
     .select("*")
-    .eq("last_shared_message_id", params.share_id)
+    .eq("last_shared_message_id", share_id)
     .single()
 
   if (!chatData) {
@@ -42,7 +43,7 @@ export default async function SharedChatPage({
   }
 
   const lastSharedMessageIndex = messagesData.findIndex(
-    message => message.id === params.share_id
+    message => message.id === share_id
   )
 
   let messages = messagesData.slice(0, lastSharedMessageIndex + 1)
@@ -61,7 +62,7 @@ export default async function SharedChatPage({
       month: "long",
       day: "numeric"
     }
-    return new Date(dateString).toLocaleDateString(params.locale, options)
+    return new Date(dateString).toLocaleDateString(locale, options)
   }
 
   return (

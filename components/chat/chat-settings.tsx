@@ -1,7 +1,7 @@
 import { PentestGPTContext } from "@/context/context"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { IconChevronDown } from "@tabler/icons-react"
-import { FC, useContext, useEffect, useRef, useState } from "react"
+import { FC, useContext, useRef, useState } from "react"
 import { Button } from "../ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { ModelSelect } from "../models/model-select"
@@ -18,16 +18,7 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
   } = useContext(PentestGPTContext)
 
   const [isOpen, setIsOpen] = useState(false)
-
   const buttonRef = useRef<HTMLButtonElement>(null)
-
-  useEffect(() => {
-    if (!chatSettings) return
-
-    setChatSettings({
-      ...chatSettings
-    })
-  }, [chatSettings?.model])
 
   if (!chatSettings || !profile) return null
 
@@ -35,7 +26,7 @@ export const ChatSettings: FC<ChatSettingsProps> = ({}) => {
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger>
+      <PopoverTrigger asChild>
         <Button
           ref={buttonRef}
           className={`flex items-center space-x-1 ${isOpen ? "bg-accent" : ""}`}
