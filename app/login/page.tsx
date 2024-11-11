@@ -47,18 +47,16 @@ const validateEmail = (email: string) => {
 export default async function Login({
   searchParams
 }: {
-  searchParams: { message?: string }
+  searchParams: Promise<{ message?: string }>
 }) {
-  let errorMessage = searchParams.message
-    ? errorMessages[searchParams.message] || errorMessages["default"]
+  const params = await searchParams
+  let errorMessage = params.message
+    ? errorMessages[params.message] || errorMessages["default"]
     : null
 
-  // Check for the specific Supabase rate limit error
   if (
-    searchParams.message &&
-    searchParams.message.startsWith(
-      "For security purposes, you can only request"
-    )
+    params.message &&
+    params.message.startsWith("For security purposes, you can only request")
   ) {
     errorMessage = errorMessages.ratelimit_defaul
   }
@@ -89,7 +87,8 @@ export default async function Login({
 
     const email = formData.get("email") as string
     const password = formData.get("password") as string
-    const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
+    const headersList = await headers()
+    const ip = headersList.get("x-forwarded-for")?.split(",")[0] || "unknown"
 
     const { success } = await checkAuthRateLimit(email, ip, "login")
     if (!success) {
@@ -130,9 +129,10 @@ export default async function Login({
   const signUp = async (formData: FormData) => {
     "use server"
 
-    const origin = headers().get("origin")
+    const headersList = await headers()
+    const origin = headersList.get("origin")
     const email = formData.get("email") as string
-    const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
+    const ip = headersList.get("x-forwarded-for")?.split(",")[0] || "unknown"
 
     const { success } = await checkAuthRateLimit(email, ip, "signup")
     if (!success) {
@@ -214,14 +214,13 @@ export default async function Login({
   const handleResetPassword = async (formData: FormData) => {
     "use server"
 
-    const origin = headers().get("origin")
+    const headersList = await headers()
+    const origin = headersList.get("origin")
     const email = formData.get("email") as string
+    const ip = headersList.get("x-forwarded-for")?.split(",")[0] || "unknown"
 
     if (!email || email.trim() === "") return redirect("/login?message=12")
     if (!validateEmail(email)) return redirect("/login?message=11")
-
-    const ip = headers().get("x-forwarded-for")?.split(",")[0] || "unknown"
-    const supabase = await createClient()
 
     const { success } = await checkAuthRateLimit(email, ip, "password-reset")
     if (!success) return redirect("/login?message=password_reset_limit")
@@ -240,7 +239,8 @@ export default async function Login({
   const handleSignInWithGoogle = async () => {
     "use server"
     const supabase = await createClient()
-    const origin = headers().get("origin")
+    const headersList = await headers()
+    const origin = headersList.get("origin")
 
     const { error, data } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -259,7 +259,8 @@ export default async function Login({
   const handleSignInWithMicrosoft = async () => {
     "use server"
     const supabase = await createClient()
-    const origin = headers().get("origin")
+    const headersList = await headers()
+    const origin = headersList.get("origin")
 
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "azure",

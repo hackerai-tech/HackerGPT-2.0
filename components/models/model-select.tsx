@@ -6,7 +6,12 @@ import {
   IconMessageOff
 } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState, useCallback } from "react"
-import { useRouter, useSearchParams, useParams, usePathname } from "next/navigation"
+import {
+  useRouter,
+  useSearchParams,
+  useParams,
+  usePathname
+} from "next/navigation"
 import { ModelIcon } from "./model-icon"
 import { Button } from "../ui/button"
 import { Switch } from "../ui/switch"

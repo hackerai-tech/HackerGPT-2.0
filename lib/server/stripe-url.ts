@@ -14,7 +14,7 @@ export async function getCheckoutUrl(
   teamName?: string,
   seatQuantity: number = 1
 ): Promise<Result<string>> {
-  const supabase = createSupabaseAppServerClient()
+  const supabase = await createSupabaseAppServerClient()
   const user = (await supabase.auth.getUser()).data.user
   if (!user) {
     return errStr("User not found")
@@ -128,7 +128,7 @@ export async function retrievePriceAndValidation(
 }
 
 export async function getBillingPortalUrl(): Promise<Result<string>> {
-  const supabase = createSupabaseAppServerClient()
+  const supabase = await createSupabaseAppServerClient()
   const user = (await supabase.auth.getUser()).data.user
   if (!user) {
     return errStr("User not found")
