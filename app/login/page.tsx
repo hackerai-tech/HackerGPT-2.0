@@ -61,30 +61,32 @@ export default async function Login({
     errorMessage = errorMessages.ratelimit_defaul
   }
 
-  const supabase = await createClient()
+  const checkAuth = async () => {
+    const supabase = await createClient()
+    const {
+      data: { user }
+    } = await supabase.auth.getUser()
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser()
+    if (user) {
+      const { data: homeWorkspace } = await supabase
+        .from("workspaces")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("is_home", true)
+        .single()
 
-  if (user) {
-    const { data: homeWorkspace, error } = await supabase
-      .from("workspaces")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("is_home", true)
-      .single()
-
-    if (!homeWorkspace) {
-      return { message: "default" }
+      if (homeWorkspace) {
+        return redirect(`/${homeWorkspace.id}/chat`)
+      }
     }
-
-    return redirect(`/${homeWorkspace.id}/chat`)
   }
+
+  await checkAuth()
 
   const signIn = async (formData: FormData) => {
     "use server"
 
+    const supabase = await createClient()
     const email = formData.get("email") as string
     const password = formData.get("password") as string
     const headersList = await headers()
@@ -94,7 +96,6 @@ export default async function Login({
     if (!success) {
       return redirect(`/login?message=13`)
     }
-    const supabase = await createClient()
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
@@ -129,6 +130,7 @@ export default async function Login({
   const signUp = async (formData: FormData) => {
     "use server"
 
+    const supabase = await createClient()
     const headersList = await headers()
     const origin = headersList.get("origin")
     const email = formData.get("email") as string
@@ -190,8 +192,6 @@ export default async function Login({
       return redirect(`/login?message=1`)
     }
 
-    const supabase = await createClient()
-
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -214,6 +214,7 @@ export default async function Login({
   const handleResetPassword = async (formData: FormData) => {
     "use server"
 
+    const supabase = await createClient()
     const headersList = await headers()
     const origin = headersList.get("origin")
     const email = formData.get("email") as string
@@ -238,6 +239,7 @@ export default async function Login({
 
   const handleSignInWithGoogle = async () => {
     "use server"
+
     const supabase = await createClient()
     const headersList = await headers()
     const origin = headersList.get("origin")
@@ -258,6 +260,7 @@ export default async function Login({
 
   const handleSignInWithMicrosoft = async () => {
     "use server"
+
     const supabase = await createClient()
     const headersList = await headers()
     const origin = headersList.get("origin")
