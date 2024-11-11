@@ -72,7 +72,7 @@
     "cmdk": "^1.0.4",
     "d3-dsv": "^2.0.0",
     "endent": "^2.1.0",
-    "gpt-tokenizer": "^2.6.0",
+    "gpt-tokenizer": "^2.6.1",
     "husky": "^9.1.6",
     "isomorphic-dompurify": "^2.16.0",
     "langchain": "^0.3.5",
