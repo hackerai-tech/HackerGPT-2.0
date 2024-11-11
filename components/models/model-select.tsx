@@ -6,7 +6,7 @@ import {
   IconMessageOff
 } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef, useState, useCallback } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, useParams, usePathname } from "next/navigation"
 import { ModelIcon } from "./model-icon"
 import { Button } from "../ui/button"
 import { Switch } from "../ui/switch"
@@ -23,6 +23,8 @@ export const ModelSelect: FC<ModelSelectProps> = ({
 }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const params = useParams()
+  const pathname = usePathname()
   const {
     isPremiumSubscription,
     profile,
@@ -36,15 +38,21 @@ export const ModelSelect: FC<ModelSelectProps> = ({
     (isTemporary: boolean) => {
       const newSearchParams = new URLSearchParams(searchParams)
       if (isTemporary) {
-        newSearchParams.set("temporary-chat", "true")
-        router.push(`?${newSearchParams.toString()}`)
+        if (pathname.includes("/chat/")) {
+          const baseUrl = `/${params.workspaceid}/chat`
+          newSearchParams.set("temporary-chat", "true")
+          router.push(`${baseUrl}?${newSearchParams.toString()}`)
+        } else {
+          newSearchParams.set("temporary-chat", "true")
+          router.push(`?${newSearchParams.toString()}`)
+        }
       } else {
         newSearchParams.delete("temporary-chat")
         router.push(`?${newSearchParams.toString()}`)
         handleNewChat()
       }
     },
-    [handleNewChat, searchParams, router]
+    [handleNewChat, searchParams, router, params, pathname]
   )
 
   const inputRef = useRef<HTMLInputElement>(null)
