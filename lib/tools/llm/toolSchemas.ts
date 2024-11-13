@@ -23,11 +23,14 @@ export const createToolSchemas = (context: ToolContext) => {
     // },
     webSearch: {
       description: "Search the web for latest information",
-      parameters: z.object({ search: z.boolean() })
+      parameters: z.object({
+        webSearch: z
+          .boolean()
+          .describe("Set to true to search the web for information")
+      })
     },
     browser: {
-      description:
-        "Browse a webpage and extract its text content. For HTML retrieval or more complex web scraping, use the Python tool.",
+      description: "Browse a webpage and extract its text content.",
       parameters: z.object({
         open_url: z.string().url().describe("The URL of the webpage to browse")
       })
