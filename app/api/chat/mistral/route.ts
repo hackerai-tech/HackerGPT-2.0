@@ -161,11 +161,15 @@ export async function POST(request: Request) {
     try {
       let provider
 
-      if (selectedModel.startsWith("mistral")) {
+      if (selectedModel.startsWith("mistralai")) {
         provider = createMistral({
           apiKey: providerApiKey,
           baseURL: providerBaseUrl,
           headers: providerHeaders
+        })
+      } else if (selectedModel.startsWith("mistral")) {
+        provider = createMistral({
+          apiKey: llmConfig.mistral.apiKey
         })
       } else {
         provider = createOpenAI({
