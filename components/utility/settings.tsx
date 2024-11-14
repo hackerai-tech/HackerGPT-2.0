@@ -218,10 +218,17 @@ export const Settings: FC = () => {
         {profile.image_url ? (
           <Image
             className="mt-2 size-[34px] cursor-pointer rounded hover:opacity-50"
-            src={profile.image_url + "?" + new Date().getTime()}
+            src={profile.image_url}
             height={34}
             width={34}
             alt="Profile"
+            onError={e => {
+              const target = e.target as HTMLImageElement
+              target.style.display = "none"
+              const icon = document.createElement("div")
+              icon.innerHTML = "<IconSettings size={34} />"
+              target.parentNode?.appendChild(icon)
+            }}
           />
         ) : (
           <IconSettings size={SIDEBAR_ICON_SIZE} />
