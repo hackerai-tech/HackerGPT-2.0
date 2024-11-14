@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
-import { getProfileByUserId, updateProfile } from "@/db/profile"
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -16,18 +15,21 @@ export async function GET(request: Request) {
 
       // Get Google avatar if available
       if (data?.user?.app_metadata?.provider === "google") {
-        const avatarUrl = data.user.user_metadata?.avatar_url
+        const avatarUrl = data.user.user_metadata?.picture
 
-        if (avatarUrl) {
+        if (avatarUrl && data.user) {
           try {
-            // Get profile using user ID
-            const profile = await getProfileByUserId(data.user.id)
-
-            if (profile) {
-              // Update profile with Google avatar
-              await updateProfile(profile.id, {
-                image_url: avatarUrl
+            // Update profile directly using supabase query
+            const { error: updateError } = await supabase
+              .from("profiles")
+              .update({
+                image_url: avatarUrl,
+                image_path: ""
               })
+              .eq("user_id", data.user.id)
+
+            if (updateError) {
+              console.error("Error updating profile:", updateError)
             }
           } catch (error) {
             console.error("Error updating profile with Google avatar:", error)
