@@ -14,7 +14,7 @@ import {
 } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useState } from "react"
 import { WithTooltip } from "../ui/with-tooltip"
-import { ChangeModelIcon } from "../ui/change-model-icon"
+import { SwitchModel } from "../ui/switch-model"
 import { useAudioPlayer } from "../chat/chat-hooks/use-audio-player"
 
 export const MESSAGE_ICON_SIZE = 20
@@ -197,7 +197,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {isLast && !messageHasImage && (
+      {isLast && !messageHasImage && !isPremiumSubscription && (
         <WithTooltip
           delayDuration={0}
           side="bottom"
@@ -259,7 +259,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
       )}
 
       {isLast && !messageHasImage && isPremiumSubscription && (
-        <ChangeModelIcon
+        <SwitchModel
           currentModel={messageModel}
           onChangeModel={onRegenerateSpecificModel}
           isMobile={isMobile}
