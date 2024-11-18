@@ -145,7 +145,7 @@ export async function POST(request: Request) {
 
     const handleMessages = (shouldUncensor: boolean) => {
       if (includeImages) {
-        selectedModel = "openai/gpt-4o-mini"
+        selectedModel = "pixtral-large-latest"
         return filterEmptyAssistantMessages(messages)
       }
 
@@ -167,7 +167,10 @@ export async function POST(request: Request) {
           baseURL: providerBaseUrl,
           headers: providerHeaders
         })
-      } else if (selectedModel.startsWith("mistral")) {
+      } else if (
+        selectedModel.startsWith("mistral") ||
+        selectedModel.startsWith("pixtral")
+      ) {
         provider = createMistral({
           apiKey: llmConfig.mistral.apiKey
         })
