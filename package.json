@@ -62,7 +62,7 @@
     "@sentry/nextjs": "^8.37.1",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.46.1",
-    "@tabler/icons-react": "^3.21.0",
+    "@tabler/icons-react": "^3.22.0",
     "@upstash/redis": "^1.34.3",
     "@vercel/edge-config": "^1.4.0",
     "ai": "^3.4.33",
