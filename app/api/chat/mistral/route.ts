@@ -145,7 +145,7 @@ export async function POST(request: Request) {
 
     const handleMessages = (shouldUncensor: boolean) => {
       if (includeImages) {
-        selectedModel = "pixtral-large-latest"
+        selectedModel = "mistralai/pixtral-large-2411"
         return filterEmptyAssistantMessages(messages)
       }
 
@@ -167,10 +167,7 @@ export async function POST(request: Request) {
           baseURL: providerBaseUrl,
           headers: providerHeaders
         })
-      } else if (
-        selectedModel.startsWith("mistral") ||
-        selectedModel.startsWith("pixtral")
-      ) {
+      } else if (selectedModel.startsWith("mistral")) {
         provider = createMistral({
           apiKey: llmConfig.mistral.apiKey
         })
