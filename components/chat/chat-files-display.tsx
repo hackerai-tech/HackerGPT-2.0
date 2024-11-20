@@ -64,7 +64,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
   const combinedMessageFiles = [...messageImages, ...combinedChatFiles]
 
   return onlyImages || (showFilesDisplay && combinedMessageFiles.length > 0) ? (
-    <>
+    <div className="w-full">
       {showPreview && selectedImage && (
         <FilePreview
           type="image"
@@ -246,7 +246,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
           </div>
         </div>
       </div>
-    </>
+    </div>
   ) : (
     combinedMessageFiles.length > 0 && (
       <div className="flex w-full items-center justify-center space-x-2">
@@ -256,15 +256,13 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
           variant="secondary"
         >
           <RetrievalToggle />
-
-          <div>
-            {" "}
+          <span>
             View {combinedMessageFiles.length} file
             {combinedMessageFiles.length > 1 ? "s" : ""}
-          </div>
-          <div onClick={e => e.stopPropagation()}>
+          </span>
+          <span onClick={e => e.stopPropagation()}>
             <ChatRetrievalSettings />
-          </div>
+          </span>
         </Button>
       </div>
     )
