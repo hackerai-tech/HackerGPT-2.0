@@ -222,16 +222,25 @@ export const Message: FC<MessageProps> = ({
   const modelDetails = LLM_LIST.find(model => model.modelId === message.model)
 
   return (
-    <div
-      className={cn("flex w-full justify-center")}
+    <div 
+      className={cn(
+        "flex w-full justify-center",
+        showSidebar 
+          ? "px-4 md:px-6 lg:px-8" 
+          : "px-4 md:px-8 lg:px-8 xl:px-8"
+      )}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       onKeyDown={handleKeyDown}
     >
       <div
-        className={`relative flex w-full flex-col px-8 py-6 sm:w-[550px] sm:px-0 md:w-[650px] xl:w-[800px] 
-        ${showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"}
-        ${isLast ? "mb-8" : ""}`}
+        className={cn(
+          "relative flex w-full flex-col py-6",
+          showSidebar 
+            ? "max-w-xl md:max-w-2xl lg:max-w-3xl" 
+            : "max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl",
+          isLast && "mb-8"
+        )}
       >
         <div className="flex space-x-3">
           {message.role === "assistant" && !isMobile && (

@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button"
 import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"
-import { IconCheck, IconCopy } from "@tabler/icons-react"
+import { IconCheck, IconCopy, IconEye } from "@tabler/icons-react"
 import { FC, memo } from "react"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
 import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism"
 import { cn } from "@/lib/utils"
+import { usePentestGPT } from "@/context/context"
 
 interface MessageCodeBlockProps {
   language: string
@@ -84,11 +85,29 @@ CopyButton.displayName = "CopyButton"
 
 export const MessageCodeBlock: FC<MessageCodeBlockProps> = memo(
   ({ language, value }) => {
+    const { previewActions } = usePentestGPT()
+    const { setIsOpen, setCode, setLanguage } = previewActions
+
+    const handlePreview = () => {
+      setCode(value)
+      setLanguage(language)
+      setIsOpen(true)
+    }
+
     return (
       <div className="codeblock relative w-full bg-zinc-950 font-sans">
         <div className="sticky top-0 flex w-full items-center justify-between bg-zinc-700 px-4 text-white">
           <span className="text-xs lowercase">{language}</span>
           <div className="flex items-center space-x-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-xs text-white hover:bg-zinc-800"
+              onClick={handlePreview}
+            >
+              <IconEye size={16} className="mr-1" />
+              <span className="hidden sm:inline">Preview</span>
+            </Button>
             <CopyButton value={value} />
           </div>
         </div>

@@ -34,6 +34,7 @@ import {
 import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { toast } from "sonner"
 import { KeyboardShortcutsPopup } from "../chat/keyboard-shortcuts-popup"
+import { Preview } from "./preview"
 
 export const SIDEBAR_WIDTH = 350
 
@@ -50,7 +51,8 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     showSidebar,
     setShowSidebar,
     contentType,
-    setContentType
+    setContentType,
+    previewState
   } = useContext(PentestGPTContext)
 
   const pathname = usePathname()
@@ -203,8 +205,10 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     [showSidebar]
   )
 
+  const { isOpen: showRightSidebar } = previewState
+
   return (
-    <div className="flex size-full">
+    <div className="flex size-full overflow-hidden">
       {showConfirmationDialog && pendingFiles.length > 0 && (
         <UnsupportedFilesDialog
           isOpen={showConfirmationDialog}
@@ -272,8 +276,9 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
       <div
         className={cn(
-          "bg-background flex grow flex-col",
-          isDraggingEnabled && "drag-drop-zone"
+          "bg-background flex grow flex-col overflow-hidden",
+          isDraggingEnabled && "drag-drop-zone",
+          showRightSidebar && "w-1/2"
         )}
         {...(isDraggingEnabled
           ? {
@@ -297,6 +302,13 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
           renderContent()
         )}
       </div>
+
+      {showRightSidebar && (
+        <Preview
+          isChatLoading={false}
+          isPreviewLoading={false}
+        />
+      )}
     </div>
   )
 }

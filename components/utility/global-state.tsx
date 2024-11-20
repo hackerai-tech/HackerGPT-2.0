@@ -32,6 +32,13 @@ interface GlobalStateProps {
   children: React.ReactNode
 }
 
+interface PreviewState {
+  isOpen: boolean
+  code: string
+  language: string
+  selectedTab: "code" | "preview"
+}
+
 export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -144,6 +151,27 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   useEffect(() => {
     setIsTemporaryChat(searchParams.get("temporary-chat") === "true")
   }, [searchParams])
+
+  // PREVIEW STORE
+  const [previewState, setPreviewState] = useState<PreviewState>({
+    isOpen: false,
+    code: "",
+    language: "",
+    selectedTab: "preview" as const
+  })
+
+  const previewActions = useMemo(
+    () => ({
+      setIsOpen: (isOpen: boolean) =>
+        setPreviewState(prev => ({ ...prev, isOpen })),
+      setCode: (code: string) => setPreviewState(prev => ({ ...prev, code })),
+      setLanguage: (language: string) =>
+        setPreviewState(prev => ({ ...prev, language })),
+      setSelectedTab: (selectedTab: PreviewState["selectedTab"]) =>
+        setPreviewState(prev => ({ ...prev, selectedTab }))
+    }),
+    []
+  )
 
   // Handle window resize to update isMobile
   useEffect(() => {
@@ -378,7 +406,11 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setIsMicSupported,
 
         // TEMPORARY CHAT STORE
-        isTemporaryChat
+        isTemporaryChat,
+
+        // PREVIEW STORE
+        previewState,
+        previewActions
       }}
     >
       {children}

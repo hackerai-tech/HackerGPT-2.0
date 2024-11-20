@@ -58,7 +58,8 @@ export const useChatHandler = () => {
     setIsReadyToChat,
     isTemporaryChat,
     temporaryChatMessages,
-    setTemporaryChatMessages
+    setTemporaryChatMessages,
+    previewActions
   } = useContext(PentestGPTContext)
 
   let { selectedPlugin } = useContext(PentestGPTContext)
@@ -107,13 +108,17 @@ export const useChatHandler = () => {
 
     await handleStopMessage()
 
+    // Reset all states including preview
     setUserInput("")
     setChatMessages([])
     setSelectedChat(null)
+    previewActions.setIsOpen(false)
+    previewActions.setCode("")
+    previewActions.setLanguage("")
 
+    // Reset other states
     setIsGenerating(false)
     setFirstTokenReceived(false)
-
     setChatFiles([])
     setChatImages([])
     setNewMessageFiles([])

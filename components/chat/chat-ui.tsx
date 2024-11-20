@@ -34,6 +34,7 @@ import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
 import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
 import { WithTooltip } from "../ui/with-tooltip"
+import { cn } from "@/lib/utils"
 
 const MESSAGES_PER_FETCH = 20
 interface ChatUIProps {}
@@ -386,7 +387,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
 
       <div
         ref={scrollContainerRef}
-        className="flex size-full flex-col overflow-auto"
+        className={cn(
+          "flex size-full flex-col overflow-auto",
+          showSidebar ? "px-4 md:px-6 lg:px-8" : "px-4 md:px-8 lg:px-8 xl:px-8"
+        )}
         onScroll={innerHandleScroll}
       >
         {isLoadingMore && !isTemporaryChat && (
@@ -402,9 +406,12 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       </div>
 
       <div
-        className={`relative w-screen min-w-[300px] items-end px-2 pb-3 sm:w-[600px] sm:pb-8 md:w-[650px] md:min-w-[300px] xl:w-[800px] ${
-          showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
-        }`}
+        className={cn(
+          "relative w-full px-4 pb-3 sm:pb-8",
+          showSidebar 
+            ? "max-w-xl md:max-w-2xl lg:max-w-3xl" 
+            : "max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl"
+        )}
       >
         <div className="absolute -top-10 left-1/2 flex -translate-x-1/2 justify-center">
           <ChatScrollButtons

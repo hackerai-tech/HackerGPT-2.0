@@ -13,6 +13,20 @@ import { ContentType } from "@/types"
 import { ProcessedTeamMember } from "@/lib/team-utils"
 import { User } from "@supabase/supabase-js"
 
+interface PreviewState {
+  isOpen: boolean
+  code: string
+  language: string
+  selectedTab: "code" | "preview"
+}
+
+interface PreviewActions {
+  setIsOpen: (isOpen: boolean) => void
+  setCode: (code: string) => void
+  setLanguage: (language: string) => void
+  setSelectedTab: (tab: PreviewState["selectedTab"]) => void
+}
+
 interface PentestGPTContextType {
   // USER STORE
   user: User | null
@@ -139,6 +153,10 @@ interface PentestGPTContextType {
 
   // TEMPORARY CHAT STORE
   isTemporaryChat: boolean
+
+  // Preview Store
+  previewState: PreviewState
+  previewActions: PreviewActions
 }
 
 export const PentestGPTContext = createContext<PentestGPTContextType>({
@@ -264,7 +282,21 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   setIsMicSupported: () => {},
 
   // TEMPORARY CHAT STORE
-  isTemporaryChat: false
+  isTemporaryChat: false,
+
+  // Preview Store
+  previewState: {
+    isOpen: false,
+    code: "",
+    language: "",
+    selectedTab: "preview"
+  },
+  previewActions: {
+    setIsOpen: () => {},
+    setCode: () => {},
+    setLanguage: () => {},
+    setSelectedTab: () => {}
+  }
 })
 
 export const usePentestGPT = () => useContext(PentestGPTContext)
