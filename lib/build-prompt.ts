@@ -337,16 +337,15 @@ export const toVercelChatMessages = (
 }
 
 /**
- * Checks if any of the last 5 messages in the conversation include images.
+ * Checks if any messages in the conversation include images.
  * This function is used to determine if image processing capabilities are needed
  * for the current context of the conversation.
  *
  * @param messages - The array of all messages in the conversation
- * @returns boolean - True if any of the last 5 messages contain an image, false otherwise
+ * @returns boolean - True if any messages contain an image, false otherwise
  */
 export function messagesIncludeImages(messages: BuiltChatMessage[]): boolean {
-  const lastFiveMessages = messages.slice(-5)
-  return lastFiveMessages.some(
+  return messages.some(
     message =>
       Array.isArray(message.content) &&
       message.content.some(

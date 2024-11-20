@@ -145,7 +145,7 @@ export async function POST(request: Request) {
 
     const handleMessages = (shouldUncensor: boolean) => {
       if (includeImages) {
-        selectedModel = "openai/gpt-4o-mini"
+        selectedModel = "mistralai/pixtral-large-2411"
         return filterEmptyAssistantMessages(messages)
       }
 
