@@ -28,9 +28,7 @@ export const Preview: FC<PreviewProps> = ({
   const { setIsOpen, setSelectedTab } = previewActions
 
   return (
-    <div
-      className="bg-popover relative h-full w-1/2 overflow-hidden border-l md:rounded-l-3xl"
-    >
+    <div className="bg-popover relative h-full w-1/2 overflow-hidden border-l md:rounded-l-3xl">
       <Tabs
         value={selectedTab}
         onValueChange={value => setSelectedTab(value as "code" | "preview")}

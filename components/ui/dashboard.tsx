@@ -304,10 +304,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
       </div>
 
       {showRightSidebar && (
-        <Preview
-          isChatLoading={false}
-          isPreviewLoading={false}
-        />
+        <Preview isChatLoading={false} isPreviewLoading={false} />
       )}
     </div>
   )

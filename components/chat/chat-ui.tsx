@@ -408,8 +408,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       <div
         className={cn(
           "relative w-full px-4 pb-3 sm:pb-8",
-          showSidebar 
-            ? "max-w-xl md:max-w-2xl lg:max-w-3xl" 
+          showSidebar
+            ? "max-w-xl md:max-w-2xl lg:max-w-3xl"
             : "max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl"
         )}
       >
