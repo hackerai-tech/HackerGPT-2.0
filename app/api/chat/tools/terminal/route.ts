@@ -103,7 +103,7 @@ export async function POST(request: Request) {
           let terminalOutput = ""
 
           const { textStream, finishReason } = await streamText({
-            model: openai("gpt-4o-2024-08-06"),
+            model: openai("gpt-4o"),
             temperature: 0.5,
             maxTokens: 1024,
             messages: toVercelChatMessages(messages, true),
