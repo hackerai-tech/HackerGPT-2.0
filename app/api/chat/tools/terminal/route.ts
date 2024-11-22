@@ -11,12 +11,10 @@ import {
   filterEmptyAssistantMessages,
   toVercelChatMessages
 } from "@/lib/build-prompt"
-import {
-  replaceWordsInLastUserMessage,
-  updateSystemMessage
-} from "@/lib/ai-helper"
+import { replaceWordsInLastUserMessage } from "@/lib/ai-helper"
 import { z } from "zod"
 import { encode, decode } from "gpt-tokenizer"
+import { buildSystemPrompt } from "@/lib/ai/prompts"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -72,11 +70,6 @@ export async function POST(request: Request) {
       )
     }
 
-    updateSystemMessage(
-      messages,
-      llmConfig.systemPrompts.pentestGPTTerminal,
-      profile.profile_context
-    )
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
 
@@ -106,6 +99,10 @@ export async function POST(request: Request) {
             model: openai("gpt-4o"),
             temperature: 0.5,
             maxTokens: 1024,
+            system: buildSystemPrompt(
+              llmConfig.systemPrompts.pentestGPTTerminal,
+              profile.profile_context
+            ),
             messages: toVercelChatMessages(messages, true),
             abortSignal: request.signal,
             tools: {

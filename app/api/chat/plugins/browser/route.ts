@@ -1,6 +1,5 @@
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { ServerRuntime } from "next"
-import { updateSystemMessage } from "@/lib/ai-helper"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import {
@@ -11,6 +10,7 @@ import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 import { PGPT4 } from "@/lib/models/llm/hackerai-llm-list"
 import { createOpenAI } from "@ai-sdk/openai"
 import { streamText } from "ai"
+import { buildSystemPrompt } from "@/lib/ai/prompts"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -48,11 +48,6 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    updateSystemMessage(
-      messages,
-      llmConfig.systemPrompts.pentestGPTBrowser,
-      profile.profile_context
-    )
     filterEmptyAssistantMessages(messages)
 
     const browserResult = await browsePage(open_url)
@@ -66,6 +61,10 @@ export async function POST(request: Request) {
 
     const result = await streamText({
       model: openai(selectedModel),
+      system: buildSystemPrompt(
+        llmConfig.systemPrompts.pentestGPTBrowser,
+        profile.profile_context
+      ),
       messages: [
         ...toVercelChatMessages(messages.slice(0, -1)),
         { role: "user", content: browserPrompt }

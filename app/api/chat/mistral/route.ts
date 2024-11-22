@@ -1,6 +1,6 @@
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { ServerRuntime } from "next"
-import { updateSystemMessage } from "@/lib/ai-helper"
+import { buildSystemPrompt } from "@/lib/ai/prompts"
 import {
   filterEmptyAssistantMessages,
   handleAssistantMessages,
@@ -84,11 +84,12 @@ export async function POST(request: Request) {
       shouldUncensorResponse = moderationResult
     }
 
-    updateSystemMessage(
-      messages,
-      isPentestGPTPro
-        ? llmConfig.systemPrompts.pgptLarge
-        : llmConfig.systemPrompts.pgptSmall,
+    const baseSystemPrompt = isPentestGPTPro
+      ? llmConfig.systemPrompts.pgptLarge
+      : llmConfig.systemPrompts.pgptSmall
+
+    let systemPrompt = buildSystemPrompt(
+      baseSystemPrompt,
       profile.profile_context
     )
 
@@ -130,13 +131,16 @@ export async function POST(request: Request) {
 
       if (data && data.content) {
         ragUsed = true
-        messages[0].content =
+        // Update system prompt with RAG content
+        const ragPrompt =
           `${llmConfig.systemPrompts.RAG}\n` +
           `Context for RAG enrichment:\n` +
           `---------------------\n` +
           `${data.content}\n` +
           `---------------------\n` +
           `DON'T MENTION OR REFERENCE ANYTHING RELATED TO RAG CONTENT OR ANYTHING RELATED TO RAG. USER DOESN'T HAVE DIRECT ACCESS TO THIS CONTENT, ITS PURPOSE IS TO ENRICH YOUR OWN KNOWLEDGE. ROLE PLAY.`
+
+        systemPrompt = buildSystemPrompt(ragPrompt, profile.profile_context)
       } else {
         selectedModel = "perplexity/llama-3.1-sonar-large-128k-online"
       }
@@ -189,6 +193,7 @@ export async function POST(request: Request) {
 
       const result = await streamText({
         model: provider(selectedModel || ""),
+        system: systemPrompt,
         messages: toVercelChatMessages(messages, includeImages),
         temperature: modelTemperature,
         maxTokens: isPentestGPTPro ? 2048 : 1024,

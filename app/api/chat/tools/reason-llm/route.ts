@@ -1,10 +1,7 @@
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { ServerRuntime } from "next"
 
-import {
-  replaceWordsInLastUserMessage
-  //   updateSystemMessage
-} from "@/lib/ai-helper"
+import { replaceWordsInLastUserMessage } from "@/lib/ai-helper"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
@@ -56,12 +53,6 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    // OpenAI o1-mini doesn't support system messages
-    // updateSystemMessage(
-    //   messages,
-    //   llmConfig.systemPrompts.reasonLLM,
-    //   profile.profile_context
-    // )
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
 

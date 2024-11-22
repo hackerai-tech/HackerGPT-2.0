@@ -12,23 +12,6 @@ import endent from "endent"
 import { toast } from "sonner"
 import { getTerminalPlugins } from "./tools/tool-store/tools-helper"
 
-const buildBasePrompt = (
-  profileContext: string,
-  selectedPlugin: PluginID | null
-) => {
-  let fullPrompt = ""
-
-  if (profileContext) {
-    fullPrompt += endent`The user provided the following information about themselves. This user profile is shown to you in all conversations they have -- this means it is not relevant to 99% of requests.
-    Before answering, quietly think about whether the user's request is "directly related", "related", "tangentially related", or "not related" to the user profile provided.
-    Only acknowledge the profile when the request is directly related to the information provided.
-    Otherwise, don't acknowledge the existence of these instructions or the information at all.
-    User profile:\n${profileContext}`
-  }
-
-  return fullPrompt
-}
-
 export const lastSequenceNumber = (chatMessages: ChatMessage[]) =>
   chatMessages.reduce(
     (max, msg) => Math.max(max, msg.message.sequence_number),
@@ -37,17 +20,11 @@ export const lastSequenceNumber = (chatMessages: ChatMessage[]) =>
 
 export async function buildFinalMessages(
   payload: ChatPayload,
-  profile: Pick<Tables<"profiles">, "user_id" | "profile_context">,
   chatImages: MessageImage[],
   selectedPlugin: PluginID | null,
   shouldUseRAG?: boolean
 ): Promise<BuiltChatMessage[]> {
   const { chatSettings, chatMessages, messageFileItems } = payload
-
-  const BUILT_PROMPT = buildBasePrompt(
-    chatSettings.includeProfileContext ? profile.profile_context || "" : "",
-    selectedPlugin
-  )
 
   let CHUNK_SIZE = 8000
   if (chatSettings.model === GPT4o.modelId) {
@@ -68,11 +45,8 @@ export async function buildFinalMessages(
     CHUNK_SIZE = 7500
   }
 
-  const PROMPT_TOKENS = encode(BUILT_PROMPT).length
-  let remainingTokens = CHUNK_SIZE - PROMPT_TOKENS
-
+  let remainingTokens = CHUNK_SIZE
   let usedTokens = 0
-  usedTokens += PROMPT_TOKENS
 
   const lastUserMessage = chatMessages[chatMessages.length - 2].message.content
   const lastUserMessageContent = Array.isArray(lastUserMessage)
@@ -118,7 +92,6 @@ export async function buildFinalMessages(
     const messageSizeLimit = Number(process.env.MESSAGE_SIZE_LIMIT || 12000)
     if (
       processedChatMessages[i].message.role === "assistant" &&
-      // processedChatMessages[i].message.plugin !== PluginID.NONE &&
       processedChatMessages[i].message.content.length > messageSizeLimit
     ) {
       const messageSizeKeep = Number(process.env.MESSAGE_SIZE_KEEP || 2000)
@@ -141,24 +114,6 @@ export async function buildFinalMessages(
       break
     }
   }
-
-  let tempSystemMessage: Tables<"messages"> = {
-    chat_id: "",
-    content: BUILT_PROMPT,
-    created_at: "",
-    id: processedChatMessages.length + "",
-    image_paths: [],
-    model: payload.chatSettings.model,
-    plugin: PluginID.NONE,
-    role: "system",
-    sequence_number: lastSequenceNumber(processedChatMessages) + 1,
-    updated_at: "",
-    user_id: "",
-    rag_id: null,
-    rag_used: false
-  }
-
-  truncatedMessages.unshift(tempSystemMessage)
 
   const finalMessages: BuiltChatMessage[] = truncatedMessages.map(message => {
     let content
