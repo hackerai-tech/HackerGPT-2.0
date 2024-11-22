@@ -225,7 +225,6 @@ export const handleHostedChat = async (
 
   const formattedMessages = await buildFinalMessages(
     payload,
-    profile,
     chatImages,
     selectedPlugin,
     isRagEnabled

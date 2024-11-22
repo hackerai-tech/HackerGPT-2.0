@@ -17,10 +17,7 @@ import {
 import endent from "endent"
 import { getTerminalPlugins } from "./tools/tool-store/tools-helper"
 
-const buildBasePrompt = (
-  profileContext: string,
-  selectedPlugin: PluginID | null
-) => {
+const buildBasePrompt = (profileContext: string) => {
   let fullPrompt = ""
 
   if (profileContext) {
@@ -50,8 +47,7 @@ export async function buildFinalMessages(
   const { chatSettings, chatMessages, messageFileItems } = payload
 
   const BUILT_PROMPT = buildBasePrompt(
-    chatSettings.includeProfileContext ? profile.profile_context || "" : "",
-    selectedPlugin
+    chatSettings.includeProfileContext ? profile.profile_context || "" : ""
   )
 
   let CHUNK_SIZE = 8000

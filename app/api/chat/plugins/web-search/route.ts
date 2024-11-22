@@ -10,6 +10,7 @@ import { PGPT4 } from "@/lib/models/llm/hackerai-llm-list"
 import { createOpenAI as createOpenRouterClient } from "@ai-sdk/openai"
 import { streamText } from "ai"
 import { toVercelChatMessages } from "@/lib/build-prompt"
+import { buildSystemPrompt } from "@/lib/ai/prompts"
 
 export const runtime: ServerRuntime = "edge"
 
@@ -26,11 +27,6 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    updateOrAddSystemMessage(
-      messages,
-      llmConfig.systemPrompts.pentestGPTWebSearch
-    )
-
     filterEmptyAssistantMessages(messages)
 
     const openrouter = createOpenRouterClient({
@@ -41,6 +37,10 @@ export async function POST(request: Request) {
 
     const result = await streamText({
       model: openrouter(selectedModel),
+      system: buildSystemPrompt(
+        llmConfig.systemPrompts.pentestGPTWebSearch,
+        profile.profile_context
+      ),
       messages: toVercelChatMessages(messages),
       temperature: 0.5,
       maxTokens: 1024,

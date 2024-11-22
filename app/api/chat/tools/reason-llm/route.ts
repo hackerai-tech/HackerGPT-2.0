@@ -1,14 +1,11 @@
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { ServerRuntime } from "next"
 
-import {
-  replaceWordsInLastUserMessage
-  //   updateSystemMessage
-} from "@/lib/ai-helper"
+import { replaceWordsInLastUserMessage } from "@/lib/ai-helper"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
-import { generateText } from "ai"
+import { streamText } from "ai"
 import { toVercelChatMessages } from "@/lib/build-prompt"
 import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
 import { createOpenAI } from "@ai-sdk/openai"
@@ -56,12 +53,6 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    // OpenAI o1-mini doesn't support system messages
-    // updateSystemMessage(
-    //   messages,
-    //   llmConfig.systemPrompts.reasonLLM,
-    //   profile.profile_context
-    // )
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
 
@@ -75,17 +66,12 @@ export async function POST(request: Request) {
       apiKey: llmConfig.openai.apiKey
     })
 
-    const { text } = await generateText({
+    const result = await streamText({
       model: openai("o1-mini"),
       messages: toVercelChatMessages(filteredMessages)
     })
 
-    return new Response(`0:${JSON.stringify(text)}\n`, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "x-vercel-ai-data-stream": "v1"
-      }
-    })
+    return result.toDataStreamResponse()
   } catch (error: any) {
     const errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500
