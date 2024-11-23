@@ -76,20 +76,11 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     handleSendTerminalContinuation
   } = useChatHandler()
 
-  const {
-    messagesStartRef,
-    messagesEndRef,
-    handleScroll,
-    scrollToBottom,
-    isAtBottom,
-    isOverflowing,
-    scrollToBottomAfterFetch
-  } = useScroll()
+  const { scrollRef, contentRef, isAtBottom, scrollToBottom } = useScroll()
 
   const [loading, setLoading] = useState(true)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [allMessagesLoaded, setAllMessagesLoaded] = useState(false)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const previousHeightRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -97,7 +88,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       if (!isTemporaryChat) {
         await Promise.all([fetchMessages(), fetchChat()])
       }
-      scrollToBottomAfterFetch()
+      scrollToBottom()
     }
 
     if (
@@ -255,7 +246,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     setIsLoadingMore(true)
 
     try {
-      const scrollContainer = scrollContainerRef.current
+      const scrollContainer = scrollRef.current
       if (scrollContainer) {
         previousHeightRef.current = scrollContainer.scrollHeight
       }
@@ -293,7 +284,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
 
   useLayoutEffect(() => {
     if (isLoadingMore) {
-      const scrollContainer = scrollContainerRef.current
+      const scrollContainer = scrollRef.current
       if (scrollContainer && previousHeightRef.current !== null) {
         const newHeight = scrollContainer.scrollHeight
         const previousHeight = previousHeightRef.current
@@ -317,9 +308,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       if (scrollTop === 0) {
         loadMoreMessages()
       }
-      handleScroll(e)
     },
-    [loadMoreMessages, handleScroll]
+    [loadMoreMessages]
   )
 
   const handleCleanChat = () => {
@@ -384,21 +374,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
         </div>
       </div>
 
-      <div
-        ref={scrollContainerRef}
-        className="flex size-full flex-col overflow-auto"
-        onScroll={innerHandleScroll}
-      >
-        {isLoadingMore && !isTemporaryChat && (
-          <div className="flex justify-center p-4">
-            <Loading size={8} />
-          </div>
-        )}
-        <div ref={messagesStartRef} />
-
-        <ChatMessages />
-
-        <div ref={messagesEndRef} />
+      <div ref={scrollRef} className="flex size-full flex-col overflow-auto">
+        <div ref={contentRef}>
+          <ChatMessages />
+        </div>
       </div>
 
       <div
@@ -409,7 +388,6 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
         <div className="absolute -top-10 left-1/2 flex -translate-x-1/2 justify-center">
           <ChatScrollButtons
             isAtBottom={isAtBottom}
-            isOverflowing={isOverflowing}
             scrollToBottom={scrollToBottom}
           />
         </div>

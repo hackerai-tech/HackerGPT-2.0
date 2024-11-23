@@ -1,95 +1,36 @@
+import { useStickToBottom } from "use-stick-to-bottom"
 import { PentestGPTContext } from "@/context/context"
-import {
-  type UIEventHandler,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState
-} from "react"
+import { useContext, useEffect, useCallback } from "react"
 
 export const useScroll = () => {
-  const { isGenerating, chatMessages, isTemporaryChat, temporaryChatMessages } =
-    useContext(PentestGPTContext)
+  const { isGenerating } = useContext(PentestGPTContext)
 
-  const messagesStartRef = useRef<HTMLDivElement>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const isAutoScrolling = useRef(false)
+  const stickToBottom = useStickToBottom({
+    resize: "smooth",
+    initial: "smooth"
+  })
 
-  const [isAtBottom, setIsAtBottom] = useState(true)
-  const [userScrolled, setUserScrolled] = useState(false)
-  const [isOverflowing, setIsOverflowing] = useState(false)
+  const scrollToBottom = useCallback(
+    (options?: { force?: boolean }) => {
+      return stickToBottom.scrollToBottom({
+        animation: "smooth",
+        preserveScrollPosition: !options?.force
+      })
+    },
+    [stickToBottom.scrollToBottom]
+  )
 
   useEffect(() => {
     if (isGenerating) {
-      setUserScrolled(false)
+      void scrollToBottom()
     }
-  }, [isGenerating])
-
-  useEffect(() => {
-    if (isGenerating && !userScrolled) {
-      scrollToBottom()
-    }
-  }, [
-    chatMessages,
-    temporaryChatMessages,
-    isGenerating,
-    userScrolled,
-    isTemporaryChat
-  ])
-
-  const handleScroll: UIEventHandler<HTMLDivElement> = useCallback(e => {
-    const target = e.target as HTMLDivElement
-    const bottom =
-      Math.abs(target.scrollHeight - target.scrollTop - target.clientHeight) <
-      50
-
-    setIsAtBottom(bottom)
-
-    if (bottom) {
-      setUserScrolled(false)
-    } else if (!isAutoScrolling.current && target.scrollTop > 10) {
-      setUserScrolled(true)
-    }
-
-    const isOverflow = target.scrollHeight > target.clientHeight
-    setIsOverflowing(isOverflow)
-  }, [])
-
-  const scrollToBottom = useCallback(
-    (forced: boolean = false) => {
-      if (forced) {
-        setUserScrolled(false)
-      }
-      if (!userScrolled || forced) {
-        isAutoScrolling.current = true
-        messagesEndRef.current?.scrollIntoView({
-          behavior: forced ? "smooth" : "auto"
-        })
-        setTimeout(() => {
-          isAutoScrolling.current = false
-        }, 100)
-      }
-    },
-    [userScrolled]
-  )
-
-  const scrollToBottomAfterFetch = useCallback(() => {
-    setTimeout(() => {
-      scrollToBottom(true)
-      setIsAtBottom(true)
-    }, 100)
-  }, [scrollToBottom])
+  }, [isGenerating, scrollToBottom])
 
   return {
-    messagesEndRef,
-    messagesStartRef,
-    isAtBottom,
-    userScrolled,
-    isOverflowing,
-    handleScroll,
+    scrollRef: stickToBottom.scrollRef,
+    contentRef: stickToBottom.contentRef,
+    isAtBottom: stickToBottom.isAtBottom,
     scrollToBottom,
-    setIsAtBottom,
-    scrollToBottomAfterFetch
+    stopScroll: stickToBottom.stopScroll
   }
 }
