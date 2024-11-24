@@ -86,7 +86,7 @@ export default function ChatPage() {
           )}
 
           <div
-            className={`z-10 w-screen items-end px-2 pb-3 pt-2 sm:w-[600px] sm:pb-8 md:w-[650px] md:min-w-[300px] ${
+            className={`z-10 w-screen items-end px-2 pb-3 pt-2 sm:w-[600px] sm:pb-5 md:w-[650px] md:min-w-[300px] ${
               showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
             } xl:w-[800px]`}
           >

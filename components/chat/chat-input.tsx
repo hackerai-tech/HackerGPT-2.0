@@ -272,7 +272,7 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
                   "flex w-full resize-none rounded-t-xl bg-transparent",
                   "border-none focus-visible:outline-none",
                   "disabled:cursor-not-allowed disabled:opacity-50",
-                  "pb-1 pt-3",
+                  "py-3",
                   "px-3"
                 )}
                 placeholder={
@@ -332,7 +332,7 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
                           }
                           trigger={
                             <IconMicrophone
-                              className="cursor-pointer p-1 hover:opacity-50"
+                              className="cursor-pointer rounded-lg rounded-bl-xl p-1 hover:bg-black/10 focus-visible:outline-black dark:hover:bg-white/10 dark:focus-visible:outline-white"
                               onClick={async () => {
                                 if (hasMicAccess) {
                                   startListening()

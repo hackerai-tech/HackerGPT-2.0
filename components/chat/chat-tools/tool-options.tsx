@@ -119,10 +119,17 @@ export const ToolOptions = ({
             </div>
           }
           trigger={
-            <div className="flex flex-row items-center">
+            <div
+              className={cn(
+                "relative flex flex-row items-center rounded-lg transition-colors duration-300",
+                selectedPlugin === PluginID.WEB_SEARCH
+                  ? "bg-primary/10"
+                  : "hover:bg-black/10 dark:hover:bg-white/10"
+              )}
+            >
               <IconWorld
                 className={cn(
-                  "cursor-pointer rounded-lg rounded-bl-xl p-1 hover:bg-black/10 focus-visible:outline-black dark:hover:bg-white/10 dark:focus-visible:outline-white",
+                  "cursor-pointer rounded-lg rounded-bl-xl p-1 focus-visible:outline-black dark:focus-visible:outline-white",
                   selectedPlugin === PluginID.WEB_SEARCH
                     ? "text-primary"
                     : "opacity-50"
@@ -130,6 +137,18 @@ export const ToolOptions = ({
                 onClick={handleWebSearchToggle}
                 size={32}
               />
+              {/* Animated Search Text */}
+              <div
+                className={cn(
+                  "whitespace-nowrap text-xs font-medium",
+                  "transition-all duration-300",
+                  selectedPlugin === PluginID.WEB_SEARCH
+                    ? "text-primary max-w-[100px] pr-2 opacity-100"
+                    : "max-w-0 opacity-0"
+                )}
+              >
+                Search
+              </div>
             </div>
           }
         />

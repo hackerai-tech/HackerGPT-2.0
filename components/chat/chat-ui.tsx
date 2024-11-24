@@ -381,7 +381,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       </div>
 
       <div
-        className={`relative w-screen min-w-[300px] items-end px-2 pb-3 sm:w-[600px] sm:pb-8 md:w-[650px] md:min-w-[300px] xl:w-[800px] ${
+        className={`relative w-screen min-w-[300px] items-end px-2 pb-3 sm:w-[600px] sm:pb-5 md:w-[650px] md:min-w-[300px] xl:w-[800px] ${
           showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
         }`}
       >
