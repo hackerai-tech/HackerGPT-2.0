@@ -40,20 +40,25 @@ export const MessageMarkdown: FC<MessageMarkdownProps> = ({
       rehypePlugins={[rehypeMathjax]}
       urlTransform={urlTransform}
       components={{
-        a({ children, ...props }) {
+        a({ children, href, ...props }) {
           if (typeof children === "string" && /^\d+$/.test(children)) {
             return (
               <a
-                {...props}
-                title={props.href}
-                target={"_blank"}
-                className="bg-foreground/20 ml-1 inline-flex size-[16px] items-center justify-center rounded-full text-[10px] no-underline"
+                href={href}
+                title={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-foreground/20 hover:bg-foreground/30 ml-1 inline-flex size-[16px] items-center justify-center rounded-full text-[10px] no-underline"
               >
                 {children}
               </a>
             )
           }
-          return <a {...props}>{children}</a>
+          return (
+            <a href={href} {...props}>
+              {children}
+            </a>
+          )
         },
         p({ children }) {
           return (

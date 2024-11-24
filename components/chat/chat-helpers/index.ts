@@ -158,7 +158,8 @@ export const createTempMessages = ({
       updated_at: "",
       user_id: "",
       rag_used: false,
-      rag_id: null
+      rag_id: null,
+      citations: []
     },
     fileItems: []
   }
@@ -177,7 +178,8 @@ export const createTempMessages = ({
       updated_at: "",
       user_id: "",
       rag_used: false,
-      rag_id: null
+      rag_id: null,
+      citations: []
     },
     fileItems: []
   }
@@ -430,13 +432,14 @@ export const processResponse = async (
   if (response.body) {
     let fullText = ""
     let finishReason = ""
-    // let toolCallId = ""
     let ragUsed = false
     let ragId = null
     let isFirstChunk = true
     let updatedPlugin = selectedPlugin
     let assistantGeneratedImages: string[] = []
     let toolExecuted = false
+    let citations: string[] = []
+
     const reader = response.body.getReader()
     const stream = readDataStream(reader, {
       isAborted: () => controller.signal.aborted
@@ -446,54 +449,15 @@ export const processResponse = async (
       for await (const streamPart of stream) {
         // console.log(streamPart)
 
-        // const isReasonLLMResult = (
-        //   part: any
-        // ): part is {
-        //   type: "data"
-        //   value: Array<{ reason: string }>
-        // } =>
-        //   part.type === "data" &&
-        //   Array.isArray(part.value) &&
-        //   part.value.length > 0 &&
-        //   typeof part.value[0] === "object" &&
-        //   "reason" in part.value[0]
-
-        const processStreamPart = (
-          streamPart: any
-          // toolCallId: string
-        ): { contentToAdd: string; newImagePath: string | null } => {
-          if (streamPart.type === "text")
-            return { contentToAdd: streamPart.value, newImagePath: null }
-
-          // if (isReasonLLMResult(streamPart)) {
-          //   return {
-          //     contentToAdd: streamPart.value[0].reason,
-          //     newImagePath: null
-          //   }
-          // }
-
-          return { contentToAdd: "", newImagePath: null }
-        }
-
         switch (streamPart.type) {
           case "text":
-          case "tool_result":
           case "data":
-            const { contentToAdd, newImagePath } = processStreamPart(
-              streamPart
-              // toolCallId
-            )
-
-            if (contentToAdd || newImagePath) {
+            if (streamPart.type === "text" && streamPart.value) {
               if (isFirstChunk) {
                 setFirstTokenReceived(true)
                 isFirstChunk = false
               }
-              fullText += contentToAdd
-
-              if (newImagePath) {
-                assistantGeneratedImages.push(newImagePath)
-              }
+              fullText += streamPart.value
 
               setChatMessages(prev =>
                 prev.map(chatMessage =>
@@ -502,26 +466,35 @@ export const processResponse = async (
                         ...chatMessage,
                         message: {
                           ...chatMessage.message,
-                          content: chatMessage.message.content + contentToAdd,
-                          image_paths: newImagePath
-                            ? [...chatMessage.message.image_paths, newImagePath]
-                            : chatMessage.message.image_paths
+                          content:
+                            chatMessage.message.content + streamPart.value,
+                          image_paths: chatMessage.message.image_paths
                         }
                       }
                     : chatMessage
                 )
               )
-            } else if (
-              typeof streamPart.value === "object" &&
-              streamPart.value !== null &&
-              "ragUsed" in streamPart.value &&
-              "ragId" in streamPart.value
-            ) {
-              ragUsed = Boolean(streamPart.value.ragUsed)
-              ragId =
-                streamPart.value.ragId !== null
-                  ? String(streamPart.value.ragId)
-                  : null
+            } else if (streamPart.type === "data") {
+              const dataValue = streamPart.value as any[]
+
+              // Handle citations
+              if (Array.isArray(dataValue) && dataValue[0]?.citations) {
+                citations = dataValue[0].citations
+              }
+
+              // Handle RAG data
+              if (
+                Array.isArray(dataValue) &&
+                typeof dataValue[0] === "object" &&
+                dataValue[0] !== null &&
+                "ragUsed" in dataValue[0]
+              ) {
+                ragUsed = Boolean(dataValue[0].ragUsed)
+                ragId =
+                  dataValue[0].ragId !== null
+                    ? String(dataValue[0].ragId)
+                    : null
+              }
             }
             break
 
@@ -564,6 +537,7 @@ export const processResponse = async (
               )
 
               fullText += browserResult.fullText
+              citations = browserResult.citations || citations
             } else if (toolName === "terminal") {
               setToolInUse(PluginID.TERMINAL)
               updatedPlugin = PluginID.TERMINAL
@@ -591,12 +565,8 @@ export const processResponse = async (
               )
 
               fullText += terminalResult.fullText
-
               finishReason = terminalResult.finishReason
-
-              if (finishReason === "tool-calls") {
-                finishReason = "terminal-calls"
-              }
+              citations = terminalResult.citations || citations
             } else if (toolName === "webSearch") {
               setToolInUse(PluginID.WEB_SEARCH)
               updatedPlugin = PluginID.WEB_SEARCH
@@ -624,6 +594,7 @@ export const processResponse = async (
               )
 
               fullText += webSearchResult.fullText
+              citations = webSearchResult.citations || citations
             } else if (toolName === "reasonLLM") {
               setToolInUse(PluginID.REASON_LLM)
               updatedPlugin = PluginID.REASON_LLM
@@ -651,6 +622,7 @@ export const processResponse = async (
               )
 
               fullText += reasonLLMResult.fullText
+              citations = reasonLLMResult.citations || citations
             }
             toolExecuted = true
             break
@@ -689,7 +661,8 @@ export const processResponse = async (
       ragUsed,
       ragId,
       selectedPlugin: updatedPlugin,
-      assistantGeneratedImages
+      assistantGeneratedImages,
+      citations
     }
   } else {
     throw new Error("Response body is null")
@@ -756,8 +729,11 @@ export const handleCreateMessages = async (
   editSequenceNumber?: number,
   ragUsed?: boolean,
   ragId?: string | null,
-  isTemporary: boolean = false
+  isTemporary: boolean = false,
+  citations?: string[]
 ) => {
+  console.log("5. Citations received in handleCreateMessages:", citations)
+
   const isEdit = editSequenceNumber !== undefined
 
   // If it's a temporary chat, don't create messages in the database
@@ -776,7 +752,8 @@ export const handleCreateMessages = async (
         plugin: selectedPlugin,
         image_paths: newMessageImages.map(image => image.path),
         rag_used: ragUsed || false,
-        rag_id: ragId || null
+        rag_id: ragId || null,
+        citations: []
       },
       fileItems: retrievedFileItems
     }
@@ -795,7 +772,8 @@ export const handleCreateMessages = async (
         plugin: selectedPlugin,
         image_paths: assistantGeneratedImages || [],
         rag_used: ragUsed || false,
-        rag_id: ragId || null
+        rag_id: ragId || null,
+        citations: citations || []
       },
       fileItems: []
     }
@@ -814,7 +792,8 @@ export const handleCreateMessages = async (
     sequence_number: lastSequenceNumber(chatMessages) + 1,
     image_paths: [],
     rag_used: ragUsed || false,
-    rag_id: ragId || null
+    rag_id: ragId || null,
+    citations: []
   }
 
   const finalAssistantMessage: TablesInsert<"messages"> = {
@@ -827,7 +806,8 @@ export const handleCreateMessages = async (
     sequence_number: lastSequenceNumber(chatMessages) + 2,
     image_paths: assistantGeneratedImages || [],
     rag_used: ragUsed || false,
-    rag_id: ragId || null
+    rag_id: ragId || null,
+    citations: citations || []
   }
 
   let finalChatMessages: ChatMessage[] = []
@@ -887,8 +867,13 @@ export const handleCreateMessages = async (
   } else {
     const createdMessages = await createMessages([
       finalUserMessage,
-      finalAssistantMessage
+      {
+        ...finalAssistantMessage,
+        citations: citations || []
+      }
     ])
+    console.log("6. Citations being saved to database:", citations)
+    console.log("7. Created messages:", createdMessages)
 
     // Upload each image (stored in newMessageImages) for the user message to message_images bucket
     const uploadPromises = newMessageImages
