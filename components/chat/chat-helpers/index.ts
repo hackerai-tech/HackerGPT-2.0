@@ -215,6 +215,9 @@ export const handleHostedChat = async (
     apiEndpoint = `/api/chat/tools/terminal`
     setToolInUse(PluginID.TERMINAL)
     selectedPlugin = PluginID.TERMINAL
+  } else if (selectedPlugin === PluginID.WEB_SEARCH) {
+    apiEndpoint = "/api/chat/plugins/web-search"
+    setToolInUse(PluginID.WEB_SEARCH)
   } else {
     setToolInUse(
       isRagEnabled && provider !== "openai"
@@ -732,8 +735,6 @@ export const handleCreateMessages = async (
   isTemporary: boolean = false,
   citations?: string[]
 ) => {
-  console.log("5. Citations received in handleCreateMessages:", citations)
-
   const isEdit = editSequenceNumber !== undefined
 
   // If it's a temporary chat, don't create messages in the database
@@ -872,8 +873,6 @@ export const handleCreateMessages = async (
         citations: citations || []
       }
     ])
-    console.log("6. Citations being saved to database:", citations)
-    console.log("7. Created messages:", createdMessages)
 
     // Upload each image (stored in newMessageImages) for the user message to message_images bucket
     const uploadPromises = newMessageImages

@@ -4,10 +4,7 @@ import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { cn } from "@/lib/utils"
 import { PluginID } from "@/types/plugins"
 import {
-  IconPaperclip,
   IconPlayerStopFilled,
-  IconPuzzle,
-  IconPuzzleOff,
   IconArrowUp,
   IconLoader2,
   IconMicrophone
@@ -28,6 +25,7 @@ import { UnsupportedFilesDialog } from "./unsupported-files-dialog"
 import useSpeechRecognition from "./chat-hooks/use-speech-recognition"
 import VoiceRecordingBar from "@/components/ui/voice-recording-bar"
 import VoiceLoadingBar from "@/components/ui/voice-loading-bar"
+import { ToolOptions } from "./chat-tools/tool-options"
 
 interface ChatInputProps {
   isTemporaryChat: boolean
@@ -172,62 +170,6 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
     setShowConfirmationDialog(false)
   }
 
-  const ToolOptions = () => (
-    <>
-      <div
-        className="flex flex-row items-center"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        {isPremiumSubscription && (
-          <WithTooltip
-            delayDuration={TOOLTIP_DELAY}
-            side="top"
-            display={
-              <div className="flex flex-col">
-                <p className="font-medium">Upload Files</p>
-              </div>
-            }
-            trigger={
-              <IconPaperclip
-                className="cursor-pointer p-1 hover:opacity-50"
-                size={32}
-              />
-            }
-          />
-        )}
-      </div>
-      {!isTemporaryChat && (
-        <div
-          className="flex flex-row items-center"
-          onClick={handleToggleEnhancedMenu}
-        >
-          <WithTooltip
-            delayDuration={TOOLTIP_DELAY}
-            side="top"
-            display={
-              <div className="flex flex-col">
-                <p className="font-medium">Show/Hide Plugins Menu</p>
-              </div>
-            }
-            trigger={
-              isEnhancedMenuOpen ? (
-                <IconPuzzle
-                  className="cursor-pointer p-1 hover:opacity-50"
-                  size={32}
-                />
-              ) : (
-                <IconPuzzleOff
-                  className="cursor-pointer p-1 opacity-50 hover:opacity-100"
-                  size={32}
-                />
-              )
-            }
-          />
-        </div>
-      )}
-    </>
-  )
-
   return (
     <>
       {/* Unsupported files dialog */}
@@ -354,8 +296,12 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
             </div>
 
             <div className="relative min-h-[44px] w-full px-2">
-              <div className="absolute bottom-[4px] left-2 flex flex-row">
-                <ToolOptions />
+              <div className="absolute bottom-[10px] left-2 flex flex-row">
+                <ToolOptions
+                  fileInputRef={fileInputRef}
+                  isTemporaryChat={isTemporaryChat}
+                  handleToggleEnhancedMenu={handleToggleEnhancedMenu}
+                />
               </div>
 
               <div className="absolute bottom-[10px] right-3 flex cursor-pointer items-center space-x-3">
