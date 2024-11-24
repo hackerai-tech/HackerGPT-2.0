@@ -53,6 +53,7 @@ export async function POST(request: Request) {
       async start(controller) {
         const reader = response.body?.getReader()
         const decoder = new TextDecoder()
+        const encoder = new TextEncoder()
         let buffer = ""
         let isFirstChunk = true
 
@@ -79,7 +80,9 @@ export async function POST(request: Request) {
               if (isFirstChunk) {
                 const citations = parsed.citations
                 if (citations?.length) {
-                  controller.enqueue(`2:${JSON.stringify([{ citations }])}\n`)
+                  controller.enqueue(
+                    encoder.encode(`2:${JSON.stringify([{ citations }])}\n`)
+                  )
                 }
                 isFirstChunk = false
               }
@@ -87,7 +90,9 @@ export async function POST(request: Request) {
               // Handle content
               const content = parsed.choices[0]?.delta?.content
               if (content) {
-                controller.enqueue(`0:${JSON.stringify(content)}\n`)
+                controller.enqueue(
+                  encoder.encode(`0:${JSON.stringify(content)}\n`)
+                )
               }
             }
           }
