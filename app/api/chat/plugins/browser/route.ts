@@ -55,11 +55,11 @@ export async function POST(request: Request) {
     const browserPrompt = createBrowserPrompt(browserResult, lastUserMessage)
 
     const openai = createOpenAI({
-      baseUrl: llmConfig.openai.baseUrl,
+      baseURL: llmConfig.openai.baseURL,
       apiKey: llmConfig.openai.apiKey
     })
 
-    const result = await streamText({
+    const result = streamText({
       model: openai(selectedModel),
       system: buildSystemPrompt(
         llmConfig.systemPrompts.pentestGPTBrowser,

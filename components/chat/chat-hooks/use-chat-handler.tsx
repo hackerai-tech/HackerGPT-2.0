@@ -388,7 +388,14 @@ export const useChatHandler = () => {
         // Update temporary chat messages with the generated response
         const updatedMessages = sentChatMessages.map(msg =>
           msg.message.id === tempAssistantChatMessage.message.id
-            ? { ...msg, message: { ...msg.message, content: generatedText } }
+            ? {
+                ...msg,
+                message: {
+                  ...msg.message,
+                  content: generatedText,
+                  citations: citations || []
+                }
+              }
             : msg
         )
         setTemporaryChatMessages(updatedMessages)

@@ -79,7 +79,7 @@ export async function POST(request: Request) {
     }
 
     const openai = createOpenAI({
-      baseUrl: llmConfig.openai.baseUrl,
+      baseURL: llmConfig.openai.baseURL,
       apiKey: llmConfig.openai.apiKey
     })
 
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
           let terminalExecuted = false
           let terminalOutput = ""
 
-          const { textStream, finishReason } = await streamText({
+          const { textStream, finishReason } = streamText({
             model: openai("gpt-4o"),
             temperature: 0.5,
             maxTokens: 1024,

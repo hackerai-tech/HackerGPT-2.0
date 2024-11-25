@@ -62,11 +62,11 @@ export async function POST(request: Request) {
     )
 
     const openai = createOpenAI({
-      baseUrl: llmConfig.openai.baseUrl,
+      baseURL: llmConfig.openai.baseURL,
       apiKey: llmConfig.openai.apiKey
     })
 
-    const result = await streamText({
+    const result = streamText({
       model: openai("o1-mini"),
       messages: toVercelChatMessages(filteredMessages)
     })
