@@ -1,7 +1,7 @@
 import { getRedis } from "./redis"
 
 const AUTH_PREFIX = "auth_ratelimit:"
-const MAX_LOGIN_ATTEMPTS = 5
+const MAX_LOGIN_ATTEMPTS = 7
 const MAX_SIGNUP_ATTEMPTS = 5
 const MAX_PASSWORD_RESET_ATTEMPTS = 3
 const AUTH_WINDOW_SIZE_MS = 15 * 60 * 1000 // 15 minutes
