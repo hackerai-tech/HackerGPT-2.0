@@ -109,7 +109,7 @@ export const ToolOptions = ({
       )}
 
       {/* Web Search Toggle */}
-      {isPremiumSubscription && !isTemporaryChat && (
+      {!isTemporaryChat && (
         <WithTooltip
           delayDuration={TOOLTIP_DELAY}
           side="top"

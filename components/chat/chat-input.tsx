@@ -32,7 +32,7 @@ interface ChatInputProps {
 }
 
 export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
-  const TOOLTIP_DELAY = 1000
+  const TOOLTIP_DELAY = 500
 
   useHotkey("l", () => {
     handleFocusChatInput()
