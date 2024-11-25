@@ -1,26 +1,21 @@
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { ServerRuntime } from "next"
 
-import { updateOrAddSystemMessage } from "@/lib/ai-helper"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 import { PGPT4 } from "@/lib/models/llm/hackerai-llm-list"
-import { createOpenAI as createOpenRouterClient } from "@ai-sdk/openai"
-import { streamText } from "ai"
 import { toVercelChatMessages } from "@/lib/build-prompt"
 import { buildSystemPrompt } from "@/lib/ai/prompts"
 
 export const runtime: ServerRuntime = "edge"
 
 export async function POST(request: Request) {
-  const { messages, chatSettings } = await request.json()
-
   try {
+    const { messages, chatSettings } = await request.json()
     const profile = await getAIProfile()
-
-    let { providerHeaders, selectedModel, rateLimitCheckResult } =
+    const { providerHeaders, selectedModel, rateLimitCheckResult } =
       await getProviderConfig(chatSettings, profile)
 
     if (rateLimitCheckResult !== null) {
@@ -29,34 +24,100 @@ export async function POST(request: Request) {
 
     filterEmptyAssistantMessages(messages)
 
-    const openrouter = createOpenRouterClient({
-      baseUrl: llmConfig.openrouter.baseUrl,
-      apiKey: llmConfig.openrouter.apiKey,
-      headers: providerHeaders
+    const response = await fetch(llmConfig.openrouter.url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${llmConfig.openrouter.apiKey}`,
+        "Content-Type": "application/json",
+        ...providerHeaders
+      },
+      body: JSON.stringify({
+        model: selectedModel,
+        messages: [
+          {
+            role: "system",
+            content: buildSystemPrompt(
+              llmConfig.systemPrompts.pentestGPTWebSearch,
+              profile.profile_context
+            )
+          },
+          ...toVercelChatMessages(messages)
+        ],
+        max_tokens: 1024,
+        temperature: 0.5,
+        stream: true
+      })
     })
 
-    const result = await streamText({
-      model: openrouter(selectedModel),
-      system: buildSystemPrompt(
-        llmConfig.systemPrompts.pentestGPTWebSearch,
-        profile.profile_context
-      ),
-      messages: toVercelChatMessages(messages),
-      temperature: 0.5,
-      maxTokens: 1024,
-      // abortSignal isn't working for some reason.
-      abortSignal: request.signal
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = response.body?.getReader()
+        const decoder = new TextDecoder()
+        const encoder = new TextEncoder()
+        let buffer = ""
+        let isFirstChunk = true
+
+        try {
+          while (true) {
+            const { done, value } = (await reader?.read()) || {
+              done: true,
+              value: undefined
+            }
+            if (done) break
+
+            buffer += decoder.decode(value, { stream: true })
+            const lines = buffer.split("\n")
+            buffer = lines.pop() || ""
+
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue
+              const data = line.slice(6)
+              if (data === "[DONE]") continue
+
+              const parsed = JSON.parse(data)
+
+              // Handle citations only on first chunk
+              if (isFirstChunk) {
+                const citations = parsed.citations
+                if (citations?.length) {
+                  controller.enqueue(
+                    encoder.encode(`2:${JSON.stringify([{ citations }])}\n`)
+                  )
+                }
+                isFirstChunk = false
+              }
+
+              // Handle content
+              const content = parsed.choices[0]?.delta?.content
+              if (content) {
+                controller.enqueue(
+                  encoder.encode(`0:${JSON.stringify(content)}\n`)
+                )
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Stream processing error:", e)
+        } finally {
+          controller.close()
+        }
+      }
     })
 
-    return result.toDataStreamResponse()
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "x-vercel-ai-data-stream": "v1"
+      }
+    })
   } catch (error: any) {
     console.error("Error in web search endpoint:", error)
-    const errorMessage = error.message || "An unexpected error occurred"
-    const errorCode = error.status || 500
-
-    return new Response(JSON.stringify({ message: errorMessage }), {
-      status: errorCode
-    })
+    return new Response(
+      JSON.stringify({
+        message: error.message || "An unexpected error occurred"
+      }),
+      { status: error.status || 500 }
+    )
   }
 }
 

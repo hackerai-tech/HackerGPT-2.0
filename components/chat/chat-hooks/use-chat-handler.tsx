@@ -315,6 +315,7 @@ export const useChatHandler = () => {
       let ragUsed = false
       let ragId = null
       let assistantGeneratedImages: string[] = []
+      let citations: string[] = []
 
       if (
         selectedPlugin.length > 0 &&
@@ -323,7 +324,11 @@ export const useChatHandler = () => {
         selectedPlugin !== PluginID.ENHANCED_SEARCH &&
         selectedPlugin !== PluginID.TERMINAL
       ) {
-        const { fullText, finishReason } = await handleHostedPluginsChat(
+        const {
+          fullText,
+          finishReason,
+          citations: citationsFromResponse
+        } = await handleHostedPluginsChat(
           payload,
           profile!,
           modelData!,
@@ -342,6 +347,7 @@ export const useChatHandler = () => {
         )
         generatedText = fullText
         finishReasonFromResponse = finishReason
+        citations = citationsFromResponse
       } else {
         const {
           fullText,
@@ -349,7 +355,8 @@ export const useChatHandler = () => {
           ragUsed: ragUsedFromResponse,
           ragId: ragIdFromResponse,
           selectedPlugin: updatedSelectedPlugin,
-          assistantGeneratedImages: assistantGeneratedImagesFromResponse
+          assistantGeneratedImages: assistantGeneratedImagesFromResponse,
+          citations: citationsFromResponse
         } = await handleHostedChat(
           payload,
           profile!,
@@ -374,6 +381,7 @@ export const useChatHandler = () => {
         ragId = ragIdFromResponse
         selectedPlugin = updatedSelectedPlugin
         assistantGeneratedImages = assistantGeneratedImagesFromResponse
+        citations = citationsFromResponse
       }
 
       if (isTemporaryChat) {
@@ -434,7 +442,9 @@ export const useChatHandler = () => {
           assistantGeneratedImages,
           editSequenceNumber,
           ragUsed,
-          ragId
+          ragId,
+          isTemporaryChat,
+          citations
         )
       }
 

@@ -4,6 +4,7 @@ import { FC } from "react"
 import { MessageMarkdown } from "./message-markdown"
 import { MessagePluginFile } from "./message-plugin-file"
 import { MessageTerminal } from "./e2b-messages/message-terminal"
+import { MessageCitations } from "./message-citations"
 
 interface MessageTypeResolverProps {
   message: Tables<"messages">
@@ -63,6 +64,20 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
         content={message.content}
         messageId={message.id}
         isAssistant={message.role === "assistant"}
+      />
+    )
+  }
+
+  if (
+    message.plugin === PluginID.WEB_SEARCH ||
+    toolInUse === PluginID.WEB_SEARCH ||
+    message.citations?.length > 0
+  ) {
+    return (
+      <MessageCitations
+        content={message.content}
+        isAssistant={message.role === "assistant"}
+        citations={message.citations || []}
       />
     )
   }

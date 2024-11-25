@@ -413,6 +413,7 @@ export type Database = {
       messages: {
         Row: {
           chat_id: string
+          citations: string[]
           content: string
           created_at: string
           id: string
@@ -428,6 +429,7 @@ export type Database = {
         }
         Insert: {
           chat_id: string
+          citations?: string[]
           content: string
           created_at?: string
           id?: string
@@ -443,6 +445,7 @@ export type Database = {
         }
         Update: {
           chat_id?: string
+          citations?: string[]
           content?: string
           created_at?: string
           id?: string
@@ -718,7 +721,6 @@ export type Database = {
           created_at: string
           default_model: string
           id: string
-          image_path: string
           include_profile_context: boolean
           is_home: boolean
           name: string
@@ -730,7 +732,6 @@ export type Database = {
           created_at?: string
           default_model: string
           id?: string
-          image_path?: string
           include_profile_context: boolean
           is_home?: boolean
           name: string
@@ -742,7 +743,6 @@ export type Database = {
           created_at?: string
           default_model?: string
           id?: string
-          image_path?: string
           include_profile_context?: boolean
           is_home?: boolean
           name?: string
@@ -893,12 +893,6 @@ export type Database = {
         }[]
       }
       non_private_file_exists: {
-        Args: {
-          p_name: string
-        }
-        Returns: boolean
-      }
-      non_private_workspace_exists: {
         Args: {
           p_name: string
         }
