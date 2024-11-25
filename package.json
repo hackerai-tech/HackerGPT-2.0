@@ -101,7 +101,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.5.0",
+    "@commitlint/cli": "^19.6.0",
     "@commitlint/config-conventional": "^19.5.0",
     "@next/bundle-analyzer": "^15.0.3",
     "@tailwindcss/typography": "^0.5.15",
