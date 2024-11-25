@@ -64,13 +64,13 @@ export async function commandGeneratorHandler({
   if (isPremium) {
     model = "gpt-4o"
     provider = createOpenAI({
-      baseUrl: llmConfig.openai.baseUrl,
+      baseURL: llmConfig.openai.baseURL,
       apiKey: llmConfig.openai.apiKey
     })
   } else {
     model = "openai/gpt-4o-2024-08-06"
     provider = createOpenAI({
-      baseUrl: llmConfig.openrouter.baseUrl,
+      baseURL: llmConfig.openrouter.baseURL,
       headers: providerHeaders
     })
   }
@@ -98,7 +98,7 @@ export async function commandGeneratorHandler({
 
       updateSystemMessage(messages, customPrompt, profile_context)
 
-      const { textStream, finishReason } = await streamText({
+      const { textStream, finishReason } = streamText({
         model: provider(model),
         temperature: 0.5,
         maxTokens: 1024,

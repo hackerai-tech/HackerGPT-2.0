@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     replaceWordsInLastUserMessage(messages)
 
     const openai = createOpenAI({
-      baseUrl: llmConfig.openai.baseUrl,
+      baseURL: llmConfig.openai.baseURL,
       apiKey: llmConfig.openai.apiKey
     })
 
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       messages
     })
 
-    const result = await streamText({
+    const result = streamText({
       model: openai("gpt-4o"),
       system: buildSystemPrompt(
         llmConfig.systemPrompts.gpt4o,

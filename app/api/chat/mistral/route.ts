@@ -191,7 +191,7 @@ export async function POST(request: Request) {
         tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
       }
 
-      const result = await streamText({
+      const result = streamText({
         model: provider(selectedModel || ""),
         system: systemPrompt,
         messages: toVercelChatMessages(messages, includeImages),
@@ -230,7 +230,7 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   const proModel = llmConfig.models.pentestgpt_pro_openrouter
 
   const providerUrl = llmConfig.openrouter.url
-  const providerBaseUrl = llmConfig.openrouter.baseUrl
+  const providerBaseUrl = llmConfig.openrouter.baseURL
   const providerApiKey = llmConfig.openrouter.apiKey
 
   const providerHeaders = {

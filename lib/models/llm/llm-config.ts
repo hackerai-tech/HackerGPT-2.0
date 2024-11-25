@@ -17,12 +17,12 @@ const openaiInitialSystemPrompt = `${process.env.SECRET_OPENAI_SYSTEM_PROMPT}`
 
 const llmConfig = {
   openrouter: {
-    baseUrl: "https://openrouter.ai/api/v1",
+    baseURL: "https://openrouter.ai/api/v1",
     url: `https://openrouter.ai/api/v1/chat/completions`,
     apiKey: process.env.OPENROUTER_API_KEY
   },
   openai: {
-    baseUrl: "https://api.openai.com/v1",
+    baseURL: "https://api.openai.com/v1",
     url: "https://api.openai.com/v1/chat/completions",
     apiKey: process.env.OPENAI_API_KEY
   },

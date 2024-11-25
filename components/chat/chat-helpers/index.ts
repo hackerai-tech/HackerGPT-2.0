@@ -11,7 +11,6 @@ import {
   updateMessage
 } from "@/db/messages"
 import { uploadMessageImage } from "@/db/storage/message-images"
-import { consumeReadableStream } from "@/lib/consume-stream"
 import { Tables, TablesInsert } from "@/supabase/types"
 import {
   ChatFile,
@@ -20,13 +19,14 @@ import {
   ChatSettings,
   LLM,
   LLMID,
-  MessageImage
+  MessageImage,
+  DataPartValue
 } from "@/types"
 import { PluginID } from "@/types/plugins"
 import React from "react"
 import { toast } from "sonner"
 import { v4 as uuidv4 } from "uuid"
-import { readDataStream } from "ai"
+import { processDataStream } from "ai"
 import { CONTINUE_PROMPT } from "@/lib/models/llm/llm-prompting"
 import { buildFinalMessages } from "@/lib/build-prompt-v2"
 import { supabase } from "@/lib/supabase/browser-client"
@@ -443,219 +443,201 @@ export const processResponse = async (
     let toolExecuted = false
     let citations: string[] = []
 
-    const reader = response.body.getReader()
-    const stream = readDataStream(reader, {
-      isAborted: () => controller.signal.aborted
-    })
-
     try {
-      for await (const streamPart of stream) {
-        // console.log(streamPart)
+      await processDataStream({
+        stream: response.body,
+        onTextPart: value => {
+          if (value && !controller.signal.aborted) {
+            if (isFirstChunk) {
+              setFirstTokenReceived(true)
+              isFirstChunk = false
+            }
+            fullText += value
 
-        switch (streamPart.type) {
-          case "text":
-          case "data":
-            if (streamPart.type === "text" && streamPart.value) {
-              if (isFirstChunk) {
-                setFirstTokenReceived(true)
-                isFirstChunk = false
-              }
-              fullText += streamPart.value
-
-              setChatMessages(prev =>
-                prev.map(chatMessage =>
-                  chatMessage.message.id === lastChatMessage.message.id
-                    ? {
-                        ...chatMessage,
-                        message: {
-                          ...chatMessage.message,
-                          content:
-                            chatMessage.message.content + streamPart.value,
-                          image_paths: chatMessage.message.image_paths
-                        }
+            setChatMessages(prev =>
+              prev.map(chatMessage =>
+                chatMessage.message.id === lastChatMessage.message.id
+                  ? {
+                      ...chatMessage,
+                      message: {
+                        ...chatMessage.message,
+                        content: chatMessage.message.content + value,
+                        image_paths: chatMessage.message.image_paths
                       }
-                    : chatMessage
-                )
+                    }
+                  : chatMessage
               )
-            } else if (streamPart.type === "data") {
-              const dataValue = streamPart.value as any[]
+            )
+          }
+        },
+        onDataPart: value => {
+          if (
+            Array.isArray(value) &&
+            value.length > 0 &&
+            !controller.signal.aborted
+          ) {
+            const firstValue = value[0] as DataPartValue
 
-              // Handle citations
-              if (Array.isArray(dataValue) && dataValue[0]?.citations) {
-                citations = dataValue[0].citations
-              }
-
-              // Handle RAG data
-              if (
-                Array.isArray(dataValue) &&
-                typeof dataValue[0] === "object" &&
-                dataValue[0] !== null &&
-                "ragUsed" in dataValue[0]
-              ) {
-                ragUsed = Boolean(dataValue[0].ragUsed)
-                ragId =
-                  dataValue[0].ragId !== null
-                    ? String(dataValue[0].ragId)
-                    : null
-              }
+            // Handle citations
+            if (firstValue?.citations) {
+              citations = firstValue.citations
             }
-            break
 
-          case "tool_call":
-            if (toolExecuted) break
-
-            const { toolName } = streamPart.value
-
-            if (toolName === "browser" && streamPart.value.args.open_url) {
-              setToolInUse(PluginID.BROWSER)
-              updatedPlugin = PluginID.BROWSER
-
-              const urlToOpen = streamPart.value.args.open_url
-
-              const browserRequestBody = {
-                ...requestBody,
-                open_url: urlToOpen
-              }
-
-              const browserResponse = await fetchChatResponse(
-                "/api/chat/plugins/browser",
-                browserRequestBody,
-                controller,
-                setIsGenerating,
-                setChatMessages,
-                alertDispatch
-              )
-
-              const browserResult = await processResponse(
-                browserResponse,
-                lastChatMessage,
-                controller,
-                setFirstTokenReceived,
-                setChatMessages,
-                setToolInUse,
-                requestBody,
-                setIsGenerating,
-                alertDispatch,
-                updatedPlugin
-              )
-
-              fullText += browserResult.fullText
-              citations = browserResult.citations || citations
-            } else if (toolName === "terminal") {
-              setToolInUse(PluginID.TERMINAL)
-              updatedPlugin = PluginID.TERMINAL
-
-              const terminalResponse = await fetchChatResponse(
-                "/api/chat/tools/terminal",
-                requestBody,
-                controller,
-                setIsGenerating,
-                setChatMessages,
-                alertDispatch
-              )
-
-              const terminalResult = await processResponse(
-                terminalResponse,
-                lastChatMessage,
-                controller,
-                setFirstTokenReceived,
-                setChatMessages,
-                setToolInUse,
-                requestBody,
-                setIsGenerating,
-                alertDispatch,
-                updatedPlugin
-              )
-
-              fullText += terminalResult.fullText
-              finishReason = terminalResult.finishReason
-              citations = terminalResult.citations || citations
-            } else if (toolName === "webSearch") {
-              setToolInUse(PluginID.WEB_SEARCH)
-              updatedPlugin = PluginID.WEB_SEARCH
-
-              const webSearchResponse = await fetchChatResponse(
-                "/api/chat/plugins/web-search",
-                requestBody,
-                controller,
-                setIsGenerating,
-                setChatMessages,
-                alertDispatch
-              )
-
-              const webSearchResult = await processResponse(
-                webSearchResponse,
-                lastChatMessage,
-                controller,
-                setFirstTokenReceived,
-                setChatMessages,
-                setToolInUse,
-                requestBody,
-                setIsGenerating,
-                alertDispatch,
-                updatedPlugin
-              )
-
-              fullText += webSearchResult.fullText
-              citations = webSearchResult.citations || citations
-            } else if (toolName === "reasonLLM") {
-              setToolInUse(PluginID.REASON_LLM)
-              updatedPlugin = PluginID.REASON_LLM
-
-              const reasonLLMResponse = await fetchChatResponse(
-                "/api/chat/tools/reason-llm",
-                requestBody,
-                controller,
-                setIsGenerating,
-                setChatMessages,
-                alertDispatch
-              )
-
-              const reasonLLMResult = await processResponse(
-                reasonLLMResponse,
-                lastChatMessage,
-                controller,
-                setFirstTokenReceived,
-                setChatMessages,
-                setToolInUse,
-                requestBody,
-                setIsGenerating,
-                alertDispatch,
-                updatedPlugin
-              )
-
-              fullText += reasonLLMResult.fullText
-              citations = reasonLLMResult.citations || citations
+            // Handle RAG data
+            if (firstValue?.ragUsed !== undefined) {
+              ragUsed = Boolean(firstValue.ragUsed)
+              ragId =
+                firstValue.ragId !== null ? String(firstValue.ragId) : null
             }
-            toolExecuted = true
-            break
+          }
+        },
+        onToolCallPart: async value => {
+          if (toolExecuted || controller.signal.aborted) return
 
-          case "finish_message":
-            if (finishReason === "") {
-              // Only set finishReason if it hasn't been set before
-              if (
-                streamPart.value.finishReason === "tool-calls" &&
-                getTerminalPlugins().includes(updatedPlugin)
-              ) {
-                // To use continue generating for terminal
-                finishReason = "terminal-calls"
-              } else {
-                finishReason = streamPart.value.finishReason
-              }
+          const { toolName } = value
+
+          if (toolName === "browser" && value.args.open_url) {
+            setToolInUse(PluginID.BROWSER)
+            updatedPlugin = PluginID.BROWSER
+
+            const urlToOpen = value.args.open_url
+
+            const browserRequestBody = {
+              ...requestBody,
+              open_url: urlToOpen
             }
-            break
+
+            const browserResponse = await fetchChatResponse(
+              "/api/chat/plugins/browser",
+              browserRequestBody,
+              controller,
+              setIsGenerating,
+              setChatMessages,
+              alertDispatch
+            )
+
+            const browserResult = await processResponse(
+              browserResponse,
+              lastChatMessage,
+              controller,
+              setFirstTokenReceived,
+              setChatMessages,
+              setToolInUse,
+              requestBody,
+              setIsGenerating,
+              alertDispatch,
+              updatedPlugin
+            )
+
+            fullText += browserResult.fullText
+            citations = browserResult.citations || citations
+          } else if (toolName === "terminal") {
+            setToolInUse(PluginID.TERMINAL)
+            updatedPlugin = PluginID.TERMINAL
+
+            const terminalResponse = await fetchChatResponse(
+              "/api/chat/tools/terminal",
+              requestBody,
+              controller,
+              setIsGenerating,
+              setChatMessages,
+              alertDispatch
+            )
+
+            const terminalResult = await processResponse(
+              terminalResponse,
+              lastChatMessage,
+              controller,
+              setFirstTokenReceived,
+              setChatMessages,
+              setToolInUse,
+              requestBody,
+              setIsGenerating,
+              alertDispatch,
+              updatedPlugin
+            )
+
+            fullText += terminalResult.fullText
+            finishReason = terminalResult.finishReason
+            citations = terminalResult.citations || citations
+          } else if (toolName === "webSearch") {
+            setToolInUse(PluginID.WEB_SEARCH)
+            updatedPlugin = PluginID.WEB_SEARCH
+
+            const webSearchResponse = await fetchChatResponse(
+              "/api/chat/plugins/web-search",
+              requestBody,
+              controller,
+              setIsGenerating,
+              setChatMessages,
+              alertDispatch
+            )
+
+            const webSearchResult = await processResponse(
+              webSearchResponse,
+              lastChatMessage,
+              controller,
+              setFirstTokenReceived,
+              setChatMessages,
+              setToolInUse,
+              requestBody,
+              setIsGenerating,
+              alertDispatch,
+              updatedPlugin
+            )
+
+            fullText += webSearchResult.fullText
+            citations = webSearchResult.citations || citations
+          } else if (toolName === "reasonLLM") {
+            setToolInUse(PluginID.REASON_LLM)
+            updatedPlugin = PluginID.REASON_LLM
+
+            const reasonLLMResponse = await fetchChatResponse(
+              "/api/chat/tools/reason-llm",
+              requestBody,
+              controller,
+              setIsGenerating,
+              setChatMessages,
+              alertDispatch
+            )
+
+            const reasonLLMResult = await processResponse(
+              reasonLLMResponse,
+              lastChatMessage,
+              controller,
+              setFirstTokenReceived,
+              setChatMessages,
+              setToolInUse,
+              requestBody,
+              setIsGenerating,
+              alertDispatch,
+              updatedPlugin
+            )
+
+            fullText += reasonLLMResult.fullText
+            citations = reasonLLMResult.citations || citations
+          }
+          toolExecuted = true
+        },
+        onFinishMessagePart: value => {
+          if (finishReason === "" && !controller.signal.aborted) {
+            // Only set finishReason if it hasn't been set before
+            if (
+              value.finishReason === "tool-calls" &&
+              getTerminalPlugins().includes(updatedPlugin)
+            ) {
+              // To use continue generating for terminal
+              finishReason = "terminal-calls"
+            } else {
+              finishReason = value.finishReason
+            }
+          }
         }
-
-        if (controller.signal.aborted) {
-          break
-        }
-      }
+      })
     } catch (error) {
       if (!(error instanceof DOMException && error.name === "AbortError")) {
         console.error("Unexpected error processing stream:", error)
       }
-    } finally {
-      reader.releaseLock()
     }
 
     return {
