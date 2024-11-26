@@ -191,10 +191,13 @@ export async function POST(request: Request) {
         tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
       }
 
+      // Remove last message if it's a continuation to remove the continue prompt
+      const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
+
       const result = streamText({
         model: provider(selectedModel || ""),
         system: systemPrompt,
-        messages: toVercelChatMessages(messages, includeImages),
+        messages: toVercelChatMessages(cleanedMessages, includeImages),
         temperature: modelTemperature,
         maxTokens: isPentestGPTPro ? 2048 : 1024,
         // abortSignal isn't working for some reason.
