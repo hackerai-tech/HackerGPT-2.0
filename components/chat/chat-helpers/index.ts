@@ -442,6 +442,7 @@ export const processResponse = async (
     let ragUsed = false
     let ragId = null
     let isFirstChunk = true
+    let isFirstChunkReceived = false
     let updatedPlugin = selectedPlugin
     let assistantGeneratedImages: string[] = []
     let toolExecuted = false
@@ -460,7 +461,7 @@ export const processResponse = async (
               //   lastMessageContent: lastChatMessage?.message?.content,
               //   isMatch: isContinuation && lastChatMessage?.message?.content === value
               // })
-
+              isFirstChunkReceived = true
               if (
                 isContinuation &&
                 lastChatMessage?.message?.content === value
@@ -661,6 +662,12 @@ export const processResponse = async (
             ) {
               // To use continue generating for terminal
               finishReason = "terminal-calls"
+            } else if (
+              value.finishReason === "length" &&
+              !isFirstChunkReceived &&
+              isContinuation
+            ) {
+              finishReason = "stop"
             } else {
               finishReason = value.finishReason
             }
