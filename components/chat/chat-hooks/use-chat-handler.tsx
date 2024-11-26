@@ -343,7 +343,8 @@ export const useChatHandler = () => {
           isTemporaryChat ? setTemporaryChatMessages : setChatMessages,
           setToolInUse,
           alertDispatch,
-          selectedPlugin
+          selectedPlugin,
+          isContinuation
         )
         generatedText = fullText
         finishReasonFromResponse = finishReason

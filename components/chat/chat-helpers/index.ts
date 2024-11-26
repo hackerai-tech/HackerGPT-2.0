@@ -285,7 +285,8 @@ export const handleHostedChat = async (
     requestBody,
     setIsGenerating,
     alertDispatch,
-    selectedPlugin
+    selectedPlugin,
+    isContinuation
   )
 }
 
@@ -304,7 +305,8 @@ export const handleHostedPluginsChat = async (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
-  selectedPlugin: PluginID
+  selectedPlugin: PluginID,
+  isContinuation: boolean
 ) => {
   const apiEndpoint = "/api/chat/plugins"
 
@@ -345,7 +347,8 @@ export const handleHostedPluginsChat = async (
     requestBody,
     setIsGenerating,
     alertDispatch,
-    selectedPlugin
+    selectedPlugin,
+    isContinuation
   )
 }
 
@@ -397,7 +400,8 @@ export const processResponse = async (
   requestBody: object,
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
   alertDispatch: React.Dispatch<AlertAction>,
-  selectedPlugin: PluginID
+  selectedPlugin: PluginID,
+  isContinuation: boolean
 ) => {
   if (!response.ok) {
     const result = await response.json()
@@ -442,16 +446,41 @@ export const processResponse = async (
     let assistantGeneratedImages: string[] = []
     let toolExecuted = false
     let citations: string[] = []
+    let shouldSkipFirstChunk = false
 
     try {
       await processDataStream({
         stream: response.body,
         onTextPart: value => {
           if (value && !controller.signal.aborted) {
+            // Check if this is the first chunk and matches the last message
             if (isFirstChunk) {
+              // console.log("[ProcessResponse] First chunk received", {
+              //   value,
+              //   lastMessageContent: lastChatMessage?.message?.content,
+              //   isMatch: isContinuation && lastChatMessage?.message?.content === value
+              // })
+
+              if (
+                isContinuation &&
+                lastChatMessage?.message?.content === value
+              ) {
+                // console.log("[ProcessResponse] Skipping duplicate first chunk")
+                shouldSkipFirstChunk = true
+                isFirstChunk = false
+                return
+              }
               setFirstTokenReceived(true)
               isFirstChunk = false
             }
+
+            // Skip if this was a duplicate first chunk
+            if (shouldSkipFirstChunk) {
+              // console.log("[ProcessResponse] Skipping chunk due to previous duplicate")
+              shouldSkipFirstChunk = false
+              return
+            }
+
             fullText += value
 
             setChatMessages(prev =>
@@ -526,7 +555,8 @@ export const processResponse = async (
               requestBody,
               setIsGenerating,
               alertDispatch,
-              updatedPlugin
+              updatedPlugin,
+              isContinuation
             )
 
             fullText += browserResult.fullText
@@ -554,7 +584,8 @@ export const processResponse = async (
               requestBody,
               setIsGenerating,
               alertDispatch,
-              updatedPlugin
+              updatedPlugin,
+              isContinuation
             )
 
             fullText += terminalResult.fullText
@@ -583,7 +614,8 @@ export const processResponse = async (
               requestBody,
               setIsGenerating,
               alertDispatch,
-              updatedPlugin
+              updatedPlugin,
+              isContinuation
             )
 
             fullText += webSearchResult.fullText
@@ -611,7 +643,8 @@ export const processResponse = async (
               requestBody,
               setIsGenerating,
               alertDispatch,
-              updatedPlugin
+              updatedPlugin,
+              isContinuation
             )
 
             fullText += reasonLLMResult.fullText
