@@ -34,6 +34,7 @@ import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
 import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
 import { WithTooltip } from "../ui/with-tooltip"
+import { toast } from "sonner"
 
 const MESSAGES_PER_FETCH = 20
 interface ChatUIProps {}
@@ -83,12 +84,44 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   const [allMessagesLoaded, setAllMessagesLoaded] = useState(false)
   const previousHeightRef = useRef<number | null>(null)
 
+  const handleChatNotFound = useCallback(
+    (chatId: string) => {
+      const toastKey = `chat-not-found-${chatId}`
+      if (!window.sessionStorage.getItem(toastKey)) {
+        toast.error("Unable to load conversation " + chatId)
+        window.sessionStorage.setItem(toastKey, "true")
+        setTimeout(() => window.sessionStorage.removeItem(toastKey), 2000)
+      }
+
+      const workspaceId = params.workspaceid as string
+      router.push(`/${workspaceId}/chat`)
+    },
+    [params.workspaceid, router]
+  )
+
   useEffect(() => {
     const fetchData = async () => {
       if (!isTemporaryChat) {
-        await Promise.all([fetchMessages(), fetchChat()])
+        try {
+          const [messagesResult, chatResult] = await Promise.allSettled([
+            fetchMessages(),
+            fetchChat()
+          ])
+
+          if (
+            messagesResult.status === "rejected" ||
+            chatResult.status === "rejected"
+          ) {
+            handleChatNotFound(params.chatid as string)
+            return
+          }
+
+          scrollToBottom()
+        } catch (error) {
+          console.error("Error fetching data:", error)
+          handleChatNotFound(params.chatid as string)
+        }
       }
-      scrollToBottom()
     }
 
     if (
@@ -168,33 +201,35 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       return
     }
 
-    const reformatedMessages = await fetchMessagesAndProcess(
-      params.chatid as string,
-      MESSAGES_PER_FETCH
-    )
+    try {
+      const reformatedMessages = await fetchMessagesAndProcess(
+        params.chatid as string,
+        MESSAGES_PER_FETCH
+      )
 
-    const chatFiles = await getChatFilesByChatId(params.chatid as string)
+      const chatFiles = await getChatFilesByChatId(params.chatid as string)
 
-    if (!chatFiles) {
-      // Chat not found, redirect to the workspace chat page
-      const workspaceId = params.workspaceid as string
-      router.push(`/${workspaceId}/chat`)
-      return
+      if (!reformatedMessages || !chatFiles) {
+        handleChatNotFound(params.chatid as string)
+        return
+      }
+
+      setChatFiles(
+        chatFiles.files.map(file => ({
+          id: file.id,
+          name: file.name,
+          type: file.type,
+          file: null
+        }))
+      )
+
+      setUseRetrieval(chatFiles.files.length > 0)
+      setShowFilesDisplay(chatFiles.files.length > 0)
+      setChatMessages(reformatedMessages)
+    } catch (error) {
+      console.error("Error fetching messages:", error)
+      handleChatNotFound(params.chatid as string)
     }
-
-    setChatFiles(
-      chatFiles.files.map(file => ({
-        id: file.id,
-        name: file.name,
-        type: file.type,
-        file: null
-      }))
-    )
-
-    setUseRetrieval(chatFiles.files.length > 0)
-    setShowFilesDisplay(chatFiles.files.length > 0)
-
-    setChatMessages(reformatedMessages)
   }
 
   const fetchChat = async () => {
