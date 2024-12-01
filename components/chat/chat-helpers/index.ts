@@ -650,6 +650,36 @@ export const processResponse = async (
 
             fullText += reasonLLMResult.fullText
             citations = reasonLLMResult.citations || citations
+          } else if (toolName === "fragment-generator") {
+            setToolInUse(PluginID.FRAGMENT_GENERATOR)
+            updatedPlugin = PluginID.FRAGMENT_GENERATOR
+
+            const fragmentGeneratorResponse = await fetchChatResponse(
+              "/api/chat/tools/fragment-generator",
+              requestBody,
+              controller,
+              setIsGenerating,
+              setChatMessages,
+              alertDispatch
+            )
+
+            const fragmentGeneratorResult = await processResponse(
+              fragmentGeneratorResponse,
+              lastChatMessage,
+              controller,
+              setFirstTokenReceived,
+              setChatMessages,
+              setToolInUse,
+              requestBody,
+              setIsGenerating,
+              alertDispatch,
+              updatedPlugin,
+              isContinuation
+            )
+
+            fullText += fragmentGeneratorResult.fullText
+            finishReason = fragmentGeneratorResult.finishReason
+            citations = fragmentGeneratorResult.citations || citations
           }
           toolExecuted = true
         },
