@@ -71,7 +71,7 @@
     "class-variance-authority": "^0.7.0",
     "cmdk": "^1.0.4",
     "endent": "^2.1.0",
-    "gpt-tokenizer": "^2.6.2",
+    "gpt-tokenizer": "^2.7.0",
     "husky": "^9.1.7",
     "isomorphic-dompurify": "^2.17.0",
     "jest-environment-jsdom": "^29.7.0",
