@@ -1,10 +1,6 @@
 import { z } from "zod"
-import { StreamData } from "ai"
 
 type ToolContext = {
-  profile: { user_id: string }
-  data: StreamData
-  openai?: any
   messages?: any
 }
 

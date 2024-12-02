@@ -8,7 +8,7 @@ import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { createOpenAI } from "@ai-sdk/openai"
-import { StreamData, streamText } from "ai"
+import { streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 
@@ -59,12 +59,7 @@ export async function POST(request: Request) {
       apiKey: llmConfig.openai.apiKey
     })
 
-    const data = new StreamData()
-
     const { getSelectedSchemas } = createToolSchemas({
-      profile,
-      data,
-      openai,
       messages
     })
 
@@ -75,13 +70,10 @@ export async function POST(request: Request) {
       temperature: 0.5,
       maxTokens: 2048,
       abortSignal: request.signal,
-      tools: getSelectedSchemas("all"),
-      onFinish: () => {
-        data.close()
-      }
+      tools: getSelectedSchemas("all")
     })
 
-    return result.toDataStreamResponse({ data })
+    return result.toDataStreamResponse()
   } catch (error: any) {
     const errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500
