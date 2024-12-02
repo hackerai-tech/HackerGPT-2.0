@@ -35,7 +35,7 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   try {
-    const { messages, isContinuation } = await request.json()
+    const { messages } = await request.json()
 
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
@@ -48,6 +48,11 @@ export async function POST(request: Request) {
 
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
+
+    const systemPrompt = buildSystemPrompt(
+      llmConfig.systemPrompts.gpt4o,
+      profile.profile_context
+    )
 
     const openai = createOpenAI({
       baseURL: llmConfig.openai.baseURL,
@@ -63,16 +68,10 @@ export async function POST(request: Request) {
       messages
     })
 
-    // Remove last message if it's a continuation to remove the continue prompt
-    const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
-
     const result = streamText({
       model: openai("gpt-4o"),
-      system: buildSystemPrompt(
-        llmConfig.systemPrompts.gpt4o,
-        profile.profile_context
-      ),
-      messages: toVercelChatMessages(cleanedMessages, true),
+      system: systemPrompt,
+      messages: toVercelChatMessages(messages, true),
       temperature: 0.5,
       maxTokens: 2048,
       abortSignal: request.signal,
