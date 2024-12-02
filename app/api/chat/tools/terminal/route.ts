@@ -98,7 +98,7 @@ export async function POST(request: Request) {
           const { textStream, finishReason } = streamText({
             model: openai("gpt-4o"),
             temperature: 0.5,
-            maxTokens: 1024,
+            maxTokens: 2048,
             system: buildSystemPrompt(
               llmConfig.systemPrompts.pentestGPTTerminal,
               profile.profile_context
