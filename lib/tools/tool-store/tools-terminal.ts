@@ -20,13 +20,13 @@ export const terminalExecutor = async ({
   pluginID,
   sandboxTimeout = DEFAULT_BASH_SANDBOX_TIMEOUT,
   sandboxTemplate = DEFAULT_TEMPLATE
-}: TerminalExecutorOptions): Promise<ReadableStream<string>> => {
+}: TerminalExecutorOptions): Promise<ReadableStream<Uint8Array>> => {
   let sbx: Sandbox | null = null
   let hasTerminalOutput = false
 
-  return new ReadableStream({
+  return new ReadableStream<Uint8Array>({
     async start(controller) {
-      controller.enqueue(`\n\`\`\`terminal\n${command}\n\`\`\``)
+      controller.enqueue(ENCODER.encode(`\n\`\`\`terminal\n${command}\n\`\`\``))
       console.log(
         `[${userID}] Executing terminal command (${pluginID}): ${command}`
       )
@@ -42,15 +42,15 @@ export const terminalExecutor = async ({
             if (shouldProcessOutput(data.line, pluginID)) {
               hasTerminalOutput = true
               if (!isOutputStarted) {
-                controller.enqueue("\n```stdout\n")
+                controller.enqueue(ENCODER.encode("\n```stdout\n"))
                 isOutputStarted = true
               }
-              controller.enqueue(`${data.line}`)
+              controller.enqueue(ENCODER.encode(data.line))
             }
           }
         })
 
-        if (isOutputStarted) controller.enqueue("\n```")
+        if (isOutputStarted) controller.enqueue(ENCODER.encode("\n```"))
 
         handleExecutionResult(execution, controller, userID, hasTerminalOutput)
       } catch (error) {
@@ -73,7 +73,7 @@ function shouldProcessOutput(line: string, pluginID: string): boolean {
 
 function handleExecutionResult(
   execution: any,
-  controller: ReadableStreamDefaultController<string>,
+  controller: ReadableStreamDefaultController<Uint8Array>,
   userID: string,
   hasTerminalOutput: boolean
 ) {
@@ -83,21 +83,23 @@ function handleExecutionResult(
       const errorMessage = execution.error.name.includes("TimeoutError")
         ? `Command timed out after ${MAX_EXECUTION_TIME / 1000} seconds. Try a shorter command or split it.`
         : `Execution failed: ${execution.error.value || "Unknown error"}`
-      controller.enqueue(`\n\`\`\`stderr\n${errorMessage}\n\`\`\``)
+      controller.enqueue(
+        ENCODER.encode(`\n\`\`\`stderr\n${errorMessage}\n\`\`\``)
+      )
     }
 
     const stderr = Array.isArray(execution.logs.stderr)
       ? execution.logs.stderr.join("\n")
       : execution.logs.stderr || ""
     if (stderr) {
-      controller.enqueue(`\n\`\`\`stderr\n${stderr}\n\`\`\``)
+      controller.enqueue(ENCODER.encode(`\n\`\`\`stderr\n${stderr}\n\`\`\``))
     }
 
     const stdout = Array.isArray(execution.logs.stdout)
       ? execution.logs.stdout.join("\n")
       : execution.logs.stdout || ""
     if (stdout) {
-      controller.enqueue(`\n\`\`\`stdout\n${stdout}\n\`\`\``)
+      controller.enqueue(ENCODER.encode(`\n\`\`\`stdout\n${stdout}\n\`\`\``))
     }
   }
 }

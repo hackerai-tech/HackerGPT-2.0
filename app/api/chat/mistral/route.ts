@@ -13,7 +13,7 @@ import { generateStandaloneQuestion } from "@/lib/models/question-generator"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createMistral } from "@ai-sdk/mistral"
 import { createOpenAI } from "@ai-sdk/openai"
-import { StreamData, streamText } from "ai"
+import { createDataStreamResponse, streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 
@@ -182,37 +182,46 @@ export async function POST(request: Request) {
         })
       }
 
-      const data = new StreamData()
-      data.append({ ragUsed, ragId })
-
-      let tools
-      if (isPentestGPTPro) {
-        const toolSchemas = createToolSchemas({ profile, data })
-        tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
-      }
-
       // Remove last message if it's a continuation to remove the continue prompt
       const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
 
-      const result = streamText({
-        model: provider(selectedModel || ""),
-        system: systemPrompt,
-        messages: toVercelChatMessages(cleanedMessages, includeImages),
-        temperature: modelTemperature,
-        maxTokens: isPentestGPTPro ? 2048 : 1024,
-        // abortSignal isn't working for some reason.
-        abortSignal: request.signal,
-        ...(isPentestGPTPro
-          ? {
-              tools
-            }
-          : {}),
-        onFinish: () => {
-          data.close()
+      return createDataStreamResponse({
+        execute: dataStream => {
+          dataStream.writeData({ ragUsed, ragId })
+
+          let tools
+          if (isPentestGPTPro) {
+            const toolSchemas = createToolSchemas({})
+            tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
+          }
+
+          const result = streamText({
+            model: provider(
+              selectedModel || "",
+              isPentestGPTPro ? { parallelToolCalls: false } : {}
+            ),
+            system: systemPrompt,
+            messages: toVercelChatMessages(cleanedMessages, includeImages),
+            temperature: modelTemperature,
+            maxTokens: isPentestGPTPro ? 2048 : 1024,
+            // abortSignal isn't working for some reason.
+            abortSignal: request.signal,
+            ...(isPentestGPTPro ? { tools } : null)
+          })
+
+          result.mergeIntoDataStream(dataStream)
+        },
+        onError: error => {
+          // Log the error message to the server console
+          console.error(
+            "Error occurred:",
+            error instanceof Error ? error.message : String(error)
+          )
+
+          // Return a generic error message to the client
+          return "An error occurred while processing your request."
         }
       })
-
-      return result.toDataStreamResponse({ data })
     } catch (error) {
       return handleErrorResponse(error)
     }
