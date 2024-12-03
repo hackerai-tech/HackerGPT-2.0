@@ -196,7 +196,10 @@ export async function POST(request: Request) {
           }
 
           const result = streamText({
-            model: provider(selectedModel || ""),
+            model: provider(
+              selectedModel || "",
+              isPentestGPTPro ? { parallelToolCalls: false } : {}
+            ),
             system: systemPrompt,
             messages: toVercelChatMessages(cleanedMessages, includeImages),
             temperature: modelTemperature,

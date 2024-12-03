@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     })
 
     const result = streamText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-4o", { parallelToolCalls: false }),
       system: systemPrompt,
       messages: toVercelChatMessages(messages, true),
       temperature: 0.5,
