@@ -1,7 +1,6 @@
 import { OutputMessage, Sandbox } from "@e2b/code-interpreter"
 import { CustomExecutionError } from "../tool-store/tools-terminal"
 
-const TEMPLATE = "bash-terminal-v1"
 const BASH_SANDBOX_TIMEOUT = 15 * 60 * 1000
 const MAX_EXECUTION_TIME = 5 * 60 * 1000
 const ENCODER = new TextEncoder()
@@ -9,11 +8,13 @@ const ENCODER = new TextEncoder()
 interface TerminalExecutorOptions {
   userID: string
   command: string
+  template: "bash-terminal-v1"
 }
 
 export const terminalExecutor = async ({
   userID,
-  command
+  command,
+  template
 }: TerminalExecutorOptions): Promise<ReadableStream<Uint8Array>> => {
   let sbx: Sandbox | null = null
   let hasTerminalOutput = false
@@ -26,7 +27,7 @@ export const terminalExecutor = async ({
       try {
         sbx = await createOrConnectTerminal(
           userID,
-          TEMPLATE,
+          template,
           BASH_SANDBOX_TIMEOUT
         )
 

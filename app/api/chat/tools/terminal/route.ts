@@ -120,7 +120,8 @@ export async function POST(request: Request) {
                   terminalExecuted = true
                   const terminalStream = await terminalExecutor({
                     userID: profile.user_id,
-                    command
+                    command,
+                    template: "bash-terminal-v1"
                   })
                   await streamTerminalOutput(terminalStream, chunk => {
                     enqueueChunk(chunk)
