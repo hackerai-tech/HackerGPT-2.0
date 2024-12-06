@@ -455,6 +455,20 @@ export const availablePlugins: PluginSummary[] = [
     ]
   },
   {
+    id: 32,
+    name: "Fragment Generator",
+    value: PluginID.FRAGMENT_GENERATOR,
+    categories: ["utils"],
+    icon: "https://cdn-icons-png.flaticon.com/128/5576/5576886.png", //TODO: find a nicer
+    invertInDarkMode: true,
+    description: "Generate next.js pages and components",
+    githubRepoUrl: pluginUrls.FRAGMENT_GENERATOR,
+    isInstalled: false,
+    isPremium: true,
+    createdAt: "2024-10-04",
+    starters: []
+  },
+  {
     id: 99,
     name: "Plugins Store",
     categories: [],
