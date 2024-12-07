@@ -42,6 +42,25 @@ export const createToolSchemas = (context: ToolContext) => {
             "Set to true to use the terminal for executing bash commands. Select immediately when terminal operations are needed."
           )
       })
+    },
+    fragments: {
+      description:
+        "Creates a Next.js website or execute a python code based on your detailed specifications.",
+      parameters: z.object({
+        name: z
+          .string()
+          .describe("Name of the website/project or Python script"),
+        description: z
+          .string()
+          .describe(
+            "Detailed description of the website's purpose and requirements, or the Python script's functionality and goals"
+          ),
+        features: z
+          .array(z.string())
+          .describe(
+            "List of specific features to include in the website or functionality to implement in Python"
+          )
+      })
     }
   }
 

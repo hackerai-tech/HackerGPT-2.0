@@ -218,6 +218,10 @@ export const handleHostedChat = async (
   } else if (selectedPlugin === PluginID.WEB_SEARCH) {
     apiEndpoint = "/api/chat/plugins/web-search"
     setToolInUse(PluginID.WEB_SEARCH)
+  } else if (selectedPlugin === PluginID.FRAGMENTS) {
+    apiEndpoint = "/api/chat/tools/fragments"
+    setToolInUse(PluginID.FRAGMENTS)
+    selectedPlugin = PluginID.FRAGMENTS
   } else {
     setToolInUse(
       isRagEnabled && provider !== "openai"
@@ -650,12 +654,12 @@ export const processResponse = async (
 
             fullText += reasonLLMResult.fullText
             citations = reasonLLMResult.citations || citations
-          } else if (toolName === "fragment-generator") {
-            setToolInUse(PluginID.FRAGMENT_GENERATOR)
-            updatedPlugin = PluginID.FRAGMENT_GENERATOR
+          } else if (toolName === "fragments") {
+            setToolInUse(PluginID.FRAGMENTS)
+            updatedPlugin = PluginID.FRAGMENTS
 
             const fragmentGeneratorResponse = await fetchChatResponse(
-              "/api/chat/tools/fragment-generator",
+              "/api/chat/tools/fragments",
               requestBody,
               controller,
               setIsGenerating,

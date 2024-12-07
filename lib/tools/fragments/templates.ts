@@ -1,4 +1,7 @@
 import { Templates } from "./types"
+import templates from "./templates.json"
+
+export default templates
 
 export function templatesToPrompt(templates: Templates) {
   return `${Object.entries(templates)

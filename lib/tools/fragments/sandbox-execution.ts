@@ -4,19 +4,19 @@ import {
   ExecutionResultWeb,
   Fragment
 } from "./types"
+import { createOrConnectTerminal } from "../e2b/sandbox"
 
 export async function executeFragment(
   fragment: Fragment,
   userID: string,
-  sandboxTimeout: number,
-  apiKey: string
+  sandboxTimeout: number
 ) {
   // Create a interpreter or a sandbox
-  const sbx = await Sandbox.create(fragment.template, {
-    metadata: { template: fragment.template, userID: userID },
-    timeoutMs: sandboxTimeout,
-    apiKey
-  })
+  const sbx = await createOrConnectTerminal(
+    userID,
+    fragment.template,
+    sandboxTimeout
+  )
 
   // Install packages
   if (fragment.has_additional_dependencies) {
