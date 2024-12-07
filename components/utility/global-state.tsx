@@ -344,6 +344,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
     setUseRetrieval(chatFiles.files.length > 0)
     setShowFilesDisplay(chatFiles.files.length > 0)
+    setAllMessagesLoaded(false)
+    setIsLoadingMore(false)
 
     setChatMessages(reformatedMessages)
   }
