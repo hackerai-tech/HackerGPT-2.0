@@ -42,20 +42,12 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   })
 
   const params = useParams()
-  const router = useRouter()
 
   const {
     setChatMessages,
     chatMessages,
-    temporaryChatMessages,
     selectedChat,
-    setSelectedChat,
-    setChatSettings,
-    setChatImages,
     isGenerating,
-    setChatFiles,
-    setShowFilesDisplay,
-    setUseRetrieval,
     setIsReadyToChat,
     showSidebar,
     isTemporaryChat,
