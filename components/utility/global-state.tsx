@@ -1,15 +1,22 @@
 "use client"
 
 import { PentestGPTContext } from "@/context/context"
+import { getChatFilesByChatId } from "@/db/chat-files"
+import { getChatById } from "@/db/chats"
+import { getMessagesByChatId } from "@/db/messages"
 import { getProfileByUserId } from "@/db/profile"
+import { getMessageImageFromStorage } from "@/db/storage/message-images"
 import {
   getSubscriptionByTeamId,
   getSubscriptionByUserId
 } from "@/db/subscriptions"
-import { getWorkspacesByUserId } from "@/db/workspaces"
 import { getTeamMembersByTeamId } from "@/db/teams"
+import { getWorkspacesByUserId } from "@/db/workspaces"
+import { convertBlobToBase64 } from "@/lib/blob-to-b64"
+import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
 import { fetchHostedModels } from "@/lib/models/fetch-models"
 import { supabase } from "@/lib/supabase/browser-client"
+import { ProcessedTeamMember } from "@/lib/team-utils"
 import { Tables } from "@/supabase/types"
 import {
   ChatFile,
@@ -17,16 +24,16 @@ import {
   ChatSettings,
   ContentType,
   LLM,
+  LLMID,
   MessageImage,
   SubscriptionStatus
 } from "@/types"
 import { PluginID } from "@/types/plugins"
-import { useRouter } from "next/navigation"
-import { FC, useCallback, useEffect, useMemo, useState } from "react"
-import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
-import { ProcessedTeamMember } from "@/lib/team-utils"
 import { User } from "@supabase/supabase-js"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { FC, useCallback, useEffect, useMemo, useState } from "react"
+
+const MESSAGES_PER_FETCH = 20
 
 interface GlobalStateProps {
   children: React.ReactNode
@@ -141,6 +148,10 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // TEMPORARY CHAT STORE
   const [isTemporaryChat, setIsTemporaryChat] = useState(false)
 
+  // Loading Messages States
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [allMessagesLoaded, setAllMessagesLoaded] = useState(false)
+
   useEffect(() => {
     setIsTemporaryChat(searchParams.get("temporary-chat") === "true")
   }, [searchParams])
@@ -250,6 +261,159 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
   const refreshTeamMembers = async () => {
     await fetchStartingData()
+  }
+
+  const fetchMessagesAndProcess = async (
+    chatId: string,
+    oldestSequenceNumber?: number
+  ) => {
+    if (isTemporaryChat) {
+      return temporaryChatMessages
+    }
+
+    const fetchedMessages = await getMessagesByChatId(
+      chatId,
+      MESSAGES_PER_FETCH,
+      oldestSequenceNumber
+    )
+
+    const imagePromises: Promise<MessageImage>[] = fetchedMessages.flatMap(
+      message =>
+        message.image_paths
+          ? message.image_paths.map(async imagePath => {
+              const url = await getMessageImageFromStorage(imagePath)
+
+              if (url) {
+                const response = await fetch(url)
+                const blob = await response.blob()
+                const base64 = await convertBlobToBase64(blob)
+
+                return {
+                  messageId: message.id,
+                  path: imagePath,
+                  base64,
+                  url,
+                  file: null
+                }
+              }
+
+              return {
+                messageId: message.id,
+                path: imagePath,
+                base64: "",
+                url,
+                file: null
+              }
+            })
+          : []
+    )
+
+    const images: MessageImage[] = await Promise.all(imagePromises.flat())
+    setChatImages(prevImages => [...prevImages, ...images])
+
+    return fetchedMessages.map(fetchMessage => ({
+      message: fetchMessage,
+      fileItems: fetchMessage.file_items,
+      feedback: fetchMessage.feedback[0] ?? undefined
+    }))
+  }
+
+  const fetchMessages = async (chatId: string, workspaceId: string) => {
+    if (isTemporaryChat) {
+      return
+    }
+
+    const reformatedMessages = await fetchMessagesAndProcess(chatId)
+
+    const chatFiles = await getChatFilesByChatId(chatId)
+
+    if (!chatFiles) {
+      // Chat not found, redirect to the workspace chat page
+      router.push(`/${workspaceId}/chat`)
+      return
+    }
+
+    setChatFiles(
+      chatFiles.files.map(file => ({
+        id: file.id,
+        name: file.name,
+        type: file.type,
+        file: null
+      }))
+    )
+
+    setUseRetrieval(chatFiles.files.length > 0)
+    setShowFilesDisplay(chatFiles.files.length > 0)
+
+    setChatMessages(reformatedMessages)
+  }
+
+  const loadMoreMessages = async (chatId: string) => {
+    if (
+      isTemporaryChat ||
+      allMessagesLoaded ||
+      isLoadingMore ||
+      !chatMessages.length
+    )
+      return
+
+    const oldestSequenceNumber = chatMessages[0].message.sequence_number
+
+    if (!chatId) {
+      console.error("Chat ID is undefined")
+      return
+    }
+
+    setIsLoadingMore(true)
+
+    try {
+      const olderMessages = await fetchMessagesAndProcess(
+        chatId,
+        oldestSequenceNumber
+      )
+
+      if (olderMessages.length > 0) {
+        setChatMessages(prevMessages => [...olderMessages, ...prevMessages])
+      }
+
+      setAllMessagesLoaded(
+        olderMessages.length < MESSAGES_PER_FETCH ||
+          olderMessages[0].message.sequence_number <= 1
+      )
+    } catch (error) {
+      console.error("Error loading more messages:", error)
+    } finally {
+      setTimeout(() => {
+        setIsLoadingMore(false)
+      }, 200)
+    }
+  }
+
+  const fetchChat = async (chatId: string, workspaceId: string) => {
+    if (isTemporaryChat) {
+      return
+    }
+
+    try {
+      const chat = await getChatById(chatId)
+      if (!chat) {
+        // Chat not found, redirect to the workspace chat page
+        router.push(`/${workspaceId}/chat`)
+        return
+      }
+
+      setSelectedChat(chat)
+      setChatSettings({
+        model: chat.model as LLMID,
+        includeProfileContext: chat.include_profile_context,
+        embeddingsProvider: "openai"
+      })
+    } catch (error) {
+      console.error("Error fetching chat:", error)
+      // Handle the error, e.g., show an error message to the user
+      // and redirect to the workspace chat page
+      router.push(`/${workspaceId}/chat`)
+    }
   }
 
   return (
@@ -378,7 +542,16 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setIsMicSupported,
 
         // TEMPORARY CHAT STORE
-        isTemporaryChat
+        isTemporaryChat,
+
+        // Fetch Chat and Messages
+        fetchChat,
+        fetchMessages,
+        loadMoreMessages,
+
+        // Loading Messages States
+        isLoadingMore,
+        allMessagesLoaded
       }}
     >
       {children}

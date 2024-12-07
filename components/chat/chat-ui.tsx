@@ -1,17 +1,11 @@
 import Loading from "@/app/loading"
 import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 import { PentestGPTContext } from "@/context/context"
-import { getChatFilesByChatId } from "@/db/chat-files"
-import { getChatById } from "@/db/chats"
-import { getMessagesByChatId } from "@/db/messages"
-import { getMessageImageFromStorage } from "@/db/storage/message-images"
-import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import useHotkey from "@/lib/hooks/use-hotkey"
-import { LLMID, MessageImage } from "@/types"
 import {
-  IconPlayerTrackNext,
-  IconMessageOff,
   IconInfoCircle,
+  IconMessageOff,
+  IconPlayerTrackNext,
   IconRefresh
 } from "@tabler/icons-react"
 import { useParams, useRouter } from "next/navigation"
@@ -25,6 +19,7 @@ import {
   useState
 } from "react"
 import { Button } from "../ui/button"
+import { WithTooltip } from "../ui/with-tooltip"
 import { ChatHelp } from "./chat-help"
 import { useScroll } from "./chat-hooks/use-scroll"
 import { ChatInput } from "./chat-input"
@@ -33,9 +28,7 @@ import { ChatScrollButtons } from "./chat-scroll-buttons"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
 import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
-import { WithTooltip } from "../ui/with-tooltip"
 
-const MESSAGES_PER_FETCH = 20
 interface ChatUIProps {}
 
 export const ChatUI: FC<ChatUIProps> = ({}) => {
@@ -66,7 +59,12 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     setIsReadyToChat,
     showSidebar,
     isTemporaryChat,
-    setTemporaryChatMessages
+    setTemporaryChatMessages,
+    fetchMessages,
+    fetchChat,
+    loadMoreMessages,
+    isLoadingMore,
+    allMessagesLoaded
   } = useContext(PentestGPTContext)
 
   const {
@@ -79,14 +77,15 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   const { scrollRef, contentRef, isAtBottom, scrollToBottom } = useScroll()
 
   const [loading, setLoading] = useState(true)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [allMessagesLoaded, setAllMessagesLoaded] = useState(false)
   const previousHeightRef = useRef<number | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       if (!isTemporaryChat) {
-        await Promise.all([fetchMessages(), fetchChat()])
+        await Promise.all([
+          fetchMessages(params.chatid as string, params.workspaceid as string),
+          fetchChat(params.chatid as string, params.workspaceid as string)
+        ])
       }
       scrollToBottom()
     }
@@ -107,126 +106,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     }
   }, [])
 
-  const fetchMessagesAndProcess = async (
-    chatId: string,
-    limit?: number,
-    beforeSequenceNumber?: number
-  ) => {
-    if (isTemporaryChat) {
-      return temporaryChatMessages
-    }
-
-    const fetchedMessages = await getMessagesByChatId(
-      chatId,
-      limit,
-      beforeSequenceNumber
-    )
-
-    const imagePromises: Promise<MessageImage>[] = fetchedMessages.flatMap(
-      message =>
-        message.image_paths
-          ? message.image_paths.map(async imagePath => {
-              const url = await getMessageImageFromStorage(imagePath)
-
-              if (url) {
-                const response = await fetch(url)
-                const blob = await response.blob()
-                const base64 = await convertBlobToBase64(blob)
-
-                return {
-                  messageId: message.id,
-                  path: imagePath,
-                  base64,
-                  url,
-                  file: null
-                }
-              }
-
-              return {
-                messageId: message.id,
-                path: imagePath,
-                base64: "",
-                url,
-                file: null
-              }
-            })
-          : []
-    )
-
-    const images: MessageImage[] = await Promise.all(imagePromises.flat())
-    setChatImages(prevImages => [...prevImages, ...images])
-
-    return fetchedMessages.map(fetchMessage => ({
-      message: fetchMessage,
-      fileItems: fetchMessage.file_items,
-      feedback: fetchMessage.feedback[0] ?? undefined
-    }))
-  }
-
-  const fetchMessages = async () => {
-    if (isTemporaryChat) {
-      return
-    }
-
-    const reformatedMessages = await fetchMessagesAndProcess(
-      params.chatid as string,
-      MESSAGES_PER_FETCH
-    )
-
-    const chatFiles = await getChatFilesByChatId(params.chatid as string)
-
-    if (!chatFiles) {
-      // Chat not found, redirect to the workspace chat page
-      const workspaceId = params.workspaceid as string
-      router.push(`/${workspaceId}/chat`)
-      return
-    }
-
-    setChatFiles(
-      chatFiles.files.map(file => ({
-        id: file.id,
-        name: file.name,
-        type: file.type,
-        file: null
-      }))
-    )
-
-    setUseRetrieval(chatFiles.files.length > 0)
-    setShowFilesDisplay(chatFiles.files.length > 0)
-
-    setChatMessages(reformatedMessages)
-  }
-
-  const fetchChat = async () => {
-    if (isTemporaryChat) {
-      return
-    }
-
-    try {
-      const chat = await getChatById(params.chatid as string)
-      if (!chat) {
-        // Chat not found, redirect to the workspace chat page
-        const workspaceId = params.workspaceid as string
-        router.push(`/${workspaceId}/chat`)
-        return
-      }
-
-      setSelectedChat(chat)
-      setChatSettings({
-        model: chat.model as LLMID,
-        includeProfileContext: chat.include_profile_context,
-        embeddingsProvider: "openai"
-      })
-    } catch (error) {
-      console.error("Error fetching chat:", error)
-      // Handle the error, e.g., show an error message to the user
-      // and redirect to the workspace chat page
-      const workspaceId = params.workspaceid as string
-      router.push(`/${workspaceId}/chat`)
-    }
-  }
-
-  const loadMoreMessages = useCallback(async () => {
+  const loadMoreMessagesInner = useCallback(async () => {
     if (
       isTemporaryChat ||
       allMessagesLoaded ||
@@ -235,7 +115,6 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     )
       return
 
-    const oldestSequenceNumber = chatMessages[0].message.sequence_number
     const chatId = params.chatid as string
 
     if (!chatId) {
@@ -243,73 +122,54 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       return
     }
 
-    setIsLoadingMore(true)
-
-    try {
-      const scrollContainer = scrollRef.current
-      if (scrollContainer) {
-        previousHeightRef.current = scrollContainer.scrollHeight
-      }
-
-      const olderMessages = await fetchMessagesAndProcess(
-        chatId,
-        MESSAGES_PER_FETCH,
-        oldestSequenceNumber
-      )
-
-      if (olderMessages.length > 0) {
-        setChatMessages(prevMessages => [...olderMessages, ...prevMessages])
-      }
-
-      setAllMessagesLoaded(
-        olderMessages.length < MESSAGES_PER_FETCH ||
-          olderMessages[0].message.sequence_number <= 1
-      )
-    } catch (error) {
-      console.error("Error loading more messages:", error)
-    } finally {
-      setTimeout(() => {
-        setIsLoadingMore(false)
-      }, 200)
+    const scrollContainer = scrollRef.current
+    if (scrollContainer) {
+      previousHeightRef.current = scrollContainer.scrollHeight
     }
+
+    loadMoreMessages(chatId)
   }, [
     isTemporaryChat,
     allMessagesLoaded,
     isLoadingMore,
     chatMessages,
-    fetchMessagesAndProcess,
+    loadMoreMessages,
     params.chatid,
     setChatMessages
   ])
 
   useLayoutEffect(() => {
     if (isLoadingMore) {
-      const scrollContainer = scrollRef.current
-      if (scrollContainer && previousHeightRef.current !== null) {
-        const newHeight = scrollContainer.scrollHeight
-        const previousHeight = previousHeightRef.current
-        const scrollDifference = newHeight - previousHeight
+      setTimeout(() => {
+        const scrollContainer = scrollRef.current
+        if (scrollContainer && previousHeightRef.current !== null) {
+          const newHeight = scrollContainer.scrollHeight
+          const previousHeight = previousHeightRef.current
+          const scrollDifference = newHeight - previousHeight
 
-        // console.log("newHeight", newHeight)
-        // console.log("previousHeight", previousHeight)
-        // console.log("scrollDifference", scrollDifference)
-        // console.log("scrollContainer.scrollTop", scrollContainer.scrollTop)
-        // Adjust scroll position
-        scrollContainer.scrollTop = scrollDifference
-        // Reset previousHeightRef for next load
-        previousHeightRef.current = null
-      }
+          // console.log("newHeight", newHeight)
+          // console.log("previousHeight", previousHeight)
+          // console.log("scrollDifference", scrollDifference)
+          // console.log("scrollContainer.scrollTop", scrollContainer.scrollTop)
+          // Adjust scroll position
+          scrollContainer.scrollTop = scrollDifference
+          // Reset previousHeightRef for next load
+          previousHeightRef.current = null
+        }
+      }, 200) // allow some time for the new messages to render
     }
   }, [chatMessages, isLoadingMore])
 
   const innerHandleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       const { scrollTop } = e.currentTarget
+      console.log("innerHandleScroll", scrollTop)
+
       if (scrollTop === 0) {
-        loadMoreMessages()
+        loadMoreMessagesInner()
       }
     },
-    [loadMoreMessages]
+    [loadMoreMessagesInner]
   )
 
   const handleCleanChat = () => {
@@ -374,7 +234,11 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
         </div>
       </div>
 
-      <div ref={scrollRef} className="flex size-full flex-col overflow-auto">
+      <div
+        ref={scrollRef}
+        className="flex size-full flex-col overflow-auto"
+        onScroll={innerHandleScroll}
+      >
         <div ref={contentRef}>
           <ChatMessages />
         </div>

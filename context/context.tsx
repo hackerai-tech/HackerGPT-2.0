@@ -139,6 +139,15 @@ interface PentestGPTContextType {
 
   // TEMPORARY CHAT STORE
   isTemporaryChat: boolean
+
+  // Fetch Chat and Messages
+  fetchChat: (chatId: string, workspaceId: string) => Promise<void>
+  fetchMessages: (chatId: string, workspaceId: string) => Promise<void>
+  loadMoreMessages: (chatId: string) => Promise<void>
+
+  // Loading Messages States
+  isLoadingMore: boolean
+  allMessagesLoaded: boolean
 }
 
 export const PentestGPTContext = createContext<PentestGPTContextType>({
@@ -264,7 +273,16 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   setIsMicSupported: () => {},
 
   // TEMPORARY CHAT STORE
-  isTemporaryChat: false
+  isTemporaryChat: false,
+
+  // Loading Messages States
+  isLoadingMore: false,
+  allMessagesLoaded: false,
+
+  // Fetch Chat and Messages
+  fetchChat: async (chatId: string, workspaceId: string) => {},
+  fetchMessages: async (chatId: string, workspaceId: string) => {},
+  loadMoreMessages: async (chatId: string) => {}
 })
 
 export const usePentestGPT = () => useContext(PentestGPTContext)
