@@ -176,7 +176,7 @@ export function getRateLimitErrorMessage(
 
   if (model === "terminal") {
     const baseMessage = `⚠️ You've reached the limit for terminal usage.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
-    return !premium
+    return premium
       ? baseMessage
       : `${baseMessage}\n\n🚀 Consider upgrading to Pro or Team for higher terminal usage limits and more features.`
   }

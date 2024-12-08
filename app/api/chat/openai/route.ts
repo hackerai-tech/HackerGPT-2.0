@@ -8,7 +8,7 @@ import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { createOpenAI } from "@ai-sdk/openai"
-import { StreamData, streamText } from "ai"
+import { streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 
@@ -35,7 +35,7 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   try {
-    const { messages, isContinuation } = await request.json()
+    const { messages } = await request.json()
 
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
@@ -49,40 +49,31 @@ export async function POST(request: Request) {
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
 
+    const systemPrompt = buildSystemPrompt(
+      llmConfig.systemPrompts.gpt4o,
+      profile.profile_context
+    )
+
     const openai = createOpenAI({
       baseURL: llmConfig.openai.baseURL,
       apiKey: llmConfig.openai.apiKey
     })
 
-    const data = new StreamData()
-
     const { getSelectedSchemas } = createToolSchemas({
-      profile,
-      data,
-      openai,
       messages
     })
 
-    // Remove last message if it's a continuation to remove the continue prompt
-    const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
-
     const result = streamText({
-      model: openai("gpt-4o"),
-      system: buildSystemPrompt(
-        llmConfig.systemPrompts.gpt4o,
-        profile.profile_context
-      ),
-      messages: toVercelChatMessages(cleanedMessages, true),
+      model: openai("gpt-4o", { parallelToolCalls: false }),
+      system: systemPrompt,
+      messages: toVercelChatMessages(messages, true),
       temperature: 0.5,
       maxTokens: 2048,
       abortSignal: request.signal,
-      tools: getSelectedSchemas("all"),
-      onFinish: () => {
-        data.close()
-      }
+      tools: getSelectedSchemas("all")
     })
 
-    return result.toDataStreamResponse({ data })
+    return result.toDataStreamResponse()
   } catch (error: any) {
     const errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500

@@ -32,6 +32,7 @@ import { PluginID } from "@/types/plugins"
 import { User } from "@supabase/supabase-js"
 import { useRouter, useSearchParams } from "next/navigation"
 import { FC, useCallback, useEffect, useMemo, useState } from "react"
+import { toast } from "sonner"
 
 const MESSAGES_PER_FETCH = 20
 
@@ -318,6 +319,17 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     }))
   }
 
+  const handleChatNotFound = (chatId: string, workspaceId: string) => {
+    const toastKey = `chat-not-found-${chatId}`
+    if (!window.sessionStorage.getItem(toastKey)) {
+      toast.error("Unable to load conversation " + chatId)
+      window.sessionStorage.setItem(toastKey, "true")
+      setTimeout(() => window.sessionStorage.removeItem(toastKey), 2000)
+    }
+
+    router.push(`/${workspaceId}/chat`)
+  }
+
   const fetchMessages = async (chatId: string, workspaceId: string) => {
     if (isTemporaryChat) {
       return
@@ -329,7 +341,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
     if (!chatFiles) {
       // Chat not found, redirect to the workspace chat page
-      router.push(`/${workspaceId}/chat`)
+      handleChatNotFound(chatId, workspaceId)
       return
     }
 
@@ -414,7 +426,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
       console.error("Error fetching chat:", error)
       // Handle the error, e.g., show an error message to the user
       // and redirect to the workspace chat page
-      router.push(`/${workspaceId}/chat`)
+      handleChatNotFound(chatId, workspaceId)
     }
   }
 

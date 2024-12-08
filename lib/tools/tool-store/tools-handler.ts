@@ -19,7 +19,10 @@ import {
 } from "./prompts/system-prompt"
 import { PluginID } from "@/types/plugins"
 import { getTerminalTemplate } from "@/lib/tools/tool-store/tools-helper"
-import { encode, decode } from "gpt-tokenizer"
+import {
+  streamTerminalOutput,
+  reduceTerminalOutput
+} from "@/lib/ai/terminal-utils"
 
 interface CommandGeneratorHandlerOptions {
   userID: string
@@ -30,9 +33,6 @@ interface CommandGeneratorHandlerOptions {
   isPremium: boolean
 }
 
-const MAX_TOKENS = 32000
-const INITIAL_TOKENS = 1000
-
 export async function commandGeneratorHandler({
   userID,
   profile_context,
@@ -41,7 +41,7 @@ export async function commandGeneratorHandler({
   isTerminalContinuation,
   isPremium
 }: CommandGeneratorHandlerOptions) {
-  const customPrompt = getToolsPrompt(
+  const customPrompt = getToolsWithAnswerPrompt(
     process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || "",
     pluginID
   )
@@ -49,6 +49,7 @@ export async function commandGeneratorHandler({
   filterEmptyAssistantMessages(messages)
   replaceWordsInLastUserMessage(messages)
 
+  // Continue assistant message from previous terminal call
   if (isTerminalContinuation) {
     messages.pop()
   }
@@ -76,132 +77,50 @@ export async function commandGeneratorHandler({
   }
 
   try {
-    let terminalStream: ReadableStream<string> | null = null
-    let terminalExecuted = false
-    let loopCount = 0
-    const maxLoops = 2
-    let combinedResponse = ""
-    let assistantMessage: { role: "assistant"; content: string } | null = null
-    let finalFinishReason = "unknown"
-
-    const processIteration = async () => {
-      const customPrompt =
-        loopCount === 0
-          ? getToolsPrompt(
-              process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || "",
-              pluginID
-            )
-          : getToolsWithAnswerPrompt(
-              process.env.SECRET_PENTESTGPT_SYSTEM_PROMPT || "",
-              pluginID
-            )
-
-      updateSystemMessage(messages, customPrompt, profile_context)
-
-      const { textStream, finishReason } = streamText({
-        model: provider(model),
-        temperature: 0.5,
-        maxTokens: 1024,
-        messages: toVercelChatMessages(messages, true),
-        tools: {
-          terminal: tool({
-            description: "Generate and execute a terminal command",
-            parameters: z.object({
-              command: z.string().describe("The terminal command to execute")
-            }),
-            execute: async ({ command }) => {
-              if (terminalExecuted) {
-                return
-              }
-              terminalExecuted = true
-              terminalStream = await terminalExecutor({
-                userID,
-                command,
-                pluginID,
-                sandboxTemplate: getTerminalTemplate(pluginID)
-              })
-            }
-          })
-        }
-      })
-
-      return { textStream, finishReason }
-    }
-
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         const encoder = new TextEncoder()
         const enqueueChunk = (chunk: string) =>
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
 
-        while (loopCount < maxLoops) {
-          const { textStream, finishReason } = await processIteration()
+        const { textStream, finishReason } = streamText({
+          model: provider(model, { parallelToolCalls: false }),
+          temperature: 0.5,
+          maxTokens: isPremium ? 2048 : 1024,
+          messages: toVercelChatMessages(messages, true),
+          tools: {
+            terminal: tool({
+              description: "Generate and execute a terminal command",
+              parameters: z.object({
+                command: z.string().describe("The terminal command to execute")
+              }),
+              execute: async ({ command }) => {
+                const terminalStream = await terminalExecutor({
+                  userID,
+                  command,
+                  pluginID,
+                  sandboxTemplate: getTerminalTemplate(pluginID)
+                })
+                let terminalOutput = ""
+                await streamTerminalOutput(terminalStream, chunk => {
+                  enqueueChunk(chunk)
+                  terminalOutput += chunk
+                })
+                terminalOutput = reduceTerminalOutput(terminalOutput)
 
-          let iterationResponse = ""
-
-          // Process text stream
-          for await (const chunk of textStream) {
-            iterationResponse += chunk
-            enqueueChunk(chunk)
-          }
-
-          if (terminalStream) {
-            const reader = terminalStream.getReader()
-            let terminalOutput = ""
-            while (true) {
-              const { done, value } = await reader.read()
-              if (done) break
-              terminalOutput += value
-              enqueueChunk(value)
-            }
-
-            // Process terminal output for AI
-            const tokens = encode(terminalOutput)
-            let aiTerminalOutput = ""
-            if (tokens.length > MAX_TOKENS) {
-              const initialTokens = tokens.slice(0, INITIAL_TOKENS)
-              const remainingTokens = tokens.slice(
-                -(MAX_TOKENS - INITIAL_TOKENS)
-              )
-              aiTerminalOutput =
-                decode(initialTokens) + "\n...\n" + decode(remainingTokens)
-            } else {
-              aiTerminalOutput = terminalOutput
-            }
-
-            iterationResponse += aiTerminalOutput
-          }
-
-          // Update or create the assistant message
-          if (iterationResponse.trim()) {
-            if (!assistantMessage) {
-              assistantMessage = {
-                role: "assistant",
-                content: iterationResponse.trim()
+                return terminalOutput
               }
-              messages.push(assistantMessage)
-            } else {
-              assistantMessage.content += "\n" + iterationResponse.trim()
-            }
-          }
+            })
+          },
+          maxSteps: 2
+        })
 
-          combinedResponse += iterationResponse
-
-          // Check if terminal was executed
-          const reason = await finishReason
-          finalFinishReason = reason
-          if (reason !== "tool-calls") {
-            break
-          }
-
-          loopCount++
-          terminalExecuted = false
-          terminalStream = null
+        for await (const chunk of textStream) {
+          enqueueChunk(chunk)
         }
 
-        // Enqueue the finish reason as the last chunk
         const finalData = {
-          finishReason: finalFinishReason
+          finishReason: await finishReason
         }
         controller.enqueue(encoder.encode(`d:${JSON.stringify(finalData)}\n`))
         controller.close()

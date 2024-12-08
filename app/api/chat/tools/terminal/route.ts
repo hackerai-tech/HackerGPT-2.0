@@ -12,9 +12,12 @@ import {
   toVercelChatMessages
 } from "@/lib/build-prompt"
 import { replaceWordsInLastUserMessage } from "@/lib/ai-helper"
-import { z } from "zod"
-import { encode, decode } from "gpt-tokenizer"
 import { buildSystemPrompt } from "@/lib/ai/prompts"
+import {
+  streamTerminalOutput,
+  reduceTerminalOutput
+} from "@/lib/ai/terminal-utils"
+import { z } from "zod"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -91,89 +94,48 @@ export async function POST(request: Request) {
         const enqueueChunk = (chunk: string) =>
           controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
 
-        for (let i = 0; i < 3; i++) {
-          let terminalExecuted = false
-          let terminalOutput = ""
+        const { textStream, finishReason } = streamText({
+          model: openai("gpt-4o", { parallelToolCalls: false }),
+          temperature: 0.5,
+          maxTokens: 2048,
+          system: buildSystemPrompt(
+            llmConfig.systemPrompts.pentestGPTTerminal,
+            profile.profile_context
+          ),
+          messages: toVercelChatMessages(messages, true),
+          abortSignal: request.signal,
+          tools: {
+            terminal: tool({
+              description: "Generate and execute a terminal command",
+              parameters: z.object({
+                command: z.string().describe("The terminal command to execute")
+              }),
+              execute: async ({ command }) => {
+                const terminalStream = await terminalExecutor({
+                  userID: profile.user_id,
+                  command,
+                  template: "bash-terminal-v1"
+                })
+                let terminalOutput = ""
+                await streamTerminalOutput(terminalStream, chunk => {
+                  enqueueChunk(chunk)
+                  terminalOutput += chunk
+                })
+                terminalOutput = reduceTerminalOutput(terminalOutput)
 
-          const { textStream, finishReason } = streamText({
-            model: openai("gpt-4o"),
-            temperature: 0.5,
-            maxTokens: 1024,
-            system: buildSystemPrompt(
-              llmConfig.systemPrompts.pentestGPTTerminal,
-              profile.profile_context
-            ),
-            messages: toVercelChatMessages(messages, true),
-            abortSignal: request.signal,
-            tools: {
-              terminal: tool({
-                description: "Generate and execute a terminal command",
-                parameters: z.object({
-                  command: z
-                    .string()
-                    .describe("The terminal command to execute")
-                }),
-                execute: async ({ command }) => {
-                  if (terminalExecuted) {
-                    return
-                  }
-                  terminalExecuted = true
-                  const terminalStream = await terminalExecutor({
-                    userID: profile.user_id,
-                    command,
-                    template: "bash-terminal-v1"
-                  })
-                  await streamTerminalOutput(terminalStream, chunk => {
-                    enqueueChunk(chunk)
-                    terminalOutput += chunk
-                  })
-                }
-              })
-            }
-          })
+                return terminalOutput
+              }
+            })
+          },
+          maxSteps: 3
+        })
 
-          let aiResponse = ""
-          for await (const chunk of textStream) {
-            aiResponse += chunk
-            enqueueChunk(chunk)
-          }
-
-          // Process terminal output for AI if it exists
-          if (terminalOutput.trim()) {
-            const tokens = encode(terminalOutput)
-            let processedTerminalOutput = ""
-            if (tokens.length > MAX_TOKENS) {
-              const initialTokens = tokens.slice(0, INITIAL_TOKENS)
-              const remainingTokens = tokens.slice(
-                -(MAX_TOKENS - INITIAL_TOKENS)
-              )
-              processedTerminalOutput =
-                decode(initialTokens) + "\n...\n" + decode(remainingTokens)
-            } else {
-              processedTerminalOutput = terminalOutput
-            }
-            aiResponse += "\n" + processedTerminalOutput
-          }
-
-          // Update or create the assistant message
-          if (aiResponse.trim()) {
-            const lastMessage = messages[messages.length - 1]
-            if (lastMessage && lastMessage.role === "assistant") {
-              lastMessage.content += "\n" + aiResponse.trim()
-            } else {
-              messages.push({
-                role: "assistant",
-                content: aiResponse.trim()
-              })
-            }
-          }
-
-          finalFinishReason = await finishReason
-
-          if (finalFinishReason !== "tool-calls") break
+        for await (const chunk of textStream) {
+          enqueueChunk(chunk)
         }
 
-        // Enqueue only the finish reason as the last chunk
+        finalFinishReason = await finishReason
+
         const finalData = {
           finishReason: finalFinishReason
         }
@@ -194,20 +156,4 @@ export async function POST(request: Request) {
       status: 500
     })
   }
-}
-
-async function streamTerminalOutput(
-  terminalStream: ReadableStream<Uint8Array>,
-  enqueueChunk: (chunk: string) => void
-): Promise<string> {
-  const reader = terminalStream.getReader()
-  let terminalOutput = ""
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    const chunk = new TextDecoder().decode(value)
-    terminalOutput += chunk
-    enqueueChunk(chunk)
-  }
-  return terminalOutput
 }

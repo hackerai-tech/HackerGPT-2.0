@@ -18,8 +18,10 @@ import {
   useRef,
   useState
 } from "react"
+import { toast } from "sonner"
 import { Button } from "../ui/button"
 import { WithTooltip } from "../ui/with-tooltip"
+import { ChatFragment } from "./chat-fragment"
 import { ChatHelp } from "./chat-help"
 import { useScroll } from "./chat-hooks/use-scroll"
 import { ChatInput } from "./chat-input"
@@ -28,8 +30,6 @@ import { ChatScrollButtons } from "./chat-scroll-buttons"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
 import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
-import { useFragments } from "./chat-hooks/use-fragments"
-import { ChatFragment } from "./chat-fragment"
 
 interface ChatUIProps {}
 
@@ -44,9 +44,9 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   })
 
   const params = useParams()
+  const router = useRouter()
 
   const {
-    setChatMessages,
     chatMessages,
     selectedChat,
     isGenerating,
@@ -80,8 +80,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
           fetchMessages(params.chatid as string, params.workspaceid as string),
           fetchChat(params.chatid as string, params.workspaceid as string)
         ])
+        scrollToBottom()
       }
-      scrollToBottom()
     }
 
     if (
