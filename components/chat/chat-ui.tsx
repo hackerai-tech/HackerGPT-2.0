@@ -28,6 +28,8 @@ import { ChatScrollButtons } from "./chat-scroll-buttons"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
 import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
+import { useFragments } from "./chat-hooks/use-fragments"
+import { ChatFragment } from "./chat-fragment"
 
 interface ChatUIProps {}
 
@@ -127,7 +129,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     chatMessages,
     loadMoreMessages,
     params.chatid,
-    setChatMessages
+    scrollRef
   ])
 
   useLayoutEffect(() => {
@@ -150,12 +152,11 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
         }
       }, 200) // allow some time for the new messages to render
     }
-  }, [chatMessages, isLoadingMore])
+  }, [chatMessages, isLoadingMore, scrollRef])
 
   const innerHandleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       const { scrollTop } = e.currentTarget
-      console.log("innerHandleScroll", scrollTop)
 
       if (scrollTop === 0) {
         loadMoreMessagesInner()
@@ -218,58 +219,75 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
         </div>
       )}
 
-      <div
-        className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
-      >
-        <div className="mt-2 max-w-[230px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
-          <ChatSettings />
-        </div>
-      </div>
-
-      <div
-        ref={scrollRef}
-        className="flex size-full flex-col overflow-auto"
-        onScroll={innerHandleScroll}
-      >
-        <div ref={contentRef}>
-          <ChatMessages />
-        </div>
-      </div>
-
-      <div
-        className={`relative w-screen min-w-[300px] items-end px-2 pb-3 sm:w-[600px] sm:pb-5 md:w-[650px] md:min-w-[300px] xl:w-[800px] ${
-          showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
-        }`}
-      >
-        <div className="absolute -top-10 left-1/2 flex -translate-x-1/2 justify-center">
-          <ChatScrollButtons
-            isAtBottom={isAtBottom}
-            scrollToBottom={scrollToBottom}
-          />
+      <div className="flex size-full flex-col">
+        {/* Chat settings - Top Bar */}
+        <div
+          className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
+        >
+          <div className="mt-2 max-w-[230px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
+            <ChatSettings />
+          </div>
         </div>
 
-        {!isGenerating &&
-          (selectedChat?.finish_reason === "length" ||
-            selectedChat?.finish_reason === "terminal-calls") && (
-            <div className="flex w-full justify-center p-2">
-              <Button
-                onClick={
-                  selectedChat?.finish_reason === "terminal-calls"
-                    ? handleSendTerminalContinuation
-                    : handleSendContinuation
-                }
-                variant="secondary"
-                className="flex items-center space-x-1 px-4 py-2"
-              >
-                <IconPlayerTrackNext size={16} />
-                <span>Continue generating</span>
-              </Button>
+        <div className="flex min-h-0 flex-1 flex-col gap-2 lg:flex-row-reverse">
+          {/* Fragments */}
+          <ChatFragment />
+
+          {/* Chat messages container */}
+          <div className="flex h-[45%] flex-1 flex-col overflow-hidden lg:h-auto">
+            {/* Chat messages */}
+            <div
+              ref={scrollRef}
+              className="flex flex-1 flex-col overflow-auto"
+              onScroll={innerHandleScroll}
+            >
+              <div ref={contentRef}>
+                <ChatMessages />
+              </div>
             </div>
-          )}
 
-        <ChatInput isTemporaryChat={isTemporaryChat} />
+            {/* Scroll buttons */}
+            <div className="relative w-full items-end px-2 pb-3 sm:pb-5">
+              <div className="absolute -top-10 left-1/2 flex -translate-x-1/2 justify-center">
+                <ChatScrollButtons
+                  isAtBottom={isAtBottom}
+                  scrollToBottom={scrollToBottom}
+                />
+              </div>
+
+              {!isGenerating &&
+                (selectedChat?.finish_reason === "length" ||
+                  selectedChat?.finish_reason === "terminal-calls") && (
+                  <div className="flex w-full justify-center p-2">
+                    <Button
+                      onClick={
+                        selectedChat?.finish_reason === "terminal-calls"
+                          ? handleSendTerminalContinuation
+                          : handleSendContinuation
+                      }
+                      variant="secondary"
+                      className="flex items-center space-x-1 px-4 py-2"
+                    >
+                      <IconPlayerTrackNext size={16} />
+                      <span>Continue generating</span>
+                    </Button>
+                  </div>
+                )}
+            </div>
+          </div>
+        </div>
+
+        {/* Chat input */}
+        <div
+          className={`mx-auto mt-auto w-full justify-center ${
+            showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
+          }`}
+        >
+          <ChatInput isTemporaryChat={isTemporaryChat} />
+        </div>
       </div>
 
+      {/* Chat help */}
       <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">
         <ChatHelp />
       </div>
