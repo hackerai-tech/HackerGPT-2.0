@@ -89,9 +89,15 @@ export async function POST(request: Request) {
 
     const stream = new ReadableStream({
       async start(controller) {
-        const encoder = new TextEncoder()
-        const enqueueChunk = (chunk: string) =>
-          controller.enqueue(encoder.encode(`0:${JSON.stringify(chunk)}\n`))
+        const enqueueChunk = (code: string, object: any) =>
+          controller.enqueue(
+            `${code}:${JSON.stringify([
+              {
+                isFragment: true
+              },
+              object
+            ])}\n`
+          )
 
         const { object: finalObjectPromise, partialObjectStream } =
           streamObject({
@@ -121,23 +127,17 @@ export async function POST(request: Request) {
           }
 
           for (const key of transmittingKeys) {
-            controller.enqueue(
-              encoder.encode(
-                `2:${JSON.stringify({ [key]: partialObject[key as keyof typeof partialObject] })}\n`
-              )
-            )
+            enqueueChunk("2", {
+              [key]: partialObject[key as keyof typeof partialObject]
+            })
           }
         }
 
         const finalObject = await finalObjectPromise
 
-        controller.enqueue(
-          encoder.encode(
-            `2:${JSON.stringify({
-              sandboxExecution: "starting"
-            })}\n`
-          )
-        )
+        enqueueChunk("2", {
+          sandboxExecution: "starting"
+        })
 
         const sandboxData = await executeFragment(
           finalObject,
@@ -145,15 +145,12 @@ export async function POST(request: Request) {
           5 * 60 * 1000
         )
 
-        controller.enqueue(
-          encoder.encode(
-            `2:${JSON.stringify({
-              ...sandboxData,
-              sandboxExecution: "completed"
-            })}\n`
-          )
-        )
-        controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`))
+        enqueueChunk("2", {
+          sandboxResult: sandboxData,
+          sandboxExecution: "completed"
+        })
+
+        controller.enqueue(`d:{"finishReason":"stop"}\n`)
 
         controller.close()
       }

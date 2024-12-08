@@ -31,6 +31,7 @@ export type Fragment = {
   port: number | null
   file_path: string
   code: string
+  sandboxResult?: ExecutionResultInterpreter | ExecutionResultWeb
 }
 
 export type Templates = typeof templates

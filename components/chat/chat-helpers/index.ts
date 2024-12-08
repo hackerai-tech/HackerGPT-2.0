@@ -31,6 +31,7 @@ import { CONTINUE_PROMPT } from "@/lib/models/llm/llm-prompting"
 import { buildFinalMessages } from "@/lib/build-prompt-v2"
 import { supabase } from "@/lib/supabase/browser-client"
 import { getTerminalPlugins } from "@/lib/tools/tool-store/tools-helper"
+import { Fragment } from "@/lib/tools/fragments/types"
 
 export const validateChatSettings = (
   chatSettings: ChatSettings | null,
@@ -452,6 +453,7 @@ export const processResponse = async (
     let toolExecuted = false
     let citations: string[] = []
     let shouldSkipFirstChunk = false
+    let fragment: Fragment = {} as Fragment
 
     try {
       await processDataStream({
@@ -511,6 +513,35 @@ export const processResponse = async (
             !controller.signal.aborted
           ) {
             const firstValue = value[0] as DataPartValue
+
+            if (firstValue.isFragment) {
+              const fragmentData = value[1] as Fragment
+              fragment = {
+                ...fragment,
+                ...fragmentData
+              }
+
+              if (fragment.commentary && fragment.commentary !== fullText) {
+                console.log("setting fullText to commentary", {
+                  commentary: fragment.commentary
+                })
+                fullText = fragment.commentary
+                setChatMessages(prev =>
+                  prev.map(chatMessage =>
+                    chatMessage.message.id === lastChatMessage.message.id
+                      ? {
+                          ...chatMessage,
+                          message: {
+                            ...chatMessage.message,
+                            content: fragment.commentary,
+                            image_paths: []
+                          }
+                        }
+                      : chatMessage
+                  )
+                )
+              }
+            }
 
             // Handle citations
             if (firstValue?.citations) {
