@@ -207,7 +207,8 @@ export const handleHostedChat = async (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
-  selectedPlugin: PluginID
+  selectedPlugin: PluginID,
+  setFragment: (fragment: Fragment | null) => void
 ) => {
   let { provider } = modelData
   let apiEndpoint = `/api/chat/${provider}`
@@ -291,7 +292,8 @@ export const handleHostedChat = async (
     setIsGenerating,
     alertDispatch,
     selectedPlugin,
-    isContinuation
+    isContinuation,
+    setFragment
   )
 }
 
@@ -311,7 +313,8 @@ export const handleHostedPluginsChat = async (
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
   selectedPlugin: PluginID,
-  isContinuation: boolean
+  isContinuation: boolean,
+  setFragment: (fragment: Fragment | null) => void
 ) => {
   const apiEndpoint = "/api/chat/plugins"
 
@@ -353,7 +356,8 @@ export const handleHostedPluginsChat = async (
     setIsGenerating,
     alertDispatch,
     selectedPlugin,
-    isContinuation
+    isContinuation,
+    setFragment
   )
 }
 
@@ -406,7 +410,8 @@ export const processResponse = async (
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
   alertDispatch: React.Dispatch<AlertAction>,
   selectedPlugin: PluginID,
-  isContinuation: boolean
+  isContinuation: boolean,
+  setFragment: (fragment: Fragment | null) => void
 ) => {
   if (!response.ok) {
     const result = await response.json()
@@ -522,9 +527,8 @@ export const processResponse = async (
               }
 
               if (fragment.commentary && fragment.commentary !== fullText) {
-                console.log("setting fullText to commentary", {
-                  commentary: fragment.commentary
-                })
+                setFirstTokenReceived(true)
+                setToolInUse(PluginID.NONE)
                 fullText = fragment.commentary
                 setChatMessages(prev =>
                   prev.map(chatMessage =>
@@ -541,6 +545,7 @@ export const processResponse = async (
                   )
                 )
               }
+              setFragment(fragment)
             }
 
             // Handle citations
@@ -592,7 +597,8 @@ export const processResponse = async (
               setIsGenerating,
               alertDispatch,
               updatedPlugin,
-              isContinuation
+              isContinuation,
+              setFragment
             )
 
             fullText += browserResult.fullText
@@ -621,7 +627,8 @@ export const processResponse = async (
               setIsGenerating,
               alertDispatch,
               updatedPlugin,
-              isContinuation
+              isContinuation,
+              setFragment
             )
 
             fullText += terminalResult.fullText
@@ -651,7 +658,8 @@ export const processResponse = async (
               setIsGenerating,
               alertDispatch,
               updatedPlugin,
-              isContinuation
+              isContinuation,
+              setFragment
             )
 
             fullText += webSearchResult.fullText
@@ -680,7 +688,8 @@ export const processResponse = async (
               setIsGenerating,
               alertDispatch,
               updatedPlugin,
-              isContinuation
+              isContinuation,
+              setFragment
             )
 
             fullText += reasonLLMResult.fullText
@@ -688,6 +697,8 @@ export const processResponse = async (
           } else if (toolName === "fragments") {
             setToolInUse(PluginID.FRAGMENTS)
             updatedPlugin = PluginID.FRAGMENTS
+
+            setFragment(null)
 
             const fragmentGeneratorResponse = await fetchChatResponse(
               "/api/chat/tools/fragments",
@@ -709,7 +720,8 @@ export const processResponse = async (
               setIsGenerating,
               alertDispatch,
               updatedPlugin,
-              isContinuation
+              isContinuation,
+              setFragment
             )
 
             fullText += fragmentGeneratorResult.fullText

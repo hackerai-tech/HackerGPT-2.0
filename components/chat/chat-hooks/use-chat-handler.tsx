@@ -18,6 +18,7 @@ import {
   handleRetrieval,
   validateChatSettings
 } from "../chat-helpers"
+import { useFragments } from "./use-fragments"
 
 export const useChatHandler = () => {
   const router = useRouter()
@@ -62,6 +63,8 @@ export const useChatHandler = () => {
   } = useContext(PentestGPTContext)
 
   let { selectedPlugin } = useContext(PentestGPTContext)
+
+  const { setFragment } = useFragments()
 
   const isGeneratingRef = useRef(isGenerating)
 
@@ -123,6 +126,8 @@ export const useChatHandler = () => {
     setUseRetrieval(false)
 
     setToolInUse("none")
+
+    setFragment(null)
 
     setIsReadyToChat(true)
     return router.push(`/${selectedWorkspace.id}/chat`)
@@ -345,7 +350,8 @@ export const useChatHandler = () => {
           setToolInUse,
           alertDispatch,
           selectedPlugin,
-          isContinuation
+          isContinuation,
+          setFragment
         )
         generatedText = fullText
         finishReasonFromResponse = finishReason
@@ -375,7 +381,8 @@ export const useChatHandler = () => {
           isTemporaryChat ? setTemporaryChatMessages : setChatMessages,
           setToolInUse,
           alertDispatch,
-          selectedPlugin
+          selectedPlugin,
+          setFragment
         )
         generatedText = fullText
         finishReasonFromResponse = finishReason

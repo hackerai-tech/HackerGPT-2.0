@@ -31,6 +31,7 @@ export type Fragment = {
   port: number | null
   file_path: string
   code: string
+  sandboxExecution?: "started" | "completed"
   sandboxResult?: ExecutionResultInterpreter | ExecutionResultWeb
 }
 

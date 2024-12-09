@@ -15,7 +15,9 @@ export const fragmentSchema = z.object({
   title: z.string().describe("Short title of the fragment. Max 3 words."),
   description: z
     .string()
-    .describe("Short description of the fragment. Max 1 sentence."),
+    .describe(
+      "Short description of the fragment for the user, not technical, no dependencies talking, only simple description. Max 1 sentence."
+    ),
   additional_dependencies: z
     .array(z.string())
     .describe(
