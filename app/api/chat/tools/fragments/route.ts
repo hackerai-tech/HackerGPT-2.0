@@ -93,7 +93,8 @@ export async function POST(request: Request) {
 
     const stream = new ReadableStream({
       async start(controller) {
-        const enqueueChunk = (code: string, object: any) =>
+        const enqueueChunk = (code: string, object: any) => {
+          console.log("enqueueChunk", code, object)
           controller.enqueue(
             `${code}:${JSON.stringify([
               {
@@ -102,6 +103,7 @@ export async function POST(request: Request) {
               object
             ])}\n`
           )
+        }
 
         const { object: finalObjectPromise, partialObjectStream } =
           streamObject({
@@ -167,25 +169,9 @@ export async function POST(request: Request) {
       }
     })
   } catch (error) {
-    console.error("Terminal execution error:", error)
+    console.error("Fragment execution error:", error)
     return new Response("An error occurred while processing your request", {
       status: 500
     })
   }
-}
-
-async function streamTerminalOutput(
-  terminalStream: ReadableStream<Uint8Array>,
-  enqueueChunk: (chunk: string) => void
-): Promise<string> {
-  const reader = terminalStream.getReader()
-  let terminalOutput = ""
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    const chunk = new TextDecoder().decode(value)
-    terminalOutput += chunk
-    enqueueChunk(chunk)
-  }
-  return terminalOutput
 }
