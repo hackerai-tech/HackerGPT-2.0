@@ -31,7 +31,7 @@ import { CONTINUE_PROMPT } from "@/lib/models/llm/llm-prompting"
 import { buildFinalMessages } from "@/lib/build-prompt-v2"
 import { supabase } from "@/lib/supabase/browser-client"
 import { getTerminalPlugins } from "@/lib/tools/tool-store/tools-helper"
-import { Fragment } from "@/lib/tools/fragments/types"
+import { Fragment } from "@/lib/tools/e2b/fragments/types"
 
 export const validateChatSettings = (
   chatSettings: ChatSettings | null,

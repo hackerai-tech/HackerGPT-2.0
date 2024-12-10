@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react"
-import { Fragment } from "@/lib/tools/fragments/types"
+import { Fragment } from "@/lib/tools/e2b/fragments/types"
 
 type TabType = "code" | "execution"
 

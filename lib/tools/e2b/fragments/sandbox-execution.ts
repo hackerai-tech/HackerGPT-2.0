@@ -4,7 +4,7 @@ import {
   ExecutionResultWeb,
   Fragment
 } from "./types"
-import { createOrConnectTerminal } from "../e2b/sandbox"
+import { createOrConnectTerminal } from "../sandbox"
 
 export async function executeFragment(
   fragment: Fragment,

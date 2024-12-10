@@ -1,22 +1,20 @@
 import { replaceWordsInLastUserMessage } from "@/lib/ai-helper"
-import { buildSystemPrompt } from "@/lib/ai/prompts"
-import {
-  filterEmptyAssistantMessages,
-  toVercelChatMessages
-} from "@/lib/build-prompt"
+import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { ratelimit } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
-import { fragmentSchema } from "@/lib/tools/fragments/fragment-schema"
-import { toPrompt } from "@/lib/tools/fragments/prompt"
-import { executeFragment } from "@/lib/tools/fragments/sandbox-execution"
-import templates from "@/lib/tools/fragments/templates"
+import { fragmentSchema } from "@/lib/tools/e2b/fragments/fragment-schema"
+import { toPrompt } from "@/lib/tools/e2b/fragments/prompt"
+import { executeFragment } from "@/lib/tools/e2b/fragments/sandbox-execution"
+import templates from "@/lib/tools/e2b/fragments/templates"
 import { epochTimeToNaturalLanguage } from "@/lib/utils"
 import { BuiltChatMessage } from "@/types/chat-message"
 import { createOpenAI } from "@ai-sdk/openai"
-import { streamObject, streamText, tool } from "ai"
-import { decode, encode } from "gpt-tokenizer"
+import {
+  experimental_createProviderRegistry as createProviderRegistry,
+  streamObject
+} from "ai"
 import { ServerRuntime } from "next"
 
 export const runtime: ServerRuntime = "edge"
@@ -82,9 +80,15 @@ export async function POST(request: Request) {
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
 
-    const openai = createOpenAI({
+    const openaiClient = createOpenAI({
       baseURL: llmConfig.openai.baseURL,
       apiKey: llmConfig.openai.apiKey
+    })
+
+    // custom provider with different model settings:
+    const registry = createProviderRegistry({
+      // register provider with prefix and custom setup:
+      openai: openaiClient
     })
 
     const stream = new ReadableStream({
@@ -101,7 +105,7 @@ export async function POST(request: Request) {
 
         const { object: finalObjectPromise, partialObjectStream } =
           streamObject({
-            model: openai("gpt-4o"),
+            model: registry.languageModel("openai:gpt-4o"),
             schema: fragmentSchema,
             prompt:
               toPrompt(templates) +
