@@ -95,14 +95,13 @@ export async function POST(request: Request) {
       async start(controller) {
         const enqueueChunk = (code: string, object: any) => {
           console.log("enqueueChunk", code, object)
-          controller.enqueue(
-            `${code}:${JSON.stringify([
-              {
-                isFragment: true
-              },
-              object
-            ])}\n`
-          )
+          const chunk = `${code}:${JSON.stringify([
+            {
+              isFragment: true
+            },
+            object
+          ])}\n`
+          controller.enqueue(new TextEncoder().encode(chunk))
         }
 
         const { object: finalObjectPromise, partialObjectStream } =
@@ -156,7 +155,7 @@ export async function POST(request: Request) {
           sandboxExecution: "completed"
         })
 
-        controller.enqueue(`d:{"finishReason":"stop"}\n`)
+        controller.enqueue(new TextEncoder().encode(`d:{"finishReason":"stop"}\n`))
 
         controller.close()
       }
