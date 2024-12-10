@@ -68,7 +68,7 @@ export async function POST(request: Request) {
       system: systemPrompt,
       messages: toVercelChatMessages(messages, true),
       temperature: 0.5,
-      maxTokens: 2048,
+      maxTokens: 125,
       abortSignal: request.signal,
       tools: getSelectedSchemas("all")
     })

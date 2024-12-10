@@ -155,7 +155,9 @@ export async function POST(request: Request) {
           sandboxExecution: "completed"
         })
 
-        controller.enqueue(new TextEncoder().encode(`d:{"finishReason":"stop"}\n`))
+        controller.enqueue(
+          new TextEncoder().encode(`d:{"finishReason":"stop"}\n`)
+        )
 
         controller.close()
       }

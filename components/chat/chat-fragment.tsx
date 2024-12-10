@@ -28,7 +28,7 @@ export function ChatFragment() {
           }`}
           onClick={() => setActiveTab("execution")}
         >
-          Execution
+          Preview
         </button>
       </div>
 

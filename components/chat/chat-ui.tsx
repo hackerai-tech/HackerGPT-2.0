@@ -246,8 +246,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
               </div>
             </div>
 
-            {/* Scroll buttons */}
-            <div className="relative w-full items-end px-2 pb-3 sm:pb-5">
+            {/* Scroll buttons and continuation button */}
+            <div className="relative w-full items-end">
               <div className="absolute -top-10 left-1/2 flex -translate-x-1/2 justify-center">
                 <ChatScrollButtons
                   isAtBottom={isAtBottom}
@@ -274,16 +274,18 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
                   </div>
                 )}
             </div>
-          </div>
-        </div>
 
-        {/* Chat input */}
-        <div
-          className={`mx-auto mt-auto w-full justify-center ${
-            showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
-          }`}
-        >
-          <ChatInput isTemporaryChat={isTemporaryChat} />
+            {/* Chat input */}
+            <div className="flex w-full justify-center">
+              <div
+                className={`z-10 w-screen items-end px-2 pb-3 sm:w-[600px] sm:pb-5 md:w-[650px] md:min-w-[300px] ${
+                  showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
+                } xl:w-[800px]`}
+              >
+                <ChatInput isTemporaryChat={isTemporaryChat} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
