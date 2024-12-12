@@ -8,19 +8,22 @@ interface MessageFragmentProps {
 }
 
 export const MessageFragment: FC<MessageFragmentProps> = ({ fragment }) => {
-    const { openFragmentBar, setFragment } = useFragments()
+  const { openFragmentBar, setFragment } = useFragments()
 
   return (
-    <div className="mt-4 w-96 cursor-pointer rounded-lg border p-2" onClick={() => {
+    <div
+      className="mt-4 w-96 cursor-pointer rounded-lg border p-2"
+      onClick={() => {
         openFragmentBar()
         setFragment(fragment)
-    }}>
+      }}
+    >
       <div className="flex items-center gap-3">
-        {!fragment.sandboxExecution && (          
-            <IconLoader2 className="size-12 animate-spin" />
+        {!fragment.sandboxExecution && (
+          <IconLoader2 className="size-12 animate-spin" />
         )}
         {fragment.sandboxExecution && (
-            <IconCaretRightFilled className="size-12" />
+          <IconCaretRightFilled className="size-12" />
         )}
         <div>
           <h3 className="font-medium">{fragment.title}</h3>
