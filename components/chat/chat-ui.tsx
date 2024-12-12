@@ -18,7 +18,6 @@ import {
   useRef,
   useState
 } from "react"
-import { toast } from "sonner"
 import { Button } from "../ui/button"
 import { WithTooltip } from "../ui/with-tooltip"
 import { ChatFragment } from "./chat-fragment"

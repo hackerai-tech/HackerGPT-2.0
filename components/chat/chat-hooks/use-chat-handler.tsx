@@ -19,6 +19,7 @@ import {
   validateChatSettings
 } from "../chat-helpers"
 import { useFragments } from "./use-fragments"
+import { Fragment } from "@/lib/tools/e2b/fragments/types"
 
 export const useChatHandler = () => {
   const router = useRouter()
@@ -321,6 +322,7 @@ export const useChatHandler = () => {
       let ragId = null
       let assistantGeneratedImages: string[] = []
       let citations: string[] = []
+      let fragment: Fragment | null = null
 
       if (
         selectedPlugin.length > 0 &&
@@ -364,7 +366,8 @@ export const useChatHandler = () => {
           ragId: ragIdFromResponse,
           selectedPlugin: updatedSelectedPlugin,
           assistantGeneratedImages: assistantGeneratedImagesFromResponse,
-          citations: citationsFromResponse
+          citations: citationsFromResponse,
+          fragment: fragmentFromResponse
         } = await handleHostedChat(
           payload,
           profile!,
@@ -391,6 +394,10 @@ export const useChatHandler = () => {
         selectedPlugin = updatedSelectedPlugin
         assistantGeneratedImages = assistantGeneratedImagesFromResponse
         citations = citationsFromResponse
+        fragment =
+          Object.keys(fragmentFromResponse || {}).length === 0
+            ? null
+            : fragmentFromResponse
       }
 
       if (isTemporaryChat) {
@@ -402,7 +409,8 @@ export const useChatHandler = () => {
                 message: {
                   ...msg.message,
                   content: generatedText,
-                  citations: citations || []
+                  citations: citations || [],
+                  fragment: fragment ? JSON.stringify(fragment) : null
                 }
               }
             : msg
@@ -460,7 +468,8 @@ export const useChatHandler = () => {
           ragUsed,
           ragId,
           isTemporaryChat,
-          citations
+          citations,
+          fragment
         )
       }
 

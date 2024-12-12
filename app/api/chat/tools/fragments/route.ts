@@ -38,9 +38,6 @@ export const preferredRegion = [
   "syd1"
 ]
 
-const MAX_TOKENS = 32000
-const INITIAL_TOKENS = 1000
-
 function messagesToPrompt(messages: BuiltChatMessage[]) {
   return messages
     .map(message => `${message.role}: ${message.content}`)
@@ -94,7 +91,6 @@ export async function POST(request: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         const enqueueChunk = (code: string, object: any) => {
-          console.log("enqueueChunk", code, object)
           const chunk = `${code}:${JSON.stringify([
             {
               isFragment: true

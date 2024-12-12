@@ -480,6 +480,7 @@ export interface Database {
           citations: string[]
           content: string
           created_at: string
+          fragment: Json | null
           id: string
           image_paths: string[]
           model: string
@@ -496,6 +497,7 @@ export interface Database {
           citations?: string[]
           content: string
           created_at?: string
+          fragment?: Json | null
           id?: string
           image_paths: string[]
           model: string
@@ -512,6 +514,7 @@ export interface Database {
           citations?: string[]
           content?: string
           created_at?: string
+          fragment?: Json | null
           id?: string
           image_paths?: string[]
           model?: string

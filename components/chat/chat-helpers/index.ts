@@ -160,7 +160,8 @@ export const createTempMessages = ({
       user_id: "",
       rag_used: false,
       rag_id: null,
-      citations: []
+      citations: [],
+      fragment: null
     },
     fileItems: []
   }
@@ -180,7 +181,8 @@ export const createTempMessages = ({
       user_id: "",
       rag_used: false,
       rag_id: null,
-      citations: []
+      citations: [],
+      fragment: null
     },
     fileItems: []
   }
@@ -519,6 +521,7 @@ export const processResponse = async (
           ) {
             const firstValue = value[0] as DataPartValue
 
+            // Fragment decoding
             if (firstValue.isFragment) {
               const fragmentData = value[1] as Fragment
               fragment = {
@@ -538,7 +541,8 @@ export const processResponse = async (
                           message: {
                             ...chatMessage.message,
                             content: fragment.commentary,
-                            image_paths: []
+                            image_paths: [],
+                            fragment: fragment ? JSON.stringify(fragment) : null
                           }
                         }
                       : chatMessage
@@ -726,7 +730,7 @@ export const processResponse = async (
 
             fullText += fragmentGeneratorResult.fullText
             finishReason = fragmentGeneratorResult.finishReason
-            citations = fragmentGeneratorResult.citations || citations
+            fragment = fragmentGeneratorResult.fragment
           }
           toolExecuted = true
         },
@@ -764,7 +768,8 @@ export const processResponse = async (
       ragId,
       selectedPlugin: updatedPlugin,
       assistantGeneratedImages,
-      citations
+      citations,
+      fragment
     }
   } else {
     throw new Error("Response body is null")
@@ -832,7 +837,8 @@ export const handleCreateMessages = async (
   ragUsed?: boolean,
   ragId?: string | null,
   isTemporary: boolean = false,
-  citations?: string[]
+  citations?: string[],
+  fragment?: Fragment | null
 ) => {
   const isEdit = editSequenceNumber !== undefined
 
@@ -853,7 +859,8 @@ export const handleCreateMessages = async (
         image_paths: newMessageImages.map(image => image.path),
         rag_used: ragUsed || false,
         rag_id: ragId || null,
-        citations: []
+        citations: [],
+        fragment: null
       },
       fileItems: retrievedFileItems
     }
@@ -873,7 +880,8 @@ export const handleCreateMessages = async (
         image_paths: assistantGeneratedImages || [],
         rag_used: ragUsed || false,
         rag_id: ragId || null,
-        citations: citations || []
+        citations: citations || [],
+        fragment: fragment ? JSON.stringify(fragment) : null
       },
       fileItems: []
     }
@@ -893,7 +901,8 @@ export const handleCreateMessages = async (
     image_paths: [],
     rag_used: ragUsed || false,
     rag_id: ragId || null,
-    citations: []
+    citations: [],
+    fragment: null
   }
 
   const finalAssistantMessage: TablesInsert<"messages"> = {
@@ -907,7 +916,8 @@ export const handleCreateMessages = async (
     image_paths: assistantGeneratedImages || [],
     rag_used: ragUsed || false,
     rag_id: ragId || null,
-    citations: citations || []
+    citations: citations || [],
+    fragment: fragment ? JSON.stringify(fragment) : null
   }
 
   let finalChatMessages: ChatMessage[] = []
