@@ -74,9 +74,7 @@ export default function ChatPage() {
 
           {!isTemporaryChat && (
             <div
-              className={`z-10 -mx-2 w-full min-w-[300px] items-end px-2 pb-1 sm:w-[600px] md:w-[650px] ${
-                showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
-              } xl:w-[800px]`}
+              className={`z-10 -mx-2 w-full min-w-[300px] items-end px-2 pb-1 sm:w-[600px] md:w-[650px] lg:w-[700px] xl:w-[800px]`}
             >
               <ChatStarters
                 selectedPlugin={selectedPlugin}

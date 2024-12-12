@@ -1,11 +1,23 @@
-import Loading from "@/app/loading"
-import { MessageMarkdown } from "../messages/message-markdown"
+import { IconX } from "@tabler/icons-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip"
+import { Button } from "@/components/ui/button"
 import { useFragments } from "./chat-hooks/use-fragments"
-import { IconLoader2 } from "@tabler/icons-react"
+import { MessageMarkdown } from "../messages/message-markdown"
 
 export function ChatFragment() {
-  const { isFragmentBarOpen, fragment, activeTab, setActiveTab } =
-    useFragments()
+  const {
+    isFragmentBarOpen,
+    fragment,
+    activeTab,
+    setActiveTab,
+    closeFragmentBar
+  } = useFragments()
 
   if (!isFragmentBarOpen || !fragment) {
     return null
@@ -13,51 +25,48 @@ export function ChatFragment() {
 
   return (
     <div className="border-border flex h-[45%] flex-col overflow-hidden border-b lg:h-auto lg:w-1/2 lg:border-b-0 lg:border-l">
-      <div className="flex border-b">
-        <button
-          className={`p-2 font-medium ${
-            activeTab === "code" ? "border-b-2 border-blue-500" : ""
-          }`}
-          onClick={() => setActiveTab("code")}
-        >
-          Fragment
-        </button>
-        <button
-          className={`p-2 font-medium ${
-            activeTab === "execution" ? "border-b-2 border-blue-500" : ""
-          }`}
-          onClick={() => setActiveTab("execution")}
-        >
-          Preview
-        </button>
-      </div>
-
-      {activeTab === "code" ? (
-        <>
-          <div className="p-2 font-medium">{fragment.title}</div>
-          {fragment.description && (
-            <div className="p-2">{fragment.description}</div>
-          )}
-          <div className="flex-1 overflow-auto px-2">
-            {fragment.code && (
-              <pre className="whitespace-pre-wrap">
-                {fragment.sandboxResult?.template === "code-interpreter-v1" ? (
-                  <MessageMarkdown
-                    content={`\`\`\`python\n${fragment.code}\n\`\`\``}
-                    isAssistant={true}
-                  />
-                ) : (
-                  <MessageMarkdown
-                    content={`\`\`\`javascript\n${fragment.code}\n\`\`\``}
-                    isAssistant={true}
-                  />
-                )}
-              </pre>
-            )}
+      <Tabs
+        value={activeTab}
+        onValueChange={value => setActiveTab(value as "code" | "execution")}
+        className="flex h-full flex-col"
+      >
+        <div className="flex w-full items-center justify-between border-b p-2">
+          <div className="flex items-center gap-2">
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground"
+                    onClick={closeFragmentBar}
+                  >
+                    <IconX className="size-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Close sidebar</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <div className="text-sm font-medium">{fragment.title}</div>
           </div>
-        </>
-      ) : (
-        <div className="flex-1 p-2">
+
+          <TabsList className="grid h-8 w-[160px] grid-cols-2 border px-1 py-0">
+            <TabsTrigger
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-2 py-1 text-xs font-normal"
+              value="execution"
+            >
+              Preview
+            </TabsTrigger>
+            <TabsTrigger
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-2 py-1 text-xs font-normal"
+              value="code"
+            >
+              Code
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="execution" className="flex-1 overflow-auto">
           {fragment.sandboxResult?.template === "code-interpreter-v1" ? (
             <div className="p-2">
               {fragment.sandboxResult.stdout.length > 0 && (
@@ -84,9 +93,28 @@ export function ChatFragment() {
               )}
             </div>
           )}
-          {/* Execution tab content will go here */}
-        </div>
-      )}
+        </TabsContent>
+
+        <TabsContent value="code" className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-auto px-2">
+            {fragment.code && (
+              <pre className="whitespace-pre-wrap">
+                {fragment.sandboxResult?.template === "code-interpreter-v1" ? (
+                  <MessageMarkdown
+                    content={`\`\`\`python\n${fragment.code}\n\`\`\``}
+                    isAssistant={true}
+                  />
+                ) : (
+                  <MessageMarkdown
+                    content={`\`\`\`javascript\n${fragment.code}\n\`\`\``}
+                    isAssistant={true}
+                  />
+                )}
+              </pre>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

@@ -29,6 +29,7 @@ import { ChatScrollButtons } from "./chat-scroll-buttons"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
 import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
+import { useFragments } from "./chat-hooks/use-fragments"
 
 interface ChatUIProps {}
 
@@ -72,6 +73,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   const [loading, setLoading] = useState(true)
   const previousHeightRef = useRef<number | null>(null)
 
+  const { resetFragment } = useFragments()
+
   useEffect(() => {
     const fetchData = async () => {
       if (!isTemporaryChat) {
@@ -98,6 +101,12 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       setIsReadyToChat(true)
     }
   }, [])
+
+  useEffect(() => {
+    if (selectedChat) {
+      resetFragment()
+    }
+  }, [selectedChat?.id])
 
   const loadMoreMessagesInner = useCallback(async () => {
     if (
@@ -277,9 +286,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
             {/* Chat input */}
             <div className="flex w-full justify-center">
               <div
-                className={`z-10 w-screen items-end px-2 pb-3 sm:w-[600px] sm:pb-5 md:w-[650px] md:min-w-[300px] ${
-                  showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
-                } xl:w-[800px]`}
+                className={`z-10 w-screen items-end px-2 pb-3 sm:w-[600px] sm:pb-5 md:w-[650px] md:min-w-[300px] lg:w-[700px] xl:w-[800px]`}
               >
                 <ChatInput isTemporaryChat={isTemporaryChat} />
               </div>
