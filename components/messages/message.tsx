@@ -3,7 +3,7 @@ import { PentestGPTContext } from "@/context/context"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { cn } from "@/lib/utils"
 import { Tables } from "@/supabase/types"
-import { LLM, LLMID, MessageImage } from "@/types"
+import { ChatMessage, LLM, LLMID, MessageImage } from "@/types"
 import {
   IconPuzzle,
   IconWorld,
@@ -31,14 +31,14 @@ import { MessageTypeResolver } from "./message-type-solver"
 import { PluginID } from "@/types/plugins"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { toast } from "sonner"
+import { Fragment } from "@/lib/tools/e2b/fragments/types"
+import { MessageFragment } from "./message-fragment"
 
 const ICON_SIZE = 28
 
 interface MessageProps {
-  message: Tables<"messages">
+  chatMessage: ChatMessage
   previousMessage: Tables<"messages"> | undefined
-  fileItems: Tables<"file_items">[]
-  feedback?: Tables<"feedback">
   isEditing: boolean
   isLast: boolean
   onStartEdit: (message: Tables<"messages">) => void
@@ -54,10 +54,8 @@ interface MessageProps {
 }
 
 export const Message: FC<MessageProps> = ({
-  message,
+  chatMessage,
   previousMessage,
-  fileItems,
-  feedback,
   isEditing,
   isLast,
   onStartEdit,
@@ -78,6 +76,10 @@ export const Message: FC<MessageProps> = ({
     isMobile,
     showSidebar
   } = useContext(PentestGPTContext)
+
+  const { message, fileItems, feedback } = chatMessage
+
+  const fragment = (message.fragment ? JSON.parse(message.fragment as string) : null) as Fragment | null
 
   const messagesToDisplay = isTemporaryChat
     ? temporaryChatMessages
@@ -372,6 +374,10 @@ export const Message: FC<MessageProps> = ({
             )}
           </div>
         </div>
+
+        {fragment && (
+          <MessageFragment fragment={fragment} />
+        )}
 
         {fileItems.length > 0 && (
           <div className="my-2 ml-10 text-lg font-bold">
