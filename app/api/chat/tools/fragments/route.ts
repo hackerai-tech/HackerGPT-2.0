@@ -1,14 +1,13 @@
 import { replaceWordsInLastUserMessage } from "@/lib/ai-helper"
 import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
 import llmConfig from "@/lib/models/llm/llm-config"
-import { ratelimit } from "@/lib/server/ratelimiter"
+import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
 import { fragmentSchema } from "@/lib/tools/e2b/fragments/fragment-schema"
 import { toPrompt } from "@/lib/tools/e2b/fragments/prompt"
 import { executeFragment } from "@/lib/tools/e2b/fragments/sandbox-execution"
 import templates from "@/lib/tools/e2b/fragments/templates"
-import { epochTimeToNaturalLanguage } from "@/lib/utils"
 import { BuiltChatMessage } from "@/types/chat-message"
 import { createOpenAI } from "@ai-sdk/openai"
 import {
@@ -58,20 +57,12 @@ export async function POST(request: Request) {
       )
     }
 
-    const rateLimitResult = await ratelimit(profile.user_id, "fragment")
-    if (!rateLimitResult.allowed) {
-      const waitTime = epochTimeToNaturalLanguage(
-        rateLimitResult.timeRemaining!
-      )
-      return new Response(
-        JSON.stringify({
-          error: `Oops! It looks like you've reached the limit for fragment tool.\nTo ensure fair usage for all users, please wait ${waitTime} before trying again.`
-        }),
-        {
-          status: 429,
-          headers: { "Content-Type": "application/json" }
-        }
-      )
+    const rateLimitCheck = await checkRatelimitOnApi(
+      profile.user_id,
+      "fragments"
+    )
+    if (rateLimitCheck) {
+      return rateLimitCheck.response
     }
 
     filterEmptyAssistantMessages(messages)
