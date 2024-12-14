@@ -149,7 +149,7 @@ export function ChatFragment() {
                 </div>
               )}
               {fragment.sandboxResult.stderr.length > 0 && (
-                <div className="mb-4">                                
+                <div className="mb-4">
                   <MessageMarkdown
                     content={`\`\`\`stderr\n${fragment.sandboxResult.stderr.join("\n")}\n\`\`\``}
                     isAssistant={true}
@@ -163,7 +163,7 @@ export function ChatFragment() {
                     className="flex flex-col items-center text-center mb-4"
                   >
                     {result.png && (
-                      <Image  
+                      <Image
                         src={`data:image/png;base64,${result.png}`}
                         alt={`Cell result ${index + 1}`}
                         className="max-w-full"
