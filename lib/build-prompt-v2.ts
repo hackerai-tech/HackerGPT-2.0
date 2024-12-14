@@ -11,6 +11,7 @@ import { GPT4o } from "./models/llm/openai-llm-list"
 import endent from "endent"
 import { toast } from "sonner"
 import { getTerminalPlugins } from "./tools/tool-store/tools-helper"
+import { Fragment } from "./tools/e2b/fragments/types"
 
 export const lastSequenceNumber = (chatMessages: ChatMessage[]) =>
   chatMessages.reduce(
@@ -70,21 +71,35 @@ export async function buildFinalMessages(
       return chatMessage
     }
 
+    const returnMessage: ChatMessage = {
+      ...chatMessage,
+    }
+
     if (chatMessage.fileItems.length > 0) {
       const retrievalText = buildRetrievalText(chatMessage.fileItems)
 
-      return {
-        message: {
-          ...chatMessage.message,
+      returnMessage.message = {
+          ...returnMessage.message,
           content:
             `User Query: "${chatMessage.message.content}"\n\nFile Content:\n${retrievalText}` as string
-        },
-        fileItems: []
+      }
+      returnMessage.fileItems = []
+    }
+
+    if (chatMessage.message.fragment && typeof chatMessage.message.fragment === 'string') {
+      const fragment: Fragment = JSON.parse(chatMessage.message.fragment)
+
+      returnMessage.message = {
+          ...returnMessage.message,
+          content:
+            `Fragment: "${fragment.code}"` as string
       }
     }
 
-    return chatMessage
+    return returnMessage
   })
+
+  console.log(processedChatMessages)
 
   const truncatedMessages: any[] = []
 

@@ -37,16 +37,32 @@ export const preferredRegion = [
   "syd1"
 ]
 
+function messageToPrompt(message: BuiltChatMessage) {
+  let result = '<Message role="' + message.role + '">\n'
+
+  if (Array.isArray(message.content)) {
+    result = message.content.map(content => {
+      if (typeof content === 'object' && 'text' in content) {
+        return content.text
+      }
+      return content
+    }).join('')
+  } else {
+    result = message.content
+  }
+  return result + "</Message>\n"
+}
+
 function messagesToPrompt(messages: BuiltChatMessage[]) {
   return messages
-    .map(message => `${message.role}: ${message.content}`)
+    .map(messageToPrompt)
     .join("\n")
 }
 
 export async function POST(request: Request) {
   try {
     const { messages } = await request.json()
-
+    
     const profile = await getAIProfile()
     const subscriptionInfo = await getSubscriptionInfo(profile.user_id)
 
