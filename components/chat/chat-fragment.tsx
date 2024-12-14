@@ -1,3 +1,4 @@
+/* eslint-disable tailwindcss/classnames-order */
 import { IconX, IconReload, IconLoader2 } from "@tabler/icons-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -12,6 +13,7 @@ import { MessageMarkdown } from "../messages/message-markdown"
 import { useState } from "react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 
 export function ChatFragment() {
   const [isReloading, setIsReloading] = useState(false)
@@ -135,28 +137,34 @@ export function ChatFragment() {
           {fragment.sandboxResult?.template === "code-interpreter-v1" ? (
             <div className="p-2">
               {fragment.sandboxResult.stdout.length > 0 && (
-                <MessageMarkdown
-                  content={`\`\`\`stdout\n${fragment.sandboxResult.stdout.join("\n")}\n\`\`\``}
-                  isAssistant={true}
-                />
+                <div className="mb-4">
+                  <MessageMarkdown
+                    content={`\`\`\`stdout\n${fragment.sandboxResult.stdout.join("\n")}\n\`\`\``}
+                    isAssistant={true}
+                  />
+                </div>
               )}
               {fragment.sandboxResult.stderr.length > 0 && (
-                <MessageMarkdown
-                  content={`\`\`\`stderr\n${fragment.sandboxResult.stderr.join("\n")}\n\`\`\``}
-                  isAssistant={true}
-                />
+                <div className="mb-4">                                
+                  <MessageMarkdown
+                    content={`\`\`\`stderr\n${fragment.sandboxResult.stderr.join("\n")}\n\`\`\``}
+                    isAssistant={true}
+                  />
+                </div>
               )}
               {fragment.sandboxResult.cellResults?.length > 0 &&
                 fragment.sandboxResult.cellResults.map((result, index) => (
                   <div
                     key={index}
-                    className="flex flex-col items-center text-center"
+                    className="flex flex-col items-center text-center mb-4"
                   >
                     {result.png && (
-                      <img
+                      <Image  
                         src={`data:image/png;base64,${result.png}`}
                         alt={`Cell result ${index + 1}`}
                         className="max-w-full"
+                        width={1000}
+                        height={600}
                       />
                     )}
                     {result.text && (
