@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { useFragments } from "./chat-hooks/use-fragments"
 import { MessageMarkdown } from "../messages/message-markdown"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
@@ -58,6 +58,10 @@ export function ChatFragment() {
       setIsReloading(false)
     }
   }
+
+  useEffect(() => {
+    handleReload()
+  }, [fragment?.code])
 
   if (!isFragmentBarOpen || !fragment) {
     return null
