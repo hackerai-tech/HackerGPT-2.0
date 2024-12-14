@@ -210,10 +210,7 @@ export const handleHostedChat = async (
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
   selectedPlugin: PluginID,
-  setFragment: (
-    fragment: Fragment | null,
-    chatMessage?: ChatMessage
-  ) => void
+  setFragment: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
 ) => {
   let { provider } = modelData
   let apiEndpoint = `/api/chat/${provider}`
@@ -319,10 +316,7 @@ export const handleHostedPluginsChat = async (
   alertDispatch: React.Dispatch<AlertAction>,
   selectedPlugin: PluginID,
   isContinuation: boolean,
-  setFragment: (
-    fragment: Fragment | null,
-    chatMessage?: ChatMessage
-  ) => void
+  setFragment: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
 ) => {
   const apiEndpoint = "/api/chat/plugins"
 
@@ -419,10 +413,7 @@ export const processResponse = async (
   alertDispatch: React.Dispatch<AlertAction>,
   selectedPlugin: PluginID,
   isContinuation: boolean,
-  setFragment: (
-    fragment: Fragment | null,
-    chatMessage?: ChatMessage
-  ) => void
+  setFragment: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
 ) => {
   if (!response.ok) {
     const result = await response.json()

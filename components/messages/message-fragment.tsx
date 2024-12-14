@@ -11,7 +11,7 @@ interface MessageFragmentProps {
 
 export const MessageFragment: FC<MessageFragmentProps> = ({
   chatMessage,
-  fragment,
+  fragment
 }) => {
   const { openFragmentBar, setFragment } = useFragments()
 

@@ -9,10 +9,7 @@ interface UseFragmentsReturn {
   fragment: Fragment | null
   isFragmentBarOpen: boolean
   activeTab: TabType
-  setFragment: (
-    fragment: Fragment | null,
-    chatMessage?: ChatMessage
-  ) => void
+  setFragment: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
   resetFragment: () => void
   openFragmentBar: () => void
   closeFragmentBar: () => void
@@ -56,7 +53,7 @@ function useFragmentsHook(): UseFragmentsReturn {
     if (chatMessage) {
       const fragmentJson = newFragment ? JSON.stringify(newFragment) : null
       const updatedMessage = await updateMessage(chatMessage.message.id, {
-        fragment: fragmentJson,
+        fragment: fragmentJson
       })
       chatMessage.message = updatedMessage
       setFragment(newFragment, chatMessage)
