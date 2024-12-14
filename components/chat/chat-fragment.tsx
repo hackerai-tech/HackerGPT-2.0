@@ -146,6 +146,24 @@ export function ChatFragment() {
                   isAssistant={true}
                 />
               )}
+              {fragment.sandboxResult.cellResults?.length > 0 &&
+                fragment.sandboxResult.cellResults.map((result, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center text-center"
+                  >
+                    {result.png && (
+                      <img
+                        src={`data:image/png;base64,${result.png}`}
+                        alt={`Cell result ${index + 1}`}
+                        className="max-w-full"
+                      />
+                    )}
+                    {result.text && (
+                      <div className="text-sm">{result.text}</div>
+                    )}
+                  </div>
+                ))}
             </div>
           ) : (
             <div className="size-full flex-1">
