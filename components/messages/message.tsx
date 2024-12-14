@@ -376,7 +376,9 @@ export const Message: FC<MessageProps> = ({
           </div>
         </div>
 
-        {fragment && <MessageFragment fragment={fragment} />}
+        {fragment && (
+          <MessageFragment fragment={fragment} chatMessage={chatMessage} />
+        )}
 
         {fileItems.length > 0 && (
           <div className="my-2 ml-10 text-lg font-bold">

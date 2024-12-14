@@ -21,7 +21,7 @@ export function ChatFragment() {
     activeTab,
     setActiveTab,
     closeFragmentBar,
-    setFragment
+    updateFragment
   } = useFragments()
 
   const handleReload = async () => {
@@ -46,7 +46,7 @@ export function ChatFragment() {
         return
       }
 
-      setFragment({
+      updateFragment({
         ...fragment,
         sandboxResult: data.sandboxResult
       })
