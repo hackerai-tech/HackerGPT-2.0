@@ -72,27 +72,29 @@ export async function buildFinalMessages(
     }
 
     const returnMessage: ChatMessage = {
-      ...chatMessage,
+      ...chatMessage
     }
 
     if (chatMessage.fileItems.length > 0) {
       const retrievalText = buildRetrievalText(chatMessage.fileItems)
 
       returnMessage.message = {
-          ...returnMessage.message,
-          content:
-            `User Query: "${chatMessage.message.content}"\n\nFile Content:\n${retrievalText}` as string
+        ...returnMessage.message,
+        content:
+          `User Query: "${chatMessage.message.content}"\n\nFile Content:\n${retrievalText}` as string
       }
       returnMessage.fileItems = []
     }
 
-    if (chatMessage.message.fragment && typeof chatMessage.message.fragment === 'string') {
+    if (
+      chatMessage.message.fragment &&
+      typeof chatMessage.message.fragment === "string"
+    ) {
       const fragment: Fragment = JSON.parse(chatMessage.message.fragment)
 
       returnMessage.message = {
-          ...returnMessage.message,
-          content:
-            `Fragment: "${fragment.code}"` as string
+        ...returnMessage.message,
+        content: `Fragment: "${fragment.code}"` as string
       }
     }
 

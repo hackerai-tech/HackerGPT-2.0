@@ -41,12 +41,14 @@ function messageToPrompt(message: BuiltChatMessage) {
   let result = '<Message role="' + message.role + '">\n'
 
   if (Array.isArray(message.content)) {
-    result = message.content.map(content => {
-      if (typeof content === 'object' && 'text' in content) {
-        return content.text
-      }
-      return content
-    }).join('')
+    result = message.content
+      .map(content => {
+        if (typeof content === "object" && "text" in content) {
+          return content.text
+        }
+        return content
+      })
+      .join("")
   } else {
     result = message.content
   }
@@ -54,15 +56,13 @@ function messageToPrompt(message: BuiltChatMessage) {
 }
 
 function messagesToPrompt(messages: BuiltChatMessage[]) {
-  return messages
-    .map(messageToPrompt)
-    .join("\n")
+  return messages.map(messageToPrompt).join("\n")
 }
 
 export async function POST(request: Request) {
   try {
     const { messages } = await request.json()
-    
+
     const profile = await getAIProfile()
     const subscriptionInfo = await getSubscriptionInfo(profile.user_id)
 
