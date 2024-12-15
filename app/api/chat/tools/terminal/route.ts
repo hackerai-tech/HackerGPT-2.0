@@ -113,7 +113,8 @@ export async function POST(request: Request) {
               execute: async ({ command }) => {
                 const terminalStream = await terminalExecutor({
                   userID: profile.user_id,
-                  command
+                  command,
+                  template: "bash-terminal-v1"
                 })
                 let terminalOutput = ""
                 await streamTerminalOutput(terminalStream, chunk => {

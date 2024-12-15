@@ -18,6 +18,8 @@ import {
   handleRetrieval,
   validateChatSettings
 } from "../chat-helpers"
+import { useFragments } from "./use-fragments"
+import { Fragment } from "@/lib/tools/e2b/fragments/types"
 
 export const useChatHandler = () => {
   const router = useRouter()
@@ -62,6 +64,8 @@ export const useChatHandler = () => {
   } = useContext(PentestGPTContext)
 
   let { selectedPlugin } = useContext(PentestGPTContext)
+
+  const { setFragment } = useFragments()
 
   const isGeneratingRef = useRef(isGenerating)
 
@@ -123,6 +127,8 @@ export const useChatHandler = () => {
     setUseRetrieval(false)
 
     setToolInUse("none")
+
+    setFragment(null)
 
     setIsReadyToChat(true)
     return router.push(`/${selectedWorkspace.id}/chat`)
@@ -316,13 +322,15 @@ export const useChatHandler = () => {
       let ragId = null
       let assistantGeneratedImages: string[] = []
       let citations: string[] = []
+      let fragment: Fragment | null = null
 
       if (
         selectedPlugin.length > 0 &&
         selectedPlugin !== PluginID.NONE &&
         selectedPlugin !== PluginID.WEB_SEARCH &&
         selectedPlugin !== PluginID.ENHANCED_SEARCH &&
-        selectedPlugin !== PluginID.TERMINAL
+        selectedPlugin !== PluginID.TERMINAL &&
+        selectedPlugin !== PluginID.FRAGMENTS
       ) {
         const {
           fullText,
@@ -344,7 +352,8 @@ export const useChatHandler = () => {
           setToolInUse,
           alertDispatch,
           selectedPlugin,
-          isContinuation
+          isContinuation,
+          setFragment
         )
         generatedText = fullText
         finishReasonFromResponse = finishReason
@@ -357,7 +366,8 @@ export const useChatHandler = () => {
           ragId: ragIdFromResponse,
           selectedPlugin: updatedSelectedPlugin,
           assistantGeneratedImages: assistantGeneratedImagesFromResponse,
-          citations: citationsFromResponse
+          citations: citationsFromResponse,
+          fragment: fragmentFromResponse
         } = await handleHostedChat(
           payload,
           profile!,
@@ -374,7 +384,8 @@ export const useChatHandler = () => {
           isTemporaryChat ? setTemporaryChatMessages : setChatMessages,
           setToolInUse,
           alertDispatch,
-          selectedPlugin
+          selectedPlugin,
+          setFragment
         )
         generatedText = fullText
         finishReasonFromResponse = finishReason
@@ -383,6 +394,10 @@ export const useChatHandler = () => {
         selectedPlugin = updatedSelectedPlugin
         assistantGeneratedImages = assistantGeneratedImagesFromResponse
         citations = citationsFromResponse
+        fragment =
+          Object.keys(fragmentFromResponse || {}).length === 0
+            ? null
+            : fragmentFromResponse
       }
 
       if (isTemporaryChat) {
@@ -394,7 +409,8 @@ export const useChatHandler = () => {
                 message: {
                   ...msg.message,
                   content: generatedText,
-                  citations: citations || []
+                  citations: citations || [],
+                  fragment: fragment ? JSON.stringify(fragment) : null
                 }
               }
             : msg
@@ -452,7 +468,9 @@ export const useChatHandler = () => {
           ragUsed,
           ragId,
           isTemporaryChat,
-          citations
+          citations,
+          fragment,
+          setFragment
         )
       }
 

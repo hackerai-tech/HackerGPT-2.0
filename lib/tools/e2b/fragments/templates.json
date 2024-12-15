@@ -1,0 +1,16 @@
+{
+  "code-interpreter-v1": {
+    "name": "Python data analyst",
+    "lib": ["python", "jupyter", "numpy", "pandas", "matplotlib", "seaborn", "plotly"],
+    "file": "script.py",
+    "instructions": "Runs code as a Jupyter notebook cell. Strong data analysis angle. Can use complex visualisation to explain results.",
+    "port": null
+  },
+  "nextjs-developer": {
+    "name": "Next.js developer",
+    "lib": ["nextjs@14.2.5", "typescript", "@types/node", "@types/react", "@types/react-dom", "postcss", "tailwindcss", "shadcn"],
+    "file": "pages/index.tsx",
+    "instructions": "A Next.js 14+ app that reloads automatically. Using the pages router. Pay attention to contrast between background and text.",
+    "port": 3000
+  }
+}

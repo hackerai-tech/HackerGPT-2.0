@@ -88,6 +88,46 @@ export const availablePlugins: PluginSummary[] = [
   },
   {
     id: 3,
+    name: "Analysis tool",
+    value: PluginID.FRAGMENTS,
+    categories: ["utils"],
+    icon: "https://cdn-icons-png.flaticon.com/128/11676/11676347.png",
+    invertInDarkMode: true,
+    description:
+      "Write and run code to process data, run analysis, and produce data visualizations in real time",
+    githubRepoUrl: pluginUrls.FRAGMENTS,
+    isInstalled: false,
+    isPremium: true,
+    createdAt: "2024-10-04",
+    starters: [
+      {
+        title: "Chart the OWASP Top 10:2021",
+        description:
+          "vulnerabilities with percentages of affected applications",
+        chatMessage:
+          "Chart the OWASP Top 10:2021 vulnerabilities with percentages of affected applications using Python"
+      },
+      {
+        title: "Create XSS Demo",
+        description: "with Next.js vulnerable component",
+        chatMessage:
+          "Create a Next.js component that demonstrates a reflected XSS vulnerability with user input. Include both the vulnerable and secure versions."
+      },
+      {
+        title: "Encode this XSS Payload",
+        description: "using Python base64 and URL encoding",
+        chatMessage:
+          "Encode this XSS payload using Python base64 and URL encoding: <img src=x onerror=alert(document.cookie)>"
+      },
+      {
+        title: "Get Headers",
+        description: "from pentestgpt.ai",
+        chatMessage: "Get headers from pentestgpt.ai"
+      }
+    ]
+  },
+  {
+    id: 9,
     name: "CVE Map",
     value: PluginID.CVE_MAP,
     categories: ["utils"],

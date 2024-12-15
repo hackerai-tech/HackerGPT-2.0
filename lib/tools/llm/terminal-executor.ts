@@ -1,7 +1,7 @@
 import { OutputMessage, Sandbox } from "@e2b/code-interpreter"
 import { CustomExecutionError } from "../tool-store/tools-terminal"
+import { createOrConnectTerminal } from "../e2b/sandbox"
 
-const TEMPLATE = "bash-terminal-v1"
 const BASH_SANDBOX_TIMEOUT = 15 * 60 * 1000
 const MAX_EXECUTION_TIME = 5 * 60 * 1000
 const ENCODER = new TextEncoder()
@@ -9,11 +9,13 @@ const ENCODER = new TextEncoder()
 interface TerminalExecutorOptions {
   userID: string
   command: string
+  template: "bash-terminal-v1"
 }
 
 export const terminalExecutor = async ({
   userID,
-  command
+  command,
+  template
 }: TerminalExecutorOptions): Promise<ReadableStream<Uint8Array>> => {
   let sbx: Sandbox | null = null
   let hasTerminalOutput = false
@@ -26,9 +28,13 @@ export const terminalExecutor = async ({
       try {
         sbx = await createOrConnectTerminal(
           userID,
-          TEMPLATE,
+          template,
           BASH_SANDBOX_TIMEOUT
         )
+
+        if (!sbx) {
+          throw new Error("Failed to create or connect to sandbox")
+        }
 
         let isOutputStarted = false
         const execution = await sbx.runCode(command, {
@@ -127,32 +133,4 @@ function isConnectionError(error: Error): boolean {
     error.message.includes("504 Gateway Timeout") ||
     error.message.includes("502 Bad Gateway")
   )
-}
-
-async function createOrConnectTerminal(
-  userID: string,
-  template: string,
-  timeoutMs: number
-): Promise<Sandbox> {
-  const allSandboxes = await Sandbox.list()
-  const sandboxInfo = allSandboxes.find(
-    sbx =>
-      sbx.metadata?.userID === userID && sbx.metadata?.template === template
-  )
-
-  if (!sandboxInfo) {
-    try {
-      return await Sandbox.create(template, {
-        metadata: { template, userID },
-        timeoutMs
-      })
-    } catch (e) {
-      console.error("Error creating sandbox", e)
-      throw e
-    }
-  }
-
-  const sandbox = await Sandbox.connect(sandboxInfo.sandboxId)
-  await sandbox.setTimeout(timeoutMs)
-  return sandbox
 }

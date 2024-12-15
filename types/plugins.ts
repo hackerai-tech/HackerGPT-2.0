@@ -43,9 +43,13 @@ export enum PluginID {
   CVE_MAP = "cve-map",
   URL_FUZZER = "url-fuzzer",
   WORDPRESS_SCANNER = "wordpress-scanner",
+
   // Exploit Tools
   SQLI_EXPLOITER = "sqli-exploiter",
-  XSS_EXPLOITER = "xss-exploiter"
+  XSS_EXPLOITER = "xss-exploiter",
+
+  // Fragments
+  FRAGMENTS = "fragments"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -70,5 +74,7 @@ export const pluginUrls: PluginUrls = {
   WORDPRESS_SCANNER: "https://github.com/wpscanteam/wpscan",
   // Exploit Tools
   SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap",
-  XSS_EXPLOITER: "https://github.com/hahwul/dalfox"
+  XSS_EXPLOITER: "https://github.com/hahwul/dalfox",
+  // Fragments
+  FRAGMENTS: "https://github.com/e2b-dev/fragments"
 }

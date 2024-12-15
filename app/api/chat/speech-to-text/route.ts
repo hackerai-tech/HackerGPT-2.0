@@ -2,8 +2,27 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import llmConfig from "@/lib/models/llm/llm-config"
+import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
 
 export async function POST(req: NextRequest) {
+  const profile = await getAIProfile()
+  const subscriptionInfo = await getSubscriptionInfo(profile.user_id)
+
+  if (!subscriptionInfo.isPremium) {
+    return new Response(
+      "Access Denied: This feature is exclusive to Pro and Team members. Please upgrade your account to access the fragment tool.",
+      { status: 403 }
+    )
+  }
+
+  const rateLimitCheckResult = await checkRatelimitOnApi(
+    profile.user_id,
+    "stt-1"
+  )
+  if (rateLimitCheckResult !== null) {
+    return rateLimitCheckResult.response
+  }
+
   const formData = await req.formData()
   const audioFile = formData.get("audioFile")
   if (!audioFile || !(audioFile instanceof Blob)) {
@@ -37,16 +56,6 @@ export async function POST(req: NextRequest) {
   ) {
     console.error("Unsupported file type:", audioFile.type)
     return new NextResponse("Unsupported file type", { status: 400 })
-  }
-
-  const profile = await getAIProfile()
-  const rateLimitCheckResult = await checkRatelimitOnApi(
-    profile.user_id,
-    "stt-1"
-  )
-
-  if (rateLimitCheckResult !== null) {
-    return rateLimitCheckResult.response
   }
 
   const OPENAI_API_URL = "https://api.openai.com/v1/audio/transcriptions"

@@ -96,6 +96,15 @@ function getTimeWindow(): number {
 }
 
 function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
+  // Special case for fragments-reload
+  if (model === "fragments-reload") {
+    const fragmentsLimit = Number(process.env.FRAGMENTS_RELOAD_LIMIT) || 100 // fallback to 100 if not set
+    if (isNaN(fragmentsLimit) || fragmentsLimit < 0) {
+      return 100 // safe fallback if invalid value
+    }
+    return fragmentsLimit
+  }
+
   let limit
   const fixedModelName = _getFixedModelName(model)
   const baseKey = `RATELIMITER_LIMIT_${fixedModelName}`
@@ -181,6 +190,10 @@ export function getRateLimitErrorMessage(
       : `${baseMessage}\n\n🚀 Consider upgrading to Pro or Team for higher terminal usage limits and more features.`
   }
 
+  if (model === "fragments-reload") {
+    return `⚠️ You've reached the limit for fragment reloads.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
+  }
+
   let message = `⚠️ Usage Limit Reached for ${getModelName(model)}\n⏰ Access will be restored in ${remainingText}`
 
   if (premium) {
@@ -210,7 +223,8 @@ function getModelName(model: string): string {
     "gpt-4": "GPT-4",
     terminal: "terminal",
     "tts-1": "text-to-speech",
-    "stt-1": "speech-to-text"
+    "stt-1": "speech-to-text",
+    "fragments-reload": "fragment reloads"
   }
   return modelNames[model] || model
 }

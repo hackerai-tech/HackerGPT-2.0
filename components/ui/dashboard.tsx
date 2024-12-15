@@ -241,7 +241,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
       <div
         className={cn(
-          "bg-tertiary absolute z-50 h-full border-r-2 duration-200 lg:relative"
+          "bg-tertiary absolute z-50 h-full border-r-2 duration-200"
         )}
         style={contentType !== "gpts" ? sidebarStyle : undefined}
       >

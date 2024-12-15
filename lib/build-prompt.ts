@@ -156,7 +156,8 @@ export async function buildFinalMessages(
     user_id: "",
     rag_id: null,
     rag_used: false,
-    citations: []
+    citations: [],
+    fragment: null
   }
 
   truncatedMessages.unshift(tempSystemMessage)

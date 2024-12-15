@@ -31,6 +31,7 @@ import { CONTINUE_PROMPT } from "@/lib/models/llm/llm-prompting"
 import { buildFinalMessages } from "@/lib/build-prompt-v2"
 import { supabase } from "@/lib/supabase/browser-client"
 import { getTerminalPlugins } from "@/lib/tools/tool-store/tools-helper"
+import { Fragment } from "@/lib/tools/e2b/fragments/types"
 
 export const validateChatSettings = (
   chatSettings: ChatSettings | null,
@@ -159,7 +160,8 @@ export const createTempMessages = ({
       user_id: "",
       rag_used: false,
       rag_id: null,
-      citations: []
+      citations: [],
+      fragment: null
     },
     fileItems: []
   }
@@ -179,7 +181,8 @@ export const createTempMessages = ({
       user_id: "",
       rag_used: false,
       rag_id: null,
-      citations: []
+      citations: [],
+      fragment: null
     },
     fileItems: []
   }
@@ -206,7 +209,8 @@ export const handleHostedChat = async (
   setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
-  selectedPlugin: PluginID
+  selectedPlugin: PluginID,
+  setFragment: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
 ) => {
   let { provider } = modelData
   let apiEndpoint = `/api/chat/${provider}`
@@ -218,6 +222,10 @@ export const handleHostedChat = async (
   } else if (selectedPlugin === PluginID.WEB_SEARCH) {
     apiEndpoint = "/api/chat/plugins/web-search"
     setToolInUse(PluginID.WEB_SEARCH)
+  } else if (selectedPlugin === PluginID.FRAGMENTS) {
+    apiEndpoint = "/api/chat/tools/fragments"
+    setToolInUse(PluginID.FRAGMENTS)
+    selectedPlugin = PluginID.FRAGMENTS
   } else {
     setToolInUse(
       isRagEnabled && provider !== "openai"
@@ -286,7 +294,8 @@ export const handleHostedChat = async (
     setIsGenerating,
     alertDispatch,
     selectedPlugin,
-    isContinuation
+    isContinuation,
+    setFragment
   )
 }
 
@@ -306,7 +315,8 @@ export const handleHostedPluginsChat = async (
   setToolInUse: React.Dispatch<React.SetStateAction<string>>,
   alertDispatch: React.Dispatch<AlertAction>,
   selectedPlugin: PluginID,
-  isContinuation: boolean
+  isContinuation: boolean,
+  setFragment: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
 ) => {
   const apiEndpoint = "/api/chat/plugins"
 
@@ -348,7 +358,8 @@ export const handleHostedPluginsChat = async (
     setIsGenerating,
     alertDispatch,
     selectedPlugin,
-    isContinuation
+    isContinuation,
+    setFragment
   )
 }
 
@@ -401,7 +412,8 @@ export const processResponse = async (
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
   alertDispatch: React.Dispatch<AlertAction>,
   selectedPlugin: PluginID,
-  isContinuation: boolean
+  isContinuation: boolean,
+  setFragment: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
 ) => {
   if (!response.ok) {
     const result = await response.json()
@@ -448,6 +460,7 @@ export const processResponse = async (
     let toolExecuted = false
     let citations: string[] = []
     let shouldSkipFirstChunk = false
+    let fragment: Fragment = {} as Fragment
 
     try {
       await processDataStream({
@@ -508,6 +521,37 @@ export const processResponse = async (
           ) {
             const firstValue = value[0] as DataPartValue
 
+            // Fragment decoding
+            if (firstValue.isFragment) {
+              const fragmentData = value[1] as Fragment
+              fragment = {
+                ...fragment,
+                ...fragmentData
+              }
+
+              if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
+                setFirstTokenReceived(true)
+                setToolInUse(PluginID.NONE)
+                fullText = fragment.shortAnswer
+                setChatMessages(prev =>
+                  prev.map(chatMessage =>
+                    chatMessage.message.id === lastChatMessage.message.id
+                      ? {
+                          ...chatMessage,
+                          message: {
+                            ...chatMessage.message,
+                            content: fragment.shortAnswer,
+                            image_paths: [],
+                            fragment: fragment ? JSON.stringify(fragment) : null
+                          }
+                        }
+                      : chatMessage
+                  )
+                )
+              }
+              setFragment(fragment, lastChatMessage)
+            }
+
             // Handle citations
             if (firstValue?.citations) {
               citations = firstValue.citations
@@ -557,7 +601,8 @@ export const processResponse = async (
               setIsGenerating,
               alertDispatch,
               updatedPlugin,
-              isContinuation
+              isContinuation,
+              setFragment
             )
 
             fullText += browserResult.fullText
@@ -586,7 +631,8 @@ export const processResponse = async (
               setIsGenerating,
               alertDispatch,
               updatedPlugin,
-              isContinuation
+              isContinuation,
+              setFragment
             )
 
             fullText += terminalResult.fullText
@@ -616,7 +662,8 @@ export const processResponse = async (
               setIsGenerating,
               alertDispatch,
               updatedPlugin,
-              isContinuation
+              isContinuation,
+              setFragment
             )
 
             fullText += webSearchResult.fullText
@@ -645,11 +692,45 @@ export const processResponse = async (
               setIsGenerating,
               alertDispatch,
               updatedPlugin,
-              isContinuation
+              isContinuation,
+              setFragment
             )
 
             fullText += reasonLLMResult.fullText
             citations = reasonLLMResult.citations || citations
+          } else if (toolName === "fragments") {
+            setToolInUse(PluginID.FRAGMENTS)
+            updatedPlugin = PluginID.FRAGMENTS
+
+            setFragment(null)
+
+            const fragmentGeneratorResponse = await fetchChatResponse(
+              "/api/chat/tools/fragments",
+              requestBody,
+              controller,
+              setIsGenerating,
+              setChatMessages,
+              alertDispatch
+            )
+
+            const fragmentGeneratorResult = await processResponse(
+              fragmentGeneratorResponse,
+              lastChatMessage,
+              controller,
+              setFirstTokenReceived,
+              setChatMessages,
+              setToolInUse,
+              requestBody,
+              setIsGenerating,
+              alertDispatch,
+              updatedPlugin,
+              isContinuation,
+              setFragment
+            )
+
+            fullText += fragmentGeneratorResult.fullText
+            finishReason = fragmentGeneratorResult.finishReason
+            fragment = fragmentGeneratorResult.fragment
           }
           toolExecuted = true
         },
@@ -687,7 +768,8 @@ export const processResponse = async (
       ragId,
       selectedPlugin: updatedPlugin,
       assistantGeneratedImages,
-      citations
+      citations,
+      fragment
     }
   } else {
     throw new Error("Response body is null")
@@ -755,7 +837,9 @@ export const handleCreateMessages = async (
   ragUsed?: boolean,
   ragId?: string | null,
   isTemporary: boolean = false,
-  citations?: string[]
+  citations?: string[],
+  fragment?: Fragment | null,
+  setFragment?: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
 ) => {
   const isEdit = editSequenceNumber !== undefined
 
@@ -776,9 +860,11 @@ export const handleCreateMessages = async (
         image_paths: newMessageImages.map(image => image.path),
         rag_used: ragUsed || false,
         rag_id: ragId || null,
-        citations: []
+        citations: [],
+        fragment: null
       },
-      fileItems: retrievedFileItems
+      fileItems: retrievedFileItems,
+      isFinal: false
     }
 
     const tempAssistantMessage: ChatMessage = {
@@ -796,9 +882,11 @@ export const handleCreateMessages = async (
         image_paths: assistantGeneratedImages || [],
         rag_used: ragUsed || false,
         rag_id: ragId || null,
-        citations: citations || []
+        citations: citations || [],
+        fragment: fragment ? JSON.stringify(fragment) : null
       },
-      fileItems: []
+      fileItems: [],
+      isFinal: false
     }
 
     setMessages([...chatMessages, tempUserMessage, tempAssistantMessage])
@@ -816,7 +904,8 @@ export const handleCreateMessages = async (
     image_paths: [],
     rag_used: ragUsed || false,
     rag_id: ragId || null,
-    citations: []
+    citations: [],
+    fragment: null
   }
 
   const finalAssistantMessage: TablesInsert<"messages"> = {
@@ -830,7 +919,8 @@ export const handleCreateMessages = async (
     image_paths: assistantGeneratedImages || [],
     rag_used: ragUsed || false,
     rag_id: ragId || null,
-    citations: citations || []
+    citations: citations || [],
+    fragment: fragment ? JSON.stringify(fragment) : null
   }
 
   let finalChatMessages: ChatMessage[] = []
@@ -963,13 +1053,20 @@ export const handleCreateMessages = async (
         : chatMessages),
       {
         message: updatedMessage,
-        fileItems: []
+        fileItems: [],
+        isFinal: true
       },
       {
         message: createdMessages[1],
-        fileItems: retrievedFileItems
+        fileItems: retrievedFileItems,
+        isFinal: true
       }
     ]
+
+    setFragment?.(
+      fragment ?? null,
+      finalChatMessages[finalChatMessages.length - 1]
+    )
 
     setMessages(finalChatMessages)
   }

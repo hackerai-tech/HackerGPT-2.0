@@ -45,10 +45,8 @@ export const ChatMessages: FC<ChatMessagesProps> = ({}) => {
         return (
           <Message
             key={chatMessage.message.id}
-            message={chatMessage.message}
+            chatMessage={chatMessage}
             previousMessage={previousMessage}
-            fileItems={chatMessage.fileItems}
-            feedback={chatMessage.feedback}
             isEditing={editingMessage?.id === chatMessage.message.id}
             isLast={index === messagesToDisplay.length - 1}
             onStartEdit={setEditingMessage}
