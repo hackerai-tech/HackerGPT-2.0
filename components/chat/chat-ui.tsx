@@ -73,7 +73,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   const [loading, setLoading] = useState(true)
   const previousHeightRef = useRef<number | null>(null)
 
-  const { resetFragment } = useFragments()
+  const { resetFragment, isFragmentBarOpen } = useFragments()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -291,14 +291,19 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
                 <ChatInput isTemporaryChat={isTemporaryChat} />
               </div>
             </div>
+
+            {/* Chat help */}
+            <div
+              className={`absolute bottom-2 right-2 hidden md:block lg:bottom-4 ${
+                isFragmentBarOpen ? "lg:right-[calc(50%+0.5rem)]" : "lg:right-4"
+              }`}
+            >
+              <ChatHelp />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Chat help */}
-      <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">
-        <ChatHelp />
-      </div>
       <GlobalDeleteChatDialog
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}

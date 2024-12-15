@@ -180,9 +180,6 @@ export function ChatFragment() {
                         height={600}
                       />
                     )}
-                    {result.text && (
-                      <div className="text-sm">{result.text}</div>
-                    )}
                   </div>
                 ))}
             </div>
