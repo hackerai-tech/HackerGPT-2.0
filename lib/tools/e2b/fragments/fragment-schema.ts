@@ -4,7 +4,7 @@ export const fragmentSchema = z.object({
   shortAnswer: z
     .string()
     .describe(
-      "A short answer to the user, starting with something like I will, I'm going to, I'm creating, etc. Maximum of 20 words."
+      "A short answer to the user, starting with something like I will, I'm going to, etc. Maximum of 20 words."
     ),
   plan: z
     .string()
