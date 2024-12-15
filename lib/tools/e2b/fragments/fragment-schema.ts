@@ -1,23 +1,21 @@
-import { Tables } from "@/supabase/types"
-import { tool } from "ai"
 import { z } from "zod"
 
 export const fragmentSchema = z.object({
+  description: z
+    .string()
+    .describe(
+      "Short description of the fragment for the user, not technical, no dependencies or template talking, only simple description. Max 1 sentence."
+    ),
   commentary: z
     .string()
     .describe(
-      `Describe what you're about to do and the steps you want to take for generating the fragment in great detail.`
+      `Describe step by step what you're about to do in a very detailed way. Make sure to emcompass all the details described in the template instructions.`
     ),
   template: z
     .string()
     .describe("Name of the template used to generate the fragment."),
   // template_ready: z.boolean().describe('Detect if finished identifying the template.'),
   title: z.string().describe("Short title of the fragment. Max 3 words."),
-  description: z
-    .string()
-    .describe(
-      "Short description of the fragment for the user, not technical, no dependencies talking, only simple description. Max 1 sentence."
-    ),
   additional_dependencies: z
     .array(z.string())
     .describe(

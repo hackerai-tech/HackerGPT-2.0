@@ -469,7 +469,8 @@ export const useChatHandler = () => {
           ragId,
           isTemporaryChat,
           citations,
-          fragment
+          fragment,
+          setFragment
         )
       }
 

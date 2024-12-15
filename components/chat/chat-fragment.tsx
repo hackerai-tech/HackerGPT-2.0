@@ -1,5 +1,5 @@
 /* eslint-disable tailwindcss/classnames-order */
-import { IconX, IconReload, IconLoader2 } from "@tabler/icons-react"
+import { IconX, IconReload, IconLoader2, IconFile } from "@tabler/icons-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Tooltip,
@@ -27,7 +27,7 @@ export function ChatFragment() {
   } = useFragments()
 
   const handleReload = async () => {
-    if (!fragment || isReloading) return
+    if (!fragment || isReloading  || !fragment.code || fragment.sandboxExecution !== "completed" || fragment.template === "code-interpreter-v1") return
 
     setIsReloading(true)
     try {
@@ -55,12 +55,14 @@ export function ChatFragment() {
     } catch (error) {
       toast.error("Failed to reload sandbox")
     } finally {
-      setIsReloading(false)
+      setTimeout(() => {
+        setIsReloading(false)
+      }, 1500)
     }
   }
 
   useEffect(() => {
-    handleReload()
+      handleReload()
   }, [fragment?.code])
 
   if (!isFragmentBarOpen || !fragment) {

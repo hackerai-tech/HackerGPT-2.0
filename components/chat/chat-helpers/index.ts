@@ -838,7 +838,8 @@ export const handleCreateMessages = async (
   ragId?: string | null,
   isTemporary: boolean = false,
   citations?: string[],
-  fragment?: Fragment | null
+  fragment?: Fragment | null,
+  setFragment?: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
 ) => {
   const isEdit = editSequenceNumber !== undefined
 
@@ -862,7 +863,8 @@ export const handleCreateMessages = async (
         citations: [],
         fragment: null
       },
-      fileItems: retrievedFileItems
+      fileItems: retrievedFileItems,
+      isFinal: false
     }
 
     const tempAssistantMessage: ChatMessage = {
@@ -883,7 +885,8 @@ export const handleCreateMessages = async (
         citations: citations || [],
         fragment: fragment ? JSON.stringify(fragment) : null
       },
-      fileItems: []
+      fileItems: [],
+      isFinal: false
     }
 
     setMessages([...chatMessages, tempUserMessage, tempAssistantMessage])
@@ -902,7 +905,7 @@ export const handleCreateMessages = async (
     rag_used: ragUsed || false,
     rag_id: ragId || null,
     citations: [],
-    fragment: null
+    fragment: null,
   }
 
   const finalAssistantMessage: TablesInsert<"messages"> = {
@@ -1050,13 +1053,17 @@ export const handleCreateMessages = async (
         : chatMessages),
       {
         message: updatedMessage,
-        fileItems: []
+        fileItems: [],
+        isFinal: true
       },
       {
         message: createdMessages[1],
-        fileItems: retrievedFileItems
+        fileItems: retrievedFileItems,
+        isFinal: true
       }
     ]
+
+    setFragment?.(fragment ?? null, finalChatMessages[finalChatMessages.length - 1])
 
     setMessages(finalChatMessages)
   }

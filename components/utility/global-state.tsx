@@ -316,7 +316,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
     return fetchedMessages.map(fetchMessage => ({
       message: fetchMessage,
       fileItems: fetchMessage.file_items,
-      feedback: fetchMessage.feedback[0] ?? undefined
+      feedback: fetchMessage.feedback[0] ?? undefined,
+      isFinal: true
     }))
   }
 
