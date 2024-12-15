@@ -21,10 +21,10 @@ export type ExecutionResultWeb = ExecutionResultBase & {
 }
 
 export type Fragment = {
-  commentary: string
   template: string
   title: string
-  description: string
+  shortAnswer: string
+  plan: string
   additional_dependencies: string[]
   has_additional_dependencies: boolean
   install_dependencies_command: string

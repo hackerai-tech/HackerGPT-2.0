@@ -27,7 +27,14 @@ export function ChatFragment() {
   } = useFragments()
 
   const handleReload = async () => {
-    if (!fragment || isReloading  || !fragment.code || fragment.sandboxExecution !== "completed" || fragment.template === "code-interpreter-v1") return
+    if (
+      !fragment ||
+      isReloading ||
+      !fragment.code ||
+      fragment.sandboxExecution !== "completed" ||
+      fragment.template === "code-interpreter-v1"
+    )
+      return
 
     setIsReloading(true)
     try {
@@ -62,7 +69,7 @@ export function ChatFragment() {
   }
 
   useEffect(() => {
-      handleReload()
+    handleReload()
   }, [fragment?.code])
 
   if (!isFragmentBarOpen || !fragment) {

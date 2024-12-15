@@ -529,10 +529,10 @@ export const processResponse = async (
                 ...fragmentData
               }
 
-              if (fragment.commentary && fragment.commentary !== fullText) {
+              if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
                 setFirstTokenReceived(true)
                 setToolInUse(PluginID.NONE)
-                fullText = fragment.commentary
+                fullText = fragment.shortAnswer
                 setChatMessages(prev =>
                   prev.map(chatMessage =>
                     chatMessage.message.id === lastChatMessage.message.id
@@ -540,7 +540,7 @@ export const processResponse = async (
                           ...chatMessage,
                           message: {
                             ...chatMessage.message,
-                            content: fragment.commentary,
+                            content: fragment.shortAnswer,
                             image_paths: [],
                             fragment: fragment ? JSON.stringify(fragment) : null
                           }
@@ -905,7 +905,7 @@ export const handleCreateMessages = async (
     rag_used: ragUsed || false,
     rag_id: ragId || null,
     citations: [],
-    fragment: null,
+    fragment: null
   }
 
   const finalAssistantMessage: TablesInsert<"messages"> = {
@@ -1063,7 +1063,10 @@ export const handleCreateMessages = async (
       }
     ]
 
-    setFragment?.(fragment ?? null, finalChatMessages[finalChatMessages.length - 1])
+    setFragment?.(
+      fragment ?? null,
+      finalChatMessages[finalChatMessages.length - 1]
+    )
 
     setMessages(finalChatMessages)
   }
