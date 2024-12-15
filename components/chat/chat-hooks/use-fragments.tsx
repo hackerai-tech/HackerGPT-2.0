@@ -70,7 +70,12 @@ function useFragmentsHook(): UseFragmentsReturn {
     chatMessage?: ChatMessage
   ) => {
     if (!newFragment) {
-      resetFragment()
+      if (
+        !fragment?.sandboxExecution ||
+        fragment.sandboxExecution === "completed"
+      ) {
+        resetFragment()
+      }
       return
     }
 
@@ -81,25 +86,23 @@ function useFragmentsHook(): UseFragmentsReturn {
     setFragmentState(newFragment)
     setChatMessage(chatMessage)
 
-    setIsFragmentBarOpen(currentIsOpen => {
-      if (!currentIsOpen && newFragment.code) {
-        return true
-      }
-      return currentIsOpen
-    })
+    if (!isFragmentBarOpen && newFragment.code) {
+      setIsFragmentBarOpen(true)
+    }
 
-    setActiveTab(currentTab => {
-      if (
-        newFragment.sandboxExecution &&
-        newFragment.sandboxExecution === "completed" &&
-        currentTab === "code"
-      ) {
-        return "execution"
-      } else if (!newFragment.sandboxExecution && currentTab === "execution") {
-        return "code"
-      }
-      return currentTab
-    })
+    if (!isFragmentBarOpen) {
+      setActiveTab(currentTab => {
+        if (
+          newFragment.sandboxExecution &&
+          newFragment.sandboxExecution === "completed"
+        ) {
+          return "execution"
+        } else if (!newFragment.sandboxExecution) {
+          return "code"
+        }
+        return currentTab
+      })
+    }
   }
 
   const resetFragment = () => {

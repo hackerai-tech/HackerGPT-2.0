@@ -78,6 +78,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   useEffect(() => {
     const fetchData = async () => {
       if (!isTemporaryChat) {
+        resetFragment()
         await Promise.all([
           fetchMessages(params.chatid as string, params.workspaceid as string),
           fetchChat(params.chatid as string, params.workspaceid as string)
@@ -101,12 +102,6 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       setIsReadyToChat(true)
     }
   }, [])
-
-  useEffect(() => {
-    if (selectedChat) {
-      resetFragment()
-    }
-  }, [selectedChat?.id])
 
   const loadMoreMessagesInner = useCallback(async () => {
     if (
@@ -174,6 +169,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   )
 
   const handleCleanChat = () => {
+    resetFragment()
     setTemporaryChatMessages([])
   }
 
