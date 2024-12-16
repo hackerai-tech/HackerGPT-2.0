@@ -122,7 +122,7 @@ export async function POST(request: Request) {
         const finalObject = await finalObjectPromise
 
         enqueueChunk("2", {
-          sandboxExecution: "starting"
+          sandboxExecution: "started"
         })
 
         const sandboxData = await executeFragment(

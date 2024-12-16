@@ -101,8 +101,6 @@ export async function buildFinalMessages(
     return returnMessage
   })
 
-  console.log(processedChatMessages)
-
   const truncatedMessages: any[] = []
 
   for (let i = processedChatMessages.length - 1; i >= 0; i--) {

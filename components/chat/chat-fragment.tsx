@@ -64,7 +64,7 @@ export function ChatFragment() {
     } finally {
       setTimeout(() => {
         setIsReloading(false)
-      }, 1500)
+      }, 2000)
     }
   }
 
