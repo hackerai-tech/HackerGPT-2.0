@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@ai-sdk/mistral": "^1.0.4",
-    "@ai-sdk/openai": "^1.0.7",
+    "@ai-sdk/openai": "^1.0.8",
     "@e2b/code-interpreter": "^1.0.4",
     "@headlessui/react": "^2.2.0",
     "@langchain/community": "^0.3.17",
