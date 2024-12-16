@@ -178,9 +178,7 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
                 onClick={handleShareChat}
               >
                 <IconLink className="mr-2 size-4" />
-                {shareUrl
-                  ? "Update"
-                  : "Generate"} link
+                {shareUrl ? "Update" : "Generate"} link
               </Button>
               {shareUrl && (
                 <CopyButton
