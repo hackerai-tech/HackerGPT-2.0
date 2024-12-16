@@ -26,7 +26,7 @@ export async function executeFragment(
     // )
   }
 
-  console.log(`[${userID}] Creating fragment`, fragment.code)
+  console.log(`[${userID}] Creating fragment: ${fragment.code}`)
 
   // Copy code to fs
   if (fragment.code && Array.isArray(fragment.code)) {
