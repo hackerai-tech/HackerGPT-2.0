@@ -249,12 +249,13 @@ export const handleHostedChat = async (
   if (isTerminalContinuation) {
     requestBody = {
       messages: formattedMessages,
-      isTerminalContinuation: isTerminalContinuation
+      isTerminalContinuation
     }
   } else if (provider === "openai") {
     requestBody = {
       messages: formattedMessages,
-      chatSettings
+      chatSettings,
+      isTerminalContinuation
     }
   } else {
     requestBody = {
@@ -556,6 +557,11 @@ export const processResponse = async (
               )
             }
 
+            // Handle finishReason
+            if (firstValue?.finishReason) {
+              finishReason = firstValue.finishReason
+            }
+
             // Fragment decoding
             if (firstValue.isFragment) {
               const fragmentData = value[1] as Fragment
@@ -611,34 +617,6 @@ export const processResponse = async (
           } else if (toolName === "terminal") {
             setToolInUse(PluginID.TERMINAL)
             updatedPlugin = PluginID.TERMINAL
-
-            const terminalResponse = await fetchChatResponse(
-              "/api/chat/tools/terminal",
-              requestBody,
-              controller,
-              setIsGenerating,
-              setChatMessages,
-              alertDispatch
-            )
-
-            const terminalResult = await processResponse(
-              terminalResponse,
-              lastChatMessage,
-              controller,
-              setFirstTokenReceived,
-              setChatMessages,
-              setToolInUse,
-              requestBody,
-              setIsGenerating,
-              alertDispatch,
-              updatedPlugin,
-              isContinuation,
-              setFragment
-            )
-
-            fullText += terminalResult.fullText
-            finishReason = terminalResult.finishReason
-            citations = terminalResult.citations || citations
           } else if (toolName === "webSearch") {
             setToolInUse(PluginID.WEB_SEARCH)
             updatedPlugin = PluginID.WEB_SEARCH
@@ -679,22 +657,27 @@ export const processResponse = async (
           toolExecuted = true
         },
         onFinishMessagePart: value => {
-          if (finishReason === "" && !controller.signal.aborted) {
-            // Only set finishReason if it hasn't been set before
+          if (!controller.signal.aborted) {
             if (
-              value.finishReason === "tool-calls" &&
+              (value.finishReason === "tool-calls" ||
+                finishReason === "tool-calls") &&
               getTerminalPlugins().includes(updatedPlugin)
             ) {
               // To use continue generating for terminal
               finishReason = "terminal-calls"
-            } else if (
-              value.finishReason === "length" &&
-              !isFirstChunkReceived &&
-              isContinuation
-            ) {
-              finishReason = "stop"
-            } else {
-              finishReason = value.finishReason
+            }
+
+            if (finishReason === "") {
+              // Only set finishReason if it hasn't been set before
+              if (
+                value.finishReason === "length" &&
+                !isFirstChunkReceived &&
+                isContinuation
+              ) {
+                finishReason = "stop"
+              } else {
+                finishReason = value.finishReason
+              }
             }
           }
         }

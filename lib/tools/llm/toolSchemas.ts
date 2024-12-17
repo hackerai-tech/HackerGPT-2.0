@@ -1,4 +1,5 @@
 import { executeWebSearch } from "./web-search"
+import { executeTerminal } from "./terminal"
 import { executeBrowserTool } from "./browser"
 import { z } from "zod"
 
@@ -6,12 +7,14 @@ export const createToolSchemas = ({
   chatSettings,
   messages,
   profile,
-  dataStream
+  dataStream,
+  isTerminalContinuation
 }: {
   chatSettings?: any
   messages?: any
   profile?: any
   dataStream?: any
+  isTerminalContinuation?: boolean
 }) => {
   const allSchemas = {
     browser: {
@@ -32,7 +35,7 @@ export const createToolSchemas = ({
       parameters: z.object({
         search: z.boolean().describe("Set to true to search the web")
       }),
-      execute: async ({ search }: { search: boolean }) => {
+      execute: async () => {
         return executeWebSearch({
           config: { chatSettings, messages, profile, dataStream }
         })
@@ -47,7 +50,17 @@ export const createToolSchemas = ({
           .describe(
             "Set to true to use the terminal for executing bash commands. Select immediately when terminal operations are needed."
           )
-      })
+      }),
+      execute: async () => {
+        return executeTerminal({
+          config: {
+            messages,
+            profile,
+            dataStream,
+            isTerminalContinuation
+          }
+        })
+      }
     },
     fragments: {
       description:

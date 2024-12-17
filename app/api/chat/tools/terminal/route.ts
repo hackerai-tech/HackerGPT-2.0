@@ -40,9 +40,6 @@ export const preferredRegion = [
   "syd1"
 ]
 
-const MAX_TOKENS = 32000
-const INITIAL_TOKENS = 1000
-
 export async function POST(request: Request) {
   try {
     const { messages, isTerminalContinuation } = await request.json()
