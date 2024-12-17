@@ -3,4 +3,6 @@ export interface DataPartValue {
   ragUsed?: boolean
   ragId?: string | null
   isFragment?: boolean
+  type?: string
+  content?: string
 }

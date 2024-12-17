@@ -191,7 +191,12 @@ export async function POST(request: Request) {
 
           let tools
           if (isPentestGPTPro) {
-            const toolSchemas = createToolSchemas({})
+            const toolSchemas = createToolSchemas({
+              chatSettings,
+              messages: cleanedMessages,
+              profile,
+              dataStream
+            })
             tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
           }
 

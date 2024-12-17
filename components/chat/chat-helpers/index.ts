@@ -469,17 +469,11 @@ export const processResponse = async (
           if (value && !controller.signal.aborted) {
             // Check if this is the first chunk and matches the last message
             if (isFirstChunk) {
-              // console.log("[ProcessResponse] First chunk received", {
-              //   value,
-              //   lastMessageContent: lastChatMessage?.message?.content,
-              //   isMatch: isContinuation && lastChatMessage?.message?.content === value
-              // })
               isFirstChunkReceived = true
               if (
                 isContinuation &&
                 lastChatMessage?.message?.content === value
               ) {
-                // console.log("[ProcessResponse] Skipping duplicate first chunk")
                 shouldSkipFirstChunk = true
                 isFirstChunk = false
                 return
@@ -490,7 +484,6 @@ export const processResponse = async (
 
             // Skip if this was a duplicate first chunk
             if (shouldSkipFirstChunk) {
-              // console.log("[ProcessResponse] Skipping chunk due to previous duplicate")
               shouldSkipFirstChunk = false
               return
             }
@@ -520,6 +513,48 @@ export const processResponse = async (
             !controller.signal.aborted
           ) {
             const firstValue = value[0] as DataPartValue
+
+            // Handle text-delta type
+            if (firstValue.type === "text-delta") {
+              // Check if this is the first chunk and matches the last message
+              if (isFirstChunk) {
+                isFirstChunkReceived = true
+                if (
+                  isContinuation &&
+                  lastChatMessage?.message?.content === firstValue.content
+                ) {
+                  shouldSkipFirstChunk = true
+                  isFirstChunk = false
+                  return
+                }
+                setFirstTokenReceived(true)
+                isFirstChunk = false
+              }
+
+              // Skip if this was a duplicate first chunk
+              if (shouldSkipFirstChunk) {
+                shouldSkipFirstChunk = false
+                return
+              }
+
+              fullText += firstValue.content
+
+              setChatMessages(prev =>
+                prev.map(chatMessage =>
+                  chatMessage.message.id === lastChatMessage.message.id
+                    ? {
+                        ...chatMessage,
+                        message: {
+                          ...chatMessage.message,
+                          content:
+                            chatMessage.message.content + firstValue.content,
+                          image_paths: chatMessage.message.image_paths
+                        }
+                      }
+                    : chatMessage
+                )
+              )
+            }
 
             // Fragment decoding
             if (firstValue.isFragment) {
@@ -570,43 +605,9 @@ export const processResponse = async (
 
           const { toolName } = value
 
-          if (toolName === "browser" && value.args.open_url) {
+          if (toolName === "browser") {
             setToolInUse(PluginID.BROWSER)
             updatedPlugin = PluginID.BROWSER
-
-            const urlToOpen = value.args.open_url
-
-            const browserRequestBody = {
-              ...requestBody,
-              open_url: urlToOpen
-            }
-
-            const browserResponse = await fetchChatResponse(
-              "/api/chat/plugins/browser",
-              browserRequestBody,
-              controller,
-              setIsGenerating,
-              setChatMessages,
-              alertDispatch
-            )
-
-            const browserResult = await processResponse(
-              browserResponse,
-              lastChatMessage,
-              controller,
-              setFirstTokenReceived,
-              setChatMessages,
-              setToolInUse,
-              requestBody,
-              setIsGenerating,
-              alertDispatch,
-              updatedPlugin,
-              isContinuation,
-              setFragment
-            )
-
-            fullText += browserResult.fullText
-            citations = browserResult.citations || citations
           } else if (toolName === "terminal") {
             setToolInUse(PluginID.TERMINAL)
             updatedPlugin = PluginID.TERMINAL

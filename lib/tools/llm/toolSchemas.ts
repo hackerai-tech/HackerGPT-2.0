@@ -1,32 +1,34 @@
+import { executeBrowserTool } from "./browser"
 import { z } from "zod"
 
-type ToolContext = {
+export const createToolSchemas = ({
+  chatSettings,
+  messages,
+  profile,
+  dataStream
+}: {
+  chatSettings?: any
   messages?: any
-}
-
-export const createToolSchemas = (context: ToolContext) => {
+  profile?: any
+  dataStream?: any
+}) => {
   const allSchemas = {
-    // reasonLLM: {
-    //   description:
-    //     "Uses OpenAI's o1 model for advanced reasoning in complex scenarios.",
-    //   parameters: z.object({
-    //     reason: z
-    //       .boolean()
-    //       .describe(
-    //         "Set to true to use the advanced reasoning engine for complex problems"
-    //       )
-    //   })
-    // },
-    webSearch: {
-      description: "Search the web for latest information",
-      parameters: z.object({ search: z.boolean() })
-    },
     browser: {
       description:
         "Browse a webpage and extract its text content. For HTML retrieval or more complex web scraping, use the Python tool.",
       parameters: z.object({
         open_url: z.string().url().describe("The URL of the webpage to browse")
-      })
+      }),
+      execute: async ({ open_url }: { open_url: string }) => {
+        return executeBrowserTool({
+          open_url,
+          config: { chatSettings, profile, messages, dataStream }
+        })
+      }
+    },
+    webSearch: {
+      description: "Search the web for latest information",
+      parameters: z.object({ search: z.boolean() })
     },
     terminal: {
       description:

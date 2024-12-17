@@ -1,5 +1,8 @@
 import { replaceWordsInLastUserMessage } from "@/lib/ai-helper"
-import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
+import {
+  filterEmptyAssistantMessages,
+  toVercelChatMessages
+} from "@/lib/build-prompt"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
@@ -14,28 +17,6 @@ import {
   experimental_createProviderRegistry as createProviderRegistry,
   streamObject
 } from "ai"
-
-function messageToPrompt(message: BuiltChatMessage) {
-  let result = '<Message role="' + message.role + '">\n'
-
-  if (Array.isArray(message.content)) {
-    result = message.content
-      .map(content => {
-        if (typeof content === "object" && "text" in content) {
-          return content.text
-        }
-        return content
-      })
-      .join("")
-  } else {
-    result = message.content
-  }
-  return result + "</Message>\n"
-}
-
-function messagesToPrompt(messages: BuiltChatMessage[]) {
-  return messages.map(messageToPrompt).join("\n")
-}
 
 export async function POST(request: Request) {
   try {
@@ -89,10 +70,8 @@ export async function POST(request: Request) {
           streamObject({
             model: registry.languageModel("openai:gpt-4o"),
             schema: fragmentSchema,
-            prompt:
-              toPrompt(templates) +
-              "Execute the task described in the conversation bellow:\n\n" +
-              messagesToPrompt(messages)
+            system: toPrompt(templates),
+            messages: toVercelChatMessages(messages, true)
           })
 
         const keysAlreadySeen = new Set<string>()
