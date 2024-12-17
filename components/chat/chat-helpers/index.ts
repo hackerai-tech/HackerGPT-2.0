@@ -642,63 +642,6 @@ export const processResponse = async (
           } else if (toolName === "webSearch") {
             setToolInUse(PluginID.WEB_SEARCH)
             updatedPlugin = PluginID.WEB_SEARCH
-
-            const webSearchResponse = await fetchChatResponse(
-              "/api/chat/plugins/web-search",
-              requestBody,
-              controller,
-              setIsGenerating,
-              setChatMessages,
-              alertDispatch
-            )
-
-            const webSearchResult = await processResponse(
-              webSearchResponse,
-              lastChatMessage,
-              controller,
-              setFirstTokenReceived,
-              setChatMessages,
-              setToolInUse,
-              requestBody,
-              setIsGenerating,
-              alertDispatch,
-              updatedPlugin,
-              isContinuation,
-              setFragment
-            )
-
-            fullText += webSearchResult.fullText
-            citations = webSearchResult.citations || citations
-          } else if (toolName === "reasonLLM") {
-            setToolInUse(PluginID.REASON_LLM)
-            updatedPlugin = PluginID.REASON_LLM
-
-            const reasonLLMResponse = await fetchChatResponse(
-              "/api/chat/tools/reason-llm",
-              requestBody,
-              controller,
-              setIsGenerating,
-              setChatMessages,
-              alertDispatch
-            )
-
-            const reasonLLMResult = await processResponse(
-              reasonLLMResponse,
-              lastChatMessage,
-              controller,
-              setFirstTokenReceived,
-              setChatMessages,
-              setToolInUse,
-              requestBody,
-              setIsGenerating,
-              alertDispatch,
-              updatedPlugin,
-              isContinuation,
-              setFragment
-            )
-
-            fullText += reasonLLMResult.fullText
-            citations = reasonLLMResult.citations || citations
           } else if (toolName === "fragments") {
             setToolInUse(PluginID.FRAGMENTS)
             updatedPlugin = PluginID.FRAGMENTS

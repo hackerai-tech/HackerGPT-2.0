@@ -1,3 +1,4 @@
+import { executeWebSearch } from "./web-search"
 import { executeBrowserTool } from "./browser"
 import { z } from "zod"
 
@@ -28,7 +29,14 @@ export const createToolSchemas = ({
     },
     webSearch: {
       description: "Search the web for latest information",
-      parameters: z.object({ search: z.boolean() })
+      parameters: z.object({
+        search: z.boolean().describe("Set to true to search the web")
+      }),
+      execute: async ({ search }: { search: boolean }) => {
+        return executeWebSearch({
+          config: { chatSettings, messages, profile, dataStream }
+        })
+      }
     },
     terminal: {
       description:
