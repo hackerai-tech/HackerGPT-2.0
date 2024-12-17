@@ -8,7 +8,7 @@ import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { createOpenAI } from "@ai-sdk/openai"
-import { streamText } from "ai"
+import { createDataStreamResponse, streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 
@@ -35,7 +35,7 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   try {
-    const { messages } = await request.json()
+    const { chatSettings, messages } = await request.json()
 
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
@@ -59,21 +59,38 @@ export async function POST(request: Request) {
       apiKey: llmConfig.openai.apiKey
     })
 
-    const { getSelectedSchemas } = createToolSchemas({
-      messages
-    })
+    return createDataStreamResponse({
+      execute: dataStream => {
+        const { getSelectedSchemas } = createToolSchemas({
+          chatSettings,
+          messages,
+          profile,
+          dataStream
+        })
 
-    const result = streamText({
-      model: openai("gpt-4o", { parallelToolCalls: false }),
-      system: systemPrompt,
-      messages: toVercelChatMessages(messages, true),
-      temperature: 0.5,
-      maxTokens: 2048,
-      abortSignal: request.signal,
-      tools: getSelectedSchemas("all")
-    })
+        const result = streamText({
+          model: openai("gpt-4o", { parallelToolCalls: false }),
+          system: systemPrompt,
+          messages: toVercelChatMessages(messages, true),
+          temperature: 0.5,
+          maxTokens: 2048,
+          abortSignal: request.signal,
+          tools: getSelectedSchemas("all")
+        })
 
-    return result.toDataStreamResponse()
+        result.mergeIntoDataStream(dataStream)
+      },
+      onError: error => {
+        // Log the error message to the server console
+        console.error(
+          "Error occurred:",
+          error instanceof Error ? error.message : String(error)
+        )
+
+        // Return a generic error message to the client
+        return "An error occurred while processing your request."
+      }
+    })
   } catch (error: any) {
     const errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500

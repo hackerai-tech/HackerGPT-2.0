@@ -88,7 +88,7 @@ export const availablePlugins: PluginSummary[] = [
   },
   {
     id: 3,
-    name: "Analysis tool",
+    name: "Artifacts",
     value: PluginID.FRAGMENTS,
     categories: ["utils"],
     icon: "https://cdn-icons-png.flaticon.com/128/11676/11676347.png",
