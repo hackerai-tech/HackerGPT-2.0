@@ -1,6 +1,7 @@
 import { executeWebSearch } from "./web-search"
 import { executeTerminal } from "./terminal"
 import { executeBrowserTool } from "./browser"
+import { executeFragments } from "../e2b/fragments/fragment-tool"
 import { z } from "zod"
 
 export const createToolSchemas = ({
@@ -66,20 +67,13 @@ export const createToolSchemas = ({
       description:
         "Creates a Next.js website or execute a python code based on your detailed specifications.",
       parameters: z.object({
-        name: z
-          .string()
-          .describe("Name of the website/project or Python script"),
-        description: z
-          .string()
-          .describe(
-            "Detailed description of the website's purpose and requirements, or the Python script's functionality and goals"
-          ),
-        features: z
-          .array(z.string())
-          .describe(
-            "List of specific features to include in the website or functionality to implement in Python"
-          )
-      })
+        search: z.boolean().describe("Set to true to create artifact")
+      }),
+      execute: async () => {
+        return executeFragments({
+          config: { chatSettings, messages, profile, dataStream }
+        })
+      }
     }
   }
 
