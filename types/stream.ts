@@ -5,4 +5,5 @@ export interface DataPartValue {
   isFragment?: boolean
   type?: string
   content?: string
+  finishReason?: string
 }

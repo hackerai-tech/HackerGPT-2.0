@@ -249,12 +249,13 @@ export const handleHostedChat = async (
   if (isTerminalContinuation) {
     requestBody = {
       messages: formattedMessages,
-      isTerminalContinuation: isTerminalContinuation
+      isTerminalContinuation
     }
   } else if (provider === "openai") {
     requestBody = {
       messages: formattedMessages,
-      chatSettings
+      chatSettings,
+      isTerminalContinuation
     }
   } else {
     requestBody = {
@@ -556,7 +557,52 @@ export const processResponse = async (
               )
             }
 
-            // Fragment decoding
+            // Handle finishReason
+            if (firstValue?.finishReason) {
+              if (firstValue.finishReason === "tool-calls") {
+                finishReason = "terminal-calls"
+              } else {
+                finishReason = firstValue.finishReason
+              }
+            }
+
+            // Fragment decoding for fragment API
+            if (firstValue?.type === "fragment") {
+              const fragmentData = firstValue
+
+              if (fragmentData && typeof fragmentData === "object") {
+                fragment = {
+                  ...fragment,
+                  ...fragmentData
+                }
+
+                if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
+                  setFirstTokenReceived(true)
+                  setToolInUse(PluginID.NONE)
+                  fullText = fragment.shortAnswer
+                  setChatMessages(prev =>
+                    prev.map(chatMessage =>
+                      chatMessage.message.id === lastChatMessage.message.id
+                        ? {
+                            ...chatMessage,
+                            message: {
+                              ...chatMessage.message,
+                              content: fragment.shortAnswer,
+                              image_paths: [],
+                              fragment: fragment
+                                ? JSON.stringify(fragment)
+                                : null
+                            }
+                          }
+                        : chatMessage
+                    )
+                  )
+                }
+                setFragment(fragment, lastChatMessage)
+              }
+            }
+
+            // Fragment decoding for fragment tool
             if (firstValue.isFragment) {
               const fragmentData = value[1] as Fragment
               fragment = {
@@ -604,78 +650,23 @@ export const processResponse = async (
           if (toolExecuted || controller.signal.aborted) return
 
           const { toolName } = value
+          const toolMap = {
+            browser: PluginID.BROWSER,
+            terminal: PluginID.TERMINAL,
+            webSearch: PluginID.WEB_SEARCH,
+            fragments: PluginID.FRAGMENTS
+          } as const
 
-          if (toolName === "browser") {
-            setToolInUse(PluginID.BROWSER)
-            updatedPlugin = PluginID.BROWSER
-          } else if (toolName === "terminal") {
-            setToolInUse(PluginID.TERMINAL)
-            updatedPlugin = PluginID.TERMINAL
+          const plugin = toolMap[toolName as keyof typeof toolMap]
+          if (plugin) {
+            setToolInUse(plugin)
+            updatedPlugin = plugin
 
-            const terminalResponse = await fetchChatResponse(
-              "/api/chat/tools/terminal",
-              requestBody,
-              controller,
-              setIsGenerating,
-              setChatMessages,
-              alertDispatch
-            )
-
-            const terminalResult = await processResponse(
-              terminalResponse,
-              lastChatMessage,
-              controller,
-              setFirstTokenReceived,
-              setChatMessages,
-              setToolInUse,
-              requestBody,
-              setIsGenerating,
-              alertDispatch,
-              updatedPlugin,
-              isContinuation,
-              setFragment
-            )
-
-            fullText += terminalResult.fullText
-            finishReason = terminalResult.finishReason
-            citations = terminalResult.citations || citations
-          } else if (toolName === "webSearch") {
-            setToolInUse(PluginID.WEB_SEARCH)
-            updatedPlugin = PluginID.WEB_SEARCH
-          } else if (toolName === "fragments") {
-            setToolInUse(PluginID.FRAGMENTS)
-            updatedPlugin = PluginID.FRAGMENTS
-
-            setFragment(null)
-
-            const fragmentGeneratorResponse = await fetchChatResponse(
-              "/api/chat/tools/fragments",
-              requestBody,
-              controller,
-              setIsGenerating,
-              setChatMessages,
-              alertDispatch
-            )
-
-            const fragmentGeneratorResult = await processResponse(
-              fragmentGeneratorResponse,
-              lastChatMessage,
-              controller,
-              setFirstTokenReceived,
-              setChatMessages,
-              setToolInUse,
-              requestBody,
-              setIsGenerating,
-              alertDispatch,
-              updatedPlugin,
-              isContinuation,
-              setFragment
-            )
-
-            fullText += fragmentGeneratorResult.fullText
-            finishReason = fragmentGeneratorResult.finishReason
-            fragment = fragmentGeneratorResult.fragment
+            if (plugin === PluginID.FRAGMENTS) {
+              setFragment(null)
+            }
           }
+
           toolExecuted = true
         },
         onFinishMessagePart: value => {

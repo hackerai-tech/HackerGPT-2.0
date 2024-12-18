@@ -35,7 +35,8 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   try {
-    const { chatSettings, messages } = await request.json()
+    const { chatSettings, messages, isTerminalContinuation } =
+      await request.json()
 
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
@@ -65,7 +66,8 @@ export async function POST(request: Request) {
           chatSettings,
           messages,
           profile,
-          dataStream
+          dataStream,
+          isTerminalContinuation
         })
 
         const result = streamText({

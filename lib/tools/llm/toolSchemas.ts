@@ -1,17 +1,21 @@
 import { executeWebSearch } from "./web-search"
+import { executeTerminal } from "./terminal"
 import { executeBrowserTool } from "./browser"
+import { executeFragments } from "../e2b/fragments/fragment-tool"
 import { z } from "zod"
 
 export const createToolSchemas = ({
   chatSettings,
   messages,
   profile,
-  dataStream
+  dataStream,
+  isTerminalContinuation
 }: {
   chatSettings?: any
   messages?: any
   profile?: any
   dataStream?: any
+  isTerminalContinuation?: boolean
 }) => {
   const allSchemas = {
     browser: {
@@ -32,7 +36,7 @@ export const createToolSchemas = ({
       parameters: z.object({
         search: z.boolean().describe("Set to true to search the web")
       }),
-      execute: async ({ search }: { search: boolean }) => {
+      execute: async () => {
         return executeWebSearch({
           config: { chatSettings, messages, profile, dataStream }
         })
@@ -47,26 +51,29 @@ export const createToolSchemas = ({
           .describe(
             "Set to true to use the terminal for executing bash commands. Select immediately when terminal operations are needed."
           )
-      })
+      }),
+      execute: async () => {
+        return executeTerminal({
+          config: {
+            messages,
+            profile,
+            dataStream,
+            isTerminalContinuation
+          }
+        })
+      }
     },
     fragments: {
       description:
         "Creates a Next.js website or execute a python code based on your detailed specifications.",
       parameters: z.object({
-        name: z
-          .string()
-          .describe("Name of the website/project or Python script"),
-        description: z
-          .string()
-          .describe(
-            "Detailed description of the website's purpose and requirements, or the Python script's functionality and goals"
-          ),
-        features: z
-          .array(z.string())
-          .describe(
-            "List of specific features to include in the website or functionality to implement in Python"
-          )
-      })
+        search: z.boolean().describe("Set to true to create artifact")
+      }),
+      execute: async () => {
+        return executeFragments({
+          config: { chatSettings, messages, profile, dataStream }
+        })
+      }
     }
   }
 
