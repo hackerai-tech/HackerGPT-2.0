@@ -2,8 +2,7 @@ import { ServerRuntime } from "next"
 import { terminalExecutor } from "@/lib/tools/llm/terminal-executor"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
-import { ratelimit } from "@/lib/server/ratelimiter"
-import { epochTimeToNaturalLanguage } from "@/lib/utils"
+import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { streamText, tool } from "ai"
 import { createOpenAI } from "@ai-sdk/openai"
@@ -54,20 +53,12 @@ export async function POST(request: Request) {
       )
     }
 
-    const rateLimitResult = await ratelimit(profile.user_id, "terminal")
-    if (!rateLimitResult.allowed) {
-      const waitTime = epochTimeToNaturalLanguage(
-        rateLimitResult.timeRemaining!
-      )
-      return new Response(
-        JSON.stringify({
-          error: `Oops! It looks like you've reached the limit for terminal commands.\nTo ensure fair usage for all users, please wait ${waitTime} before trying again.`
-        }),
-        {
-          status: 429,
-          headers: { "Content-Type": "application/json" }
-        }
-      )
+    const rateLimitCheckResultTerminal = await checkRatelimitOnApi(
+      profile.user_id,
+      "terminal"
+    )
+    if (rateLimitCheckResultTerminal !== null) {
+      return rateLimitCheckResultTerminal.response
     }
 
     filterEmptyAssistantMessages(messages)
