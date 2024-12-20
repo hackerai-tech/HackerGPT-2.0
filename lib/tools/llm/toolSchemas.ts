@@ -64,8 +64,7 @@ export const createToolSchemas = ({
       }
     },
     fragments: {
-      description:
-        "Creates a Next.js website or execute a python code based on your detailed specifications.",
+      description: "Creates a Next.js website or execute a python code",
       parameters: z.object({
         search: z.boolean().describe("Set to true to create artifact")
       }),

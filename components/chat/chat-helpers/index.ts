@@ -222,10 +222,10 @@ export const handleHostedChat = async (
   } else if (selectedPlugin === PluginID.WEB_SEARCH) {
     apiEndpoint = "/api/chat/plugins/web-search"
     setToolInUse(PluginID.WEB_SEARCH)
-  } else if (selectedPlugin === PluginID.FRAGMENTS) {
+  } else if (selectedPlugin === PluginID.ARTIFACTS) {
     apiEndpoint = "/api/chat/tools/fragments"
-    setToolInUse(PluginID.FRAGMENTS)
-    selectedPlugin = PluginID.FRAGMENTS
+    setToolInUse(PluginID.ARTIFACTS)
+    selectedPlugin = PluginID.ARTIFACTS
   } else {
     setToolInUse(
       isRagEnabled && provider !== "openai"
@@ -654,7 +654,7 @@ export const processResponse = async (
             browser: PluginID.BROWSER,
             terminal: PluginID.TERMINAL,
             webSearch: PluginID.WEB_SEARCH,
-            fragments: PluginID.FRAGMENTS
+            fragments: PluginID.ARTIFACTS
           } as const
 
           const plugin = toolMap[toolName as keyof typeof toolMap]
@@ -662,7 +662,7 @@ export const processResponse = async (
             setToolInUse(plugin)
             updatedPlugin = plugin
 
-            if (plugin === PluginID.FRAGMENTS) {
+            if (plugin === PluginID.ARTIFACTS) {
               setFragment(null)
             }
           }

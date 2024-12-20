@@ -38,7 +38,7 @@ export const MessageFragment: FC<MessageFragmentProps> = ({
           <span className="text-muted-foreground font-sans text-sm">
             {fragment.template === "nextjs-developer"
               ? "Click to open code"
-              : "Click to see fragment"}
+              : "Click to see artifact"}
           </span>
         </div>
       </div>

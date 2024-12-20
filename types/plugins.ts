@@ -48,8 +48,8 @@ export enum PluginID {
   SQLI_EXPLOITER = "sqli-exploiter",
   XSS_EXPLOITER = "xss-exploiter",
 
-  // Fragments
-  FRAGMENTS = "fragments"
+  // Artifacts
+  ARTIFACTS = "artifacts"
 }
 
 export const Plugins: Record<PluginID, Plugin> = Object.fromEntries(
@@ -75,6 +75,6 @@ export const pluginUrls: PluginUrls = {
   // Exploit Tools
   SQLI_EXPLOITER: "https://github.com/sqlmapproject/sqlmap",
   XSS_EXPLOITER: "https://github.com/hahwul/dalfox",
-  // Fragments
-  FRAGMENTS: "https://github.com/e2b-dev/fragments"
+  // Artifacts
+  ARTIFACTS: "https://github.com/e2b-dev/fragments"
 }

@@ -89,13 +89,13 @@ export const availablePlugins: PluginSummary[] = [
   {
     id: 3,
     name: "Artifacts",
-    value: PluginID.FRAGMENTS,
+    value: PluginID.ARTIFACTS,
     categories: ["utils"],
     icon: "https://cdn-icons-png.flaticon.com/128/11676/11676347.png",
     invertInDarkMode: true,
     description:
       "Write and run code to process data, run analysis, and produce data visualizations in real time",
-    githubRepoUrl: pluginUrls.FRAGMENTS,
+    githubRepoUrl: pluginUrls.ARTIFACTS,
     isInstalled: false,
     isPremium: true,
     createdAt: "2024-10-04",

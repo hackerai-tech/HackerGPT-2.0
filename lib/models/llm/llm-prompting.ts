@@ -143,7 +143,8 @@ export const getPentestGPTToolsInfo = (
   includeBrowserTool: boolean = false,
   includeWebSearchTool: boolean = false,
   includeTerminalTool: boolean = false,
-  includeReasonLLM: boolean = false,
+  includeArtifacts: boolean = false,
+  // includeReasonLLM: boolean = false,
   currentModel: string = ""
 ): string => {
   let toolsInfo = "<tools_instructions>\n"
@@ -224,7 +225,35 @@ PentestGPT will analyze the situation, provide reasoning, and attempt to solve t
 by executing a different, more appropriate command. This will be done only once to avoid \
 creating a loop. After the attempt, PentestGPT will provide a detailed explanation of the \
 situation.
-</terminal_instructions>\n`
+</terminal_instructions>\n\n`
+  }
+
+  if (includeArtifacts) {
+    toolsInfo += `<artifacts_instructions>
+PentestGPT can create and reference artifacts during conversations. Artifacts are for substantial, \
+self-contained content that users might modify or reuse, displayed in a separate UI window for clarity.
+
+# Don't use artifacts for...
+- Simple, informational, or short content, such as brief code snippets, mathematical equations, \
+or small examples
+- Primarily explanatory, instructional, or illustrative content, such as examples provided \
+to clarify a concept
+- Suggestions, commentary, or feedback on existing artifacts
+- Conversational or explanatory content that doesn't represent a standalone piece of work
+- Content that is dependent on the current conversational context to be useful
+- Content that is unlikely to be modified or iterated upon by the user
+- Request from users that appears to be a one-off question
+
+# Usage notes
+- One artifact per message unless specifically requested
+- Prefer in-line content (don't use artifacts) when possible. Unnecessary use of artifacts \
+can be jarring for users.
+- Currently only Python and Next.js code artifacts are supported
+- If a user asks the assistant to "run python visualization" or "make a website," the \
+assistant does not need to explain that it doesn't have these capabilities. \
+Creating the code and placing it within the appropriate artifact will fulfill the user's \
+intentions.
+</artifacts_instructions>\n`
   }
 
   //   if (includeReasonLLM) {
