@@ -273,7 +273,7 @@ export const handleHostedChat = async (
     requestBody,
     newAbortController,
     setIsGenerating,
-    setChatMessages,
+    // setChatMessages,
     alertDispatch
   )
 
@@ -337,7 +337,7 @@ export const handleHostedPluginsChat = async (
     requestBody,
     newAbortController,
     setIsGenerating,
-    setChatMessages,
+    // setChatMessages,
     alertDispatch
   )
 
@@ -369,7 +369,7 @@ export const fetchChatResponse = async (
   body: object,
   controller: AbortController,
   setIsGenerating: React.Dispatch<React.SetStateAction<boolean>>,
-  setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
+  // setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>,
   alertDispatch: React.Dispatch<AlertAction>
 ) => {
   const response = await fetch(url, {
@@ -396,7 +396,7 @@ export const fetchChatResponse = async (
     }
 
     setIsGenerating(false)
-    setChatMessages(prevMessages => prevMessages.slice(0, -2))
+    // setChatMessages(prevMessages => prevMessages.slice(0, -2))
   }
 
   return response
