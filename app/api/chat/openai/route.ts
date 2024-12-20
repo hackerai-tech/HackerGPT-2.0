@@ -83,14 +83,11 @@ export async function POST(request: Request) {
         result.mergeIntoDataStream(dataStream)
       },
       onError: error => {
-        // Log the error message to the server console
         console.error(
           "Error occurred:",
           error instanceof Error ? error.message : String(error)
         )
-
-        // Return a generic error message to the client
-        return "An error occurred while processing your request."
+        throw error
       }
     })
   } catch (error: any) {

@@ -27,27 +27,24 @@ export async function executeTerminal({
 }) {
   const { messages, profile, dataStream, isTerminalContinuation } = config
 
-  // Check subscription
   const subscriptionInfo = await getSubscriptionInfo(profile.user_id)
   if (!subscriptionInfo.isPremium) {
-    throw new Error(
-      "Access Denied: This feature is exclusive to Pro and Team members."
-    )
+    dataStream.writeData({
+      type: "error",
+      content:
+        "Access Denied: This feature is exclusive to Pro and Team members."
+    })
+    return "Access Denied: Premium feature only"
   }
 
-  // Check rate limit
   const rateLimitResult = await ratelimit(profile.user_id, "terminal")
   if (!rateLimitResult.allowed) {
     const waitTime = epochTimeToNaturalLanguage(rateLimitResult.timeRemaining!)
-    return new Response(
-      JSON.stringify({
-        error: `Oops! It looks like you've reached the limit for terminal commands.\nTo ensure fair usage for all users, please wait ${waitTime} before trying again.`
-      }),
-      {
-        status: 429,
-        headers: { "Content-Type": "application/json" }
-      }
-    )
+    dataStream.writeData({
+      type: "error",
+      content: `⚠️ You've reached the limit for terminal usage.\n\nTo ensure fair usage for all users, please wait ${waitTime} before trying again.`
+    })
+    return "Rate limit exceeded"
   }
 
   // Continue assistant message from previous terminal call

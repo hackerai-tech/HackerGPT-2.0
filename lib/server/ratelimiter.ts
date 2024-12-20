@@ -194,6 +194,10 @@ export function getRateLimitErrorMessage(
     return `⚠️ You've reached the limit for fragment reloads.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
   }
 
+  if (model === "fragments") {
+    return `⚠️ You've reached the limit for artifacts usage.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
+  }
+
   let message = `⚠️ Usage Limit Reached for ${getModelName(model)}\n⏰ Access will be restored in ${remainingText}`
 
   if (premium) {
@@ -224,7 +228,8 @@ function getModelName(model: string): string {
     terminal: "terminal",
     "tts-1": "text-to-speech",
     "stt-1": "speech-to-text",
-    "fragments-reload": "fragment reloads"
+    "fragments-reload": "fragment reloads",
+    "fragments": "artifacts"
   }
   return modelNames[model] || model
 }

@@ -633,6 +633,28 @@ export const processResponse = async (
               setFragment(fragment, lastChatMessage)
             }
 
+            // Handle tools errors
+            if (firstValue?.type === "error") {
+              const errorMessage =
+                firstValue.content || "An unknown error occurred"
+
+              if (errorMessage.includes("reached the limit")) {
+                alertDispatch({
+                  type: "SHOW",
+                  payload: {
+                    message: errorMessage,
+                    title: "Usage Cap Error"
+                  }
+                })
+              } else {
+                toast.error(errorMessage)
+              }
+
+              setIsGenerating(false)
+              controller.abort()
+              return
+            }
+
             // Handle citations
             if (firstValue?.citations) {
               citations = firstValue.citations
