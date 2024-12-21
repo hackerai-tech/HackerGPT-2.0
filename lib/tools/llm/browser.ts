@@ -22,15 +22,6 @@ async function getProviderConfig(chatSettings: any, profile: any) {
 
   let selectedModel = isProModel ? proModel : defaultModel
 
-  let rateLimitIdentifier
-  if (chatSettings.model === GPT4o.modelId) {
-    rateLimitIdentifier = "gpt-4"
-  } else if (chatSettings.model === PGPT4.modelId) {
-    rateLimitIdentifier = "pentestgpt-pro"
-  } else {
-    rateLimitIdentifier = "pentestgpt"
-  }
-
   return {
     selectedModel,
     isProModel
