@@ -11,6 +11,8 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { createDataStreamResponse, streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
+import { PluginID } from "@/types/plugins"
+import { executeWebSearch } from "@/lib/tools/llm/web-search"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -35,7 +37,7 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   try {
-    const { chatSettings, messages, isTerminalContinuation } =
+    const { chatSettings, messages, isTerminalContinuation, selectedPlugin } =
       await request.json()
 
     const profile = await getAIProfile()
@@ -49,6 +51,24 @@ export async function POST(request: Request) {
 
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
+
+    // Handle web search plugin
+    if (selectedPlugin === PluginID.WEB_SEARCH) {
+      return createDataStreamResponse({
+        execute: async dataStream => {
+          await executeWebSearch({
+            config: { chatSettings, messages, profile, dataStream }
+          })
+        },
+        onError: error => {
+          console.error(
+            "Error occurred:",
+            error instanceof Error ? error.message : String(error)
+          )
+          throw error
+        }
+      })
+    }
 
     const systemPrompt = buildSystemPrompt(
       llmConfig.systemPrompts.gpt4o,

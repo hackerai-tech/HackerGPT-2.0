@@ -229,7 +229,7 @@ function getModelName(model: string): string {
     "tts-1": "text-to-speech",
     "stt-1": "speech-to-text",
     "fragments-reload": "fragment reloads",
-    "fragments": "artifacts"
+    fragments: "artifacts"
   }
   return modelNames[model] || model
 }

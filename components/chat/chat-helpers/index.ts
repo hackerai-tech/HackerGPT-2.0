@@ -219,9 +219,6 @@ export const handleHostedChat = async (
     apiEndpoint = `/api/chat/tools/terminal`
     setToolInUse(PluginID.TERMINAL)
     selectedPlugin = PluginID.TERMINAL
-  } else if (selectedPlugin === PluginID.WEB_SEARCH) {
-    apiEndpoint = "/api/chat/plugins/web-search"
-    setToolInUse(PluginID.WEB_SEARCH)
   } else if (selectedPlugin === PluginID.ARTIFACTS) {
     apiEndpoint = "/api/chat/tools/fragments"
     setToolInUse(PluginID.ARTIFACTS)
@@ -255,7 +252,8 @@ export const handleHostedChat = async (
     requestBody = {
       messages: formattedMessages,
       chatSettings,
-      isTerminalContinuation
+      isTerminalContinuation,
+      selectedPlugin
     }
   } else {
     requestBody = {
@@ -264,7 +262,8 @@ export const handleHostedChat = async (
       isRetrieval:
         payload.messageFileItems && payload.messageFileItems.length > 0,
       isContinuation,
-      isRagEnabled
+      isRagEnabled,
+      selectedPlugin
     }
   }
 

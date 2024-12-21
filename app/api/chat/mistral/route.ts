@@ -16,6 +16,8 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { createDataStreamResponse, streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
+import { PluginID } from "@/types/plugins"
+import { executeWebSearch } from "@/lib/tools/llm/web-search"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -39,8 +41,14 @@ export const preferredRegion = [
 ]
 
 export async function POST(request: Request) {
-  const { messages, chatSettings, isRetrieval, isContinuation, isRagEnabled } =
-    await request.json()
+  const {
+    messages,
+    chatSettings,
+    isRetrieval,
+    isContinuation,
+    isRagEnabled,
+    selectedPlugin
+  } = await request.json()
 
   let ragUsed = false
   let ragId: string | null = null
@@ -184,6 +192,24 @@ export async function POST(request: Request) {
 
       // Remove last message if it's a continuation to remove the continue prompt
       const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
+
+      // Handle web search plugin
+      if (selectedPlugin === PluginID.WEB_SEARCH) {
+        return createDataStreamResponse({
+          execute: async dataStream => {
+            await executeWebSearch({
+              config: { chatSettings, messages, profile, dataStream }
+            })
+          },
+          onError: error => {
+            console.error(
+              "Error occurred:",
+              error instanceof Error ? error.message : String(error)
+            )
+            throw error
+          }
+        })
+      }
 
       return createDataStreamResponse({
         execute: dataStream => {
