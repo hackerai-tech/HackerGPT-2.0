@@ -216,13 +216,11 @@ export const handleHostedChat = async (
   let apiEndpoint = `/api/chat/${provider}`
 
   if (isTerminalContinuation || selectedPlugin === PluginID.TERMINAL) {
-    apiEndpoint = `/api/chat/tools/terminal`
     setToolInUse(PluginID.TERMINAL)
     selectedPlugin = PluginID.TERMINAL
   } else if (selectedPlugin === PluginID.ARTIFACTS) {
     apiEndpoint = "/api/chat/tools/fragments"
     setToolInUse(PluginID.ARTIFACTS)
-    selectedPlugin = PluginID.ARTIFACTS
   } else {
     setToolInUse(
       isRagEnabled && provider !== "openai"
@@ -243,12 +241,7 @@ export const handleHostedChat = async (
 
   let requestBody: any
 
-  if (isTerminalContinuation) {
-    requestBody = {
-      messages: formattedMessages,
-      isTerminalContinuation
-    }
-  } else if (provider === "openai") {
+  if (provider === "openai" || isTerminalContinuation) {
     requestBody = {
       messages: formattedMessages,
       chatSettings,
