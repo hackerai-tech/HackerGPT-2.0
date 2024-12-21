@@ -216,6 +216,7 @@ export const handleHostedChat = async (
   let apiEndpoint = `/api/chat/${provider}`
 
   if (isTerminalContinuation || selectedPlugin === PluginID.TERMINAL) {
+    apiEndpoint = "/api/chat/openai"
     setToolInUse(PluginID.TERMINAL)
     selectedPlugin = PluginID.TERMINAL
   } else if (selectedPlugin === PluginID.ARTIFACTS) {
@@ -595,35 +596,35 @@ export const processResponse = async (
             }
 
             // Fragment decoding for fragment tool
-            if (firstValue.isFragment) {
-              const fragmentData = value[1] as Fragment
-              fragment = {
-                ...fragment,
-                ...fragmentData
-              }
+            // if (firstValue.isFragment) {
+            //   const fragmentData = value[1] as Fragment
+            //   fragment = {
+            //     ...fragment,
+            //     ...fragmentData
+            //   }
 
-              if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
-                setFirstTokenReceived(true)
-                setToolInUse(PluginID.NONE)
-                fullText = fragment.shortAnswer
-                setChatMessages(prev =>
-                  prev.map(chatMessage =>
-                    chatMessage.message.id === lastChatMessage.message.id
-                      ? {
-                          ...chatMessage,
-                          message: {
-                            ...chatMessage.message,
-                            content: fragment.shortAnswer,
-                            image_paths: [],
-                            fragment: fragment ? JSON.stringify(fragment) : null
-                          }
-                        }
-                      : chatMessage
-                  )
-                )
-              }
-              setFragment(fragment, lastChatMessage)
-            }
+            //   if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
+            //     setFirstTokenReceived(true)
+            //     setToolInUse(PluginID.NONE)
+            //     fullText = fragment.shortAnswer
+            //     setChatMessages(prev =>
+            //       prev.map(chatMessage =>
+            //         chatMessage.message.id === lastChatMessage.message.id
+            //           ? {
+            //               ...chatMessage,
+            //               message: {
+            //                 ...chatMessage.message,
+            //                 content: fragment.shortAnswer,
+            //                 image_paths: [],
+            //                 fragment: fragment ? JSON.stringify(fragment) : null
+            //               }
+            //             }
+            //           : chatMessage
+            //       )
+            //     )
+            //   }
+            //   setFragment(fragment, lastChatMessage)
+            // }
 
             // Handle tools errors
             if (firstValue?.type === "error") {

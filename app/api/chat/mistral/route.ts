@@ -18,7 +18,7 @@ import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
 import { executeWebSearch } from "@/lib/tools/llm/web-search"
-import { executeFragments } from "@/lib/tools/e2b/fragments/fragment-tool"
+// import { executeFragments } from "@/lib/tools/e2b/fragments/fragment-tool"
 import { handlePluginExecution } from "@/lib/ai-helper"
 
 export const runtime: ServerRuntime = "edge"
@@ -204,12 +204,12 @@ export async function POST(request: Request) {
             })
           })
 
-        case PluginID.ARTIFACTS:
-          return handlePluginExecution(async dataStream => {
-            await executeFragments({
-              config: { chatSettings, messages, profile, dataStream }
-            })
-          })
+        // case PluginID.ARTIFACTS:
+        //   return handlePluginExecution(async dataStream => {
+        //     await executeFragments({
+        //       config: { chatSettings, messages, profile, dataStream }
+        //     })
+        //   })
       }
 
       return createDataStreamResponse({
