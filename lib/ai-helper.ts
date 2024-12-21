@@ -1,3 +1,4 @@
+import { createDataStreamResponse } from "ai"
 import endent from "endent"
 
 export function replaceWordsInLastUserMessage(messages: any[]) {
@@ -119,4 +120,19 @@ export function updateSystemMessage(
     // No system message exists, create a new one at the start
     messages.unshift(newSystemMessage)
   }
+}
+
+export const handlePluginExecution = (
+  executor: (dataStream: any) => Promise<void>
+) => {
+  return createDataStreamResponse({
+    execute: executor,
+    onError: error => {
+      console.error(
+        "Error occurred:",
+        error instanceof Error ? error.message : String(error)
+      )
+      throw error
+    }
+  })
 }
