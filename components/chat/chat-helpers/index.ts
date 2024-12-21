@@ -559,72 +559,72 @@ export const processResponse = async (
               }
             }
 
-            // Fragment decoding for fragment API
-            if (firstValue?.type === "fragment") {
-              const fragmentData = firstValue
-
-              if (fragmentData && typeof fragmentData === "object") {
-                fragment = {
-                  ...fragment,
-                  ...fragmentData
-                }
-
-                if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
-                  setFirstTokenReceived(true)
-                  setToolInUse(PluginID.NONE)
-                  fullText = fragment.shortAnswer
-                  setChatMessages(prev =>
-                    prev.map(chatMessage =>
-                      chatMessage.message.id === lastChatMessage.message.id
-                        ? {
-                            ...chatMessage,
-                            message: {
-                              ...chatMessage.message,
-                              content: fragment.shortAnswer,
-                              image_paths: [],
-                              fragment: fragment
-                                ? JSON.stringify(fragment)
-                                : null
-                            }
-                          }
-                        : chatMessage
-                    )
-                  )
-                }
-                setFragment(fragment, lastChatMessage)
-              }
-            }
-
             // Fragment decoding for fragment tool
-            // if (firstValue.isFragment) {
-            //   const fragmentData = value[1] as Fragment
-            //   fragment = {
-            //     ...fragment,
-            //     ...fragmentData
-            //   }
+            // if (firstValue?.type === "fragment") {
+            //   const fragmentData = firstValue
 
-            //   if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
-            //     setFirstTokenReceived(true)
-            //     setToolInUse(PluginID.NONE)
-            //     fullText = fragment.shortAnswer
-            //     setChatMessages(prev =>
-            //       prev.map(chatMessage =>
-            //         chatMessage.message.id === lastChatMessage.message.id
-            //           ? {
-            //               ...chatMessage,
-            //               message: {
-            //                 ...chatMessage.message,
-            //                 content: fragment.shortAnswer,
-            //                 image_paths: [],
-            //                 fragment: fragment ? JSON.stringify(fragment) : null
+            //   if (fragmentData && typeof fragmentData === "object") {
+            //     fragment = {
+            //       ...fragment,
+            //       ...fragmentData
+            //     }
+
+            //     if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
+            //       setFirstTokenReceived(true)
+            //       setToolInUse(PluginID.NONE)
+            //       fullText = fragment.shortAnswer
+            //       setChatMessages(prev =>
+            //         prev.map(chatMessage =>
+            //           chatMessage.message.id === lastChatMessage.message.id
+            //             ? {
+            //                 ...chatMessage,
+            //                 message: {
+            //                   ...chatMessage.message,
+            //                   content: fragment.shortAnswer,
+            //                   image_paths: [],
+            //                   fragment: fragment
+            //                     ? JSON.stringify(fragment)
+            //                     : null
+            //                 }
             //               }
-            //             }
-            //           : chatMessage
+            //             : chatMessage
+            //         )
             //       )
-            //     )
+            //     }
+            //     setFragment(fragment, lastChatMessage)
             //   }
-            //   setFragment(fragment, lastChatMessage)
             // }
+
+            // Fragment decoding for fragment API
+            if (firstValue.isFragment) {
+              const fragmentData = value[1] as Fragment
+              fragment = {
+                ...fragment,
+                ...fragmentData
+              }
+
+              if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
+                setFirstTokenReceived(true)
+                setToolInUse(PluginID.NONE)
+                fullText = fragment.shortAnswer
+                setChatMessages(prev =>
+                  prev.map(chatMessage =>
+                    chatMessage.message.id === lastChatMessage.message.id
+                      ? {
+                          ...chatMessage,
+                          message: {
+                            ...chatMessage.message,
+                            content: fragment.shortAnswer,
+                            image_paths: [],
+                            fragment: fragment ? JSON.stringify(fragment) : null
+                          }
+                        }
+                      : chatMessage
+                  )
+                )
+              }
+              setFragment(fragment, lastChatMessage)
+            }
 
             // Handle tools errors
             if (firstValue?.type === "error") {
