@@ -16,6 +16,10 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { createDataStreamResponse, streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
+import { PluginID } from "@/types/plugins"
+import { executeWebSearch } from "@/lib/tools/llm/web-search"
+// import { executeFragments } from "@/lib/tools/e2b/fragments/fragment-tool"
+import { handlePluginExecution } from "@/lib/ai-helper"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -39,8 +43,14 @@ export const preferredRegion = [
 ]
 
 export async function POST(request: Request) {
-  const { messages, chatSettings, isRetrieval, isContinuation, isRagEnabled } =
-    await request.json()
+  const {
+    messages,
+    chatSettings,
+    isRetrieval,
+    isContinuation,
+    isRagEnabled,
+    selectedPlugin
+  } = await request.json()
 
   let ragUsed = false
   let ragId: string | null = null
@@ -184,6 +194,23 @@ export async function POST(request: Request) {
 
       // Remove last message if it's a continuation to remove the continue prompt
       const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
+
+      // Handle web search plugin
+      switch (selectedPlugin) {
+        case PluginID.WEB_SEARCH:
+          return handlePluginExecution(async dataStream => {
+            await executeWebSearch({
+              config: { chatSettings, messages, profile, dataStream }
+            })
+          })
+
+        // case PluginID.ARTIFACTS:
+        //   return handlePluginExecution(async dataStream => {
+        //     await executeFragments({
+        //       config: { chatSettings, messages, profile, dataStream }
+        //     })
+        //   })
+      }
 
       return createDataStreamResponse({
         execute: dataStream => {

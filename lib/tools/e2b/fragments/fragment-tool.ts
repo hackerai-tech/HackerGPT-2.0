@@ -7,7 +7,8 @@ import { toPrompt } from "./prompt"
 import templates from "./templates"
 import { executeFragment } from "./sandbox-execution"
 import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
-import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
+import { ratelimit } from "@/lib/server/ratelimiter"
+import { epochTimeToNaturalLanguage } from "@/lib/utils"
 
 interface FragmentsToolConfig {
   chatSettings: any
@@ -23,18 +24,24 @@ export async function executeFragments({
 }) {
   const { messages, profile, dataStream } = config
 
-  // Check subscription
   const subscriptionInfo = await getSubscriptionInfo(profile.user_id)
   if (!subscriptionInfo.isPremium) {
-    return new Response(
-      "Access Denied: This feature is exclusive to Pro and Team members. Please upgrade your account to access the fragment tool.",
-      { status: 403 }
-    )
+    dataStream.writeData({
+      type: "error",
+      content:
+        "Access Denied: This feature is exclusive to Pro and Team members."
+    })
+    return "Access Denied: Premium feature only"
   }
 
-  const rateLimitCheck = await checkRatelimitOnApi(profile.user_id, "fragments")
-  if (rateLimitCheck) {
-    return rateLimitCheck.response
+  const rateLimitResult = await ratelimit(profile.user_id, "fragments")
+  if (!rateLimitResult.allowed) {
+    const waitTime = epochTimeToNaturalLanguage(rateLimitResult.timeRemaining!)
+    dataStream.writeData({
+      type: "error",
+      content: `⚠️ You've reached the limit for artifacts usage.\n\nTo ensure fair usage for all users, please wait ${waitTime} before trying again.`
+    })
+    return "Rate limit exceeded"
   }
 
   const openaiClient = createOpenAI({

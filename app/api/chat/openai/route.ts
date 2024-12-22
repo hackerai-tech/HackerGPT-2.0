@@ -11,6 +11,11 @@ import { createOpenAI } from "@ai-sdk/openai"
 import { createDataStreamResponse, streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
+import { PluginID } from "@/types/plugins"
+import { executeWebSearch } from "@/lib/tools/llm/web-search"
+// import { executeFragments } from "@/lib/tools/e2b/fragments/fragment-tool"
+import { handlePluginExecution } from "@/lib/ai-helper"
+import { executeTerminal } from "@/lib/tools/llm/terminal"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -35,7 +40,7 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   try {
-    const { chatSettings, messages, isTerminalContinuation } =
+    const { chatSettings, messages, isTerminalContinuation, selectedPlugin } =
       await request.json()
 
     const profile = await getAIProfile()
@@ -49,6 +54,30 @@ export async function POST(request: Request) {
 
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
+
+    // Handle special plugins
+    switch (selectedPlugin) {
+      case PluginID.WEB_SEARCH:
+        return handlePluginExecution(async dataStream => {
+          await executeWebSearch({
+            config: { chatSettings, messages, profile, dataStream }
+          })
+        })
+
+      case PluginID.TERMINAL || isTerminalContinuation:
+        return handlePluginExecution(async dataStream => {
+          await executeTerminal({
+            config: { messages, profile, dataStream, isTerminalContinuation }
+          })
+        })
+
+      // case PluginID.ARTIFACTS:
+      //   return handlePluginExecution(async dataStream => {
+      //     await executeFragments({
+      //       config: { chatSettings, messages, profile, dataStream }
+      //     })
+      //   })
+    }
 
     const systemPrompt = buildSystemPrompt(
       llmConfig.systemPrompts.gpt4o,
@@ -83,14 +112,11 @@ export async function POST(request: Request) {
         result.mergeIntoDataStream(dataStream)
       },
       onError: error => {
-        // Log the error message to the server console
         console.error(
           "Error occurred:",
           error instanceof Error ? error.message : String(error)
         )
-
-        // Return a generic error message to the client
-        return "An error occurred while processing your request."
+        throw error
       }
     })
   } catch (error: any) {

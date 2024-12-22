@@ -216,16 +216,12 @@ export const handleHostedChat = async (
   let apiEndpoint = `/api/chat/${provider}`
 
   if (isTerminalContinuation || selectedPlugin === PluginID.TERMINAL) {
-    apiEndpoint = `/api/chat/tools/terminal`
+    apiEndpoint = "/api/chat/openai"
     setToolInUse(PluginID.TERMINAL)
     selectedPlugin = PluginID.TERMINAL
-  } else if (selectedPlugin === PluginID.WEB_SEARCH) {
-    apiEndpoint = "/api/chat/plugins/web-search"
-    setToolInUse(PluginID.WEB_SEARCH)
   } else if (selectedPlugin === PluginID.ARTIFACTS) {
     apiEndpoint = "/api/chat/tools/fragments"
     setToolInUse(PluginID.ARTIFACTS)
-    selectedPlugin = PluginID.ARTIFACTS
   } else {
     setToolInUse(
       isRagEnabled && provider !== "openai"
@@ -246,16 +242,12 @@ export const handleHostedChat = async (
 
   let requestBody: any
 
-  if (isTerminalContinuation) {
-    requestBody = {
-      messages: formattedMessages,
-      isTerminalContinuation
-    }
-  } else if (provider === "openai") {
+  if (provider === "openai" || isTerminalContinuation) {
     requestBody = {
       messages: formattedMessages,
       chatSettings,
-      isTerminalContinuation
+      isTerminalContinuation,
+      selectedPlugin
     }
   } else {
     requestBody = {
@@ -264,7 +256,8 @@ export const handleHostedChat = async (
       isRetrieval:
         payload.messageFileItems && payload.messageFileItems.length > 0,
       isContinuation,
-      isRagEnabled
+      isRagEnabled,
+      selectedPlugin
     }
   }
 
@@ -566,43 +559,43 @@ export const processResponse = async (
               }
             }
 
-            // Fragment decoding for fragment API
-            if (firstValue?.type === "fragment") {
-              const fragmentData = firstValue
-
-              if (fragmentData && typeof fragmentData === "object") {
-                fragment = {
-                  ...fragment,
-                  ...fragmentData
-                }
-
-                if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
-                  setFirstTokenReceived(true)
-                  setToolInUse(PluginID.NONE)
-                  fullText = fragment.shortAnswer
-                  setChatMessages(prev =>
-                    prev.map(chatMessage =>
-                      chatMessage.message.id === lastChatMessage.message.id
-                        ? {
-                            ...chatMessage,
-                            message: {
-                              ...chatMessage.message,
-                              content: fragment.shortAnswer,
-                              image_paths: [],
-                              fragment: fragment
-                                ? JSON.stringify(fragment)
-                                : null
-                            }
-                          }
-                        : chatMessage
-                    )
-                  )
-                }
-                setFragment(fragment, lastChatMessage)
-              }
-            }
-
             // Fragment decoding for fragment tool
+            // if (firstValue?.type === "fragment") {
+            //   const fragmentData = firstValue
+
+            //   if (fragmentData && typeof fragmentData === "object") {
+            //     fragment = {
+            //       ...fragment,
+            //       ...fragmentData
+            //     }
+
+            //     if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
+            //       setFirstTokenReceived(true)
+            //       setToolInUse(PluginID.NONE)
+            //       fullText = fragment.shortAnswer
+            //       setChatMessages(prev =>
+            //         prev.map(chatMessage =>
+            //           chatMessage.message.id === lastChatMessage.message.id
+            //             ? {
+            //                 ...chatMessage,
+            //                 message: {
+            //                   ...chatMessage.message,
+            //                   content: fragment.shortAnswer,
+            //                   image_paths: [],
+            //                   fragment: fragment
+            //                     ? JSON.stringify(fragment)
+            //                     : null
+            //                 }
+            //               }
+            //             : chatMessage
+            //         )
+            //       )
+            //     }
+            //     setFragment(fragment, lastChatMessage)
+            //   }
+            // }
+
+            // Fragment decoding for fragment API
             if (firstValue.isFragment) {
               const fragmentData = value[1] as Fragment
               fragment = {
@@ -631,6 +624,28 @@ export const processResponse = async (
                 )
               }
               setFragment(fragment, lastChatMessage)
+            }
+
+            // Handle tools errors
+            if (firstValue?.type === "error") {
+              const errorMessage =
+                firstValue.content || "An unknown error occurred"
+
+              if (errorMessage.includes("reached the limit")) {
+                alertDispatch({
+                  type: "SHOW",
+                  payload: {
+                    message: errorMessage,
+                    title: "Usage Cap Error"
+                  }
+                })
+              } else {
+                toast.error(errorMessage)
+              }
+
+              setIsGenerating(false)
+              controller.abort()
+              return
             }
 
             // Handle citations
