@@ -13,9 +13,9 @@ import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
 import { executeWebSearch } from "@/lib/tools/llm/web-search"
-import { executeTerminal } from "@/lib/tools/llm/terminal"
-import { executeFragments } from "@/lib/tools/e2b/fragments/fragment-tool"
+// import { executeFragments } from "@/lib/tools/e2b/fragments/fragment-tool"
 import { handlePluginExecution } from "@/lib/ai-helper"
+import { executeTerminal } from "@/lib/tools/llm/terminal"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -64,19 +64,19 @@ export async function POST(request: Request) {
           })
         })
 
-      case PluginID.TERMINAL:
+      case PluginID.TERMINAL || isTerminalContinuation:
         return handlePluginExecution(async dataStream => {
           await executeTerminal({
             config: { messages, profile, dataStream, isTerminalContinuation }
           })
         })
 
-      case PluginID.ARTIFACTS:
-        return handlePluginExecution(async dataStream => {
-          await executeFragments({
-            config: { chatSettings, messages, profile, dataStream }
-          })
-        })
+      // case PluginID.ARTIFACTS:
+      //   return handlePluginExecution(async dataStream => {
+      //     await executeFragments({
+      //       config: { chatSettings, messages, profile, dataStream }
+      //     })
+      //   })
     }
 
     const systemPrompt = buildSystemPrompt(
