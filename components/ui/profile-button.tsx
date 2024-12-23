@@ -25,7 +25,7 @@ export const ProfileButton: FC<ProfileButtonProps> = ({
     >
       {imageUrl ? (
         <Image
-          className={`rounded ${!showEmail ? "mt-2" : ""} size-[${iconSize}px]`}
+          className={`rounded-full size-[${iconSize}px]`}
           src={imageUrl}
           height={iconSize}
           width={iconSize}
