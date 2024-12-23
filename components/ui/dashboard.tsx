@@ -3,6 +3,7 @@
 import { handleFileUpload } from "@/components/chat/chat-helpers/file-upload"
 import { UnsupportedFilesDialog } from "@/components/chat/unsupported-files-dialog"
 import { Sidebar } from "@/components/sidebar/sidebar"
+import { SidebarSwitcher } from "@/components/sidebar/sidebar-switcher"
 import { Button } from "@/components/ui/button"
 import { Tabs } from "@/components/ui/tabs"
 import { PentestGPTContext } from "@/context/context"
@@ -34,7 +35,7 @@ import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { toast } from "sonner"
 import { KeyboardShortcutsPopup } from "../chat/keyboard-shortcuts-popup"
 
-export const SIDEBAR_WIDTH = 280
+export const SIDEBAR_WIDTH = 350
 
 interface DashboardProps {
   children: React.ReactNode
@@ -43,6 +44,7 @@ interface DashboardProps {
 export const Dashboard: FC<DashboardProps> = ({ children }) => {
   const {
     isPremiumSubscription,
+    chatSettings,
     isReadyToChat,
     isMobile,
     showSidebar,
@@ -70,7 +72,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
   useEffect(() => {
     setContentType(tabValue as ContentType)
-    if (tabValue === "tools") {
+    if (isMobile && tabValue === "gpts") {
       setShowSidebar(false)
     }
   }, [tabValue, isMobile, setShowSidebar])
@@ -109,7 +111,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
   const renderContent = () => {
     switch (contentType) {
-      case "tools":
+      case "gpts":
         return (
           <ToolsStorePage
             pluginsData={updatedAvailablePlugins}
@@ -161,7 +163,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
   }
 
   const isDraggingEnabled =
-    contentType !== "tools" && isReadyToChat && isPremiumSubscription
+    contentType !== "gpts" && isReadyToChat && isPremiumSubscription
 
   const handleConversionConfirmation = () => {
     pendingFiles.forEach(file => handleSelectDeviceFile(file))
@@ -238,12 +240,27 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
       )}
 
       <div
-        className={cn("bg-tertiary absolute z-50 h-full duration-200")}
-        style={sidebarStyle}
+        className={cn(
+          "bg-tertiary absolute z-50 h-full border-r-2 duration-200"
+        )}
+        style={contentType !== "gpts" ? sidebarStyle : undefined}
       >
         {showSidebar && (
-          <Tabs className="flex h-full" value={contentType}>
-            <Sidebar contentType={contentType} showSidebar={showSidebar} />
+          <Tabs
+            className="flex h-full"
+            value={contentType}
+            onValueChange={tabValue => {
+              setContentType(tabValue as ContentType)
+              router.replace(`${pathname}?tab=${tabValue}`)
+            }}
+          >
+            <SidebarSwitcher
+              onContentTypeChange={setContentType}
+              handleToggleSidebar={handleToggleSidebar}
+            />
+            {contentType !== "gpts" && (
+              <Sidebar contentType={contentType} showSidebar={showSidebar} />
+            )}
           </Tabs>
         )}
       </div>

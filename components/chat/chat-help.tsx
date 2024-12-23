@@ -7,7 +7,7 @@ import {
   IconExternalLink
 } from "@tabler/icons-react"
 import Link from "next/link"
-import { FC, useState, useContext } from "react"
+import { FC, useState, useEffect } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,15 +20,23 @@ import { KeyboardShortcutsPopup } from "./keyboard-shortcuts-popup"
 import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"
 import { Button } from "../ui/button"
 import { toast } from "sonner"
-import { PentestGPTContext } from "@/context/context"
+import { supabase } from "@/lib/supabase/browser-client"
 
 interface ChatHelpProps {}
 
 export const ChatHelp: FC<ChatHelpProps> = () => {
-  const { userEmail } = useContext(PentestGPTContext)
   const [isOpen, setIsOpen] = useState(false)
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
   const { copyToClipboard } = useCopyToClipboard({ timeout: 2000 })
+  const [userEmail, setUserEmail] = useState("")
+
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      const user = await supabase.auth.getUser()
+      setUserEmail(user?.data.user?.email || "Not available")
+    }
+    fetchUserEmail()
+  }, [])
 
   const socialLinks = [
     { icon: IconBrandX, href: "https://x.com/PentestGPT" },

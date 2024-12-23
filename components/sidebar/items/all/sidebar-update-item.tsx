@@ -73,7 +73,7 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
   const renderState = {
     chats: null,
     files: null,
-    tools: null
+    gpts: null
   }
 
   const fetchDataFunctions: {
@@ -81,7 +81,7 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
   } = {
     chats: null,
     files: null,
-    tools: null
+    gpts: null
   }
 
   const fetchWorkpaceFunctions = {
@@ -90,7 +90,7 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
       const item = await getFileWorkspacesByFileId(fileId)
       return item.workspaces
     },
-    tools: null
+    gpts: null
   }
 
   const fetchSelectedWorkspaces = async () => {
@@ -173,13 +173,13 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
 
       return updatedFile
     },
-    tools: updateChat
+    gpts: null
   }
 
   const stateUpdateFunctions = {
     chats: setChats,
     files: setFiles,
-    tools: setChats
+    gpts: null
   }
 
   const handleUpdate = async () => {

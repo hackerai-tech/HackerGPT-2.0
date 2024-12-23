@@ -148,10 +148,6 @@ interface PentestGPTContextType {
   // Loading Messages States
   isLoadingMore: boolean
   allMessagesLoaded: boolean
-
-  // User Email
-  userEmail: string
-  setUserEmail: (email: string) => void
 }
 
 export const PentestGPTContext = createContext<PentestGPTContextType>({
@@ -286,11 +282,7 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   // Fetch Chat and Messages
   fetchChat: async (chatId: string, workspaceId: string) => {},
   fetchMessages: async (chatId: string, workspaceId: string) => {},
-  loadMoreMessages: async (chatId: string) => {},
-
-  // User Email
-  userEmail: "",
-  setUserEmail: () => {}
+  loadMoreMessages: async (chatId: string) => {}
 })
 
 export const usePentestGPT = () => useContext(PentestGPTContext)

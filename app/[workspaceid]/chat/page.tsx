@@ -13,8 +13,6 @@ import { useContext } from "react"
 import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { ChatPluginInfo } from "@/components/chat/chat-plugin-info"
 import { TemporaryChatInfo } from "@/components/chat/temporary-chat-info"
-import { Settings } from "@/components/utility/settings"
-import { WithTooltip } from "@/components/ui/with-tooltip"
 
 export default function ChatPage() {
   useHotkey("o", () => handleNewChat())
@@ -64,20 +62,11 @@ export default function ChatPage() {
             )}
           </div>
 
-          <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-2">
-            {!isMobile && (
-              <WithTooltip
-                display={<div>Settings</div>}
-                trigger={<Settings />}
-              />
-            )}
-          </div>
-
           <div
             className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
           >
             <div className="mt-2 max-w-[230px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
-              <ChatSettings isTemporaryChat={isTemporaryChat} />
+              <ChatSettings />
             </div>
           </div>
 
