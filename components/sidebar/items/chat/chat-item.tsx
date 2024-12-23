@@ -19,8 +19,13 @@ interface ChatItemProps {
 }
 
 export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
-  const { selectedChat, isMobile, setShowSidebar } =
-    useContext(PentestGPTContext)
+  const {
+    selectedChat,
+    isMobile,
+    setShowSidebar,
+    contentType,
+    setContentType
+  } = useContext(PentestGPTContext)
   const { handleSelectChat } = useChatHandler()
   const params = useParams()
   const isActive = params.chatid === chat.id || selectedChat?.id === chat.id
@@ -28,11 +33,21 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleClick = useCallback(() => {
+    if (contentType === "tools") {
+      setContentType("chats")
+    }
     handleSelectChat(chat)
     if (isMobile) {
       setShowSidebar(false)
     }
-  }, [handleSelectChat, chat, isMobile, setShowSidebar])
+  }, [
+    handleSelectChat,
+    chat,
+    isMobile,
+    setShowSidebar,
+    contentType,
+    setContentType
+  ])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {

@@ -154,6 +154,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [allMessagesLoaded, setAllMessagesLoaded] = useState(false)
 
+  const [userEmail, setUserEmail] = useState("")
+
   useEffect(() => {
     setIsTemporaryChat(searchParams.get("temporary-chat") === "true")
   }, [searchParams])
@@ -214,6 +216,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
     if (userFromAuth) {
       setUser(userFromAuth)
+      setUserEmail(userFromAuth.email || "Not available")
 
       const profile = await getProfileByUserId(userFromAuth.id)
       setProfile(profile)
@@ -567,7 +570,11 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
         // Loading Messages States
         isLoadingMore,
-        allMessagesLoaded
+        allMessagesLoaded,
+
+        // User Email
+        userEmail,
+        setUserEmail
       }}
     >
       <FragmentsProvider>{children}</FragmentsProvider>

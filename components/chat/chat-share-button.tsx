@@ -137,7 +137,7 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
           ) : (
             <WithTooltip
               delayDuration={200}
-              display={"Share chat"}
+              display={"Share"}
               trigger={
                 <IconShare2
                   className="mr-2 cursor-pointer hover:opacity-50"

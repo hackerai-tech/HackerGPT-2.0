@@ -22,11 +22,9 @@ import {
   IconUsers,
   IconX
 } from "@tabler/icons-react"
-import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { FC, useContext, useEffect, useState } from "react"
+import { FC, useContext, useState } from "react"
 import { toast } from "sonner"
-import { SIDEBAR_ICON_SIZE } from "../sidebar/sidebar-switcher"
 import { Button } from "../ui/button"
 import { MultiStepDeleteAccountDialog } from "../ui/mutil-step-deletion"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
@@ -39,8 +37,11 @@ import { SubscriptionTab } from "./profile-tabs/subscription-tab"
 import { TeamTab } from "./profile-tabs/team-tab"
 import { TeamRole } from "@/lib/team-utils"
 import { cancelSubscription, getStripe } from "@/lib/server/stripe"
+import { ProfileButton } from "../ui/profile-button"
 
-export const Settings: FC = () => {
+export const Settings: FC<{ showEmail?: boolean }> = ({
+  showEmail = false
+}) => {
   const {
     user,
     subscription,
@@ -49,14 +50,14 @@ export const Settings: FC = () => {
     envKeyMap,
     setAvailableHostedModels,
     isMobile,
-    membershipData
+    membershipData,
+    userEmail
   } = useContext(PentestGPTContext)
 
   const router = useRouter()
 
   const [isOpen, setIsOpen] = useState(false)
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false)
-  const [userEmail, setUserEmail] = useState("")
   const [profileInstructions, setProfileInstructions] = useState(
     profile?.profile_context || ""
   )
@@ -64,14 +65,6 @@ export const Settings: FC = () => {
     useState(false)
   const [activeTab, setActiveTab] = useState("profile")
   const [isDeleting, setIsDeleting] = useState(false)
-
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      const user = await supabase.auth.getUser()
-      setUserEmail(user?.data.user?.email || "Not available")
-    }
-    fetchUserEmail()
-  }, [])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut({ scope: "local" })
@@ -214,26 +207,12 @@ export const Settings: FC = () => {
 
   return (
     <>
-      <button onClick={() => setIsOpen(true)}>
-        {profile.image_url ? (
-          <Image
-            className="mt-2 size-[34px] cursor-pointer rounded hover:opacity-50"
-            src={profile.image_url}
-            height={34}
-            width={34}
-            alt="Profile"
-            onError={e => {
-              const target = e.target as HTMLImageElement
-              target.style.display = "none"
-              const icon = document.createElement("div")
-              icon.innerHTML = "<IconSettings size={34} />"
-              target.parentNode?.appendChild(icon)
-            }}
-          />
-        ) : (
-          <IconSettings size={SIDEBAR_ICON_SIZE} />
-        )}
-      </button>
+      <ProfileButton
+        imageUrl={profile?.image_url}
+        onClick={() => setIsOpen(true)}
+        userEmail={userEmail}
+        showEmail={showEmail}
+      />
 
       <TransitionedDialog isOpen={isOpen} onClose={() => setIsOpen(false)}>
         <DialogPanel

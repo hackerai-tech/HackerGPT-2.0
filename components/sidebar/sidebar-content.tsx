@@ -1,6 +1,5 @@
 import { ContentType, DataListType } from "@/types"
 import { FC, useContext, useEffect, useState } from "react"
-import { SidebarCreateButtons } from "./sidebar-create-buttons"
 import { SidebarDataList } from "./sidebar-data-list"
 import { PentestGPTContext } from "@/context/context"
 import { SidebarUpgrade } from "./sidebar-upgrade"
@@ -8,6 +7,12 @@ import { SidebarInviteButton } from "./sidebar-invite-button"
 import { InviteMembersDialog } from "@/components/utility/invite-members-dialog"
 import { AcceptInvitationDialog } from "@/components/utility/accept-invitation-dialog"
 import { isTeamAdmin } from "@/lib/team-utils"
+import { SidebarHeader } from "./sidebar-header"
+import { SidebarSwitcher } from "./sidebar-switcher"
+import { WithTooltip } from "../ui/with-tooltip"
+import { Settings } from "../utility/settings"
+
+export const SIDEBAR_ICON_SIZE = 26
 
 interface SidebarContentProps {
   contentType: ContentType
@@ -24,7 +29,8 @@ export const SidebarContent: FC<SidebarContentProps> = ({
     isMobile,
     subscription,
     membershipData,
-    teamMembers
+    teamMembers,
+    setContentType
   } = useContext(PentestGPTContext)
   const isInvitationPending = membershipData?.invitation_status === "pending"
 
@@ -56,14 +62,19 @@ export const SidebarContent: FC<SidebarContentProps> = ({
     setIsAcceptInviteDialogOpen(true)
   }
 
+  const handleToggleSidebar = () => {
+    setShowSidebar(false)
+  }
+
   return (
     <div className="flex max-h-[calc(100%-10px)] grow flex-col">
-      <div className="flex items-center">
-        <SidebarCreateButtons
-          contentType={contentType}
-          handleSidebarVisibility={handleSidebarVisibility}
-        />
-      </div>
+      <SidebarHeader
+        handleToggleSidebar={handleToggleSidebar}
+        contentType={contentType}
+        handleSidebarVisibility={handleSidebarVisibility}
+      />
+
+      <SidebarSwitcher onContentTypeChange={setContentType} />
 
       <SidebarDataList contentType={contentType} data={data} />
 
@@ -83,6 +94,13 @@ export const SidebarContent: FC<SidebarContentProps> = ({
       )}
 
       {!isPremiumSubscription && !isInvitationPending && <SidebarUpgrade />}
+
+      {isMobile && (
+        <WithTooltip
+          display={<div>Settings</div>}
+          trigger={<Settings showEmail={true} />}
+        />
+      )}
 
       {canInviteMembers && subscription?.team_id && (
         <InviteMembersDialog

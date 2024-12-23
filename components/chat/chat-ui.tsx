@@ -30,6 +30,8 @@ import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 import { ChatSettings } from "./chat-settings"
 import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
 import { useFragments } from "./chat-hooks/use-fragments"
+import { Settings } from "../utility/settings"
+import { ShareChatButton } from "./chat-share-button"
 
 interface ChatUIProps {}
 
@@ -58,7 +60,8 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     fetchChat,
     loadMoreMessages,
     isLoadingMore,
-    allMessagesLoaded
+    allMessagesLoaded,
+    isMobile
   } = useContext(PentestGPTContext)
 
   const {
@@ -181,24 +184,38 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     <div className="relative flex h-full flex-col items-center">
       {!isTemporaryChat ? (
         <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-2">
-          <ChatSecondaryButtons />
+          {!isMobile ? (
+            <>
+              <ShareChatButton />
+              <WithTooltip
+                display={<div>Settings</div>}
+                trigger={<Settings />}
+              />
+            </>
+          ) : (
+            <ChatSecondaryButtons />
+          )}
         </div>
       ) : (
         <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-2">
-          <WithTooltip
-            delayDuration={200}
-            display={isTemporaryChat ? "Clean chat" : "New chat"}
-            trigger={
-              isTemporaryChat && (
-                <IconRefresh
-                  className="cursor-pointer hover:opacity-50"
-                  size={24}
-                  onClick={handleCleanChat}
-                />
-              )
-            }
-            side="bottomRight"
-          />
+          {isMobile ? (
+            <WithTooltip
+              delayDuration={200}
+              display={isTemporaryChat ? "Clean chat" : "New chat"}
+              trigger={
+                isTemporaryChat && (
+                  <IconRefresh
+                    className="cursor-pointer hover:opacity-50"
+                    size={24}
+                    onClick={handleCleanChat}
+                  />
+                )
+              }
+              side="bottomRight"
+            />
+          ) : (
+            <WithTooltip display={<div>Settings</div>} trigger={<Settings />} />
+          )}
         </div>
       )}
 
@@ -229,7 +246,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
           className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
         >
           <div className="mt-2 max-w-[230px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
-            <ChatSettings />
+            <ChatSettings
+              isTemporaryChat={isTemporaryChat}
+              handleCleanChat={handleCleanChat}
+            />
           </div>
         </div>
 
