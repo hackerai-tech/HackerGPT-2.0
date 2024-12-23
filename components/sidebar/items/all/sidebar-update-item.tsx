@@ -173,13 +173,13 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
 
       return updatedFile
     },
-    gpts: null
+    gpts: updateChat
   }
 
   const stateUpdateFunctions = {
     chats: setChats,
     files: setFiles,
-    gpts: null
+    gpts: setChats
   }
 
   const handleUpdate = async () => {

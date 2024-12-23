@@ -1,10 +1,11 @@
 import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 import { ContentType } from "@/types"
-import { IconPlus, IconRefresh } from "@tabler/icons-react"
-import { FC, useContext, useState } from "react"
+import { IconMessagePlus, IconRefresh } from "@tabler/icons-react"
+import { FC, useContext } from "react"
 import { Button } from "../ui/button"
-import { CreateFile } from "./items/files/create-file"
+// import { CreateFile } from "./items/files/create-file"
 import { PentestGPTContext } from "@/context/context"
+import { SIDEBAR_ICON_SIZE } from "./sidebar-content"
 
 interface SidebarCreateButtonsProps {
   contentType: ContentType
@@ -19,11 +20,12 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
     useContext(PentestGPTContext)
   const { handleNewChat } = useChatHandler()
 
-  const [isCreatingFile, setIsCreatingFile] = useState(false)
+  // const [isCreatingFile, setIsCreatingFile] = useState(false)
 
   const getCreateFunction = () => {
     switch (contentType) {
       case "chats":
+      case "files":
         if (isTemporaryChat) {
           return () => {
             setTemporaryChatMessages([])
@@ -35,10 +37,10 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
           handleSidebarVisibility()
         }
 
-      case "files":
-        return async () => {
-          setIsCreatingFile(true)
-        }
+      // case "files":
+      //   return async () => {
+      //     setIsCreatingFile(true)
+      //   }
 
       default:
         break
@@ -46,24 +48,22 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
   }
 
   return (
-    <div className="flex w-full space-x-2">
-      <Button className="flex h-[36px] grow" onClick={getCreateFunction()}>
+    <div className="flex">
+      <Button
+        variant="ghost"
+        className="size-10 p-0"
+        onClick={getCreateFunction()}
+      >
         {isTemporaryChat && contentType === "chats" ? (
-          <IconRefresh className="mr-1" size={20} />
+          <IconRefresh size={SIDEBAR_ICON_SIZE} />
         ) : (
-          <IconPlus className="mr-1" size={20} />
+          <IconMessagePlus size={SIDEBAR_ICON_SIZE} />
         )}
-        {isTemporaryChat && contentType === "chats"
-          ? "Clear Chat"
-          : `New ${
-              contentType.charAt(0).toUpperCase() +
-              contentType.slice(1, contentType.length - 1)
-            }`}
       </Button>
 
-      {isCreatingFile && (
+      {/* {isCreatingFile && (
         <CreateFile isOpen={isCreatingFile} onOpenChange={setIsCreatingFile} />
-      )}
+      )} */}
     </div>
   )
 }

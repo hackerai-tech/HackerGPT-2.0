@@ -3,7 +3,6 @@
 import { handleFileUpload } from "@/components/chat/chat-helpers/file-upload"
 import { UnsupportedFilesDialog } from "@/components/chat/unsupported-files-dialog"
 import { Sidebar } from "@/components/sidebar/sidebar"
-import { SidebarSwitcher } from "@/components/sidebar/sidebar-switcher"
 import { Button } from "@/components/ui/button"
 import { Tabs } from "@/components/ui/tabs"
 import { PentestGPTContext } from "@/context/context"
@@ -35,7 +34,7 @@ import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { toast } from "sonner"
 import { KeyboardShortcutsPopup } from "../chat/keyboard-shortcuts-popup"
 
-export const SIDEBAR_WIDTH = 350
+export const SIDEBAR_WIDTH = 280
 
 interface DashboardProps {
   children: React.ReactNode
@@ -44,7 +43,6 @@ interface DashboardProps {
 export const Dashboard: FC<DashboardProps> = ({ children }) => {
   const {
     isPremiumSubscription,
-    chatSettings,
     isReadyToChat,
     isMobile,
     showSidebar,
@@ -243,7 +241,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
         className={cn(
           "bg-tertiary absolute z-50 h-full border-r-2 duration-200"
         )}
-        style={contentType !== "gpts" ? sidebarStyle : undefined}
+        style={sidebarStyle}
       >
         {showSidebar && (
           <Tabs
@@ -254,13 +252,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
               router.replace(`${pathname}?tab=${tabValue}`)
             }}
           >
-            <SidebarSwitcher
-              onContentTypeChange={setContentType}
-              handleToggleSidebar={handleToggleSidebar}
-            />
-            {contentType !== "gpts" && (
-              <Sidebar contentType={contentType} showSidebar={showSidebar} />
-            )}
+            <Sidebar contentType={contentType} showSidebar={showSidebar} />
           </Tabs>
         )}
       </div>

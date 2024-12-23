@@ -28,7 +28,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
 
   const fetchMoreChats = useCallback(async () => {
     if (
-      contentType === "chats" &&
+      (contentType === "chats" || contentType === "gpts") &&
       data.length > 0 &&
       !isLoadingMore &&
       hasMoreChats
@@ -82,10 +82,8 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
         return <ChatItem key={item.id} chat={item as Tables<"chats">} />
       case "files":
         return <FileItem key={item.id} file={item as Tables<"files">} />
-
       case "gpts":
-        return null
-
+        return <ChatItem key={item.id} chat={item as Tables<"chats">} />
       default:
         return null
     }
@@ -152,7 +150,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     <div
       ref={divRef}
       className={cn(
-        "relative mt-2 flex h-full flex-col",
+        "relative mt-12 flex h-full flex-col",
         isTemporaryChat ? "overflow-hidden" : "overflow-auto"
       )}
     >
@@ -181,7 +179,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
                 : "w-full"
             } space-y-3 pt-4 ${isOverflowing && !isTemporaryChat ? "mr-2" : ""}`}
           >
-            {contentType === "chats" ? (
+            {contentType === "chats" || contentType === "gpts" ? (
               <>
                 {[
                   "Today",
@@ -218,7 +216,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
                     )
                   )
                 })}
-                {contentType === "chats" &&
+                {(contentType === "chats" || contentType === "gpts") &&
                   data.length > 0 &&
                   hasMoreChats &&
                   !isTemporaryChat && (

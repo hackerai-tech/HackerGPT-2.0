@@ -1,7 +1,6 @@
 import { IconMoon, IconSun } from "@tabler/icons-react"
 import { useTheme } from "next-themes"
 import { FC } from "react"
-import { SIDEBAR_ICON_SIZE } from "../sidebar/sidebar-switcher"
 import { Button } from "../ui/button"
 
 interface ThemeSwitcherProps {}

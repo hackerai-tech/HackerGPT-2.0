@@ -26,7 +26,6 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { FC, useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { SIDEBAR_ICON_SIZE } from "../sidebar/sidebar-switcher"
 import { Button } from "../ui/button"
 import { MultiStepDeleteAccountDialog } from "../ui/mutil-step-deletion"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
@@ -219,19 +218,19 @@ export const Settings: FC = () => {
           <Image
             className="mt-2 size-[34px] cursor-pointer rounded hover:opacity-50"
             src={profile.image_url}
-            height={34}
-            width={34}
+            height={32}
+            width={32}
             alt="Profile"
             onError={e => {
               const target = e.target as HTMLImageElement
               target.style.display = "none"
               const icon = document.createElement("div")
-              icon.innerHTML = "<IconSettings size={34} />"
+              icon.innerHTML = "<IconSettings size={32} />"
               target.parentNode?.appendChild(icon)
             }}
           />
         ) : (
-          <IconSettings size={SIDEBAR_ICON_SIZE} />
+          <IconSettings size={32} />
         )}
       </button>
 
