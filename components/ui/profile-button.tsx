@@ -20,7 +20,7 @@ export const ProfileButton: FC<ProfileButtonProps> = ({
     <button
       onClick={onClick}
       className={`flex items-center gap-2 hover:opacity-50 ${
-        showEmail ? "hover:bg-accent -mb-2 rounded-lg p-2" : ""
+        showEmail ? "hover:bg-accent -mb-2 mt-4 rounded-lg p-2" : ""
       }`}
     >
       {imageUrl ? (

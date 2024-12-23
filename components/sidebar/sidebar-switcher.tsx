@@ -41,6 +41,32 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
   const router = useRouter()
   const pathname = usePathname()
 
+  const tabs = [
+    {
+      icon: <IconMessage size={22} />,
+      value: "chats" as ContentType,
+      label: "Chats",
+      alwaysShow: true
+    },
+    {
+      icon: <IconFile size={22} />,
+      value: "files" as ContentType,
+      label: "Files",
+      alwaysShow: false,
+      requiresPremium: true
+    },
+    {
+      icon: <IconPuzzle size={22} />,
+      value: "tools" as ContentType,
+      label: "Explore Plugins",
+      alwaysShow: true
+    }
+  ]
+
+  const visibleTabs = tabs.filter(
+    tab => tab.alwaysShow || (tab.requiresPremium && isPremiumSubscription)
+  )
+
   const handleTabChange = (value: ContentType) => {
     onContentTypeChange(value)
     router.replace(`${pathname}?tab=${value}`)
@@ -50,32 +76,19 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
     <Tabs
       value={contentType}
       defaultValue="chats"
-      className="mt-12 w-full pr-2"
+      className={`${visibleTabs.length === 3 ? "my-12" : "my-6"} w-full pr-2`}
       onValueChange={value => handleTabChange(value as ContentType)}
     >
       <TabsList className="flex w-full flex-col gap-1 bg-transparent p-0">
-        <LabeledSwitchItem
-          icon={<IconMessage size={22} />}
-          value="chats"
-          label="Chats"
-          onContentTypeChange={handleTabChange}
-        />
-
-        {isPremiumSubscription && (
+        {visibleTabs.map(tab => (
           <LabeledSwitchItem
-            icon={<IconFile size={22} />}
-            value="files"
-            label="Files"
+            key={tab.value}
+            icon={tab.icon}
+            value={tab.value}
+            label={tab.label}
             onContentTypeChange={handleTabChange}
           />
-        )}
-
-        <LabeledSwitchItem
-          icon={<IconPuzzle size={22} />}
-          value="tools"
-          label="Explore Plugins"
-          onContentTypeChange={handleTabChange}
-        />
+        ))}
       </TabsList>
     </Tabs>
   )
