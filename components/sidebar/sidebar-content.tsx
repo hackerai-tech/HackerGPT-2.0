@@ -9,6 +9,8 @@ import { AcceptInvitationDialog } from "@/components/utility/accept-invitation-d
 import { isTeamAdmin } from "@/lib/team-utils"
 import { SidebarHeader } from "./sidebar-header"
 import { SidebarSwitcher } from "./sidebar-switcher"
+import { WithTooltip } from "../ui/with-tooltip"
+import { Settings } from "../utility/settings"
 
 export const SIDEBAR_ICON_SIZE = 26
 
@@ -92,6 +94,13 @@ export const SidebarContent: FC<SidebarContentProps> = ({
       )}
 
       {!isPremiumSubscription && !isInvitationPending && <SidebarUpgrade />}
+
+      {isMobile && (
+        <WithTooltip
+          display={<div>Settings</div>}
+          trigger={<Settings showEmail={true} />}
+        />
+      )}
 
       {canInviteMembers && subscription?.team_id && (
         <InviteMembersDialog

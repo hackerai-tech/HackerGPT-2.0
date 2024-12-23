@@ -238,16 +238,11 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
       )}
 
       <div
-        className={cn(
-          "bg-tertiary absolute z-50 h-full duration-200"
-        )}
+        className={cn("bg-tertiary absolute z-50 h-full duration-200")}
         style={sidebarStyle}
       >
         {showSidebar && (
-          <Tabs
-            className="flex h-full"
-            value={contentType}
-          >
+          <Tabs className="flex h-full" value={contentType}>
             <Sidebar contentType={contentType} showSidebar={showSidebar} />
           </Tabs>
         )}

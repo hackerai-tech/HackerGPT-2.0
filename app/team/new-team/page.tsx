@@ -25,11 +25,10 @@ const MAX_TEAM_NAME_LENGTH = 25
 const NewTeamPage: FC = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { profile } = useContext(PentestGPTContext)
+  const { profile, userEmail } = useContext(PentestGPTContext)
   const [teamName, setTeamName] = useState("")
   const [isYearly, setIsYearly] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [userEmail, setUserEmail] = useState("")
   const [seatQuantity, setSeatQuantity] = useState(1)
   const { theme } = useTheme()
 
@@ -59,14 +58,6 @@ const NewTeamPage: FC = () => {
     const yearlyParam = searchParams.get("yearly")
     setIsYearly(yearlyParam === "true")
   }, [searchParams])
-
-  useEffect(() => {
-    const fetchUserEmail = async () => {
-      const user = await supabase.auth.getUser()
-      setUserEmail(user?.data.user?.email || "Not available")
-    }
-    fetchUserEmail()
-  }, [])
 
   const handleCreateTeam = async () => {
     if (!teamName.trim()) {
