@@ -13,7 +13,7 @@ export const ChatSecondaryButtons: FC<ChatSecondaryButtonsProps> = ({}) => {
   if (!selectedChat) return null
 
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex items-center pl-3">
       <WithTooltip
         delayDuration={200}
         display={"New chat"}

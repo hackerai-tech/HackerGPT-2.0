@@ -33,28 +33,26 @@ export const ChatSettings: FC<ChatSettingsProps> = ({
   const fullModel = LLM_LIST.find(llm => llm.modelId === chatSettings.model)
 
   return (
-    <div
-      className={`flex items-center ${
-        !isMobile && handleCleanChat && "gap-2 pl-2"
-      }`}
-    >
-      {!isMobile && handleCleanChat && (
+    <div className={`flex items-center ${!isMobile && "gap-3"}`}>
+      {!isMobile && (
         <>
           {!isTemporaryChat ? (
             <ChatSecondaryButtons />
           ) : (
-            <WithTooltip
-              delayDuration={200}
-              display="Clean chat"
-              trigger={
-                <IconRefresh
-                  className="cursor-pointer hover:opacity-50"
-                  size={24}
-                  onClick={handleCleanChat}
-                />
-              }
-              side="bottom"
-            />
+            <div className="pl-3">
+              <WithTooltip
+                delayDuration={200}
+                display="Clean chat"
+                trigger={
+                  <IconRefresh
+                    className="cursor-pointer hover:opacity-50"
+                    size={24}
+                    onClick={handleCleanChat}
+                  />
+                }
+                side="bottom"
+              />
+            </div>
           )}
         </>
       )}
