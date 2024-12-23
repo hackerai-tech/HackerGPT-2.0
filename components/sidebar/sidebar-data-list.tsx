@@ -150,7 +150,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     <div
       ref={divRef}
       className={cn(
-        "relative mt-12 flex h-full flex-col",
+        "relative flex h-full flex-col",
         isTemporaryChat ? "overflow-hidden" : "overflow-auto"
       )}
     >
