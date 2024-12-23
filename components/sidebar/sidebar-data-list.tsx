@@ -28,7 +28,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
 
   const fetchMoreChats = useCallback(async () => {
     if (
-      (contentType === "chats" || contentType === "gpts") &&
+      (contentType === "chats" || contentType === "tools") &&
       data.length > 0 &&
       !isLoadingMore &&
       hasMoreChats
@@ -82,7 +82,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
         return <ChatItem key={item.id} chat={item as Tables<"chats">} />
       case "files":
         return <FileItem key={item.id} file={item as Tables<"files">} />
-      case "gpts":
+      case "tools":
         return <ChatItem key={item.id} chat={item as Tables<"chats">} />
       default:
         return null
@@ -179,7 +179,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
                 : "w-full"
             } space-y-3 pt-4 ${isOverflowing && !isTemporaryChat ? "mr-2" : ""}`}
           >
-            {contentType === "chats" || contentType === "gpts" ? (
+            {contentType === "chats" || contentType === "tools" ? (
               <>
                 {[
                   "Today",
@@ -216,7 +216,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
                     )
                   )
                 })}
-                {(contentType === "chats" || contentType === "gpts") &&
+                {(contentType === "chats" || contentType === "tools") &&
                   data.length > 0 &&
                   hasMoreChats &&
                   !isTemporaryChat && (

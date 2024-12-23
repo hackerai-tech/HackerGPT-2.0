@@ -85,8 +85,8 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
   )
 
   const handleOpenGPTsStore = () => {
-    setContentType("gpts")
-    router.replace(`${pathname}?tab=gpts`)
+    setContentType("tools")
+    router.replace(`${pathname}?tab=tools`)
   }
 
   const renderPluginOptions = () => {

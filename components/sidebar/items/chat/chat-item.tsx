@@ -33,7 +33,7 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleClick = useCallback(() => {
-    if (contentType === "gpts") {
+    if (contentType === "tools") {
       setContentType("chats")
     }
     handleSelectChat(chat)

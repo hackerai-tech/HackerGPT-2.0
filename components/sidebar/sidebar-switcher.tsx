@@ -3,6 +3,7 @@ import { IconFile, IconMessage, IconPuzzle } from "@tabler/icons-react"
 import React, { FC, useContext } from "react"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 import { PentestGPTContext } from "@/context/context"
+import { usePathname, useRouter } from "next/navigation"
 
 interface SidebarSwitcherProps {
   onContentTypeChange: (contentType: ContentType) => void
@@ -37,20 +38,27 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
   onContentTypeChange
 }) => {
   const { isPremiumSubscription, contentType } = useContext(PentestGPTContext)
+  const router = useRouter()
+  const pathname = usePathname()
+
+  const handleTabChange = (value: ContentType) => {
+    onContentTypeChange(value)
+    router.replace(`${pathname}?tab=${value}`)
+  }
 
   return (
     <Tabs
       value={contentType}
       defaultValue="chats"
       className="mt-12 w-full pr-2"
-      onValueChange={value => onContentTypeChange(value as ContentType)}
+      onValueChange={value => handleTabChange(value as ContentType)}
     >
       <TabsList className="flex w-full flex-col gap-1 bg-transparent p-0">
         <LabeledSwitchItem
           icon={<IconMessage size={22} />}
           value="chats"
           label="Chats"
-          onContentTypeChange={onContentTypeChange}
+          onContentTypeChange={handleTabChange}
         />
 
         {isPremiumSubscription && (
@@ -58,15 +66,15 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
             icon={<IconFile size={22} />}
             value="files"
             label="Files"
-            onContentTypeChange={onContentTypeChange}
+            onContentTypeChange={handleTabChange}
           />
         )}
 
         <LabeledSwitchItem
           icon={<IconPuzzle size={22} />}
-          value="gpts"
+          value="tools"
           label="Explore Plugins"
-          onContentTypeChange={onContentTypeChange}
+          onContentTypeChange={handleTabChange}
         />
       </TabsList>
     </Tabs>

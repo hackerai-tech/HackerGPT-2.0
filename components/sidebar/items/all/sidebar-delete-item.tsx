@@ -39,7 +39,7 @@ export const SidebarDeleteItem: FC<SidebarDeleteItemProps> = ({
       await deleteFileFromStorage(file.file_path)
       await deleteFile(file.id)
     },
-    gpts: async (chat: Tables<"chats">) => {
+    tools: async (chat: Tables<"chats">) => {
       await deleteChat(chat.id)
     }
   }
@@ -47,7 +47,7 @@ export const SidebarDeleteItem: FC<SidebarDeleteItemProps> = ({
   const stateUpdateFunctions = {
     chats: setChats,
     files: setFiles,
-    gpts: setChats
+    tools: setChats
   }
 
   const handleDelete = async () => {

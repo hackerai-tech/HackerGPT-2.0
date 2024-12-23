@@ -70,7 +70,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
   useEffect(() => {
     setContentType(tabValue as ContentType)
-    if (isMobile && tabValue === "gpts") {
+    if (tabValue === "tools") {
       setShowSidebar(false)
     }
   }, [tabValue, isMobile, setShowSidebar])
@@ -109,7 +109,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
   const renderContent = () => {
     switch (contentType) {
-      case "gpts":
+      case "tools":
         return (
           <ToolsStorePage
             pluginsData={updatedAvailablePlugins}
@@ -161,7 +161,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
   }
 
   const isDraggingEnabled =
-    contentType !== "gpts" && isReadyToChat && isPremiumSubscription
+    contentType !== "tools" && isReadyToChat && isPremiumSubscription
 
   const handleConversionConfirmation = () => {
     pendingFiles.forEach(file => handleSelectDeviceFile(file))
@@ -239,7 +239,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
       <div
         className={cn(
-          "bg-tertiary absolute z-50 h-full border-r-2 duration-200"
+          "bg-tertiary absolute z-50 h-full duration-200"
         )}
         style={sidebarStyle}
       >
@@ -247,10 +247,6 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
           <Tabs
             className="flex h-full"
             value={contentType}
-            onValueChange={tabValue => {
-              setContentType(tabValue as ContentType)
-              router.replace(`${pathname}?tab=${tabValue}`)
-            }}
           >
             <Sidebar contentType={contentType} showSidebar={showSidebar} />
           </Tabs>

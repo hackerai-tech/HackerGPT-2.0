@@ -37,7 +37,7 @@ export const Sidebar: FC<SidebarProps> = ({ contentType, showSidebar }) => {
             case "files":
               return renderSidebarContent("files", files)
 
-            case "gpts":
+            case "tools":
               return renderSidebarContent("chats", chats)
 
             default:

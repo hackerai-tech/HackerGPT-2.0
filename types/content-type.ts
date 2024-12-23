@@ -1,1 +1,1 @@
-export type ContentType = "chats" | "files" | "gpts"
+export type ContentType = "chats" | "files" | "tools"

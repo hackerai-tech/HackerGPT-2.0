@@ -56,13 +56,13 @@ export const SidebarCreateItem: FC<SidebarCreateItemProps> = ({
 
       return createdFile
     },
-    gpts: createChat
+    tools: createChat
   }
 
   const stateUpdateFunctions = {
     chats: setChats,
     files: setFiles,
-    gpts: setChats
+    tools: setChats
   }
 
   const handleCreate = async () => {
