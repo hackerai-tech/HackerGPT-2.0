@@ -90,7 +90,7 @@ export async function executeTerminal({
         }
       })
     },
-    maxSteps: 3
+    maxSteps: 2
   })
 
   for await (const chunk of textStream) {

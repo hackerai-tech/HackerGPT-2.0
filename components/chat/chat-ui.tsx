@@ -183,10 +183,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   return (
     <div className="relative flex h-full flex-col items-center">
       {!isTemporaryChat ? (
-        <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-2">
+        <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-3">
           {!isMobile ? (
             <>
-              <ShareChatButton />
+              <ShareChatButton variant="chatUI" />
               <WithTooltip
                 display={<div>Settings</div>}
                 trigger={<Settings />}
@@ -197,7 +197,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
           )}
         </div>
       ) : (
-        <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-2">
+        <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-3">
           {isMobile ? (
             <WithTooltip
               delayDuration={200}

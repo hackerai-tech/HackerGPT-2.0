@@ -29,11 +29,13 @@ import { WithTooltip } from "../ui/with-tooltip"
 interface ShareChatButtonProps {
   children?: React.ReactNode
   chat?: Tables<"chats">
+  variant?: "default" | "chatUI"
 }
 
 export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
   children,
-  chat
+  chat,
+  variant = "default"
 }) => {
   const [isLoading, setIsLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -128,27 +130,22 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
 
   if (!chatToShare) return null
 
-  return (
-    <>
+  if (variant === "chatUI") {
+    return (
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          {children ? (
-            <div onClick={handleOpenDialog}>{children}</div>
-          ) : (
-            <WithTooltip
-              delayDuration={200}
-              display={"Share"}
-              trigger={
-                <IconShare2
-                  className="mr-2 cursor-pointer hover:opacity-50"
-                  size={24}
-                  stroke={2}
-                  onClick={handleOpenDialog}
-                />
-              }
-              side="bottomRight"
-            />
-          )}
+          <Button
+            onClick={handleOpenDialog}
+            variant="secondary"
+            className="border-secondary-foreground relative rounded-full border px-4"
+            size="sm"
+            aria-label="Share"
+          >
+            <div className="flex w-full items-center justify-center gap-1.5">
+              <IconShare2 size={16} />
+              <span className="font-normal">Share</span>
+            </div>
+          </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -223,6 +220,102 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    )
+  }
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        {children ? (
+          <div onClick={handleOpenDialog}>{children}</div>
+        ) : (
+          <WithTooltip
+            delayDuration={200}
+            display={"Share"}
+            trigger={
+              <IconShare2
+                className="mr-2 cursor-pointer hover:opacity-50"
+                size={24}
+                stroke={2}
+                onClick={handleOpenDialog}
+              />
+            }
+            side="bottomRight"
+          />
+        )}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>
+            {shareUrl ? "Update" : "Create"} public link
+          </DialogTitle>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setIsDialogOpen(false)}
+            className="absolute right-4 top-4"
+          >
+            <IconX className="size-4" />
+          </Button>
+        </DialogHeader>
+        <div className="flex flex-col space-y-4">
+          <p className="text-sm text-gray-500">
+            {shareUrl
+              ? "The public link to your chat has been updated."
+              : "Generate a public link to share your chat."}
+          </p>
+          <div className="flex items-center space-x-2">
+            {shareUrl && <Input value={shareUrl} readOnly className="grow" />}
+            <Button
+              loading={isLoading}
+              variant="outline"
+              onClick={handleShareChat}
+            >
+              <IconLink className="mr-2 size-4" />
+              {shareUrl ? "Update" : "Generate"} link
+            </Button>
+            {shareUrl && (
+              <CopyButton
+                variant={"outline"}
+                className={"text-foreground size-10 shrink-0"}
+                value={shareUrl}
+              />
+            )}
+          </div>
+          {shareUrl && (
+            <div className="flex justify-center space-x-4">
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleSocialShare("linkedin")}
+              >
+                <IconBrandLinkedin className="size-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleSocialShare("facebook")}
+              >
+                <IconBrandFacebook className="size-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleSocialShare("reddit")}
+              >
+                <IconBrandReddit className="size-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleSocialShare("twitter")}
+              >
+                <IconBrandX className="size-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

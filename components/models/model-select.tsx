@@ -20,11 +20,13 @@ import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 interface ModelSelectProps {
   selectedModelId: LLMID
   onSelectModel: (modelId: LLMID) => void
+  onClose?: () => void
 }
 
 export const ModelSelect: FC<ModelSelectProps> = ({
   selectedModelId,
-  onSelectModel
+  onSelectModel,
+  onClose
 }) => {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -56,8 +58,9 @@ export const ModelSelect: FC<ModelSelectProps> = ({
         router.push(`?${newSearchParams.toString()}`)
         handleNewChat()
       }
+      onClose?.()
     },
-    [handleNewChat, searchParams, router, params, pathname]
+    [handleNewChat, searchParams, router, params, pathname, onClose]
   )
 
   const inputRef = useRef<HTMLInputElement>(null)
@@ -227,9 +230,7 @@ export const ModelSelect: FC<ModelSelectProps> = ({
           <Switch
             checked={isTemporaryChat}
             onCheckedChange={handleToggleTemporaryChat}
-            className={`${
-              isTemporaryChat ? "border-primary" : "border-muted-foreground"
-            }`}
+            variant={"green"}
             onClick={e => e.stopPropagation()}
           />
         </div>
