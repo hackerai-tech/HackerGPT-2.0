@@ -47,7 +47,9 @@ export const ProfileButton: FC<ProfileButtonProps> = ({
             fontSize: `${iconSize * 0.4}px`
           }}
         >
-          {userEmail?.[0]?.toUpperCase() || "S"}
+          {userEmail?.toLowerCase().startsWith("the")
+            ? userEmail[3]?.toUpperCase()
+            : userEmail?.[0]?.toUpperCase() || "S"}
         </div>
       )}
       {showEmail && <span className="truncate text-sm">{userEmail}</span>}
