@@ -82,7 +82,9 @@ export const ChatSettings: FC<ChatSettingsProps> = ({
             selectedModelId={chatSettings.model}
             onSelectModel={model => {
               setChatSettings({ ...chatSettings, model })
+              setIsOpen(false)
             }}
+            onClose={() => setIsOpen(false)}
           />
         </PopoverContent>
       </Popover>
