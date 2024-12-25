@@ -24,7 +24,7 @@ import {
   useEffect
 } from "react"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
-import ToolsStorePage from "@/components/gpts/tools-store"
+import ToolsStorePage from "@/components/tools/tools-store"
 import {
   ActionTypes,
   getInstalledPlugins,

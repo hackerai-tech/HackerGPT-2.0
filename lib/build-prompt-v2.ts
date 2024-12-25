@@ -13,12 +13,6 @@ import { toast } from "sonner"
 import { getTerminalPlugins } from "./tools/tool-store/tools-helper"
 import { Fragment } from "./tools/e2b/fragments/types"
 
-export const lastSequenceNumber = (chatMessages: ChatMessage[]) =>
-  chatMessages.reduce(
-    (max, msg) => Math.max(max, msg.message.sequence_number),
-    0
-  )
-
 export async function buildFinalMessages(
   payload: ChatPayload,
   chatImages: MessageImage[],
