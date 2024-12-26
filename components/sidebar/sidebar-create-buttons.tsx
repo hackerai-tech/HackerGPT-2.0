@@ -3,7 +3,6 @@ import { ContentType } from "@/types"
 import { IconMessagePlus, IconRefresh } from "@tabler/icons-react"
 import { FC, useContext } from "react"
 import { Button } from "../ui/button"
-// import { CreateFile } from "./items/files/create-file"
 import { PentestGPTContext } from "@/context/context"
 import { SIDEBAR_ICON_SIZE } from "./sidebar-content"
 
@@ -20,8 +19,6 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
     useContext(PentestGPTContext)
   const { handleNewChat } = useChatHandler()
 
-  // const [isCreatingFile, setIsCreatingFile] = useState(false)
-
   const getCreateFunction = () => {
     switch (contentType) {
       case "chats":
@@ -36,11 +33,6 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
           handleNewChat()
           handleSidebarVisibility()
         }
-
-      // case "files":
-      //   return async () => {
-      //     setIsCreatingFile(true)
-      //   }
 
       default:
         break
@@ -60,10 +52,6 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
           <IconMessagePlus size={SIDEBAR_ICON_SIZE} />
         )}
       </Button>
-
-      {/* {isCreatingFile && (
-        <CreateFile isOpen={isCreatingFile} onOpenChange={setIsCreatingFile} />
-      )} */}
     </div>
   )
 }
