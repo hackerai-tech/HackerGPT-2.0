@@ -261,7 +261,7 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
                   handleSelectDeviceFile
                 )
               }}
-              accept={filesToAccept}
+              accept="*"
             />
 
             <div className="w-full">

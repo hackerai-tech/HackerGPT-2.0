@@ -1,3 +1,4 @@
+import { ChatMessage } from "@/types"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -60,3 +61,9 @@ export function generateRandomAlphanumeric(length: number): string {
 
   return result
 }
+
+export const lastSequenceNumber = (chatMessages: ChatMessage[]) =>
+  chatMessages.reduce(
+    (max, msg) => Math.max(max, msg.message.sequence_number),
+    0
+  )

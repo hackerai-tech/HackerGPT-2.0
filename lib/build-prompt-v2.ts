@@ -13,12 +13,6 @@ import { toast } from "sonner"
 import { getTerminalPlugins } from "./tools/tool-store/tools-helper"
 import { Fragment } from "./tools/e2b/fragments/types"
 
-export const lastSequenceNumber = (chatMessages: ChatMessage[]) =>
-  chatMessages.reduce(
-    (max, msg) => Math.max(max, msg.message.sequence_number),
-    0
-  )
-
 export async function buildFinalMessages(
   payload: ChatPayload,
   chatImages: MessageImage[],
@@ -29,11 +23,11 @@ export async function buildFinalMessages(
 
   let CHUNK_SIZE = 8000
   if (chatSettings.model === GPT4o.modelId) {
-    CHUNK_SIZE = 14000
+    CHUNK_SIZE = 12000
   } else if (chatSettings.model === "mistral-large") {
-    CHUNK_SIZE = 10000
+    CHUNK_SIZE = 9000
   } else if (chatSettings.model === "mistral-medium") {
-    CHUNK_SIZE = 10000
+    CHUNK_SIZE = 9000
   }
 
   // Lower chunk size for terminal plugins

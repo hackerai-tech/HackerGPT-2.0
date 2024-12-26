@@ -1,10 +1,5 @@
 import { Tables } from "@/supabase/types"
-import {
-  BuiltChatMessage,
-  ChatMessage,
-  ChatPayload,
-  MessageImage
-} from "@/types"
+import { BuiltChatMessage, ChatPayload, MessageImage } from "@/types"
 import { PluginID } from "@/types/plugins"
 import { encode } from "gpt-tokenizer"
 import { GPT4o } from "./models/llm/openai-llm-list"
@@ -16,6 +11,7 @@ import {
 } from "ai"
 import endent from "endent"
 import { getTerminalPlugins } from "./tools/tool-store/tools-helper"
+import { lastSequenceNumber } from "@/lib/utils"
 
 const buildBasePrompt = (profileContext: string) => {
   let fullPrompt = ""
@@ -30,12 +26,6 @@ const buildBasePrompt = (profileContext: string) => {
 
   return fullPrompt
 }
-
-export const lastSequenceNumber = (chatMessages: ChatMessage[]) =>
-  chatMessages.reduce(
-    (max, msg) => Math.max(max, msg.message.sequence_number),
-    0
-  )
 
 export async function buildFinalMessages(
   payload: ChatPayload,
@@ -52,11 +42,11 @@ export async function buildFinalMessages(
 
   let CHUNK_SIZE = 8000
   if (chatSettings.model === GPT4o.modelId) {
-    CHUNK_SIZE = 14000
+    CHUNK_SIZE = 12000
   } else if (chatSettings.model === "mistral-large") {
-    CHUNK_SIZE = 10000
+    CHUNK_SIZE = 9000
   } else if (chatSettings.model === "mistral-medium") {
-    CHUNK_SIZE = 10000
+    CHUNK_SIZE = 9000
   }
 
   // Lower chunk size for terminal plugins
