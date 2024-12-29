@@ -10,28 +10,28 @@ export const availablePlugins: PluginSummary[] = [
     isPremium: false,
     createdAt: "2023-01-01",
     starters: [
-      {
-        title: "Explain How To",
-        description: "identify and exploit XSS vulnerabilities",
-        chatMessage: "Explain how to identify and exploit XSS vulnerabilities."
-      },
-      {
-        title: "Explain How To",
-        description: "identify information disclosure vulnerabilities",
-        chatMessage:
-          "Explain how to identify information disclosure vulnerabilities."
-      },
-      {
-        title: "Provide General Methodology",
-        description: "for file upload vulnerabilities",
-        chatMessage:
-          "Provide General Methodology for file upload vulnerabilities."
-      },
-      {
-        title: "Provide Techniques",
-        description: "to bypass rate limit",
-        chatMessage: "Provide techniques to bypass rate limit."
-      }
+      // {
+      //   title: "Explain How To",
+      //   description: "identify and exploit XSS vulnerabilities",
+      //   chatMessage: "Explain how to identify and exploit XSS vulnerabilities."
+      // },
+      // {
+      //   title: "Explain How To",
+      //   description: "identify information disclosure vulnerabilities",
+      //   chatMessage:
+      //     "Explain how to identify information disclosure vulnerabilities."
+      // },
+      // {
+      //   title: "Provide General Methodology",
+      //   description: "for file upload vulnerabilities",
+      //   chatMessage:
+      //     "Provide General Methodology for file upload vulnerabilities."
+      // },
+      // {
+      //   title: "Provide Techniques",
+      //   description: "to bypass rate limit",
+      //   chatMessage: "Provide techniques to bypass rate limit."
+      // }
     ]
   },
   {

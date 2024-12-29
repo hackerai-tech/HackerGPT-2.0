@@ -271,6 +271,8 @@ export const Settings: FC<{ showEmail?: boolean }> = ({
                   <PersonalizationTab
                     profileInstructions={profileInstructions}
                     setProfileInstructions={setProfileInstructions}
+                    onSave={handleSave}
+                    isMobile={isMobile}
                   />
                 </TabPanel>
                 <TabPanel>
@@ -295,11 +297,13 @@ export const Settings: FC<{ showEmail?: boolean }> = ({
             </div>
           </TabGroup>
 
-          <div className="mt-6 flex h-[38px] items-center justify-end">
-            {activeTab === "personalization" && (
-              <Button onClick={handleSave}>Save</Button>
-            )}
-          </div>
+          {!isMobile && (
+            <div className="mt-6 flex h-[38px] items-center justify-end">
+              {activeTab === "personalization" && (
+                <Button onClick={handleSave}>Save</Button>
+              )}
+            </div>
+          )}
         </DialogPanel>
       </TransitionedDialog>
 
