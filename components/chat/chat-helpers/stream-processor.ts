@@ -170,42 +170,6 @@ export const processResponse = async (
               }
             }
 
-            // Fragment decoding for fragment tool
-            // if (firstValue?.type === "fragment") {
-            //   const fragmentData = firstValue
-
-            //   if (fragmentData && typeof fragmentData === "object") {
-            //     fragment = {
-            //       ...fragment,
-            //       ...fragmentData
-            //     }
-
-            //     if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
-            //       setFirstTokenReceived(true)
-            //       setToolInUse(PluginID.NONE)
-            //       fullText = fragment.shortAnswer
-            //       setChatMessages(prev =>
-            //         prev.map(chatMessage =>
-            //           chatMessage.message.id === lastChatMessage.message.id
-            //             ? {
-            //                 ...chatMessage,
-            //                 message: {
-            //                   ...chatMessage.message,
-            //                   content: fragment.shortAnswer,
-            //                   image_paths: [],
-            //                   fragment: fragment
-            //                     ? JSON.stringify(fragment)
-            //                     : null
-            //                 }
-            //               }
-            //             : chatMessage
-            //         )
-            //       )
-            //     }
-            //     setFragment(fragment, lastChatMessage)
-            //   }
-            // }
-
             // Fragment decoding for fragment API
             if (firstValue.isFragment) {
               const fragmentData = value[1] as Fragment
@@ -214,10 +178,10 @@ export const processResponse = async (
                 ...fragmentData
               }
 
-              if (fragment.shortAnswer && fragment.shortAnswer !== fullText) {
+              if (fragment.commentary && fragment.commentary !== fullText) {
                 setFirstTokenReceived(true)
                 setToolInUse(PluginID.NONE)
-                fullText = fragment.shortAnswer
+                fullText = fragment.commentary
                 setChatMessages(prev =>
                   prev.map(chatMessage =>
                     chatMessage.message.id === lastChatMessage.message.id
@@ -225,7 +189,7 @@ export const processResponse = async (
                           ...chatMessage,
                           message: {
                             ...chatMessage.message,
-                            content: fragment.shortAnswer,
+                            content: fragment.commentary,
                             image_paths: [],
                             fragment: fragment ? JSON.stringify(fragment) : null
                           }

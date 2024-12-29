@@ -1,15 +1,10 @@
 import { z } from "zod"
 
 export const fragmentSchema = z.object({
-  shortAnswer: z
+  commentary: z
     .string()
     .describe(
-      "A short answer to the user, starting with something like I will, I'm going to, etc. Maximum of 20 words."
-    ),
-  plan: z
-    .string()
-    .describe(
-      `Describe step by step what you're about to do in a very detailed way. Make sure to emcompass all the details described in the template instructions.`
+      `Tell the user what you're going to build in a simple, friendly way - like you're having a casual conversation.`
     ),
   template: z
     .string()

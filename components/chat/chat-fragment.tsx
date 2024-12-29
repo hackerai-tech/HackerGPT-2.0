@@ -1,5 +1,5 @@
 /* eslint-disable tailwindcss/classnames-order */
-import { IconX, IconReload, IconLoader2, IconFile } from "@tabler/icons-react"
+import { IconX, IconReload } from "@tabler/icons-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Tooltip,
@@ -10,10 +10,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { useFragments } from "./chat-hooks/use-fragments"
 import { MessageMarkdown } from "../messages/message-markdown"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
+import { FragmentPreview } from "./fragment-preview"
+import { PentestGPTContext } from "@/context/context"
+import { CopyButton } from "@/components/ui/copy-button"
 
 export function ChatFragment() {
   const [isReloading, setIsReloading] = useState(false)
@@ -25,6 +28,7 @@ export function ChatFragment() {
     closeFragmentBar,
     updateFragment
   } = useFragments()
+  const { isMobile } = useContext(PentestGPTContext)
 
   const handleReload = async () => {
     if (
@@ -100,34 +104,55 @@ export function ChatFragment() {
                 <TooltipContent>Close sidebar</TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <div className="text-sm font-medium">{fragment.title}</div>
+            {!isMobile && (
+              <div className="text-sm font-medium">{fragment.title}</div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
             {activeTab === "execution" &&
               fragment.sandboxResult &&
-              !fragment.sandboxResult.template.includes("interpreter") && (
-                <TooltipProvider>
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground"
-                        onClick={handleReload}
-                        disabled={isReloading}
-                      >
-                        <IconReload
-                          className={cn(
-                            "size-4",
-                            isReloading && "animate-spin"
-                          )}
-                        />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Reload sandbox</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              !fragment.sandboxResult.template.includes("interpreter") &&
+              isMobile && (
+                <>
+                  <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground"
+                          onClick={handleReload}
+                          disabled={isReloading}
+                        >
+                          <IconReload
+                            className={cn(
+                              "size-4",
+                              isReloading && "animate-spin"
+                            )}
+                          />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Reload sandbox</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  {fragment.sandboxResult &&
+                    "url" in fragment.sandboxResult && (
+                      <TooltipProvider>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <CopyButton
+                              value={fragment.sandboxResult.url}
+                              variant="link"
+                              className="text-muted-foreground"
+                            />
+                          </TooltipTrigger>
+                          <TooltipContent>Copy URL</TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                </>
               )}
             <TabsList className="grid h-8 w-[160px] grid-cols-2 border px-1 py-0">
               <TabsTrigger
@@ -185,20 +210,15 @@ export function ChatFragment() {
             </div>
           ) : (
             <div className="size-full flex-1">
-              {fragment.sandboxResult && (
-                <div className="relative size-full">
-                  {isReloading && (
-                    <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center">
-                      <IconLoader2 className="text-primary size-8 animate-spin" />
-                    </div>
-                  )}
-                  <iframe
-                    src={fragment.sandboxResult.url}
-                    className="size-full"
-                    style={{ height: "100%", width: "100%" }}
+              {fragment.sandboxResult &&
+                !fragment.sandboxResult.template.includes("interpreter") && (
+                  <FragmentPreview
+                    url={fragment.sandboxResult.url}
+                    isMobile={isMobile}
+                    onReload={handleReload}
+                    isReloading={isReloading}
                   />
-                </div>
-              )}
+                )}
             </div>
           )}
         </TabsContent>

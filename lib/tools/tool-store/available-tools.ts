@@ -10,28 +10,28 @@ export const availablePlugins: PluginSummary[] = [
     isPremium: false,
     createdAt: "2023-01-01",
     starters: [
-      {
-        title: "Explain How To",
-        description: "identify and exploit XSS vulnerabilities",
-        chatMessage: "Explain how to identify and exploit XSS vulnerabilities."
-      },
-      {
-        title: "Explain How To",
-        description: "identify information disclosure vulnerabilities",
-        chatMessage:
-          "Explain how to identify information disclosure vulnerabilities."
-      },
-      {
-        title: "Provide General Methodology",
-        description: "for file upload vulnerabilities",
-        chatMessage:
-          "Provide General Methodology for file upload vulnerabilities."
-      },
-      {
-        title: "Provide Techniques",
-        description: "to bypass rate limit",
-        chatMessage: "Provide techniques to bypass rate limit."
-      }
+      // {
+      //   title: "Explain How To",
+      //   description: "identify and exploit XSS vulnerabilities",
+      //   chatMessage: "Explain how to identify and exploit XSS vulnerabilities."
+      // },
+      // {
+      //   title: "Explain How To",
+      //   description: "identify information disclosure vulnerabilities",
+      //   chatMessage:
+      //     "Explain how to identify information disclosure vulnerabilities."
+      // },
+      // {
+      //   title: "Provide General Methodology",
+      //   description: "for file upload vulnerabilities",
+      //   chatMessage:
+      //     "Provide General Methodology for file upload vulnerabilities."
+      // },
+      // {
+      //   title: "Provide Techniques",
+      //   description: "to bypass rate limit",
+      //   chatMessage: "Provide techniques to bypass rate limit."
+      // }
     ]
   },
   {
@@ -48,27 +48,27 @@ export const availablePlugins: PluginSummary[] = [
     isPremium: false,
     createdAt: "2024-07-26",
     starters: [
-      {
-        title: "What are Some Ways",
-        description: "to bypass payment process?",
-        chatMessage: "What are some ways to bypass payment process?"
-      },
-      {
-        title: "Explain the OWASP Top 10",
-        description: "and how to test for them",
-        chatMessage: "Explain the OWASP Top 10 and how to test for them."
-      },
-      {
-        title: "Describe Common Techniques",
-        description: "for exploiting server-side request forgery",
-        chatMessage:
-          "Describe common techniques for exploiting server-side request forgery."
-      },
-      {
-        title: "List Popular Vulnerabel",
-        description: "ports to exploit",
-        chatMessage: "List popular vulnerabel ports to exploit."
-      }
+      // {
+      //   title: "What are Some Ways",
+      //   description: "to bypass payment process?",
+      //   chatMessage: "What are some ways to bypass payment process?"
+      // },
+      // {
+      //   title: "Explain the OWASP Top 10",
+      //   description: "and how to test for them",
+      //   chatMessage: "Explain the OWASP Top 10 and how to test for them."
+      // },
+      // {
+      //   title: "Describe Common Techniques",
+      //   description: "for exploiting server-side request forgery",
+      //   chatMessage:
+      //     "Describe common techniques for exploiting server-side request forgery."
+      // },
+      // {
+      //   title: "List Popular Vulnerabel",
+      //   description: "ports to exploit",
+      //   chatMessage: "List popular vulnerabel ports to exploit."
+      // }
     ]
   },
   {
