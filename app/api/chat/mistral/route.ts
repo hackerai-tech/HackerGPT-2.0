@@ -164,7 +164,7 @@ export async function POST(request: Request) {
       }
 
       if (shouldUncensor) {
-        if (selectedModel === "deepseek/deepseek-chat") {
+        if (selectedModel === "openai/gpt-4o-mini") {
           selectedModel = "mistralai/mistral-small"
         }
         return handleAssistantMessages(messages)
