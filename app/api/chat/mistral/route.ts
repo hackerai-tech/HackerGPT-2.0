@@ -164,6 +164,9 @@ export async function POST(request: Request) {
       }
 
       if (shouldUncensor) {
+        if (selectedModel === "deepseek/deepseek-chat") {
+          selectedModel = "mistralai/mistral-small"
+        }
         return handleAssistantMessages(messages)
       }
 
@@ -192,9 +195,6 @@ export async function POST(request: Request) {
         })
       }
 
-      // Remove last message if it's a continuation to remove the continue prompt
-      const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
-
       // Handle web search plugin
       switch (selectedPlugin) {
         case PluginID.WEB_SEARCH:
@@ -211,6 +211,9 @@ export async function POST(request: Request) {
         //     })
         //   })
       }
+
+      // Remove last message if it's a continuation to remove the continue prompt
+      const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
 
       return createDataStreamResponse({
         execute: dataStream => {
