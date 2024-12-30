@@ -16,14 +16,16 @@ import {
 import Image from "next/image"
 import { FC, useContext, useState } from "react"
 import { Button } from "../ui/button"
-import { FilePreview } from "../ui/file-preview"
 import { WithTooltip } from "../ui/with-tooltip"
 import { ChatRetrievalSettings } from "./chat-retrieval-settings"
 import { dragHelper } from "@/components/chat/chat-helpers/drag"
+import dynamic from "next/dynamic"
 
-interface ChatFilesDisplayProps {}
+const DynamicFilePreview = dynamic(() => import("../ui/file-preview"), {
+  ssr: false
+})
 
-export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
+export const ChatFilesDisplay: FC = () => {
   const {
     newMessageImages,
     setNewMessageImages,
@@ -66,7 +68,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
   return onlyImages || (showFilesDisplay && combinedMessageFiles.length > 0) ? (
     <div className="w-full">
       {showPreview && selectedImage && (
-        <FilePreview
+        <DynamicFilePreview
           type="image"
           item={selectedImage}
           isOpen={showPreview}
@@ -78,7 +80,7 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
       )}
 
       {showPreview && selectedFile && (
-        <FilePreview
+        <DynamicFilePreview
           type="file"
           item={selectedFile}
           isOpen={showPreview}

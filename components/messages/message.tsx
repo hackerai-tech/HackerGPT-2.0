@@ -22,7 +22,6 @@ import Image from "next/image"
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { ModelIcon } from "../models/model-icon"
 import { Button } from "../ui/button"
-import { FilePreview } from "../ui/file-preview"
 import { TextareaAutosize } from "../ui/textarea-autosize"
 import { MessageActions } from "./message-actions"
 import MessageDetailedFeedback from "./message-detailed-feedback"
@@ -33,6 +32,11 @@ import useHotkey from "@/lib/hooks/use-hotkey"
 import { toast } from "sonner"
 import { Fragment } from "@/lib/tools/e2b/fragments/types"
 import { MessageFragment } from "./message-fragment"
+import dynamic from "next/dynamic"
+
+const DynamicFilePreview = dynamic(() => import("../ui/file-preview"), {
+  ssr: false
+})
 
 const ICON_SIZE = 28
 
@@ -507,7 +511,7 @@ export const Message: FC<MessageProps> = ({
       </div>
 
       {showImagePreview && selectedImage && (
-        <FilePreview
+        <DynamicFilePreview
           type="image"
           item={selectedImage}
           isOpen={showImagePreview}
@@ -519,7 +523,7 @@ export const Message: FC<MessageProps> = ({
       )}
 
       {showFileItemPreview && selectedFileItem && (
-        <FilePreview
+        <DynamicFilePreview
           type="file_item"
           item={selectedFileItem}
           isOpen={showFileItemPreview}
