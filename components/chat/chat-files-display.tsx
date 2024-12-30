@@ -92,19 +92,20 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
       <div className="max-w-full space-y-2">
         {!onlyImages && (
           <div className="flex w-full items-center justify-center">
-            <Button
-              className="flex h-[32px] w-[140px] space-x-2"
-              onClick={() => setShowFilesDisplay(false)}
-              variant="secondary"
-            >
-              <RetrievalToggle />
+            <div className="relative flex items-center">
+              <Button
+                className="flex h-[32px] w-[140px] items-center space-x-2 pr-10"
+                onClick={() => setShowFilesDisplay(false)}
+                variant="secondary"
+              >
+                <RetrievalToggle />
+                <span>Hide files</span>
+              </Button>
 
-              <div>Hide files</div>
-
-              <div onClick={e => e.stopPropagation()}>
+              <div className="absolute right-1">
                 <ChatRetrievalSettings />
               </div>
-            </Button>
+            </div>
           </div>
         )}
 
@@ -249,21 +250,24 @@ export const ChatFilesDisplay: FC<ChatFilesDisplayProps> = ({}) => {
     </div>
   ) : (
     combinedMessageFiles.length > 0 && (
-      <div className="flex w-full items-center justify-center space-x-2">
-        <Button
-          className="flex h-[32px] w-[140px] space-x-2"
-          onClick={() => setShowFilesDisplay(true)}
-          variant="secondary"
-        >
-          <RetrievalToggle />
-          <span>
-            View {combinedMessageFiles.length} file
-            {combinedMessageFiles.length > 1 ? "s" : ""}
-          </span>
-          <span onClick={e => e.stopPropagation()}>
+      <div className="flex w-full items-center justify-center">
+        <div className="relative flex items-center">
+          <Button
+            className="flex h-[32px] w-[140px] items-center space-x-2 pr-12"
+            onClick={() => setShowFilesDisplay(true)}
+            variant="secondary"
+          >
+            <RetrievalToggle />
+            <span>
+              View {combinedMessageFiles.length} file
+              {combinedMessageFiles.length > 1 ? "s" : ""}
+            </span>
+          </Button>
+
+          <div className="absolute right-1">
             <ChatRetrievalSettings />
-          </span>
-        </Button>
+          </div>
+        </div>
       </div>
     )
   )
