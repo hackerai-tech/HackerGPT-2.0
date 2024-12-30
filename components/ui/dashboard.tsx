@@ -32,7 +32,12 @@ import {
 } from "../chat/chat-hooks/PluginProvider"
 import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { toast } from "sonner"
-import { KeyboardShortcutsPopup } from "../chat/keyboard-shortcuts-popup"
+import dynamic from "next/dynamic"
+
+const DynamicKeyboardShortcutsPopup = dynamic(
+  () => import("../chat/keyboard-shortcuts-popup"),
+  { ssr: false }
+)
 
 export const SIDEBAR_WIDTH = 280
 
@@ -246,10 +251,12 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
         )}
       </div>
 
-      <KeyboardShortcutsPopup
-        isOpen={isKeyboardShortcutsOpen}
-        onClose={() => setIsKeyboardShortcutsOpen(false)}
-      />
+      {isKeyboardShortcutsOpen && (
+        <DynamicKeyboardShortcutsPopup
+          isOpen={isKeyboardShortcutsOpen}
+          onClose={() => setIsKeyboardShortcutsOpen(false)}
+        />
+      )}
 
       <div
         className={cn(

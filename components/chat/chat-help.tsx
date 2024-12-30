@@ -16,11 +16,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "../ui/dropdown-menu"
-import { KeyboardShortcutsPopup } from "./keyboard-shortcuts-popup"
 import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"
 import { Button } from "../ui/button"
 import { toast } from "sonner"
 import { PentestGPTContext } from "@/context/context"
+import dynamic from "next/dynamic"
+
+const DynamicKeyboardShortcutsPopup = dynamic(
+  () => import("./keyboard-shortcuts-popup"),
+  { ssr: false }
+)
 
 interface ChatHelpProps {}
 
@@ -135,10 +140,12 @@ export const ChatHelp: FC<ChatHelpProps> = () => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <KeyboardShortcutsPopup
-        isOpen={isKeyboardShortcutsOpen}
-        onClose={() => setIsKeyboardShortcutsOpen(false)}
-      />
+      {isKeyboardShortcutsOpen && (
+        <DynamicKeyboardShortcutsPopup
+          isOpen={isKeyboardShortcutsOpen}
+          onClose={() => setIsKeyboardShortcutsOpen(false)}
+        />
+      )}
     </>
   )
 }
