@@ -6,7 +6,6 @@ import { ChatInput } from "@/components/chat/chat-input"
 import { ChatSettings } from "@/components/chat/chat-settings"
 import ChatStarters from "@/components/chat/chat-starters"
 import { ChatUI } from "@/components/chat/chat-ui"
-import { BrandLarge, BrandSmall } from "@/components/ui/brand"
 import { PentestGPTContext } from "@/context/context"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { useContext } from "react"
@@ -54,12 +53,16 @@ export default function ChatPage() {
             ) : selectedPluginInfo ? (
               <ChatPluginInfo pluginInfo={selectedPluginInfo} />
             ) : isMobile ? (
-              <div className="mb-12">
-                <BrandSmall />
+              <div className="-mx-24 mb-12">
+                <h1 className="text-2xl font-semibold">
+                  What can I help with?
+                </h1>
               </div>
             ) : (
               <div className="mb-14">
-                <BrandLarge />
+                <h1 className="text-3xl font-semibold">
+                  What can I help with?
+                </h1>
               </div>
             )}
           </div>
