@@ -41,8 +41,7 @@ export async function POST(request: Request) {
 
     let chunks: any[] = []
 
-    let openai
-    openai = new OpenAI({
+    const openai = new OpenAI({
       apiKey: llmConfig.openai.apiKey
     })
 

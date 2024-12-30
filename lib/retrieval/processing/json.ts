@@ -7,7 +7,7 @@ import { CHUNK_OVERLAP, CHUNK_SIZE } from "."
 export const processJSON = async (json: Blob): Promise<FileItemChunk[]> => {
   const loader = new JSONLoader(json)
   const docs = await loader.load()
-  let completeText = docs.map(doc => doc.pageContent).join(" ")
+  const completeText = docs.map(doc => doc.pageContent).join(" ")
 
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: CHUNK_SIZE,
@@ -15,11 +15,7 @@ export const processJSON = async (json: Blob): Promise<FileItemChunk[]> => {
   })
   const splitDocs = await splitter.createDocuments([completeText])
 
-  let chunks: FileItemChunk[] = []
-
-  splitDocs.forEach(doc => {
-    const docTokens = encode(doc.pageContent).length
-  })
+  const chunks: FileItemChunk[] = []
 
   for (let i = 0; i < splitDocs.length; i++) {
     const doc = splitDocs[i]

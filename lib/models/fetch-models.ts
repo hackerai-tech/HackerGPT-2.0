@@ -10,7 +10,7 @@ export const fetchHostedModels = async () => {
       openai_organization_id: false
     }
 
-    let modelsToAdd: LLM[] = []
+    const modelsToAdd: LLM[] = []
 
     for (const provider in isUsingEnvKeyMap) {
       if (isUsingEnvKeyMap[provider as keyof typeof isUsingEnvKeyMap]) {

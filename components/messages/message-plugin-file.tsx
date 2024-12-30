@@ -23,7 +23,7 @@ interface MessagePluginFileProps {
   isAssistant: boolean
 }
 
-const getContentHeaderAndPayload = (content: string, plugin: string) => {
+const getContentHeaderAndPayload = (content: string) => {
   const contentParts = content.split("## Results:")
   if (contentParts.length === 1) {
     return { contentHeader: content, contentPayload: undefined }
@@ -55,10 +55,7 @@ export const MessagePluginFile: FC<MessagePluginFileProps> = ({
     setShowModal(false)
   }
 
-  const { contentHeader, contentPayload } = getContentHeaderAndPayload(
-    content,
-    plugin
-  )
+  const { contentHeader, contentPayload } = getContentHeaderAndPayload(content)
 
   useEffect(() => {
     if (!autoDownloadEnabled || !isLastMessage || !created_at || !id) {

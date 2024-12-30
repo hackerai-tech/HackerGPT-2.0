@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     let emailMessage = "Invitation sent, but email delivery is not configured."
 
     if (RESEND_API_KEY && invite.teams?.name) {
-      const res = await fetch("https://api.resend.com/emails", {
+      await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -13,7 +13,7 @@ import {
   IconFileFilled,
   IconFileText,
   IconFileTypePdf,
-  IconDatabaseSearch,
+  // IconDatabaseSearch,
   // IconCode,
   IconTerminal2
   // IconPhoto
@@ -73,8 +73,7 @@ export const Message: FC<MessageProps> = ({
     chatImages,
     toolInUse,
     files,
-    isMobile,
-    showSidebar
+    isMobile
   } = useContext(PentestGPTContext)
 
   const { message, fileItems, feedback } = chatMessage
@@ -241,8 +240,7 @@ export const Message: FC<MessageProps> = ({
             <div className="shrink-0">
               <ModelIcon
                 modelId={modelDetails?.modelId || "custom"}
-                height={ICON_SIZE}
-                width={ICON_SIZE}
+                size={ICON_SIZE}
               />
             </div>
           )}
@@ -253,8 +251,7 @@ export const Message: FC<MessageProps> = ({
               {message.role === "assistant" && isMobile && (
                 <ModelIcon
                   modelId={modelDetails?.modelId || "custom"}
-                  height={ICON_SIZE}
-                  width={ICON_SIZE}
+                  size={ICON_SIZE}
                 />
               )}
               {isMobile && (
@@ -416,7 +413,7 @@ export const Message: FC<MessageProps> = ({
                       >
                         <div className="rounded bg-blue-500 p-2">
                           {(() => {
-                            let fileExtension = parentFile?.type.includes("/")
+                            const fileExtension = parentFile?.type.includes("/")
                               ? parentFile.type.split("/")[1]
                               : parentFile?.type
 

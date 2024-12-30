@@ -8,7 +8,7 @@ import {
   IconPlayerTrackNext,
   IconRefresh
 } from "@tabler/icons-react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import {
   FC,
   useCallback,
@@ -46,7 +46,6 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   })
 
   const params = useParams()
-  const router = useRouter()
 
   const {
     chatMessages,

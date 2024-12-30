@@ -1,8 +1,6 @@
-import { PentestGPTContext } from "@/context/context"
 import { cn } from "@/lib/utils"
 import { ContentType, DataItemType } from "@/types"
-import { useRouter } from "next/navigation"
-import { FC, useContext, useRef, useState } from "react"
+import { FC, useRef } from "react"
 import { SidebarUpdateItem } from "./sidebar-update-item"
 
 interface SidebarItemProps {
@@ -22,18 +20,7 @@ export const SidebarItem: FC<SidebarItemProps> = ({
   icon,
   isTyping
 }) => {
-  const { selectedWorkspace, setChats } = useContext(PentestGPTContext)
-
-  const router = useRouter()
-
   const itemRef = useRef<HTMLDivElement>(null)
-
-  const [isHovering, setIsHovering] = useState(false)
-
-  const actionMap = {
-    chats: async (item: any) => {},
-    files: async (item: any) => {}
-  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
@@ -57,8 +44,6 @@ export const SidebarItem: FC<SidebarItemProps> = ({
         )}
         tabIndex={0}
         onKeyDown={handleKeyDown}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
       >
         {icon}
 

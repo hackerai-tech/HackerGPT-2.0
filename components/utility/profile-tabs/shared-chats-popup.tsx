@@ -20,7 +20,7 @@ export const SharedChatsPopup: React.FC<SharedChatsPopupProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [deletingChatId, setDeletingChatId] = useState<string | null>(null)
   const [isDeletingAll, setIsDeletingAll] = useState(false)
-  const { profile, isMobile } = useContext(PentestGPTContext)
+  const { profile } = useContext(PentestGPTContext)
 
   useEffect(() => {
     if (profile?.user_id) {

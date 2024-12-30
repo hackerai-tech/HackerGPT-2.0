@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import {
   Sheet,
   SheetContent,
@@ -76,9 +75,10 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
     tools: null
   }
 
-  const fetchDataFunctions: {
-    [key in ContentType]: ((id: string) => Promise<void>) | null
-  } = {
+  const fetchDataFunctions: Record<
+    ContentType,
+    ((id: string) => Promise<void>) | null
+  > = {
     chats: null,
     files: null,
     tools: null
@@ -204,22 +204,6 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
     } catch (error) {
       toast.error(`Error updating ${contentType.slice(0, -1)}. ${error}`)
     }
-  }
-
-  const handleSelectWorkspace = (workspace: Tables<"workspaces">) => {
-    setSelectedWorkspaces(prevState => {
-      const isWorkspaceAlreadySelected = prevState.find(
-        selectedWorkspace => selectedWorkspace.id === workspace.id
-      )
-
-      if (isWorkspaceAlreadySelected) {
-        return prevState.filter(
-          selectedWorkspace => selectedWorkspace.id !== workspace.id
-        )
-      } else {
-        return [...prevState, workspace]
-      }
-    })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {

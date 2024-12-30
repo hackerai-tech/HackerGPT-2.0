@@ -2,14 +2,12 @@ import {
   IconArrowDown,
   IconArrowUp,
   IconDownload,
-  IconEye,
-  IconUpload
+  IconEye
 } from "@tabler/icons-react"
 import { FC, useState } from "react"
 import Modal from "../chat/dialog-portal"
 import { Button } from "../ui/button"
 import { MessageMarkdown } from "./message-markdown"
-import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
 
 interface MessageTooLongProps {
   content: string
@@ -23,7 +21,6 @@ export const MessageTooLong: FC<MessageTooLongProps> = ({
   id
 }) => {
   const [showModal, setShowModal] = useState(false)
-  const { handleSelectDeviceFile } = useSelectFileHandler()
 
   const handleViewContent = () => {
     setShowModal(true)

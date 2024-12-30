@@ -5,13 +5,11 @@ import { IconCheck, IconCopy } from "@tabler/icons-react"
 
 export function CopyButton({
   value,
-  title = "Copy to clipboard",
   variant = "link",
   className
 }: {
   value: string
   variant?: "link" | "outline"
-  title?: string
   className?: string
 }) {
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 })

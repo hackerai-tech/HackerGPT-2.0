@@ -1,5 +1,3 @@
-import { Tables } from "@/supabase/types"
-
 export enum TeamRole {
   ADMIN = "admin",
   OWNER = "owner",

@@ -78,7 +78,7 @@ export const UpgradePlan: FC = () => {
       }
 
       let url: string | null = null
-      let priceId: string | undefined =
+      const priceId: string | undefined =
         selectedPlan === "yearly" ? YEARLY_PRO_PRICE_ID : undefined
 
       if (checkoutUrl && selectedPlan === "monthly") {

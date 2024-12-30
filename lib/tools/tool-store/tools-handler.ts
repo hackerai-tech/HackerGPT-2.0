@@ -13,10 +13,7 @@ import {
   replaceWordsInLastUserMessage,
   updateSystemMessage
 } from "../../ai-helper"
-import {
-  getToolsPrompt,
-  getToolsWithAnswerPrompt
-} from "./prompts/system-prompt"
+import { getToolsWithAnswerPrompt } from "./prompts/system-prompt"
 import { PluginID } from "@/types/plugins"
 import { getTerminalTemplate } from "@/lib/tools/tool-store/tools-helper"
 import {

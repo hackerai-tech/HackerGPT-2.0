@@ -28,8 +28,8 @@ export async function getModerationResult(
     const result = moderation.results[0]
     const moderationLevel = calculateModerationLevel(result.category_scores)
     const hazardCategories = Object.entries(result.categories)
-      .filter(([_, isFlagged]) => isFlagged)
-      .map(([category, _]) => category)
+      .filter(([, isFlagged]) => isFlagged)
+      .map(([category]) => category)
 
     const shouldUncensorResponse = determineShouldUncensorResponse(
       moderationLevel,

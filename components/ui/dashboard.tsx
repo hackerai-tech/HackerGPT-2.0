@@ -13,7 +13,7 @@ import {
   IconFileFilled,
   IconLayoutSidebarLeftExpand
 } from "@tabler/icons-react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import {
   FC,
   useContext,
@@ -51,8 +51,6 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     setContentType
   } = useContext(PentestGPTContext)
 
-  const pathname = usePathname()
-  const router = useRouter()
   const searchParams = useSearchParams()
   const tabValue = searchParams.get("tab") || "chats"
 

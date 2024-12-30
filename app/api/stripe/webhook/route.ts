@@ -102,7 +102,7 @@ async function upsertSubscription(
 
   // Attempt to fetch the user profile
   const userId = customer.metadata.userId
-  const { data: profile, error } = await supabaseAdmin
+  const { data: profile } = await supabaseAdmin
     .from("profiles")
     .select("*")
     .eq("user_id", userId)

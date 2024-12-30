@@ -74,7 +74,7 @@ export const ChatInput: FC = () => {
 
   useEffect(() => {
     const observer = new ResizeObserver(entries => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         const { height } = entry.contentRect
         setBottomSpacingPx(height + 20)
       }
@@ -89,7 +89,7 @@ export const ChatInput: FC = () => {
 
   const { handleInputChange } = usePromptAndCommand()
 
-  const { filesToAccept, handleSelectDeviceFile } = useSelectFileHandler()
+  const { handleSelectDeviceFile } = useSelectFileHandler()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 

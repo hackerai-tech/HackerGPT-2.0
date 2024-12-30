@@ -151,7 +151,7 @@ export const ModelSelect: FC<ModelSelectProps> = ({
                   }
                 >
                   <div className="flex items-center space-x-2">
-                    <ModelIcon modelId={model.modelId} height={28} width={28} />
+                    <ModelIcon modelId={model.modelId} size={28} />
                     <div>
                       <div className="text-sm font-medium">
                         {model.modelName}
@@ -188,11 +188,7 @@ export const ModelSelect: FC<ModelSelectProps> = ({
                         onClick={() => handleSelectModel(model.modelId)}
                       >
                         <div className="flex min-w-0 flex-1 items-center space-x-3">
-                          <ModelIcon
-                            modelId={model.modelId}
-                            height={28}
-                            width={28}
-                          />
+                          <ModelIcon modelId={model.modelId} size={28} />
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-sm font-medium">
                               {model.modelName}

@@ -41,7 +41,6 @@ export async function buildFinalMessages(
   }
 
   let remainingTokens = CHUNK_SIZE
-  let usedTokens = 0
 
   const lastUserMessage = chatMessages[chatMessages.length - 2].message.content
   const lastUserMessageContent = Array.isArray(lastUserMessage)
@@ -117,7 +116,6 @@ export async function buildFinalMessages(
 
     if (messageTokens <= remainingTokens) {
       remainingTokens -= messageTokens
-      usedTokens += messageTokens
       truncatedMessages.unshift(message)
     } else {
       break

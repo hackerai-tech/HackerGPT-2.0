@@ -1,7 +1,7 @@
 import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 import { PentestGPTContext } from "@/context/context"
 import { Tables } from "@/supabase/types"
-import { FC, useContext, useState, useMemo } from "react"
+import { FC, useContext, useState } from "react"
 import { Message } from "../messages/message"
 import { ChatMessage } from "@/types"
 

@@ -16,13 +16,9 @@ import { InviteMembersDialog } from "../invite-members-dialog"
 import { RemoveTeamMemberDialog } from "../remove-team-member-dialog"
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react"
 
-interface TeamTabProps {
-  isMobile: boolean
-}
-
 const membersPerPage = 5
 
-export const TeamTab: FC<TeamTabProps> = ({ isMobile }) => {
+export const TeamTab: FC = () => {
   const { teamMembers, subscription, refreshTeamMembers, membershipData } =
     useContext(PentestGPTContext)
 

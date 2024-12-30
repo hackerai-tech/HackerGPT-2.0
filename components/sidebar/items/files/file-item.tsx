@@ -13,7 +13,7 @@ interface FileItemProps {
 
 export const FileItem: FC<FileItemProps> = ({ file }) => {
   const [name, setName] = useState(file.name)
-  const [isTyping, setIsTyping] = useState(false)
+  const [isTyping] = useState(false)
   const [description, setDescription] = useState(file.description)
 
   // const getLinkAndView = async () => {
