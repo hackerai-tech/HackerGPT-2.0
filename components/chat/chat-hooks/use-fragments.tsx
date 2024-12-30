@@ -37,9 +37,21 @@ export const FragmentsProvider: React.FC<{ children: React.ReactNode }> = ({
 export const useFragments = () => {
   const context = useContext(FragmentsContext)
   if (!context) {
-    throw new Error(
-      "useFragmentsContext must be used within a FragmentsProvider"
-    )
+    // throw new Error(
+    //   "useFragmentsContext must be used within a FragmentsProvider"
+    // )
+    return {
+      fragment: null,
+      isFragmentBarOpen: false,
+      activeTab: "code" as TabType,
+      setFragment: () => {},
+      resetFragment: () => {},
+      openFragmentBar: () => {},
+      closeFragmentBar: () => {},
+      toggleFragmentBar: () => {},
+      setActiveTab: () => {},
+      updateFragment: () => {}
+    }
   }
   return context
 }
