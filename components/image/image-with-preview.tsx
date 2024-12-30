@@ -1,5 +1,9 @@
-import { FilePreview } from "@/components/ui/file-preview"
+import dynamic from "next/dynamic"
 import { forwardRef, ImgHTMLAttributes, useState } from "react"
+
+const DynamicFilePreview = dynamic(() => import("../ui/file-preview"), {
+  ssr: false
+})
 
 const ImageWithPreview = forwardRef<
   HTMLImageElement,
@@ -17,7 +21,7 @@ const ImageWithPreview = forwardRef<
         {...props}
       />
       {showImagePreview && (
-        <FilePreview
+        <DynamicFilePreview
           type="image"
           item={{
             messageId: "",

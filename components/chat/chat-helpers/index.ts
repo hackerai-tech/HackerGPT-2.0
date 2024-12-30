@@ -44,7 +44,7 @@ export const handleHostedChat = async (
   selectedPlugin: PluginID,
   setFragment: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
 ) => {
-  let { provider } = modelData
+  const { provider } = modelData
   let apiEndpoint = `/api/chat/${provider}`
 
   if (isTerminalContinuation || selectedPlugin === PluginID.TERMINAL) {

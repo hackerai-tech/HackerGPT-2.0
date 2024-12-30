@@ -62,9 +62,6 @@ export async function buildFinalMessages(
   const PROMPT_TOKENS = encode(BUILT_PROMPT).length
   let remainingTokens = CHUNK_SIZE - PROMPT_TOKENS
 
-  let usedTokens = 0
-  usedTokens += PROMPT_TOKENS
-
   const lastUserMessage = chatMessages[chatMessages.length - 2].message.content
   const lastUserMessageContent = Array.isArray(lastUserMessage)
     ? lastUserMessage
@@ -125,14 +122,13 @@ export async function buildFinalMessages(
 
     if (messageTokens <= remainingTokens) {
       remainingTokens -= messageTokens
-      usedTokens += messageTokens
       truncatedMessages.unshift(message)
     } else {
       break
     }
   }
 
-  let tempSystemMessage: Tables<"messages"> = {
+  const tempSystemMessage: Tables<"messages"> = {
     chat_id: "",
     content: BUILT_PROMPT,
     created_at: "",

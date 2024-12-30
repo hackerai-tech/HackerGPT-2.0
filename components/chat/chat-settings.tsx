@@ -9,20 +9,17 @@ import { WithTooltip } from "../ui/with-tooltip"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
 
 interface ChatSettingsProps {
-  isTemporaryChat: boolean
   handleCleanChat?: () => void
 }
 
-export const ChatSettings: FC<ChatSettingsProps> = ({
-  isTemporaryChat,
-  handleCleanChat
-}) => {
+export const ChatSettings: FC<ChatSettingsProps> = ({ handleCleanChat }) => {
   const {
     chatSettings,
     setChatSettings,
     isMobile,
     profile,
-    isPremiumSubscription
+    isPremiumSubscription,
+    isTemporaryChat
   } = useContext(PentestGPTContext)
 
   const [isOpen, setIsOpen] = useState(false)

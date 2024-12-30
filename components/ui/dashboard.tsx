@@ -13,7 +13,7 @@ import {
   IconFileFilled,
   IconLayoutSidebarLeftExpand
 } from "@tabler/icons-react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import {
   FC,
   useContext,
@@ -24,7 +24,6 @@ import {
   useEffect
 } from "react"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
-import ToolsStorePage from "@/components/tools/tools-store"
 import {
   ActionTypes,
   getInstalledPlugins,
@@ -32,7 +31,17 @@ import {
 } from "../chat/chat-hooks/PluginProvider"
 import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { toast } from "sonner"
-import { KeyboardShortcutsPopup } from "../chat/keyboard-shortcuts-popup"
+import dynamic from "next/dynamic"
+
+const DynamicKeyboardShortcutsPopup = dynamic(
+  () => import("../chat/keyboard-shortcuts-popup"),
+  { ssr: false }
+)
+
+const DynamicToolsStore = dynamic(
+  () => import("@/components/tools/tools-store"),
+  { ssr: false }
+)
 
 export const SIDEBAR_WIDTH = 280
 
@@ -51,8 +60,6 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     setContentType
   } = useContext(PentestGPTContext)
 
-  const pathname = usePathname()
-  const router = useRouter()
   const searchParams = useSearchParams()
   const tabValue = searchParams.get("tab") || "chats"
 
@@ -111,7 +118,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     switch (contentType) {
       case "tools":
         return (
-          <ToolsStorePage
+          <DynamicToolsStore
             pluginsData={updatedAvailablePlugins}
             installPlugin={installPlugin}
             uninstallPlugin={uninstallPlugin}
@@ -248,10 +255,12 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
         )}
       </div>
 
-      <KeyboardShortcutsPopup
-        isOpen={isKeyboardShortcutsOpen}
-        onClose={() => setIsKeyboardShortcutsOpen(false)}
-      />
+      {isKeyboardShortcutsOpen && (
+        <DynamicKeyboardShortcutsPopup
+          isOpen={isKeyboardShortcutsOpen}
+          onClose={() => setIsKeyboardShortcutsOpen(false)}
+        />
+      )}
 
       <div
         className={cn(

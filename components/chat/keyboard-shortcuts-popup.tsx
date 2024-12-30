@@ -14,10 +14,10 @@ interface KeyboardShortcutsPopupProps {
   onClose: () => void
 }
 
-export const KeyboardShortcutsPopup: React.FC<KeyboardShortcutsPopupProps> = ({
+export default function KeyboardShortcutsPopup({
   isOpen,
   onClose
-}) => {
+}: KeyboardShortcutsPopupProps) {
   const isMac = useMemo(
     () => /macintosh|mac os x/i.test(navigator.userAgent),
     []

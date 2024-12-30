@@ -18,7 +18,7 @@ export const processMarkdown = async (
 
   const splitDocs = await splitter.createDocuments([textContent])
 
-  let chunks: FileItemChunk[] = []
+  const chunks: FileItemChunk[] = []
 
   for (let i = 0; i < splitDocs.length; i++) {
     const doc = splitDocs[i]

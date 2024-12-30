@@ -253,7 +253,6 @@ export const useChatHandler = () => {
         createTempMessages({
           messageContent,
           chatMessages,
-          chatSettings: chatSettings!,
           b64Images,
           isContinuation,
           selectedPlugin,
@@ -307,7 +306,7 @@ export const useChatHandler = () => {
         )
       }
 
-      let payload: ChatPayload = {
+      const payload: ChatPayload = {
         chatSettings: {
           ...chatSettings!,
           model: model || chatSettings!.model

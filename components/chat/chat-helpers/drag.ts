@@ -6,8 +6,8 @@ export function dragHelper(e: {
   e.preventDefault() // Prevents the click event after dragging
   const el = e.currentTarget
   let isDragging = false
-  let posX = e.clientX
-  let scrollLeft = el.scrollLeft
+  const posX = e.clientX
+  const scrollLeft = el.scrollLeft
   function onMouseMove(e: { clientX: number }) {
     isDragging = true
     const dx = e.clientX - posX

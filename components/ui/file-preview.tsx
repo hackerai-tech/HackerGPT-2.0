@@ -3,8 +3,8 @@ import { Tables } from "@/supabase/types"
 import { ChatFile, MessageImage } from "@/types"
 import { IconFileFilled } from "@tabler/icons-react"
 import Image from "next/image"
-import { FC } from "react"
 import { Dialog, DialogContent } from "./dialog"
+import { DialogTitle } from "@radix-ui/react-dialog"
 
 interface FilePreviewProps {
   type: "image" | "file" | "file_item"
@@ -13,14 +13,16 @@ interface FilePreviewProps {
   onOpenChange: (isOpen: boolean) => void
 }
 
-export const FilePreview: FC<FilePreviewProps> = ({
+export default function FilePreview({
   type,
   item,
   isOpen,
   onOpenChange
-}) => {
+}: FilePreviewProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogTitle className="sr-only">File Preview</DialogTitle>
+
       <DialogContent
         className={cn(
           "flex items-center justify-center outline-none",

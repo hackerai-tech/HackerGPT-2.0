@@ -23,7 +23,7 @@ async function getProviderConfig(chatSettings: any) {
     "X-Title": "web-search"
   }
 
-  let selectedModel = isProModel ? proModel : defaultModel
+  const selectedModel = isProModel ? proModel : defaultModel
 
   return {
     providerHeaders,

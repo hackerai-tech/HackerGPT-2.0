@@ -54,7 +54,7 @@ export const ShareChatButton: React.FC<ShareChatButtonProps> = ({
   const checkIfShared = async () => {
     if (!chatToShare) return
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("chats")
       .select("last_shared_message_id")
       .eq("id", chatToShare.id)

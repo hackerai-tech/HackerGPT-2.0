@@ -43,8 +43,7 @@ export const SharedMessage: React.FC<SharedMessageProps> = ({
             <div className="shrink-0">
               <ModelIcon
                 modelId={modelDetails?.modelId || "custom"}
-                height={ICON_SIZE}
-                width={ICON_SIZE}
+                size={ICON_SIZE}
               />
             </div>
           )}

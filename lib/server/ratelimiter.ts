@@ -105,7 +105,6 @@ function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
     return fragmentsLimit
   }
 
-  let limit
   const fixedModelName = _getFixedModelName(model)
   const baseKey = `RATELIMITER_LIMIT_${fixedModelName}`
 
@@ -117,7 +116,7 @@ function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
 
   const limitKey = baseKey + suffix
 
-  limit =
+  const limit =
     process.env[limitKey] === undefined
       ? subscriptionInfo.isTeam
         ? 50

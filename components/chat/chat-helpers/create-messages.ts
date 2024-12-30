@@ -185,7 +185,7 @@ export const handleCreateMessages = async (
     const uploadPromises = newMessageImages
       .filter(obj => obj.file !== null)
       .map(obj => {
-        let filePath = `${profile.user_id}/${currentChat.id}/${
+        const filePath = `${profile.user_id}/${currentChat.id}/${
           createdMessages[0].id
         }/${uuidv4()}`
 

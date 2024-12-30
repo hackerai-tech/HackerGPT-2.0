@@ -27,11 +27,7 @@ import VoiceRecordingBar from "@/components/ui/voice-recording-bar"
 import VoiceLoadingBar from "@/components/ui/voice-loading-bar"
 import { ToolOptions } from "./chat-tools/tool-options"
 
-interface ChatInputProps {
-  isTemporaryChat: boolean
-}
-
-export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
+export const ChatInput: FC = () => {
   const TOOLTIP_DELAY = 500
 
   useHotkey("l", () => {
@@ -58,7 +54,8 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
     selectedPlugin,
     isPremiumSubscription,
     isMobile,
-    isMicSupported
+    isMicSupported,
+    isTemporaryChat
   } = useContext(PentestGPTContext)
 
   const {
@@ -77,7 +74,7 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
 
   useEffect(() => {
     const observer = new ResizeObserver(entries => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         const { height } = entry.contentRect
         setBottomSpacingPx(height + 20)
       }
@@ -92,7 +89,7 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
 
   const { handleInputChange } = usePromptAndCommand()
 
-  const { filesToAccept, handleSelectDeviceFile } = useSelectFileHandler()
+  const { handleSelectDeviceFile } = useSelectFileHandler()
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 

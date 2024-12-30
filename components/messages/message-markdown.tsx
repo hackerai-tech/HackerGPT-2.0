@@ -56,7 +56,7 @@ const NonMemoizedMarkdown: FC<{
     table: ({ children, ...props }) => <Table {...props}>{children}</Table>,
     th: ({ children, ...props }) => <Th {...props}>{children}</Th>,
     td: ({ children, ...props }) => <Td {...props}>{children}</Td>,
-    code({ node, className, children, ...props }) {
+    code({ className, children, ...props }) {
       const childArray = React.Children.toArray(children)
       const firstChild = childArray[0] as React.ReactElement
       const firstChildAsString = React.isValidElement(firstChild)

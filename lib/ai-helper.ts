@@ -7,8 +7,8 @@ export function replaceWordsInLastUserMessage(messages: any[]) {
     if (messages[i].role === "user") {
       if (typeof messages[i].content === "string") {
         // Handle string content
-        let content = messages[i].content
-        let replacedContent = content.split(/\b/)
+        const content = messages[i].content
+        const replacedContent = content.split(/\b/)
 
         for (let j = 0; j < replacedContent.length; j++) {
           for (const [key, value] of Object.entries(wordReplacements)) {
@@ -27,8 +27,8 @@ export function replaceWordsInLastUserMessage(messages: any[]) {
         // Handle array of objects with type and text/image_url properties
         messages[i].content = messages[i].content.map((item: any) => {
           if (item.type === "text" && item.text) {
-            let content = item.text
-            let replacedContent = content.split(/\b/)
+            const content = item.text
+            const replacedContent = content.split(/\b/)
 
             for (let j = 0; j < replacedContent.length; j++) {
               for (const [key, value] of Object.entries(wordReplacements)) {
@@ -72,7 +72,7 @@ export function updateOrAddSystemMessage(
 
   if (existingSystemMessageIndex !== -1) {
     // Existing system message found
-    let existingSystemMessage = messages[existingSystemMessageIndex]
+    const existingSystemMessage = messages[existingSystemMessageIndex]
     if (!existingSystemMessage.content.includes(systemInstructions)) {
       // Append new content if "User Instructions:" is not found
       existingSystemMessage.content =

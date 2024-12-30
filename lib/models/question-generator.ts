@@ -15,7 +15,7 @@ export async function generateStandaloneQuestion(
 ) {
   filterEmptyAssistantMessages(messages)
 
-  let chatHistory = messages
+  const chatHistory = messages
     .slice(1, -1) // Remove the first (system prompt) and the last message (user message)
     .slice(-3) // Get the last 3 messages only (assistant, user, assistant)
     .map(msg => `${msg.role}: ${msg.content}`)

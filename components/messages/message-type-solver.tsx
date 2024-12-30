@@ -14,13 +14,13 @@ interface MessageTypeResolverProps {
   toolInUse: string
 }
 
-const extractOutputFilename = (content: string) => {
-  const jsonMatch = content.match(/"command"\s*:\s*"(.+?)"/)
-  const commandContent = jsonMatch ? jsonMatch[1] : content
+// const extractOutputFilename = (content: string) => {
+//   const jsonMatch = content.match(/"command"\s*:\s*"(.+?)"/)
+//   const commandContent = jsonMatch ? jsonMatch[1] : content
 
-  const filenameMatch = commandContent.match(/-output\s+(\S+)/)
-  return filenameMatch ? filenameMatch[1].trim() : undefined
-}
+//   const filenameMatch = commandContent.match(/-output\s+(\S+)/)
+//   return filenameMatch ? filenameMatch[1].trim() : undefined
+// }
 
 export const terminalPlugins = [
   PluginID.TERMINAL,
@@ -38,7 +38,7 @@ export const terminalPlugins = [
 ]
 
 export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
-  previousMessage,
+  // previousMessage,
   message,
   messageSizeLimit,
   isLastMessage,
@@ -83,51 +83,51 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   }
 
   // If the previous message is a plugin command and the current message is the output
-  if (
-    isPluginOutput &&
-    previousMessage?.content.startsWith("/") &&
-    (previousMessage.content.split("/n/n")[0].includes(" -output ") ||
-      previousMessage.content.split("/n/n")[0].includes(" --output "))
-  ) {
-    const outputFilename = extractOutputFilename(previousMessage.content)
+  // if (
+  //   isPluginOutput &&
+  //   previousMessage?.content.startsWith("/") &&
+  //   (previousMessage.content.split("/n/n")[0].includes(" -output ") ||
+  //     previousMessage.content.split("/n/n")[0].includes(" --output "))
+  // ) {
+  //   const outputFilename = extractOutputFilename(previousMessage.content)
 
-    return (
-      <MessagePluginFile
-        created_at={message.created_at}
-        content={message.content}
-        plugin={message.plugin ?? PluginID.NONE}
-        autoDownloadEnabled={true}
-        id={message.id}
-        filename={outputFilename}
-        isLastMessage={isLastMessage}
-        isAssistant={message.role === "assistant"}
-      />
-    )
-  }
+  //   return (
+  //     <MessagePluginFile
+  //       created_at={message.created_at}
+  //       content={message.content}
+  //       plugin={message.plugin ?? PluginID.NONE}
+  //       autoDownloadEnabled={true}
+  //       id={message.id}
+  //       filename={outputFilename}
+  //       isLastMessage={isLastMessage}
+  //       isAssistant={message.role === "assistant"}
+  //     />
+  //   )
+  // }
 
   // If the current message is a plugin command and the previous message is the output
-  if (
-    isPluginOutput &&
-    (message.content.split("/n/n")[0].includes(" -output ") ||
-      message.content.split("/n/n")[0].includes(" --output "))
-  ) {
-    const outputFilename = extractOutputFilename(
-      message.content.split("/n/n")[0]
-    )
+  // if (
+  //   isPluginOutput &&
+  //   (message.content.split("/n/n")[0].includes(" -output ") ||
+  //     message.content.split("/n/n")[0].includes(" --output "))
+  // ) {
+  //   const outputFilename = extractOutputFilename(
+  //     message.content.split("/n/n")[0]
+  //   )
 
-    return (
-      <MessagePluginFile
-        created_at={message.created_at}
-        content={message.content}
-        plugin={message.plugin ?? PluginID.NONE}
-        autoDownloadEnabled={true}
-        id={message.id}
-        filename={outputFilename}
-        isLastMessage={isLastMessage}
-        isAssistant={message.role === "assistant"}
-      />
-    )
-  }
+  //   return (
+  //     <MessagePluginFile
+  //       created_at={message.created_at}
+  //       content={message.content}
+  //       plugin={message.plugin ?? PluginID.NONE}
+  //       autoDownloadEnabled={true}
+  //       id={message.id}
+  //       filename={outputFilename}
+  //       isLastMessage={isLastMessage}
+  //       isAssistant={message.role === "assistant"}
+  //     />
+  //   )
+  // }
 
   if (
     typeof message.content === "string" &&

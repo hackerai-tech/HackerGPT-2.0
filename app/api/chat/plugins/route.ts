@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       )
     }
 
-    let chatSettings = payload.chatSettings
+    const chatSettings = payload.chatSettings
 
     let ratelimitmodel
     if (chatSettings.model === "mistral-medium") {
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
       })
     }
   } catch (error: any) {
-    let errorMessage = error.message || "An unexpected error occurred"
+    const errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500
 
     return new Response(JSON.stringify({ message: errorMessage }), {

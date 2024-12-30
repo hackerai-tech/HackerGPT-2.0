@@ -14,7 +14,7 @@ export const ModelOption: FC<ModelOptionProps> = ({ model, onSelect }) => {
       onClick={onSelect}
     >
       <div className="flex items-center space-x-2">
-        <ModelIcon modelId={model.modelId} width={28} height={28} />
+        <ModelIcon modelId={model.modelId} size={28} />
 
         <div className="text-sm font-semibold">{model.shortModelName}</div>
       </div>

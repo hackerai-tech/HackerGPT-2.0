@@ -7,7 +7,7 @@ import { CHUNK_OVERLAP, CHUNK_SIZE } from "."
 export const processCSV = async (csv: Blob): Promise<FileItemChunk[]> => {
   const loader = new CSVLoader(csv)
   const docs = await loader.load()
-  let completeText = docs.map(doc => doc.pageContent).join("\n\n")
+  const completeText = docs.map(doc => doc.pageContent).join("\n\n")
 
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: CHUNK_SIZE,
@@ -16,7 +16,7 @@ export const processCSV = async (csv: Blob): Promise<FileItemChunk[]> => {
   })
   const splitDocs = await splitter.createDocuments([completeText])
 
-  let chunks: FileItemChunk[] = []
+  const chunks: FileItemChunk[] = []
 
   for (let i = 0; i < splitDocs.length; i++) {
     const doc = splitDocs[i]

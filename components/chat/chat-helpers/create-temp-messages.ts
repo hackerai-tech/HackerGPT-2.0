@@ -1,12 +1,11 @@
 import { CONTINUE_PROMPT } from "@/lib/models/llm/llm-prompting"
 import { lastSequenceNumber } from "@/lib/utils"
-import { ChatMessage, ChatSettings, LLMID, PluginID } from "@/types"
+import { ChatMessage, LLMID, PluginID } from "@/types"
 import { v4 as uuidv4 } from "uuid"
 
 export const createTempMessages = ({
   messageContent,
   chatMessages,
-  chatSettings,
   b64Images,
   isContinuation,
   selectedPlugin,
@@ -14,7 +13,6 @@ export const createTempMessages = ({
 }: {
   messageContent: string | null
   chatMessages: ChatMessage[]
-  chatSettings: ChatSettings
   b64Images: string[]
   isContinuation: boolean
   selectedPlugin: PluginID | null
@@ -24,7 +22,7 @@ export const createTempMessages = ({
     ? CONTINUE_PROMPT
     : messageContent || CONTINUE_PROMPT
 
-  let tempUserChatMessage: ChatMessage = {
+  const tempUserChatMessage: ChatMessage = {
     message: {
       chat_id: "",
       content: messageContentInternal,
@@ -45,7 +43,7 @@ export const createTempMessages = ({
     fileItems: []
   }
 
-  let tempAssistantChatMessage: ChatMessage = {
+  const tempAssistantChatMessage: ChatMessage = {
     message: {
       chat_id: "",
       content: "",

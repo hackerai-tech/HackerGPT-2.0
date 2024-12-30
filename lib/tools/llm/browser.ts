@@ -13,14 +13,14 @@ interface BrowserToolConfig {
   dataStream: any
 }
 
-async function getProviderConfig(chatSettings: any, profile: any) {
+async function getProviderConfig(chatSettings: any) {
   const isProModel =
     chatSettings.model === PGPT4.modelId || chatSettings.model === GPT4o.modelId
 
   const defaultModel = "gpt-4o-mini"
   const proModel = "gpt-4o"
 
-  let selectedModel = isProModel ? proModel : defaultModel
+  const selectedModel = isProModel ? proModel : defaultModel
 
   return {
     selectedModel,
@@ -109,7 +109,7 @@ export async function executeBrowserTool({
   config: BrowserToolConfig
 }) {
   const { chatSettings, profile, messages, dataStream } = config
-  const { selectedModel } = await getProviderConfig(chatSettings, profile)
+  const { selectedModel } = await getProviderConfig(chatSettings)
   const browserResult = await browsePage(open_url)
   const lastUserMessage = getLastUserMessage(messages)
   const browserPrompt = createBrowserPrompt(browserResult, lastUserMessage)

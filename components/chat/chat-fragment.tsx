@@ -14,9 +14,13 @@ import { useContext, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-import { FragmentPreview } from "./fragment-preview"
 import { PentestGPTContext } from "@/context/context"
 import { CopyButton } from "@/components/ui/copy-button"
+import dynamic from "next/dynamic"
+
+const DynamicFragmentPreview = dynamic(() => import("./fragment-preview"), {
+  ssr: false
+})
 
 export function ChatFragment() {
   const [isReloading, setIsReloading] = useState(false)
@@ -212,7 +216,7 @@ export function ChatFragment() {
             <div className="size-full flex-1">
               {fragment.sandboxResult &&
                 !fragment.sandboxResult.template.includes("interpreter") && (
-                  <FragmentPreview
+                  <DynamicFragmentPreview
                     url={fragment.sandboxResult.url}
                     isMobile={isMobile}
                     onReload={handleReload}

@@ -38,8 +38,7 @@ export async function POST(req: Request) {
 
     let embeddings: any = []
 
-    let openai
-    openai = new OpenAI({
+    const openai = new OpenAI({
       apiKey: llmConfig.openai.apiKey
     })
 

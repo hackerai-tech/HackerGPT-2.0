@@ -287,10 +287,10 @@ async function getProviderConfig(chatSettings: any, profile: any) {
     "X-Title": chatSettings.model
   }
 
-  let modelTemperature = 0.5
-  let similarityTopK = 3
-  let selectedModel = isPentestGPTPro ? proModel : defaultModel
-  let rateLimitCheckResult = await checkRatelimitOnApi(
+  const modelTemperature = 0.5
+  const similarityTopK = 3
+  const selectedModel = isPentestGPTPro ? proModel : defaultModel
+  const rateLimitCheckResult = await checkRatelimitOnApi(
     profile.user_id,
     isPentestGPTPro ? "pentestgpt-pro" : "pentestgpt"
   )

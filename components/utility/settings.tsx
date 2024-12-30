@@ -95,7 +95,7 @@ export const Settings: FC<{ showEmail?: boolean }> = ({
     const providers = ["openai", "mistral", "openrouter"]
 
     providers.forEach(async provider => {
-      let providerKey: keyof typeof profile =
+      const providerKey: keyof typeof profile =
         `${provider}_api_key` as keyof typeof profile
 
       const models = LLM_LIST_MAP[provider]
@@ -290,7 +290,7 @@ export const Settings: FC<{ showEmail?: boolean }> = ({
                 {membershipData &&
                   membershipData?.invitation_status === "accepted" && (
                     <TabPanel>
-                      <TeamTab isMobile={isMobile} />
+                      <TeamTab />
                     </TabPanel>
                   )}
               </TabPanels>

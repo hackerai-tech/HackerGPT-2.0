@@ -13,7 +13,7 @@ import {
   IconFileFilled,
   IconFileText,
   IconFileTypePdf,
-  IconDatabaseSearch,
+  // IconDatabaseSearch,
   // IconCode,
   IconTerminal2
   // IconPhoto
@@ -22,7 +22,6 @@ import Image from "next/image"
 import { FC, useContext, useEffect, useRef, useState } from "react"
 import { ModelIcon } from "../models/model-icon"
 import { Button } from "../ui/button"
-import { FilePreview } from "../ui/file-preview"
 import { TextareaAutosize } from "../ui/textarea-autosize"
 import { MessageActions } from "./message-actions"
 import MessageDetailedFeedback from "./message-detailed-feedback"
@@ -33,6 +32,11 @@ import useHotkey from "@/lib/hooks/use-hotkey"
 import { toast } from "sonner"
 import { Fragment } from "@/lib/tools/e2b/fragments/types"
 import { MessageFragment } from "./message-fragment"
+import dynamic from "next/dynamic"
+
+const DynamicFilePreview = dynamic(() => import("../ui/file-preview"), {
+  ssr: false
+})
 
 const ICON_SIZE = 28
 
@@ -73,8 +77,7 @@ export const Message: FC<MessageProps> = ({
     chatImages,
     toolInUse,
     files,
-    isMobile,
-    showSidebar
+    isMobile
   } = useContext(PentestGPTContext)
 
   const { message, fileItems, feedback } = chatMessage
@@ -241,8 +244,7 @@ export const Message: FC<MessageProps> = ({
             <div className="shrink-0">
               <ModelIcon
                 modelId={modelDetails?.modelId || "custom"}
-                height={ICON_SIZE}
-                width={ICON_SIZE}
+                size={ICON_SIZE}
               />
             </div>
           )}
@@ -253,8 +255,7 @@ export const Message: FC<MessageProps> = ({
               {message.role === "assistant" && isMobile && (
                 <ModelIcon
                   modelId={modelDetails?.modelId || "custom"}
-                  height={ICON_SIZE}
-                  width={ICON_SIZE}
+                  size={ICON_SIZE}
                 />
               )}
               {isMobile && (
@@ -416,7 +417,7 @@ export const Message: FC<MessageProps> = ({
                       >
                         <div className="rounded bg-blue-500 p-2">
                           {(() => {
-                            let fileExtension = parentFile?.type.includes("/")
+                            const fileExtension = parentFile?.type.includes("/")
                               ? parentFile.type.split("/")[1]
                               : parentFile?.type
 
@@ -510,7 +511,7 @@ export const Message: FC<MessageProps> = ({
       </div>
 
       {showImagePreview && selectedImage && (
-        <FilePreview
+        <DynamicFilePreview
           type="image"
           item={selectedImage}
           isOpen={showImagePreview}
@@ -522,7 +523,7 @@ export const Message: FC<MessageProps> = ({
       )}
 
       {showFileItemPreview && selectedFileItem && (
-        <FilePreview
+        <DynamicFilePreview
           type="file_item"
           item={selectedFileItem}
           isOpen={showFileItemPreview}

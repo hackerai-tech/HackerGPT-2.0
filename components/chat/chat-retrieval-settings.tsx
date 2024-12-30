@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
+  DialogTitle,
   DialogTrigger
 } from "../ui/dialog"
 import { Label } from "../ui/label"
@@ -36,6 +37,8 @@ export const ChatRetrievalSettings: FC<ChatRetrievalSettingsProps> = ({}) => {
       </DialogTrigger>
 
       <DialogContent>
+        <DialogTitle className="sr-only">Retrieval Settings</DialogTitle>
+
         <div className="space-y-3">
           <Label className="flex items-center space-x-1">
             <div>Source Count:</div>

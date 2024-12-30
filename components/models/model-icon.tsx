@@ -8,8 +8,7 @@ import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 
 interface ModelIconProps extends HTMLAttributes<HTMLDivElement> {
   modelId: LLMID | "custom"
-  height: number
-  width: number
+  size: number
 }
 
 export const iconMap = {
@@ -19,12 +18,7 @@ export const iconMap = {
   default: IconSparkles
 }
 
-export const ModelIcon: FC<ModelIconProps> = ({
-  modelId,
-  height,
-  width,
-  ...props
-}) => {
+export const ModelIcon: FC<ModelIconProps> = ({ modelId, size, ...props }) => {
   const { theme } = useTheme()
   const IconComponent = iconMap[modelId] || iconMap["default"]
   const className = cn(
@@ -33,5 +27,5 @@ export const ModelIcon: FC<ModelIconProps> = ({
     theme === "dark" ? "bg-white" : "border border-black"
   )
 
-  return <IconComponent className={className} size={width} />
+  return <IconComponent className={className} size={size} />
 }

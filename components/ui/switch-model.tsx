@@ -156,8 +156,7 @@ export const SwitchModel: FC<SwitchModelProps> = ({
                       >
                         <ModelIcon
                           modelId={id as LLMID}
-                          height={18}
-                          width={18}
+                          size={18}
                           className="mr-3"
                         />
                         {name}
@@ -188,8 +187,7 @@ export const SwitchModel: FC<SwitchModelProps> = ({
                         <div className="flex items-center">
                           <ModelIcon
                             modelId={id as LLMID}
-                            height={18}
-                            width={18}
+                            size={18}
                             className="mr-3"
                           />
                           {name}

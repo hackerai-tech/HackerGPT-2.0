@@ -8,7 +8,7 @@ import {
   IconPlayerTrackNext,
   IconRefresh
 } from "@tabler/icons-react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import {
   FC,
   useCallback,
@@ -46,7 +46,6 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   })
 
   const params = useParams()
-  const router = useRouter()
 
   const {
     chatMessages,
@@ -246,10 +245,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
           className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
         >
           <div className="mt-2 max-w-[230px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
-            <ChatSettings
-              isTemporaryChat={isTemporaryChat}
-              handleCleanChat={handleCleanChat}
-            />
+            <ChatSettings handleCleanChat={handleCleanChat} />
           </div>
         </div>
 
@@ -304,7 +300,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
               <div
                 className={`z-10 w-screen items-end px-2 pb-3 sm:w-[600px] sm:pb-5 md:w-[650px] md:min-w-[300px] lg:w-[700px] xl:w-[800px]`}
               >
-                <ChatInput isTemporaryChat={isTemporaryChat} />
+                <ChatInput />
               </div>
             </div>
 

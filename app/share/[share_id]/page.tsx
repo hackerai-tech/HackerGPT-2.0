@@ -1,6 +1,5 @@
 import React from "react"
 import { createClient } from "@/lib/supabase/server"
-import { cookies } from "next/headers"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SharedMessage } from "@/components/chat/shared-message"
@@ -46,7 +45,7 @@ export default async function SharedChatPage({
     message => message.id === share_id
   )
 
-  let messages = messagesData.slice(0, lastSharedMessageIndex + 1)
+  const messages = messagesData.slice(0, lastSharedMessageIndex + 1)
 
   // Include all messages up to and including the next assistant message
   for (let i = lastSharedMessageIndex + 1; i < messagesData.length; i++) {

@@ -10,7 +10,7 @@ export const processDocX = async (text: string): Promise<FileItemChunk[]> => {
   })
   const splitDocs = await splitter.createDocuments([text])
 
-  let chunks: FileItemChunk[] = []
+  const chunks: FileItemChunk[] = []
 
   for (let i = 0; i < splitDocs.length; i++) {
     const doc = splitDocs[i]

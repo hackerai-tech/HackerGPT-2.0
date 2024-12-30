@@ -11,7 +11,6 @@ import { fragmentSchema } from "@/lib/tools/e2b/fragments/fragment-schema"
 import { toPrompt } from "@/lib/tools/e2b/fragments/prompt"
 import { executeFragment } from "@/lib/tools/e2b/fragments/sandbox-execution"
 import templates from "@/lib/tools/e2b/fragments/templates"
-import { BuiltChatMessage } from "@/types/chat-message"
 import { createOpenAI } from "@ai-sdk/openai"
 import {
   experimental_createProviderRegistry as createProviderRegistry,
