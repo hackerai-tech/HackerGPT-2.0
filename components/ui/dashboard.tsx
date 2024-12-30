@@ -24,7 +24,6 @@ import {
   useEffect
 } from "react"
 import { useSelectFileHandler } from "../chat/chat-hooks/use-select-file-handler"
-import ToolsStorePage from "@/components/tools/tools-store"
 import {
   ActionTypes,
   getInstalledPlugins,
@@ -36,6 +35,11 @@ import dynamic from "next/dynamic"
 
 const DynamicKeyboardShortcutsPopup = dynamic(
   () => import("../chat/keyboard-shortcuts-popup"),
+  { ssr: false }
+)
+
+const DynamicToolsStore = dynamic(
+  () => import("@/components/tools/tools-store"),
   { ssr: false }
 )
 
@@ -114,7 +118,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
     switch (contentType) {
       case "tools":
         return (
-          <ToolsStorePage
+          <DynamicToolsStore
             pluginsData={updatedAvailablePlugins}
             installPlugin={installPlugin}
             uninstallPlugin={uninstallPlugin}

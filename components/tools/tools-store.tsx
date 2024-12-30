@@ -11,7 +11,7 @@ interface PluginStorePageProps {
   uninstallPlugin: (id: number) => void
 }
 
-function ToolsStorePage({
+export default function ToolsStorePage({
   pluginsData,
   installPlugin,
   uninstallPlugin
@@ -141,5 +141,3 @@ function ToolsStorePage({
     </div>
   )
 }
-
-export default ToolsStorePage

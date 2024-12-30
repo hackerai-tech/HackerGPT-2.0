@@ -17,7 +17,7 @@ interface FragmentPreviewProps {
   isReloading?: boolean
 }
 
-export function FragmentPreview({
+export default function FragmentPreview({
   url,
   isMobile,
   onReload,
