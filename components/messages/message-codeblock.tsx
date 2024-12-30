@@ -64,7 +64,7 @@ export const CopyButton: FC<{
       variant="ghost"
       size="sm"
       className={cn(
-        "text-xs text-white hover:bg-zinc-800 focus-visible:ring-1 focus-visible:ring-slate-700 focus-visible:ring-offset-0",
+        "text-xs text-white focus-visible:ring-1 focus-visible:ring-slate-700 focus-visible:ring-offset-0",
         className
       )}
       onClick={() => !isCopied && copyToClipboard(value)}
