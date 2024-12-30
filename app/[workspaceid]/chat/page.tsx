@@ -80,7 +80,7 @@ export default function ChatPage() {
             className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
           >
             <div className="mt-2 max-w-[230px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
-              <ChatSettings isTemporaryChat={isTemporaryChat} />
+              <ChatSettings />
             </div>
           </div>
 
@@ -102,7 +102,7 @@ export default function ChatPage() {
               showSidebar ? "lg:w-[650px]" : "lg:w-[700px]"
             } xl:w-[800px]`}
           >
-            <ChatInput isTemporaryChat={isTemporaryChat} />
+            <ChatInput />
           </div>
 
           <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">

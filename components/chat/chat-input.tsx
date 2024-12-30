@@ -27,11 +27,7 @@ import VoiceRecordingBar from "@/components/ui/voice-recording-bar"
 import VoiceLoadingBar from "@/components/ui/voice-loading-bar"
 import { ToolOptions } from "./chat-tools/tool-options"
 
-interface ChatInputProps {
-  isTemporaryChat: boolean
-}
-
-export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
+export const ChatInput: FC = () => {
   const TOOLTIP_DELAY = 500
 
   useHotkey("l", () => {
@@ -58,7 +54,8 @@ export const ChatInput: FC<ChatInputProps> = ({ isTemporaryChat }) => {
     selectedPlugin,
     isPremiumSubscription,
     isMobile,
-    isMicSupported
+    isMicSupported,
+    isTemporaryChat
   } = useContext(PentestGPTContext)
 
   const {
