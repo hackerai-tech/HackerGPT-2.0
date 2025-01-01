@@ -1,10 +1,10 @@
 import { PentestGPTContext } from "@/context/context"
 import { Tables } from "@/supabase/types"
+import { PluginSummary } from "@/types/plugins"
 import { useContext } from "react"
 
 export const usePromptAndCommand = () => {
   const {
-    chatFiles,
     setNewMessageFiles,
     userInput,
     setUserInput,
@@ -13,29 +13,26 @@ export const usePromptAndCommand = () => {
     setSlashCommand,
     setAtCommand,
     setUseRetrieval,
-    setToolCommand
+    setIsToolPickerOpen,
+    setSelectedPlugin
   } = useContext(PentestGPTContext)
 
   const handleInputChange = (value: string) => {
-    const slashTextRegex = /\/([^ ]*)$/
-    const atTextRegex = /#([^ ]*)$/
-    const toolTextRegex = /!([^ ]*)$/
-    const slashMatch = value.match(slashTextRegex)
-    const atMatch = value.match(atTextRegex)
-    const toolMatch = value.match(toolTextRegex)
+    const slashMatch = value.match(/\/([^ ]*)$/)
+    const atMatch = value.match(/#([^ ]*)$/)
+    const toolMatch = value.match(/!([^ ]*)$/)
 
-    if (slashMatch) {
-      setSlashCommand(slashMatch[1])
+    if (slashMatch || toolMatch) {
+      setSlashCommand(slashMatch?.[1] || toolMatch?.[1] || "")
+      setIsToolPickerOpen(true)
     } else if (atMatch) {
       setIsAtPickerOpen(true)
       setAtCommand(atMatch[1])
-    } else if (toolMatch) {
-      setToolCommand(toolMatch[1])
     } else {
       setIsAtPickerOpen(false)
+      setIsToolPickerOpen(false)
       setSlashCommand("")
       setAtCommand("")
-      setToolCommand("")
     }
 
     setUserInput(value)
@@ -47,19 +44,11 @@ export const usePromptAndCommand = () => {
     setUseRetrieval(true)
 
     setNewMessageFiles(prev => {
-      const fileAlreadySelected =
-        prev.some(prevFile => prevFile.id === file.id) ||
-        chatFiles.some(chatFile => chatFile.id === file.id)
-
-      if (!fileAlreadySelected) {
+      const fileExists = prev.some(prevFile => prevFile.id === file.id)
+      if (!fileExists) {
         return [
           ...prev,
-          {
-            id: file.id,
-            name: file.name,
-            type: file.type,
-            file: null
-          }
+          { id: file.id, name: file.name, type: file.type, file: null }
         ]
       }
       return prev
@@ -68,8 +57,15 @@ export const usePromptAndCommand = () => {
     setUserInput(userInput.replace(/#[^ ]*$/, ""))
   }
 
+  const handleSelectTool = (tool: PluginSummary) => {
+    setIsToolPickerOpen(false)
+    setSelectedPlugin(tool.value)
+    setUserInput(userInput.replace(/[!/][^ ]*$/, ""))
+  }
+
   return {
     handleInputChange,
-    handleSelectUserFile
+    handleSelectUserFile,
+    handleSelectTool
   }
 }

@@ -124,6 +124,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
   // TOOL STORE
   const [toolInUse, setToolInUse] = useState<string>("none")
+  const [isToolPickerOpen, setIsToolPickerOpen] = useState(false)
+  const [focusTool, setFocusTool] = useState(false)
 
   // Define the isMobile state
   const [isMobile, setIsMobile] = useState<boolean>(false)
@@ -539,6 +541,10 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         // TOOL STORE
         toolInUse,
         setToolInUse,
+        isToolPickerOpen,
+        setIsToolPickerOpen,
+        focusTool,
+        setFocusTool,
 
         isMobile,
 

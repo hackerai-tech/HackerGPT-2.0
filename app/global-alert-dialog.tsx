@@ -25,7 +25,7 @@ export const GlobalAlertDialog = () => {
             <IconX
               className="cursor-pointer text-gray-500 hover:opacity-50"
               size={24}
-              onClick={() => handleOpenChange}
+              onClick={() => handleOpenChange()}
             />
           </div>
         </DialogHeader>
