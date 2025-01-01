@@ -152,6 +152,12 @@ interface PentestGPTContextType {
   // User Email
   userEmail: string
   setUserEmail: (email: string) => void
+
+  // Tools
+  isToolPickerOpen: boolean
+  setIsToolPickerOpen: Dispatch<SetStateAction<boolean>>
+  focusTool: boolean
+  setFocusTool: Dispatch<SetStateAction<boolean>>
 }
 
 export const PentestGPTContext = createContext<PentestGPTContextType>({
@@ -290,7 +296,13 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
 
   // User Email
   userEmail: "",
-  setUserEmail: () => {}
+  setUserEmail: () => {},
+
+  // Tools
+  isToolPickerOpen: false,
+  setIsToolPickerOpen: () => {},
+  focusTool: false,
+  setFocusTool: () => {}
 })
 
 export const usePentestGPT = () => useContext(PentestGPTContext)

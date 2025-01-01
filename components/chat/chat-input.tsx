@@ -55,7 +55,10 @@ export const ChatInput: FC = () => {
     isPremiumSubscription,
     isMobile,
     isMicSupported,
-    isTemporaryChat
+    isTemporaryChat,
+    isToolPickerOpen,
+    focusTool,
+    setFocusTool
   } = useContext(PentestGPTContext)
 
   const {
@@ -70,13 +73,13 @@ export const ChatInput: FC = () => {
   }
 
   const divRef = useRef<HTMLDivElement>(null)
-  const [bottomSpacingPx, setBottomSpacingPx] = useState(20)
+  const [bottomSpacingPx, setBottomSpacingPx] = useState(5)
 
   useEffect(() => {
     const observer = new ResizeObserver(entries => {
       for (const entry of entries) {
         const { height } = entry.contentRect
-        setBottomSpacingPx(height + 20)
+        setBottomSpacingPx(height + 10)
       }
     })
 
@@ -130,10 +133,24 @@ export const ChatInput: FC = () => {
       isAtPickerOpen &&
       (event.key === "Tab" ||
         event.key === "ArrowUp" ||
-        event.key === "ArrowDown")
+        event.key === "ArrowDown" ||
+        event.key === "Enter" ||
+        event.key === "Escape")
     ) {
       event.preventDefault()
-      setFocusFile(!focusFile)
+      if (!focusFile) setFocusFile(true)
+    }
+
+    if (
+      isToolPickerOpen &&
+      (event.key === "Tab" ||
+        event.key === "ArrowUp" ||
+        event.key === "ArrowDown" ||
+        event.key === "Enter" ||
+        event.key === "Escape")
+    ) {
+      event.preventDefault()
+      if (!focusTool) setFocusTool(true)
     }
   }
 
@@ -226,14 +243,12 @@ export const ChatInput: FC = () => {
             )}
             ref={divRef}
           >
-            {isPremiumSubscription && (
-              <div
-                className={`absolute left-0 w-full overflow-auto rounded-xl dark:border-none`}
-                style={{ bottom: `${bottomSpacingPx}px` }}
-              >
-                <ChatCommandInput />
-              </div>
-            )}
+            <div
+              className={`absolute left-0 w-full overflow-auto rounded-xl dark:border-none`}
+              style={{ bottom: `${bottomSpacingPx}px` }}
+            >
+              <ChatCommandInput />
+            </div>
 
             {/* Upload files */}
             <Input
