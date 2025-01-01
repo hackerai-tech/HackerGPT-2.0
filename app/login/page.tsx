@@ -268,7 +268,8 @@ export default async function Login({
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "azure",
       options: {
-        redirectTo: `${origin}/auth/callback?next=/login`
+        redirectTo: `${origin}/auth/callback?next=/login`,
+        scopes: "email"
       }
     })
 
