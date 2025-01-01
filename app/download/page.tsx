@@ -7,19 +7,19 @@ const DOWNLOAD_OPTIONS = [
   {
     platform: "macOS",
     description: "For macOS 14+ with Apple Silicon",
-    filename: "PentestGPT-1.0.0-arm64.dmg",
+    filename: "PentestGPT.dmg",
     showAsterisk: true
   },
   {
     platform: "Windows",
     description: "Compatible with Windows 10 and above",
-    filename: "PentestGPT Setup 1.0.0.exe",
+    filename: "PentestGPT.exe",
     showAsterisk: false
   },
   {
     platform: "Linux",
     description: "Available for major Linux distributions",
-    filename: "PentestGPT-1.0.0-arm64.AppImage",
+    filename: "PentestGPT.AppImage",
     showAsterisk: false
   }
 ]
