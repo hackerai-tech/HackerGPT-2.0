@@ -13,14 +13,14 @@ export const metadata: Metadata = {
 const errorMessages: Record<string, string> = {
   "1": "Email is not allowed to sign up.",
   "2": "Check your email to continue the sign-in process.",
-  "3": "Password reset email sent. Check your email to continue.",
+  // "3": "",
   "4": "Invalid credentials provided.",
   "5": "Signup requires a valid password.",
   "6": "Your password must be at least 8 characters long.",
   "7": "Your password must include both uppercase and lowercase letters.",
   "8": "Your password must include at least one number.",
   "9": "Your password must include at least one special character (e.g., !@#$%^&*()).",
-  // "10": ""
+  "10": "Password reset email sent. Check your email to continue.",
   "11": "The email address is not in a valid format.",
   "12": "Password recovery requires an email.",
   auth: "Authentication failed. Please try again or contact support if the issue persists.",
