@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 import { ContentType, DataItemType } from "@/types"
-import { FC, useRef } from "react"
+import { FC, useRef, JSX } from "react"
 import { SidebarUpdateItem } from "./sidebar-update-item"
 
 interface SidebarItemProps {

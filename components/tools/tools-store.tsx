@@ -37,7 +37,7 @@ export default function ToolsStorePage({
   const [selectedFilter, setSelectedFilter] = useState("All")
   const [searchTerm, setSearchTerm] = useState("")
   const categoryRefs = useRef<{
-    [key: string]: React.RefObject<HTMLDivElement>
+    [key: string]: React.RefObject<HTMLDivElement | null>
   }>({})
 
   useEffect(() => {

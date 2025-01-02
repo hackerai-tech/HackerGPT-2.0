@@ -19,7 +19,7 @@ import {
   // IconPhoto
 } from "@tabler/icons-react"
 import Image from "next/image"
-import { FC, useContext, useEffect, useRef, useState } from "react"
+import { FC, RefObject, useContext, useEffect, useRef, useState } from "react"
 import { ModelIcon } from "../models/model-icon"
 import { Button } from "../ui/button"
 import { TextareaAutosize } from "../ui/textarea-autosize"
@@ -326,7 +326,7 @@ export const Message: FC<MessageProps> = ({
               </>
             ) : isEditing ? (
               <TextareaAutosize
-                textareaRef={editInputRef}
+                textareaRef={editInputRef as RefObject<HTMLTextAreaElement>}
                 className="text-md"
                 value={editedMessage}
                 onValueChange={setEditedMessage}

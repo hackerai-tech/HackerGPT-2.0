@@ -9,7 +9,7 @@ import {
   IconLoader2,
   IconMicrophone
 } from "@tabler/icons-react"
-import { FC, useContext, useEffect, useRef, useState } from "react"
+import { FC, RefObject, useContext, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Input } from "../ui/input"
 import { TextareaAutosize } from "../ui/textarea-autosize"
@@ -278,7 +278,7 @@ export const ChatInput: FC = () => {
 
             <div className="w-full">
               <TextareaAutosize
-                textareaRef={chatInputRef}
+                textareaRef={chatInputRef as RefObject<HTMLTextAreaElement>}
                 className={cn(
                   "ring-offset-background placeholder:text-muted-foreground text-md",
                   "flex w-full resize-none rounded-t-xl bg-transparent",
@@ -310,7 +310,7 @@ export const ChatInput: FC = () => {
             <div className="relative min-h-[44px] w-full px-2">
               <div className="absolute bottom-[10px] left-2 flex flex-row">
                 <ToolOptions
-                  fileInputRef={fileInputRef}
+                  fileInputRef={fileInputRef as RefObject<HTMLInputElement>}
                   isTemporaryChat={isTemporaryChat}
                   handleToggleEnhancedMenu={handleToggleEnhancedMenu}
                 />

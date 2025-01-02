@@ -17,7 +17,7 @@ import {
 } from "@/db/files"
 import { Tables, TablesUpdate } from "@/supabase/types"
 import { ContentType, DataItemType } from "@/types"
-import { FC, useContext, useEffect, useRef, useState } from "react"
+import { FC, useContext, useEffect, useRef, useState, JSX } from "react"
 import { toast } from "sonner"
 import { SidebarDeleteItem } from "./sidebar-delete-item"
 

@@ -7,7 +7,7 @@ interface VoiceLoadingBarProps {
 }
 
 const VoiceLoadingBar: FC<VoiceLoadingBarProps> = ({
-  isLoading,
+  isLoading = false,
   isEnhancedMenuOpen
 }) => {
   if (!isLoading) return null
@@ -22,10 +22,6 @@ const VoiceLoadingBar: FC<VoiceLoadingBarProps> = ({
       <span className="ml-2 text-sm text-gray-500">Transcribing...</span>
     </div>
   )
-}
-
-VoiceLoadingBar.defaultProps = {
-  isLoading: false
 }
 
 export default memo(VoiceLoadingBar)

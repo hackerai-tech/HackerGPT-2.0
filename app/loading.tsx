@@ -1,5 +1,5 @@
 import { IconLoader2 } from "@tabler/icons-react"
-
+import { JSX } from "react"
 interface LoadingProps {
   size?: number
 }

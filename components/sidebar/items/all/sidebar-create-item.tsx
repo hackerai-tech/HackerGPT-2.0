@@ -11,7 +11,7 @@ import { createChat } from "@/db/chats"
 import { createFileBasedOnExtension } from "@/db/files"
 import { TablesInsert } from "@/supabase/types"
 import { ContentType } from "@/types"
-import { FC, useContext, useRef, useState } from "react"
+import { FC, useContext, useRef, useState, JSX } from "react"
 import { toast } from "sonner"
 
 interface SidebarCreateItemProps {
