@@ -263,7 +263,8 @@ export default async function Login({
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${origin}/auth/callback?next=/login/password`
+      redirectTo: `${origin}/auth/callback?next=/login/password`,
+      captchaToken
     })
 
     if (error) return redirect("/login?message=" + error.message)
