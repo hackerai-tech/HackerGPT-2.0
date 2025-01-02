@@ -128,5 +128,11 @@
     "tailwindcss-animate": "^1.0.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
+  },
+  "overrides": {
+    "use-stick-to-bottom": {
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0"
+    }
   }
 }
