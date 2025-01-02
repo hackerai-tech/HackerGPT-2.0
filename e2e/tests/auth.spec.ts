@@ -49,7 +49,7 @@ test.describe("Authentication Flow", () => {
 
     // Check for verification message
     const successMessage = await page.getByText(
-      "Check email to reset password."
+      "Password reset email sent. Check your email to continue."
     )
     await expect(successMessage).toBeVisible()
   })
