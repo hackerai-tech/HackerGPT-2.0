@@ -130,7 +130,12 @@ export function LoginForm({
         <Button type="submit" className="mt-4" data-testid="login-button">
           Login
         </Button>
-        <Button type="submit" variant="secondary" formAction={onSignUp}>
+        <Button
+          type="submit"
+          variant="secondary"
+          formAction={onSignUp}
+          data-testid="signup-button"
+        >
           Sign Up
         </Button>
 
@@ -152,6 +157,7 @@ export function LoginForm({
             variant="link"
             className="p-0 text-sm"
             formAction={onResetPassword}
+            data-testid="reset-password-button"
           >
             Reset
           </Button>
