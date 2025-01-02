@@ -116,8 +116,10 @@ export default async function Login({
       return redirect(`/login?message=captcha_required`)
     }
 
-    const { success } = await checkAuthRateLimit(email, ip, "login")
-    if (!success) return redirect("/login?message=13")
+    if (process.env.RATELIMITER_ENABLED === "true") {
+      const { success } = await checkAuthRateLimit(email, ip, "login")
+      if (!success) return redirect("/login?message=13")
+    }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
@@ -166,8 +168,10 @@ export default async function Login({
       return redirect(`/login?message=captcha_required`)
     }
 
-    const { success } = await checkAuthRateLimit(email, ip, "signup")
-    if (!success) return redirect("/login?message=14")
+    if (process.env.RATELIMITER_ENABLED === "true") {
+      const { success } = await checkAuthRateLimit(email, ip, "signup")
+      if (!success) return redirect("/login?message=14")
+    }
 
     const password = formData.get("password") as string
 
@@ -257,8 +261,10 @@ export default async function Login({
       return redirect(`/login?message=captcha_required`)
     }
 
-    const { success } = await checkAuthRateLimit(email, ip, "password-reset")
-    if (!success) return redirect("/login?message=password_reset_limit")
+    if (process.env.RATELIMITER_ENABLED === "true") {
+      const { success } = await checkAuthRateLimit(email, ip, "password-reset")
+      if (!success) return redirect("/login?message=password_reset_limit")
+    }
 
     await new Promise(resolve => setTimeout(resolve, 1000))
 
