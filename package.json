@@ -25,7 +25,6 @@
     "test": "jest --testPathIgnorePatterns=e2e/",
     "test:unit": "jest",
     "test:e2e": "playwright test",
-    "test:e2e:local": "playwright test e2e/tests/auth.spec.ts",
     "test:e2e:ui": "playwright test --ui",
     "test:coverage": "jest --coverage --testPathIgnorePatterns=e2e/",
     "prepare": "husky"
