@@ -127,7 +127,7 @@ export function LoginForm({
           </div>
         )}
 
-        <Button type="submit" className="mt-4">
+        <Button type="submit" className="mt-4" data-testid="login-button">
           Login
         </Button>
         <Button type="submit" variant="secondary" formAction={onSignUp}>

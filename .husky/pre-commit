@@ -1,1 +1,1 @@
-npm run type-check && npm run lint:fix && npm run format:write && npm run test
+npm run type-check && npm run lint:fix && npm run format:write && npm run test && npm run test:e2e
