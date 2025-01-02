@@ -33,6 +33,28 @@ const errorMessages: Record<string, string> = {
     "Too many password reset attempts. Please try again later."
 }
 
+const messageTypes: Record<string, "error" | "success" | "warning"> = {
+  "1": "error",
+  "2": "success",
+  "3": "success",
+  "4": "error",
+  "5": "error",
+  "6": "error",
+  "7": "error",
+  "8": "error",
+  "9": "error",
+  "10": "success",
+  "11": "error",
+  "12": "error",
+  "13": "warning",
+  "14": "warning",
+  auth: "error",
+  default: "error",
+  captcha_required: "error",
+  ratelimit_default: "warning",
+  password_reset_limit: "warning"
+}
+
 const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
@@ -47,6 +69,9 @@ export default async function Login({
   let errorMessage = params.message
     ? errorMessages[params.message] || errorMessages["default"]
     : null
+  const messageType = params.message
+    ? messageTypes[params.message] || "error"
+    : "error"
 
   if (
     params.message &&
@@ -293,6 +318,7 @@ export default async function Login({
         onGoogleSignIn={handleSignInWithGoogle}
         onMicrosoftSignIn={handleSignInWithMicrosoft}
         errorMessage={errorMessage}
+        messageType={messageType}
       />
     </div>
   )
