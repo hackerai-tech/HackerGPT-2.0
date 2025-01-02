@@ -1,17 +1,10 @@
-import { Brand } from "@/components/ui/brand"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/server"
 import { get } from "@vercel/edge-config"
 import { Metadata } from "next"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
-import { IconAlertCircle } from "@tabler/icons-react"
-import { MicrosoftIcon } from "@/components/icons/microsoft-icon"
-import { GoogleIcon } from "@/components/icons/google-icon"
 import { checkAuthRateLimit } from "@/lib/server/check-auth-ratelimit"
-import { PasswordInput } from "@/components/ui/password-input"
+import { LoginForm } from "./form"
 
 export const metadata: Metadata = {
   title: "Login"
@@ -32,6 +25,7 @@ const errorMessages: Record<string, string> = {
   "12": "Password recovery requires an email.",
   auth: "Authentication failed. Please try again or contact support if the issue persists.",
   default: "An unexpected error occurred.",
+  captcha_required: "Please complete the captcha verification.",
   ratelimit_defaul: "Too many attempts. Please try again later.",
   "13": "Too many login attempts. Please try again later.",
   "14": "Too many signup attempts. Please try again later.",
@@ -89,13 +83,16 @@ export default async function Login({
     const supabase = await createClient()
     const email = formData.get("email") as string
     const password = formData.get("password") as string
+    const captchaToken = formData.get("cf-turnstile-response") as string
     const headersList = await headers()
     const ip = headersList.get("x-forwarded-for")?.split(",")[0] || "unknown"
 
-    const { success } = await checkAuthRateLimit(email, ip, "login")
-    if (!success) {
-      return redirect(`/login?message=13`)
+    if (!captchaToken) {
+      return redirect(`/login?message=captcha_required`)
     }
+
+    const { success } = await checkAuthRateLimit(email, ip, "login")
+    if (!success) return redirect("/login?message=13")
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
@@ -104,7 +101,10 @@ export default async function Login({
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
+      options: {
+        captchaToken
+      }
     })
 
     if (error) {
@@ -135,11 +135,14 @@ export default async function Login({
     const origin = headersList.get("origin")
     const email = formData.get("email") as string
     const ip = headersList.get("x-forwarded-for")?.split(",")[0] || "unknown"
+    const captchaToken = formData.get("cf-turnstile-response") as string
+
+    if (!captchaToken) {
+      return redirect(`/login?message=captcha_required`)
+    }
 
     const { success } = await checkAuthRateLimit(email, ip, "signup")
-    if (!success) {
-      return redirect(`/login?message=14`)
-    }
+    if (!success) return redirect("/login?message=14")
 
     const password = formData.get("password") as string
 
@@ -196,6 +199,7 @@ export default async function Login({
       email,
       password,
       options: {
+        captchaToken,
         // USE IF YOU WANT TO SEND EMAIL VERIFICATION, ALSO CHANGE TOML FILE
         emailRedirectTo: `${origin}/auth/callback`
       }
@@ -282,86 +286,14 @@ export default async function Login({
 
   return (
     <div className="flex w-full flex-1 flex-col justify-center gap-2 px-8 sm:max-w-md">
-      <div>
-        <form
-          action={handleSignInWithGoogle}
-          className="animate-in flex w-full flex-1 flex-col justify-center gap-2"
-        >
-          <Brand />
-          <Button variant="default" className="mt-4" type="submit">
-            <GoogleIcon className="mr-2" width={20} height={20} />
-            Continue with Google
-          </Button>
-        </form>
-        <form
-          action={handleSignInWithMicrosoft}
-          className="animate-in mt-2 flex w-full flex-1 flex-col justify-center gap-2"
-        >
-          <Button variant="default" className="mt-2" type="submit">
-            <MicrosoftIcon className="mr-2" width={20} height={20} />
-            Continue with Microsoft
-          </Button>
-        </form>
-        <div className="mt-4 flex items-center">
-          <div className="grow border-t border-gray-300"></div>
-          <span className="text-muted-foreground mx-4 text-sm">OR</span>
-          <div className="grow border-t border-gray-300"></div>
-        </div>
-        <form
-          action={signIn}
-          className="animate-in mt-4 flex w-full flex-1 flex-col justify-center gap-3"
-        >
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-          <div className="mt-2 space-y-2">
-            <Label className="text-md" htmlFor="password">
-              Password
-            </Label>
-            <PasswordInput />
-          </div>
-          {errorMessage && (
-            <div className="mt-2 flex items-center gap-2 text-sm text-red-500">
-              <IconAlertCircle size={16} />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-          <Button type="submit" className="mt-4">
-            Login
-          </Button>
-          <Button type="submit" variant="secondary" formAction={signUp}>
-            Sign Up
-          </Button>
-          <div className="text-muted-foreground mt-4 px-8 text-center text-sm sm:px-0">
-            <span>By using PentestGPT, you agree to our </span>
-            <a
-              href="/terms"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-primary underline"
-            >
-              Terms of Use
-            </a>
-          </div>
-          <div className="text-muted-foreground mt-2 text-center text-sm">
-            <span>Forgot your password? </span>
-            <Button
-              variant="link"
-              className="p-0 text-sm"
-              formAction={handleResetPassword}
-            >
-              Reset
-            </Button>
-          </div>
-        </form>
-      </div>
+      <LoginForm
+        onSignIn={signIn}
+        onSignUp={signUp}
+        onResetPassword={handleResetPassword}
+        onGoogleSignIn={handleSignInWithGoogle}
+        onMicrosoftSignIn={handleSignInWithMicrosoft}
+        errorMessage={errorMessage}
+      />
     </div>
   )
 }
