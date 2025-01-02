@@ -247,10 +247,15 @@ export default async function Login({
     const headersList = await headers()
     const origin = headersList.get("origin")
     const email = formData.get("email") as string
+    const captchaToken = formData.get("cf-turnstile-response") as string
     const ip = headersList.get("x-forwarded-for")?.split(",")[0] || "unknown"
 
     if (!email || email.trim() === "") return redirect("/login?message=12")
     if (!validateEmail(email)) return redirect("/login?message=11")
+
+    if (!captchaToken) {
+      return redirect(`/login?message=captcha_required`)
+    }
 
     const { success } = await checkAuthRateLimit(email, ip, "password-reset")
     if (!success) return redirect("/login?message=password_reset_limit")
