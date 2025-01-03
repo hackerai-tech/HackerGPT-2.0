@@ -104,21 +104,16 @@ function _getLimit(
   subscriptionInfo: SubscriptionInfo,
   country?: string
 ): number {
-  // Check for restricted countries and pentestgpt model for free users only
   const restrictedCountries = ["IN", "PK", "BD", "NG"]
-
-  console.log(
-    `Rate limit check - Country: ${country}, Model: ${model}, Is Restricted: ${country && restrictedCountries.includes(country)}, Is Premium: ${subscriptionInfo.isPremium}, Is Team: ${subscriptionInfo.isTeam}`
-  )
 
   if (
     country &&
     restrictedCountries.includes(country) &&
-    (model === "pentestgpt" || model === "pentestgpt-pro") &&
+    model === "pentestgpt" &&
     !subscriptionInfo.isPremium &&
     !subscriptionInfo.isTeam
   ) {
-    return 3 // Lower limit for restricted countries using pentestgpt (free users only)
+    return 3 // Lower limit for restricted countries using pentestgpt-small (free users only)
   }
 
   // Special case for fragments-reload
