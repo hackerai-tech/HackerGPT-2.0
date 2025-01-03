@@ -51,6 +51,7 @@ export async function POST(request: Request) {
     isRagEnabled,
     selectedPlugin
   } = await request.json()
+  const country = request.headers.get("x-vercel-ip-country")
 
   let ragUsed = false
   let ragId: string | null = null
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
       similarityTopK,
       modelTemperature,
       isPentestGPTPro
-    } = await getProviderConfig(chatSettings, profile)
+    } = await getProviderConfig(chatSettings, profile, country)
 
     if (rateLimitCheckResult !== null) {
       return rateLimitCheckResult.response
@@ -270,7 +271,11 @@ export async function POST(request: Request) {
   }
 }
 
-async function getProviderConfig(chatSettings: any, profile: any) {
+async function getProviderConfig(
+  chatSettings: any,
+  profile: any,
+  country: string | null
+) {
   const isPentestGPTPro = chatSettings.model === "mistral-large"
 
   const defaultModel = llmConfig.models.pentestgpt_default_openrouter
@@ -292,7 +297,8 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   const selectedModel = isPentestGPTPro ? proModel : defaultModel
   const rateLimitCheckResult = await checkRatelimitOnApi(
     profile.user_id,
-    isPentestGPTPro ? "pentestgpt-pro" : "pentestgpt"
+    isPentestGPTPro ? "pentestgpt-pro" : "pentestgpt",
+    country ? country : undefined
   )
 
   return {

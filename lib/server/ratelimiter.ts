@@ -24,13 +24,14 @@ export type RateLimitResult =
  */
 export async function ratelimit(
   userId: string,
-  model: string
+  model: string,
+  country?: string
 ): Promise<RateLimitResult> {
   if (!isRateLimiterEnabled()) {
     return { allowed: true, remaining: -1, timeRemaining: null }
   }
   const subscriptionInfo = await getSubscriptionInfo(userId)
-  return _ratelimit(model, userId, subscriptionInfo)
+  return _ratelimit(model, userId, subscriptionInfo, country)
 }
 
 function isRateLimiterEnabled(): boolean {
@@ -40,14 +41,16 @@ function isRateLimiterEnabled(): boolean {
 export async function _ratelimit(
   model: string,
   userId: string,
-  subscriptionInfo: SubscriptionInfo
+  subscriptionInfo: SubscriptionInfo,
+  country?: string
 ): Promise<RateLimitResult> {
   try {
     const storageKey = _makeStorageKey(userId, model)
     const [remaining, timeRemaining] = await getRemaining(
       userId,
       model,
-      subscriptionInfo
+      subscriptionInfo,
+      country
     )
     if (remaining === 0) {
       return { allowed: false, remaining, timeRemaining: timeRemaining! }
@@ -63,12 +66,13 @@ export async function _ratelimit(
 export async function getRemaining(
   userId: string,
   model: string,
-  subscriptionInfo: SubscriptionInfo
+  subscriptionInfo: SubscriptionInfo,
+  country?: string
 ): Promise<[number, number | null]> {
   const storageKey = _makeStorageKey(userId, model)
   const timeWindow = getTimeWindow()
   const now = Date.now()
-  const limit = _getLimit(model, subscriptionInfo)
+  const limit = _getLimit(model, subscriptionInfo, country)
 
   const redis = getRedis()
   const [[firstMessageTime], count] = await Promise.all([
@@ -95,12 +99,28 @@ function getTimeWindow(): number {
   return Number(process.env[key]) * 60 * 1000
 }
 
-function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
+function _getLimit(
+  model: string,
+  subscriptionInfo: SubscriptionInfo,
+  country?: string
+): number {
+  const restrictedCountries = ["IN", "PK", "BD", "NG"]
+
+  if (
+    country &&
+    restrictedCountries.includes(country) &&
+    model === "pentestgpt" &&
+    !subscriptionInfo.isPremium &&
+    !subscriptionInfo.isTeam
+  ) {
+    return 3 // Lower limit for restricted countries using pentestgpt-small (free users only)
+  }
+
   // Special case for fragments-reload
   if (model === "fragments-reload") {
-    const fragmentsLimit = Number(process.env.FRAGMENTS_RELOAD_LIMIT) || 100 // fallback to 100 if not set
+    const fragmentsLimit = Number(process.env.FRAGMENTS_RELOAD_LIMIT) || 100
     if (isNaN(fragmentsLimit) || fragmentsLimit < 0) {
-      return 100 // safe fallback if invalid value
+      return 100
     }
     return fragmentsLimit
   }
@@ -235,9 +255,10 @@ function getModelName(model: string): string {
 
 export async function checkRatelimitOnApi(
   userId: string,
-  model: string
+  model: string,
+  country?: string
 ): Promise<{ response: Response; result: RateLimitResult } | null> {
-  const result = await ratelimit(userId, model)
+  const result = await ratelimit(userId, model, country)
   if (result.allowed) {
     return null
   }
@@ -258,23 +279,4 @@ export async function checkRatelimitOnApi(
     }
   )
   return { response, result }
-}
-
-export async function checkRateLimitWithoutIncrementing(
-  userId: string,
-  model: string
-): Promise<RateLimitResult> {
-  if (!isRateLimiterEnabled()) {
-    return { allowed: true, remaining: -1, timeRemaining: null }
-  }
-  const subscriptionInfo = await getSubscriptionInfo(userId)
-  const [remaining, timeRemaining] = await getRemaining(
-    userId,
-    model,
-    subscriptionInfo
-  )
-  if (remaining === 0) {
-    return { allowed: false, remaining: 0, timeRemaining: timeRemaining! }
-  }
-  return { allowed: true, remaining, timeRemaining: null }
 }
