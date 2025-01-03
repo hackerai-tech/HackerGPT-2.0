@@ -20,6 +20,7 @@ import { PluginID } from "@/types/plugins"
 import { executeWebSearch } from "@/lib/tools/llm/web-search"
 // import { executeFragments } from "@/lib/tools/e2b/fragments/fragment-tool"
 import { handlePluginExecution } from "@/lib/ai-helper"
+import { geolocation, ipAddress } from "@vercel/functions"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -51,6 +52,10 @@ export async function POST(request: Request) {
     isRagEnabled,
     selectedPlugin
   } = await request.json()
+
+  const { country, city } = geolocation(request)
+  const ip = ipAddress(request)
+  console.log("geolocation", country, city, ip)
 
   let ragUsed = false
   let ragId: string | null = null
