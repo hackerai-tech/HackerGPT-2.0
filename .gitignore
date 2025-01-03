@@ -8,6 +8,10 @@
 
 # testing
 /coverage
+/e2e/results/
+/playwright-report/
+/playwright/.cache/
+/test-results/
 
 # next.js
 /.next/
@@ -55,3 +59,7 @@ worker-*.js
 
 supabase/config.toml
 public/worker-development.js
+
+# Sensitive files
+*.zip
+traze.zip

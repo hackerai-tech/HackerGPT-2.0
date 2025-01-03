@@ -15,22 +15,27 @@
     "analyze": "ANALYZE=true npm run build",
     "preview": "next build && next start",
     "type-check": "tsc --noEmit",
-    "format:write": "prettier --write \"{app,lib,db,components,context,types}/**/*.{ts,tsx}\" --cache",
-    "format:check": "prettier --check \"{app,lib,db,components,context,types}**/*.{ts,tsx}\" --cache",
+    "format:write": "prettier --write \"{app,lib,db,components,context,types,e2e}/**/*.{ts,tsx}\" --cache",
+    "format:check": "prettier --check \"{app,lib,db,components,context,types,e2e}**/*.{ts,tsx}\" --cache",
     "db-reset": "supabase db reset && npm run db-types",
     "db-migrate": "supabase migration up && npm run db-types",
     "db-types": "supabase gen types typescript --local > supabase/types.ts",
     "db-pull": "supabase db remote commit",
     "db-push": "supabase db push",
-    "test": "jest",
+    "test": "jest --testPathIgnorePatterns=e2e/",
+    "test:unit": "jest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:coverage": "jest --coverage --testPathIgnorePatterns=e2e/",
     "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/mistral": "^1.0.6",
-    "@ai-sdk/openai": "^1.0.11",
+    "@ai-sdk/openai": "^1.0.12",
     "@e2b/code-interpreter": "^1.0.4",
     "@headlessui/react": "^2.2.0",
     "@langchain/community": "^0.3.21",
+    "@marsidev/react-turnstile": "^1.1.0",
     "@mistralai/mistralai": "^1.3.5",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",
@@ -65,7 +70,7 @@
     "@tabler/icons-react": "^3.26.0",
     "@upstash/redis": "^1.34.3",
     "@vercel/edge-config": "^1.4.0",
-    "ai": "^4.0.22",
+    "ai": "^4.0.23",
     "ansi-to-html": "^0.7.2",
     "chalk": "^5.4.1",
     "class-variance-authority": "^0.7.1",
@@ -75,7 +80,7 @@
     "husky": "^9.1.7",
     "isomorphic-dompurify": "^2.19.0",
     "jest-environment-jsdom": "^29.7.0",
-    "langchain": "^0.3.8",
+    "langchain": "^0.3.9",
     "lucide-react": "^0.469.0",
     "mammoth": "^1.9.0",
     "next": "^15.1.3",
@@ -97,7 +102,7 @@
     "sonner": "^1.7.1",
     "strip-ansi": "^7.1.0",
     "stripe": "^17.5.0",
-    "use-stick-to-bottom": "^1.0.42",
+    "use-stick-to-bottom": "^1.0.43",
     "uuid": "^11.0.3",
     "zod": "^3.24.1"
   },
@@ -105,9 +110,10 @@
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@next/bundle-analyzer": "^15.1.3",
+    "@playwright/test": "^1.49.1",
     "@tailwindcss/typography": "^0.5.15",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.3",
+    "@types/node": "^22.10.4",
     "@types/pdf-parse": "^1.1.4",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
@@ -128,11 +134,5 @@
     "tailwindcss-animate": "^1.0.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2"
-  },
-  "overrides": {
-    "use-stick-to-bottom": {
-      "react": "^19.0.0",
-      "react-dom": "^19.0.0"
-    }
   }
 }

@@ -1,10 +1,9 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Run only fast checks
+# Run type checking and linting
 npm run type-check
 npm run lint:fix
-npm run format:write
 
-# Run Jest tests
-npm run test
+# Run E2E tests
+npm run test:e2e
