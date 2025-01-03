@@ -12,7 +12,7 @@ test.describe("Authentication Flow", () => {
       'input[type="password"]',
       "Copartner5-Enticing8-Freckled5-Clubbed6"
     )
-    await page.waitForTimeout(2000) // Wait for captcha
+    await page.waitForTimeout(3000) // Wait for captcha
     await page.getByTestId("login-button").click()
 
     // Check if redirected to chat
@@ -27,7 +27,7 @@ test.describe("Authentication Flow", () => {
     // Fill in signup form
     await page.fill('input[type="email"]', "test@example.com")
     await page.fill('input[type="password"]', "Test123!@#Password")
-    await page.waitForTimeout(2000) // Wait for captcha
+    await page.waitForTimeout(3000) // Wait for captcha
     await page.getByTestId("signup-button").click()
 
     // Check for verification message
@@ -44,7 +44,7 @@ test.describe("Authentication Flow", () => {
 
     // Fill in signup form
     await page.fill('input[type="email"]', "test@example.com")
-    await page.waitForTimeout(2000) // Wait for captcha
+    await page.waitForTimeout(3000) // Wait for captcha
     await page.getByTestId("reset-password-button").click()
 
     // Check for verification message
