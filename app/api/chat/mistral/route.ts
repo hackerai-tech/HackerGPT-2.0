@@ -166,7 +166,9 @@ export async function POST(request: Request) {
 
       if (shouldUncensor) {
         if (selectedModel === "deepseek/deepseek-chat") {
-          selectedModel = "mistralai/mistral-small"
+          selectedModel = isPentestGPTPro
+            ? "mistralai/mistral-large"
+            : "mistralai/mistral-small"
         }
         return handleAssistantMessages(messages)
       }
