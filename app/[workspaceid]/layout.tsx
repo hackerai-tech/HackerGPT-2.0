@@ -83,10 +83,12 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
       }
       setSelectedWorkspace(workspace)
 
-      const chats = await getChatsByWorkspaceId(workspaceId)
-      setChats(chats)
+      const [chats, fileData] = await Promise.all([
+        getChatsByWorkspaceId(workspaceId),
+        getFileWorkspacesByWorkspaceId(workspaceId)
+      ])
 
-      const fileData = await getFileWorkspacesByWorkspaceId(workspaceId)
+      setChats(chats)
       setFiles(fileData.files)
 
       setChatSettings({
