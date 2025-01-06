@@ -13,6 +13,8 @@ import {
   DialogHeader,
   DialogTitle
 } from "@/components/ui/dialog"
+import { Loader2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 export const SecurityTab: FC = () => {
   const router = useRouter()
@@ -95,29 +97,35 @@ export const SecurityTab: FC = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="space-y-2">
-          <Label htmlFor="enableMFA">Two-Factor Authentication</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="enableMFA">Multi-factor authentication</Label>
+            {factors.length > 0 && <Badge variant="default">Enabled</Badge>}
+          </div>
           <p className="text-muted-foreground max-w-[90%] text-sm">
             Add an extra layer of security to your account by requiring both a
             password and an authentication code.
           </p>
         </div>
-        {isLoading ? (
-          <Button disabled>Loading...</Button>
-        ) : factors.length > 0 ? (
+        {factors.length > 0 ? (
           <Button
             variant="destructive"
             onClick={() => setShowVerifyModal(true)}
+            disabled={isLoading}
             aria-label="Disable two-factor authentication"
           >
-            Disable
+            {isLoading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              "Disable"
+            )}
           </Button>
         ) : (
           <Button
             onClick={handleEnableClick}
-            disabled={isEnrolling}
+            disabled={isLoading || isEnrolling}
             aria-label="Enable two-factor authentication"
           >
-            {isEnrolling ? "Setting up..." : "Enable"}
+            {isLoading ? <Loader2 className="size-4 animate-spin" /> : "Enable"}
           </Button>
         )}
       </div>
