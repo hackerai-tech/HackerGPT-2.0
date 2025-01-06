@@ -3,7 +3,18 @@ import { redirect } from "next/navigation"
 import { MFAVerification } from "./mfa-verification"
 
 export default async function VerifyMFA() {
-  const verifyMFA = async (code: string) => {
+  const supabase = await createClient()
+
+  // Check if MFA verification is needed
+  const { data: mfaCheck, error: mfaError } = await supabase.rpc("check_mfa")
+  if (mfaError) throw mfaError
+
+  // If MFA check is true, user doesn't need MFA verification
+  if (mfaCheck) {
+    return redirect("/")
+  }
+
+  const verifyMFA = async (code: string): Promise<{ success: boolean }> => {
     "use server"
 
     const supabase = await createClient()
@@ -24,23 +35,14 @@ export default async function VerifyMFA() {
         })
       if (challengeError) throw challengeError
 
-      const { data, error: verifyError } = await supabase.auth.mfa.verify({
+      const { error: verifyError } = await supabase.auth.mfa.verify({
         factorId: totpFactor.id,
         challengeId: challenge.id,
         code
       })
       if (verifyError) throw verifyError
 
-      const { data: homeWorkspace } = await supabase
-        .from("workspaces")
-        .select("*")
-        .eq("user_id", data.user.id)
-        .eq("is_home", true)
-        .single()
-
-      if (homeWorkspace) {
-        return redirect(`/${homeWorkspace.id}/chat`)
-      }
+      return { success: true }
     } catch (error) {
       throw error
     }

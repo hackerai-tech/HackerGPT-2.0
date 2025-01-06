@@ -16,7 +16,7 @@ import { supabase } from "@/lib/supabase/browser-client"
 import { useRouter } from "next/navigation"
 
 interface MFAVerificationProps {
-  onVerify: (code: string) => Promise<void>
+  onVerify: (code: string) => Promise<{ success: boolean } | void>
 }
 
 export function MFAVerification({ onVerify }: MFAVerificationProps) {
@@ -32,9 +32,10 @@ export function MFAVerification({ onVerify }: MFAVerificationProps) {
 
     try {
       const result = await onVerify(verifyCode)
-      // Don't set any state after successful verification
-      // Just let the redirect happen naturally
-      return result
+      if (result?.success) {
+        // Force a full page reload after successful MFA verification
+        window.location.reload()
+      }
     } catch (error) {
       setError((error as Error).message)
       setIsVerifying(false)

@@ -182,6 +182,10 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
 
   useEffect(() => {
     ;(async () => {
+      if (window.location.pathname.includes("/login/verify")) {
+        return
+      }
+
       const profile = await fetchStartingData()
 
       if (profile) {
