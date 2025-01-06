@@ -80,7 +80,7 @@ export default function DownloadPage() {
         <div className="from-primary/10 to-secondary/10 overflow-hidden rounded-2xl bg-gradient-to-br shadow-xl">
           <div className="relative aspect-[16/9] w-full">
             <Image
-              src="/pentestgpt-mac-app.png"
+              src={`${BUCKET_URL}/pentestgpt-mac-app.png`}
               alt="PentestGPT Desktop Application"
               fill
               priority
