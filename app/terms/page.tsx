@@ -1,3 +1,22 @@
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Terms of Use | PentestGPT",
+  description: "Terms of Use and conditions for PentestGPT services.",
+  openGraph: {
+    title: "Terms of Use | PentestGPT",
+    description: "Terms of Use and conditions for PentestGPT services.",
+    type: "website"
+  },
+  twitter: {
+    card: "summary",
+    title: "Terms of Use | PentestGPT",
+    description: "Terms of Use and conditions for PentestGPT services."
+  }
+}
+
+export const dynamic = "force-static"
+
 export default function TermsOfUsePage() {
   return (
     <div className="px-4 py-8 pb-16 md:px-0">
