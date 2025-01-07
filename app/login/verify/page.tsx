@@ -5,13 +5,24 @@ import { MFAVerification } from "./mfa-verification"
 export default async function VerifyMFA() {
   const supabase = await createClient()
 
-  // Check if MFA verification is needed
-  const { data: mfaCheck, error: mfaError } = await supabase.rpc("check_mfa")
-  if (mfaError) throw mfaError
+  const [
+    { data: mfaCheck, error: mfaError },
+    {
+      data: { user }
+    }
+  ] = await Promise.all([supabase.rpc("check_mfa"), supabase.auth.getUser()])
 
-  // If MFA check is true, user doesn't need MFA verification
+  // Handle MFA check error
+  if (mfaError) {
+    console.error("MFA check failed:", mfaError)
+    throw mfaError
+  }
+
+  // Redirect if user doesn't need MFA or isn't authenticated
   if (mfaCheck) {
     return redirect("/")
+  } else if (!user) {
+    return redirect("/login")
   }
 
   const verifyMFA = async (code: string): Promise<{ success: boolean }> => {

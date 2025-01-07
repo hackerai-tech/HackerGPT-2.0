@@ -5,13 +5,6 @@ import { Brand } from "@/components/ui/brand"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { IconAlertCircle } from "@tabler/icons-react"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card"
 import { supabase } from "@/lib/supabase/browser-client"
 import { useRouter } from "next/navigation"
 
@@ -49,66 +42,71 @@ export function MFAVerification({ onVerify }: MFAVerificationProps) {
   }
 
   return (
-    <Card className="mx-4 w-full max-w-md">
-      <CardHeader className="space-y-2">
+    <div className="mx-4 w-full max-w-md">
+      <form
+        onSubmit={handleSubmit}
+        className="animate-in flex w-full flex-1 flex-col justify-center gap-3"
+      >
         <div className="mb-6 flex justify-center">
           <Brand />
         </div>
-        <CardTitle className="text-center text-2xl">
+
+        <h2 className="text-center text-2xl font-semibold">
           Two-Factor Authentication
-        </CardTitle>
-        <CardDescription className="text-center">
+        </h2>
+        <p className="text-muted-foreground mb-4 text-center">
           Enter the 6-digit code from your authenticator app to continue
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-4">
-            <div className="flex justify-center">
-              <div className="flex w-full max-w-[280px] gap-2">
-                <Input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={6}
-                  className="text-center text-lg tracking-widest"
-                  value={verifyCode}
-                  onChange={e =>
-                    setVerifyCode(e.target.value.replace(/\D/g, ""))
-                  }
-                  placeholder="000000"
-                  disabled={isVerifying}
-                  required
-                />
-              </div>
-            </div>
+        </p>
 
-            {error && (
-              <div className="flex items-center justify-center gap-2 text-sm text-red-500">
-                <IconAlertCircle size={16} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <div className="flex flex-col gap-2">
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={verifyCode.length !== 6 || isVerifying}
-              >
-                {isVerifying ? "Verifying..." : "Verify"}
-              </Button>
-              <button
-                type="button"
-                onClick={handleSignOut}
-                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
-              >
-                Cancel and sign out
-              </button>
-            </div>
+        <div className="flex justify-center">
+          <div className="flex w-full max-w-[280px] gap-2">
+            <Input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={6}
+              className="text-center text-lg tracking-widest"
+              value={verifyCode}
+              onChange={e => setVerifyCode(e.target.value.replace(/\D/g, ""))}
+              placeholder="000000"
+              disabled={isVerifying}
+              required
+            />
           </div>
-        </form>
-      </CardContent>
-    </Card>
+        </div>
+
+        {error && (
+          <div className="flex items-center justify-center gap-2 text-sm text-red-500">
+            <IconAlertCircle size={16} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <div className="mt-4 flex flex-col gap-2">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={verifyCode.length !== 6 || isVerifying}
+          >
+            {isVerifying ? "Verifying..." : "Verify"}
+          </Button>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+          >
+            Cancel and sign out
+          </button>
+          <a
+            href="https://help.hackerai.co"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground hover:text-foreground text-center text-sm transition-colors"
+          >
+            Need help? Visit our Help Center
+          </a>
+        </div>
+      </form>
+    </div>
   )
 }
