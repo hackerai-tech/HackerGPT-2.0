@@ -18,12 +18,11 @@ export const usePromptAndCommand = () => {
   } = useContext(PentestGPTContext)
 
   const handleInputChange = (value: string) => {
-    const slashMatch = value.match(/\/([^ ]*)$/)
-    const atMatch = value.match(/#([^ ]*)$/)
-    const toolMatch = value.match(/!([^ ]*)$/)
+    const slashMatch = value.match(/(?:^|\s)\/([^ ]*)$/)
+    const atMatch = value.match(/(?:^|\s)#([^ ]*)$/)
 
-    if (slashMatch || toolMatch) {
-      setSlashCommand(slashMatch?.[1] || toolMatch?.[1] || "")
+    if (slashMatch) {
+      setSlashCommand(slashMatch[1] || "")
       setIsToolPickerOpen(true)
     } else if (atMatch) {
       setIsAtPickerOpen(true)
@@ -60,7 +59,7 @@ export const usePromptAndCommand = () => {
   const handleSelectTool = (tool: PluginSummary) => {
     setIsToolPickerOpen(false)
     setSelectedPlugin(tool.value)
-    setUserInput(userInput.replace(/[!/][^ ]*$/, ""))
+    setUserInput(userInput.replace(/\/[^ ]*$/, ""))
   }
 
   return {

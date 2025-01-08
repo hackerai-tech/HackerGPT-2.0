@@ -4,6 +4,7 @@ import llmConfig from "@/lib/models/llm/llm-config"
 export async function performAlternativeModeration(
   messages: any[]
 ): Promise<{ shouldUncensorResponse: boolean }> {
+  console.error("Performing alternative moderation")
   try {
     const relevantMessages = messages.slice(1, -1)
     if (relevantMessages.length === 0) {
