@@ -45,7 +45,7 @@ export async function getModerationResult(
 
     return { shouldUncensorResponse }
   } catch (error: any) {
-    if (error.status === 429) {
+    if (error.status === 429 && process.env.MISTRAL_API_KEY) {
       return await performAlternativeModeration(messages)
     }
     console.error("Error in getModerationResult:", error)
