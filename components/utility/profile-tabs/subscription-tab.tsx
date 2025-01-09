@@ -25,7 +25,6 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
     isPremiumSubscription,
     subscriptionStatus,
     updateSubscription,
-    profile,
     fetchStartingData
   } = useContext(PentestGPTContext)
 
