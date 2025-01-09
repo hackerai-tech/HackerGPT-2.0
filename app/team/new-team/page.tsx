@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "sonner"
 import { Switch } from "@/components/ui/switch"
 import { IconArrowLeft, IconLoader2 } from "@tabler/icons-react"
-import * as Sentry from "@sentry/nextjs"
 import Loading from "@/app/loading"
 
 import { Button } from "@/components/ui/button"
@@ -90,7 +89,6 @@ const NewTeamPage: FC = () => {
       // Redirect to the checkout page
       router.push(result.value)
     } catch (error) {
-      Sentry.captureException(error)
       toast.error("Failed to create team. Please try again.")
     } finally {
       setIsLoading(false)

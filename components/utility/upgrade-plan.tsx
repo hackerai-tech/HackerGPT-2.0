@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { PentestGPTContext } from "@/context/context"
 import { getCheckoutUrl } from "@/lib/server/stripe-url"
 import { getSubscriptionByUserId } from "@/db/subscriptions"
-import * as Sentry from "@sentry/nextjs"
 import {
   IconLoader2,
   IconCircleCheck,
@@ -54,7 +53,6 @@ export const UpgradePlan: FC = () => {
           setCheckoutUrl(result.value)
         }
       } catch (error) {
-        Sentry.captureException(error)
         toast.error(
           "Failed to load subscription information. Please try again."
         )
@@ -93,7 +91,6 @@ export const UpgradePlan: FC = () => {
 
       router.push(url)
     } catch (error) {
-      Sentry.captureException(error)
       toast.error("Failed to process upgrade. Please try again.")
     } finally {
       setLoadingPlan(null)

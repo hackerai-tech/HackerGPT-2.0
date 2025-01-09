@@ -1,8 +1,11 @@
-const withBundleAnalyzer = require("@next/bundle-analyzer")({
+import bundleAnalyzer from "@next/bundle-analyzer"
+import nextPWA from "next-pwa"
+
+const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true"
 })
 
-const withPWA = require("next-pwa")({
+const withPWA = nextPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
@@ -59,44 +62,4 @@ const baseConfig = {
 }
 
 // Apply the configurations in order
-const configWithAnalyzerAndPWA = withBundleAnalyzer(withPWA(baseConfig))
-
-const { withSentryConfig } = require("@sentry/nextjs")
-
-module.exports = withSentryConfig(
-  configWithAnalyzerAndPWA,
-  {
-    // For all available options, see:
-    // https://github.com/getsentry/sentry-webpack-plugin#options
-
-    // Suppresses source map uploading logs during build
-    silent: true,
-    org: "hackerai",
-    project: "hackergpt_v2"
-  },
-  {
-    // For all available options, see:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
-    widenClientFileUpload: false,
-
-    // Transpiles SDK to be compatible with IE11 (increases bundle size)
-    transpileClientSDK: false,
-
-    // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers (increases server load)
-    tunnelRoute: "/monitoring",
-
-    // Hides source maps from generated client bundles
-    hideSourceMaps: true,
-
-    // Automatically tree-shake Sentry logger statements to reduce bundle size
-    disableLogger: true,
-
-    // Enables automatic instrumentation of Vercel Cron Monitors.
-    // See the following for more information:
-    // https://docs.sentry.io/product/crons/
-    // https://vercel.com/docs/cron-jobs
-    automaticVercelMonitors: true
-  }
-)
+export default withBundleAnalyzer(withPWA(baseConfig))
