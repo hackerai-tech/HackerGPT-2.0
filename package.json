@@ -108,7 +108,6 @@
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
-    "@next/bundle-analyzer": "^15.1.3",
     "@playwright/test": "^1.49.1",
     "@tailwindcss/typography": "^0.5.15",
     "@types/jest": "^29.5.14",

@@ -1,17 +1,10 @@
-import bundleAnalyzer from "@next/bundle-analyzer"
-import nextPWA from "next-pwa"
+import withPWA from "next-pwa";
 
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true"
-})
-
-const withPWA = nextPWA({
+const config = withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
-})
-
-const baseConfig = {
+})({
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -33,7 +26,6 @@ const baseConfig = {
   experimental: {
     serverComponentsExternalPackages: ["sharp", "onnxruntime-node"]
   },
-  // Security headers configuration
   async headers() {
     return [
       {
@@ -59,7 +51,6 @@ const baseConfig = {
       }
     ]
   }
-}
+});
 
-// Apply the configurations in order
-export default withBundleAnalyzer(withPWA(baseConfig))
+export default config;
