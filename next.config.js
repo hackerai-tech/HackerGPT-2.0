@@ -1,4 +1,4 @@
-import withPWA from "next-pwa";
+const withPWA = require("next-pwa");
 
 const config = withPWA({
   dest: "public",
@@ -53,4 +53,4 @@ const config = withPWA({
   }
 });
 
-export default config;
+module.exports = config;
