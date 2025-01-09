@@ -8,6 +8,7 @@ import { ImageWithPreview } from "@/components/image/image-with-preview"
 import { Table, Th, Td } from "@/components/ui/table-components"
 import { MessageTerminalBlock } from "./e2b-messages/message-terminal-block"
 import ReactMarkdown, { type Components } from "react-markdown"
+import { DownloadCSVTable } from "@/components/ui/download-csv-table"
 
 const urlTransform = (url: string) => {
   if (url.startsWith("data:")) return url
@@ -53,7 +54,14 @@ const NonMemoizedMarkdown: FC<{
     img({ src, ...props }) {
       return <ImageWithPreview src={src!} alt={props.alt || "image"} />
     },
-    table: ({ children, ...props }) => <Table {...props}>{children}</Table>,
+    table: ({ children, ...props }) => {
+      return (
+        <div className="w-full">
+          <Table {...props}>{children}</Table>
+          <DownloadCSVTable />
+        </div>
+      )
+    },
     th: ({ children, ...props }) => <Th {...props}>{children}</Th>,
     td: ({ children, ...props }) => <Td {...props}>{children}</Td>,
     code({ className, children, ...props }) {
