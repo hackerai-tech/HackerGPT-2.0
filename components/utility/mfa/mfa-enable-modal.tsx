@@ -48,7 +48,7 @@ export const MFAEnableModal: FC<MFAEnableModalProps> = ({
                 <img
                   src={qrCode}
                   alt="QR Code for MFA"
-                  className="mt-4 size-40"
+                  className="mt-4 size-48 bg-white p-2 rounded-md"
                 />
               )}
               {showSecret && (
