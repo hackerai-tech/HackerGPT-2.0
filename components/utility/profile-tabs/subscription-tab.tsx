@@ -25,7 +25,7 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
     isPremiumSubscription,
     subscriptionStatus,
     updateSubscription,
-    refreshTeamMembers
+    fetchStartingData
   } = useContext(PentestGPTContext)
 
   const redirectToBillingPortal = async () => {
@@ -57,7 +57,7 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
         )
       }
 
-      await refreshTeamMembers()
+      await fetchStartingData()
 
       if (data.message) {
         toast.warning(data.message)

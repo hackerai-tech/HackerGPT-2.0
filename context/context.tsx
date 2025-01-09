@@ -20,7 +20,7 @@ interface PentestGPTContextType {
   // PROFILE STORE
   profile: Tables<"profiles"> | null
   setProfile: Dispatch<SetStateAction<Tables<"profiles"> | null>>
-
+  fetchStartingData: () => Promise<void>
   // CONTENT TYPE STORE
   contentType: ContentType
   setContentType: React.Dispatch<React.SetStateAction<ContentType>>
@@ -167,7 +167,7 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   // PROFILE STORE
   profile: null,
   setProfile: () => {},
-
+  fetchStartingData: async () => {},
   // CONTENT TYPE STORE
   contentType: "chats",
   setContentType: () => {},

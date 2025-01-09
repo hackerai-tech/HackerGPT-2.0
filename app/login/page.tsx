@@ -138,6 +138,19 @@ export default async function Login({
       return redirect(`/login?message=4`)
     }
 
+    const { data: aalData, error: aalError } =
+      await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (aalError) {
+      return redirect(`/login?message=auth`)
+    }
+
+    if (
+      aalData.nextLevel === "aal2" &&
+      aalData.nextLevel !== aalData.currentLevel
+    ) {
+      return redirect(`/login/verify`)
+    }
+
     const { data: homeWorkspace, error: homeWorkspaceError } = await supabase
       .from("workspaces")
       .select("*")
