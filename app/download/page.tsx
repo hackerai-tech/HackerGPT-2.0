@@ -1,5 +1,33 @@
+import { Metadata } from "next"
 import Image from "next/image"
 import { IconArrowUpRight } from "@tabler/icons-react"
+
+export const metadata: Metadata = {
+  title: "Download PentestGPT",
+  description:
+    "Download PentestGPT desktop app for macOS. Experience advanced AI-powered penetration testing with a native desktop experience. Available for macOS 14+ with Apple Silicon.",
+  openGraph: {
+    title: "Download PentestGPT Desktop App",
+    description:
+      "Get PentestGPT on your desktop for enhanced penetration testing capabilities. Native app available for macOS.",
+    type: "website",
+    images: [
+      {
+        url: `${process.env.NEXT_PUBLIC_BUCKET_URL}/pentestgpt-mac-app.png`,
+        width: 1200,
+        height: 630,
+        alt: "PentestGPT Desktop Application"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Download PentestGPT Desktop App",
+    description:
+      "Get PentestGPT on your desktop for enhanced penetration testing capabilities. Native app available for macOS.",
+    images: [`${process.env.NEXT_PUBLIC_BUCKET_URL}/pentestgpt-mac-app.png`]
+  }
+}
 
 const BUCKET_URL = process.env.NEXT_PUBLIC_BUCKET_URL
 
@@ -9,19 +37,19 @@ const DOWNLOAD_OPTIONS = [
     description: "For macOS 14+ with Apple Silicon",
     filename: "PentestGPT.dmg",
     showAsterisk: true
-  },
-  {
-    platform: "Windows",
-    description: "Compatible with Windows 10 and above",
-    filename: "PentestGPT.exe",
-    showAsterisk: false
-  },
-  {
-    platform: "Linux",
-    description: "Available for major Linux distributions",
-    filename: "PentestGPT.AppImage",
-    showAsterisk: false
   }
+  // {
+  //   platform: "Windows",
+  //   description: "Compatible with Windows 10 and above",
+  //   filename: "PentestGPT.exe",
+  //   showAsterisk: false
+  // },
+  // {
+  //   platform: "Linux",
+  //   description: "Available for major Linux distributions",
+  //   filename: "PentestGPT.AppImage",
+  //   showAsterisk: false
+  // }
 ]
 
 interface DownloadOptionProps {
