@@ -221,10 +221,12 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         return router.push("/setup")
       }
 
-      const subscription = await getSubscriptionByUserId(userFromAuth.id)
-      updateSubscription(subscription)
+      const [subscription, workspaces] = await Promise.all([
+        getSubscriptionByUserId(userFromAuth.id),
+        getWorkspacesByUserId(userFromAuth.id)
+      ])
 
-      const workspaces = await getWorkspacesByUserId(userFromAuth.id)
+      updateSubscription(subscription)
       setWorkspaces(workspaces)
 
       const members = await getTeamMembersByTeamId(

@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label"
 import { PentestGPTContext } from "@/context/context"
 import { getBillingPortalUrl } from "@/lib/server/stripe-url"
 import { SubscriptionStatus } from "@/types/chat"
-import * as Sentry from "@sentry/nextjs"
 import { IconRefresh } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
 import { FC, useContext, useState } from "react"
@@ -69,10 +68,6 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
       }
     } catch (error: any) {
       console.error("Error restoring subscription:", error)
-      Sentry.withScope(scope => {
-        scope.setExtra("user.id", profile?.user_id)
-        Sentry.captureMessage(error.message)
-      })
       toast.error(error.message)
     } finally {
       setLoading(false)
