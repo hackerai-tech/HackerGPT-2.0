@@ -181,21 +181,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   }, [])
 
   useEffect(() => {
-    ;(async () => {
-      if (window.location.pathname.includes("/login/verify")) {
-        return
-      }
-
-      const profile = await fetchStartingData()
-
-      if (profile) {
-        const hostedModelRes = await fetchHostedModels()
-        if (!hostedModelRes) return
-
-        setEnvKeyMap(hostedModelRes.envKeyMap)
-        setAvailableHostedModels(hostedModelRes.hostedModels)
-      }
-    })()
+    fetchStartingData()
   }, [])
 
   const updateSubscription = useCallback(
@@ -225,6 +211,10 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
       setUserEmail(userFromAuth.email || "Not available")
 
       const profile = await getProfileByUserId(userFromAuth.id)
+      if (!profile) {
+        return
+      }
+
       setProfile(profile)
 
       if (!profile.has_onboarded) {
@@ -266,7 +256,12 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         updateSubscription(subscription)
       }
 
-      return profile
+      const hostedModelRes = await fetchHostedModels()
+
+      if (hostedModelRes) {
+        setEnvKeyMap(hostedModelRes.envKeyMap)
+        setAvailableHostedModels(hostedModelRes.hostedModels)
+      }
     }
   }
 
@@ -450,6 +445,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         // PROFILE STORE
         profile,
         setProfile,
+        fetchStartingData,
 
         // CONTENT TYPE STORE
         contentType,

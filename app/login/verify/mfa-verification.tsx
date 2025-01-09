@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { Brand } from "@/components/ui/brand"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { IconAlertCircle } from "@tabler/icons-react"
 import { supabase } from "@/lib/supabase/browser-client"
 import { useRouter } from "next/navigation"
+import { PentestGPTContext } from "@/context/context"
+import { getHomeWorkspaceByUserId } from "@/db/workspaces"
 
 interface MFAVerificationProps {
   onVerify: (code: string) => Promise<{ success: boolean } | void>
@@ -17,17 +19,25 @@ export function MFAVerification({ onVerify }: MFAVerificationProps) {
   const [verifyCode, setVerifyCode] = useState("")
   const [error, setError] = useState("")
   const [isVerifying, setIsVerifying] = useState(false)
+  const { user } = useContext(PentestGPTContext)
+  const { fetchStartingData } = useContext(PentestGPTContext)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setIsVerifying(true)
 
+    if (!user) {
+      router.push("/login")
+      return
+    }
+
     try {
       const result = await onVerify(verifyCode)
       if (result?.success) {
-        // Force a full page reload after successful MFA verification
-        window.location.reload()
+        await fetchStartingData()
+        const homeWorkspaceId = await getHomeWorkspaceByUserId(user.id)
+        router.push(`/${homeWorkspaceId}/chat`)
       }
     } catch (error) {
       setError((error as Error).message)

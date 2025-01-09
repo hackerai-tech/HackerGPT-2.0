@@ -1,7 +1,9 @@
 import { supabase } from "@/lib/supabase/browser-client"
 import { TablesInsert, TablesUpdate } from "@/supabase/types"
 
-export const getHomeWorkspaceByUserId = async (userId: string) => {
+export const getHomeWorkspaceByUserId = async (
+  userId: string
+): Promise<string> => {
   if (!userId) {
     throw new Error("User ID is required")
   }
