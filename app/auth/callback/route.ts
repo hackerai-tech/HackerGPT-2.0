@@ -10,6 +10,10 @@ export async function GET(request: Request) {
     const supabase = await createClient()
 
     try {
+      // Get user before exchanging code
+      const { error: userError } = await supabase.auth.getUser()
+      if (userError) throw userError
+
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
       if (error) throw error
 
