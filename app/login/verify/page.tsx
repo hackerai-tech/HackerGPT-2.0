@@ -13,19 +13,20 @@ export default async function VerifyMFA() {
   const [
     { data: mfaCheck, error: mfaError },
     {
-      data: { user },
-      error: userError
+      data: { user }
     }
   ] = await Promise.all([supabase.rpc("check_mfa"), supabase.auth.getUser()])
 
-  // Handle errors more gracefully
-  if (mfaError || userError) {
-    console.error("Error checking MFA status:", mfaError || userError)
-    return redirect("/login")
+  // Handle MFA check error
+  if (mfaError) {
+    console.error("MFA check failed:", mfaError)
+    throw mfaError
   }
 
   // Redirect if user doesn't need MFA or isn't authenticated
-  if (!user || mfaCheck) {
+  if (mfaCheck) {
+    return redirect("/")
+  } else if (!user) {
     return redirect("/login")
   }
 
@@ -35,32 +36,24 @@ export default async function VerifyMFA() {
     const supabase = await createClient()
 
     try {
-      const { data: factors, error: factorsError } =
-        await supabase.auth.mfa.listFactors()
-      if (factorsError) {
-        return {
-          success: false,
-          error: "Invalid verification code. Please try again."
-        }
-      }
+      const { data: factors } = await supabase.auth.mfa.listFactors()
+      const totpFactor = factors?.totp[0]
 
-      const totpFactor = factors.totp[0]
       if (!totpFactor) {
         return {
           success: false,
-          error:
-            "MFA verification is currently disabled. Please contact support."
+          error: "MFA verification is not set up properly"
         }
       }
 
-      const { data: challenge, error: challengeError } =
-        await supabase.auth.mfa.challenge({
-          factorId: totpFactor.id
-        })
-      if (challengeError) {
+      const { data: challenge } = await supabase.auth.mfa.challenge({
+        factorId: totpFactor.id
+      })
+
+      if (!challenge) {
         return {
           success: false,
-          error: "Unable to verify code. Please try again."
+          error: "Failed to initiate verification"
         }
       }
 
@@ -69,19 +62,20 @@ export default async function VerifyMFA() {
         challengeId: challenge.id,
         code
       })
+
       if (verifyError) {
         return {
           success: false,
-          error: "Invalid verification code. Please try again."
+          error: "Invalid verification code"
         }
       }
 
       return { success: true }
     } catch (error) {
-      console.error("Unexpected error during MFA verification:", error)
+      console.error("MFA verification error:", error)
       return {
         success: false,
-        error: "An unexpected error occurred. Please try again."
+        error: "Verification failed. Please try again"
       }
     }
   }

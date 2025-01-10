@@ -11,7 +11,7 @@ import { PentestGPTContext } from "@/context/context"
 import { getHomeWorkspaceByUserId } from "@/db/workspaces"
 
 interface MFAVerificationProps {
-  onVerify: (code: string) => Promise<{ success: boolean } | void>
+  onVerify: (code: string) => Promise<{ success: boolean; error?: string }>
 }
 
 export function MFAVerification({ onVerify }: MFAVerificationProps) {
@@ -19,11 +19,12 @@ export function MFAVerification({ onVerify }: MFAVerificationProps) {
   const [verifyCode, setVerifyCode] = useState("")
   const [error, setError] = useState("")
   const [isVerifying, setIsVerifying] = useState(false)
-  const { user } = useContext(PentestGPTContext)
-  const { fetchStartingData } = useContext(PentestGPTContext)
+  const { user, fetchStartingData } = useContext(PentestGPTContext)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!user || verifyCode.length !== 6 || isVerifying) return
+
     setError("")
     setIsVerifying(true)
 
@@ -38,17 +39,27 @@ export function MFAVerification({ onVerify }: MFAVerificationProps) {
         await fetchStartingData()
         const homeWorkspaceId = await getHomeWorkspaceByUserId(user.id)
         router.push(`/${homeWorkspaceId}/chat`)
+      } else {
+        setError(result.error || "Verification failed")
+        setVerifyCode("")
       }
     } catch (error) {
-      setError((error as Error).message)
+      setError("Please try again")
+      setVerifyCode("")
+    } finally {
       setIsVerifying(false)
     }
   }
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut({ scope: "local" })
-    router.push("/login")
-    router.refresh()
+    try {
+      await supabase.auth.signOut({ scope: "local" })
+      router.push("/login")
+      router.refresh()
+    } catch (error) {
+      console.error("Sign out error:", error)
+      router.push("/login")
+    }
   }
 
   return (
