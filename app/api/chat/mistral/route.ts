@@ -11,8 +11,7 @@ import { handleErrorResponse } from "@/lib/models/llm/api-error"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { generateStandaloneQuestion } from "@/lib/models/question-generator"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
-import { createMistral } from "@ai-sdk/mistral"
-import { createOpenAI } from "@ai-sdk/openai"
+import { createOpenAI as createOpenRouterAI } from "@ai-sdk/openai"
 import { createDataStreamResponse, streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
@@ -63,7 +62,6 @@ export async function POST(request: Request) {
     let {
       providerBaseUrl,
       providerHeaders,
-      providerApiKey,
       selectedModel,
       rateLimitCheckResult,
       similarityTopK,
@@ -179,24 +177,10 @@ export async function POST(request: Request) {
     handleMessages(shouldUncensorResponse)
 
     try {
-      let provider
-
-      if (selectedModel.startsWith("mistralai")) {
-        provider = createMistral({
-          apiKey: providerApiKey,
-          baseURL: providerBaseUrl,
-          headers: providerHeaders
-        })
-      } else if (selectedModel.startsWith("mistral")) {
-        provider = createMistral({
-          apiKey: llmConfig.mistral.apiKey
-        })
-      } else {
-        provider = createOpenAI({
-          baseURL: providerBaseUrl,
-          headers: providerHeaders
-        })
-      }
+      const provider = createOpenRouterAI({
+        baseURL: providerBaseUrl,
+        headers: providerHeaders
+      })
 
       // Handle web search plugin
       switch (selectedPlugin) {
@@ -306,7 +290,6 @@ async function getProviderConfig(
   return {
     providerUrl,
     providerBaseUrl,
-    providerApiKey,
     providerHeaders,
     selectedModel,
     rateLimitCheckResult,
