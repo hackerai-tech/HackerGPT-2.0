@@ -2,8 +2,23 @@ import { createClient } from "@/lib/supabase/middleware"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function middleware(request: NextRequest) {
+  // Create initial response
+  const response = NextResponse.next({
+    request: {
+      headers: request.headers
+    }
+  })
+
   try {
-    const { supabase, response } = createClient(request)
+    const { supabase } = createClient(request)
+
+    // Always refresh session on callback URL
+    if (request.nextUrl.pathname === '/auth/callback') {
+      await supabase.auth.getUser()
+      return response
+    }
+
+    // For other routes, proceed with normal auth checks
     const { data: { user } } = await supabase.auth.getUser()
 
     if (user) {
@@ -42,11 +57,7 @@ export async function middleware(request: NextRequest) {
 
     return response
   } catch (e) {
-    return NextResponse.next({
-      request: {
-        headers: request.headers
-      }
-    })
+    return response
   }
 }
 
