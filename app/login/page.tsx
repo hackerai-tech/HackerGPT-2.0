@@ -81,6 +81,8 @@ export default async function Login({
   }
 
   const checkAuth = async () => {
+    "use server"
+
     const supabase = await createClient()
     const {
       data: { user }

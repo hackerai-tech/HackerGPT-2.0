@@ -2,6 +2,11 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { MFAVerification } from "./mfa-verification"
 
+interface VerifyMFAResponse {
+  success: boolean
+  error?: string
+}
+
 export default async function VerifyMFA() {
   const supabase = await createClient()
 
@@ -25,37 +30,53 @@ export default async function VerifyMFA() {
     return redirect("/login")
   }
 
-  const verifyMFA = async (code: string): Promise<{ success: boolean }> => {
+  const verifyMFA = async (code: string): Promise<VerifyMFAResponse> => {
     "use server"
 
     const supabase = await createClient()
 
     try {
-      const { data: factors, error: factorsError } =
-        await supabase.auth.mfa.listFactors()
-      if (factorsError) throw factorsError
+      const { data: factors } = await supabase.auth.mfa.listFactors()
+      const totpFactor = factors?.totp[0]
 
-      const totpFactor = factors.totp[0]
       if (!totpFactor) {
-        throw new Error("No TOTP factors found!")
+        return {
+          success: false,
+          error: "MFA verification is not set up properly"
+        }
       }
 
-      const { data: challenge, error: challengeError } =
-        await supabase.auth.mfa.challenge({
-          factorId: totpFactor.id
-        })
-      if (challengeError) throw challengeError
+      const { data: challenge } = await supabase.auth.mfa.challenge({
+        factorId: totpFactor.id
+      })
+
+      if (!challenge) {
+        return {
+          success: false,
+          error: "Failed to initiate verification"
+        }
+      }
 
       const { error: verifyError } = await supabase.auth.mfa.verify({
         factorId: totpFactor.id,
         challengeId: challenge.id,
         code
       })
-      if (verifyError) throw verifyError
+
+      if (verifyError) {
+        return {
+          success: false,
+          error: "Invalid verification code"
+        }
+      }
 
       return { success: true }
     } catch (error) {
-      throw error
+      console.error("MFA verification error:", error)
+      return {
+        success: false,
+        error: "Verification failed. Please try again"
+      }
     }
   }
 

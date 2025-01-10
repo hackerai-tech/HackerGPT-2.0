@@ -11,7 +11,7 @@ import { PentestGPTContext } from "@/context/context"
 import { getHomeWorkspaceByUserId } from "@/db/workspaces"
 
 interface MFAVerificationProps {
-  onVerify: (code: string) => Promise<{ success: boolean } | void>
+  onVerify: (code: string) => Promise<{ success: boolean; error?: string }>
 }
 
 export function MFAVerification({ onVerify }: MFAVerificationProps) {
@@ -19,11 +19,12 @@ export function MFAVerification({ onVerify }: MFAVerificationProps) {
   const [verifyCode, setVerifyCode] = useState("")
   const [error, setError] = useState("")
   const [isVerifying, setIsVerifying] = useState(false)
-  const { user } = useContext(PentestGPTContext)
-  const { fetchStartingData } = useContext(PentestGPTContext)
+  const { user, fetchStartingData } = useContext(PentestGPTContext)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!user || verifyCode.length !== 6 || isVerifying) return
+
     setError("")
     setIsVerifying(true)
 
@@ -38,60 +39,27 @@ export function MFAVerification({ onVerify }: MFAVerificationProps) {
         await fetchStartingData()
         const homeWorkspaceId = await getHomeWorkspaceByUserId(user.id)
         router.push(`/${homeWorkspaceId}/chat`)
-      }
-    } catch (err) {
-      setIsVerifying(false)
-
-      // Handle Supabase Auth specific errors
-      if (err instanceof Error) {
-        const error = err as any // for accessing .code property
-
-        switch (error.code) {
-          case "mfa_verification_failed":
-            setError("Invalid verification code. Please try again.")
-            break
-          case "mfa_challenge_expired":
-            setError("Verification code has expired. Please request a new one.")
-            break
-          case "over_request_rate_limit":
-            setError(
-              "Too many attempts. Please wait a few minutes before trying again."
-            )
-            break
-          case "mfa_totp_verify_not_enabled":
-            setError(
-              "MFA verification is currently disabled. Please contact support."
-            )
-            break
-          case "mfa_verification_rejected":
-            setError(
-              "Verification was rejected. Please try again or contact support."
-            )
-            break
-          default:
-            // Check for specific error messages as fallback
-            if (error.message?.includes("Invalid one-time password")) {
-              setError("Invalid verification code. Please try again.")
-            } else if (error.message?.includes("rate limit")) {
-              setError("Too many attempts. Please wait a moment and try again.")
-            } else {
-              console.error("MFA Verification Error:", error)
-              setError(
-                "Unable to verify code. Please try again or contact support."
-              )
-            }
-        }
       } else {
-        console.error("Unknown MFA Error:", err)
-        setError("An unexpected error occurred. Please try again.")
+        setError(result.error || "Verification failed")
+        setVerifyCode("")
       }
+    } catch (error) {
+      setError("Please try again")
+      setVerifyCode("")
+    } finally {
+      setIsVerifying(false)
     }
   }
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut({ scope: "local" })
-    router.push("/login")
-    router.refresh()
+    try {
+      await supabase.auth.signOut({ scope: "local" })
+      router.push("/login")
+      router.refresh()
+    } catch (error) {
+      console.error("Sign out error:", error)
+      router.push("/login")
+    }
   }
 
   return (

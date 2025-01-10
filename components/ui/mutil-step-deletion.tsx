@@ -1,9 +1,11 @@
-import { FC, useState } from "react"
+import { FC, useState, useEffect } from "react"
 import { DialogPanel, DialogTitle } from "@headlessui/react"
 import { Button } from "../ui/button"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { Input } from "../ui/input"
 import { Loader2 } from "lucide-react"
+import { useMFA } from "../utility/mfa/use-mfa"
+import { toast } from "sonner"
 
 interface MultiStepDeleteAccountDialogProps {
   isOpen: boolean
@@ -18,22 +20,56 @@ export const MultiStepDeleteAccountDialog: FC<
 > = ({ isOpen, onClose, onConfirm, userEmail, isDeleting }) => {
   const [step, setStep] = useState(1)
   const [confirmEmail, setConfirmEmail] = useState("")
+  const [mfaCode, setMfaCode] = useState("")
+  const { factors, verifyBeforeUnenroll, fetchFactors } = useMFA()
+  const hasMFA = factors.length > 0 && factors[0]?.status === "verified"
 
-  const handleNextStep = () => {
-    if (step < 3) {
-      setStep(step + 1)
+  useEffect(() => {
+    if (isOpen) {
+      fetchFactors()
+    }
+  }, [isOpen])
+
+  const handleClose = () => {
+    if (!isDeleting) {
+      // Reset all state
+      setStep(1)
+      setConfirmEmail("")
+      setMfaCode("")
+      onClose()
     }
   }
 
-  const handlePreviousStep = () => {
-    if (step > 1) {
-      setStep(step - 1)
+  const handleNextStep = async () => {
+    if (isDeleting || step >= 3) return
+
+    if (step === 2) {
+      if (hasMFA) {
+        if (mfaCode.length !== 6) return
+        try {
+          await verifyBeforeUnenroll(mfaCode)
+          setStep(3)
+          setMfaCode("") // Clear MFA code after verification
+        } catch (error) {
+          return
+        }
+      } else if (confirmEmail.toLowerCase() === userEmail.toLowerCase()) {
+        setStep(3)
+      }
+    } else {
+      setStep(prev => Math.min(prev + 1, 3))
     }
   }
 
   const handleConfirm = async () => {
-    if (confirmEmail.toLowerCase() === userEmail.toLowerCase()) {
+    if (isDeleting) return
+
+    try {
+      // Verify MFA again before final deletion if enabled
       await onConfirm()
+    } catch (error) {
+      toast.error("Failed to verify MFA")
+      return
     }
   }
 
@@ -47,7 +83,7 @@ export const MultiStepDeleteAccountDialog: FC<
               be undone.
             </p>
             <div className="mt-4 flex justify-center space-x-4">
-              <Button onClick={onClose} disabled={isDeleting}>
+              <Button onClick={handleClose} disabled={isDeleting}>
                 Cancel
               </Button>
               <Button
@@ -61,28 +97,36 @@ export const MultiStepDeleteAccountDialog: FC<
           </>
         )
       case 2:
-        return (
+        return hasMFA ? (
           <>
-            <p className="text-center text-sm">
-              Deleting your account will remove all your data, including chats,
-              settings, and personal information.
+            <p className="mb-4 text-center text-sm">
+              For security purposes, please enter your 2FA code to continue
             </p>
+            <Input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={6}
+              value={mfaCode}
+              onChange={e => setMfaCode(e.target.value.replace(/\D/g, ""))}
+              placeholder="000000"
+              className="mb-4 text-center"
+              disabled={isDeleting}
+            />
             <div className="mt-4 flex justify-center space-x-4">
-              <Button onClick={handlePreviousStep} disabled={isDeleting}>
-                Back
+              <Button onClick={handleClose} disabled={isDeleting}>
+                Cancel
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleNextStep}
-                disabled={isDeleting}
+                disabled={mfaCode.length !== 6 || isDeleting}
               >
-                I understand, continue
+                Continue
               </Button>
             </div>
           </>
-        )
-      case 3:
-        return (
+        ) : (
           <>
             <p className="mb-4 text-center text-sm">
               To confirm account deletion, please enter your email address:{" "}
@@ -97,16 +141,41 @@ export const MultiStepDeleteAccountDialog: FC<
               disabled={isDeleting}
             />
             <div className="flex justify-center space-x-4">
-              <Button onClick={handlePreviousStep} disabled={isDeleting}>
-                Back
+              <Button onClick={handleClose} disabled={isDeleting}>
+                Cancel
               </Button>
               <Button
                 variant="destructive"
-                onClick={handleConfirm}
+                onClick={handleNextStep}
                 disabled={
                   confirmEmail.toLowerCase() !== userEmail.toLowerCase() ||
                   isDeleting
                 }
+              >
+                Continue
+              </Button>
+            </div>
+          </>
+        )
+      case 3:
+        return (
+          <>
+            <p className="text-center text-sm">
+              Deleting your account will remove all your data, including chats,
+              settings, and personal information.
+            </p>
+            <p className="my-4 text-center text-sm">
+              This action cannot be undone. Click &quot;Delete Account&quot; to
+              proceed.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <Button onClick={handleClose} disabled={isDeleting}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirm}
+                disabled={isDeleting}
               >
                 {isDeleting ? (
                   <>
@@ -124,10 +193,7 @@ export const MultiStepDeleteAccountDialog: FC<
   }
 
   return (
-    <TransitionedDialog
-      isOpen={isOpen}
-      onClose={() => !isDeleting && onClose()}
-    >
+    <TransitionedDialog isOpen={isOpen} onClose={handleClose}>
       <DialogPanel className="bg-popover w-full max-w-md overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all">
         <DialogTitle
           as="h3"
