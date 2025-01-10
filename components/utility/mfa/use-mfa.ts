@@ -13,12 +13,19 @@ export const useMFA = () => {
 
   const fetchFactors = async () => {
     try {
+      setIsLoading(true)
       const { data, error } = await supabase.auth.mfa.listFactors()
       if (error) throw error
-      setFactors([...data.totp, ...data.phone])
+      
+      // Only include verified factors
+      const verifiedFactors = [...data.totp, ...data.phone].filter(
+        factor => factor.status === "verified"
+      )
+      setFactors(verifiedFactors)
     } catch (error) {
       console.error("Error fetching MFA factors:", error)
       toast.error("Failed to load MFA status")
+      setFactors([]) // Reset factors on error
     } finally {
       setIsLoading(false)
     }
@@ -145,6 +152,7 @@ export const useMFA = () => {
     startEnrollment,
     verifyMFA,
     verifyBeforeUnenroll,
-    unenrollMFA
+    unenrollMFA,
+    fetchFactors
   }
 }
