@@ -63,7 +63,7 @@ export const MultiStepDeleteAccountDialog: FC<
 
   const handleConfirm = async () => {
     if (isDeleting) return
-    
+
     try {
       // Verify MFA again before final deletion if enabled
       await onConfirm()
@@ -129,7 +129,8 @@ export const MultiStepDeleteAccountDialog: FC<
         ) : (
           <>
             <p className="mb-4 text-center text-sm">
-              To confirm account deletion, please enter your email address: {userEmail}
+              To confirm account deletion, please enter your email address:{" "}
+              {userEmail}
             </p>
             <Input
               type="email"
@@ -146,7 +147,10 @@ export const MultiStepDeleteAccountDialog: FC<
               <Button
                 variant="destructive"
                 onClick={handleNextStep}
-                disabled={confirmEmail.toLowerCase() !== userEmail.toLowerCase() || isDeleting}
+                disabled={
+                  confirmEmail.toLowerCase() !== userEmail.toLowerCase() ||
+                  isDeleting
+                }
               >
                 Continue
               </Button>
@@ -161,7 +165,8 @@ export const MultiStepDeleteAccountDialog: FC<
               settings, and personal information.
             </p>
             <p className="my-4 text-center text-sm">
-              This action cannot be undone. Click &quot;Delete Account&quot; to proceed.
+              This action cannot be undone. Click &quot;Delete Account&quot; to
+              proceed.
             </p>
             <div className="flex justify-center space-x-4">
               <Button onClick={handleClose} disabled={isDeleting}>
@@ -188,10 +193,7 @@ export const MultiStepDeleteAccountDialog: FC<
   }
 
   return (
-    <TransitionedDialog
-      isOpen={isOpen}
-      onClose={handleClose}
-    >
+    <TransitionedDialog isOpen={isOpen} onClose={handleClose}>
       <DialogPanel className="bg-popover w-full max-w-md overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all">
         <DialogTitle
           as="h3"

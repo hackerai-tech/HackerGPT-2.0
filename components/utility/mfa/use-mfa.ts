@@ -16,7 +16,7 @@ export const useMFA = () => {
       setIsLoading(true)
       const { data, error } = await supabase.auth.mfa.listFactors()
       if (error) throw error
-      
+
       // Only include verified factors
       const verifiedFactors = [...data.totp, ...data.phone].filter(
         factor => factor.status === "verified"
