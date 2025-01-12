@@ -330,7 +330,7 @@ export const toVercelChatMessages = (
  */
 export function messagesIncludeImages(messages: BuiltChatMessage[]): boolean {
   const recentMessages = messages.slice(-6)
-  
+
   return recentMessages.some(
     message =>
       Array.isArray(message.content) &&
