@@ -13,6 +13,7 @@ import { generateStandaloneQuestion } from "@/lib/models/question-generator"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createOpenAI as createOpenRouterAI } from "@ai-sdk/openai"
 import { createMistral } from "@ai-sdk/mistral"
+import { createDeepSeek } from "@ai-sdk/deepseek"
 import { createDataStreamResponse, streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
@@ -182,6 +183,12 @@ export async function POST(request: Request) {
       let provider
       if (selectedModel.startsWith("mistralai")) {
         provider = createMistral({
+          apiKey: providerApiKey,
+          baseURL: providerBaseUrl,
+          headers: providerHeaders
+        })
+      } else if (selectedModel.startsWith("deepseek")) {
+        provider = createDeepSeek({
           apiKey: providerApiKey,
           baseURL: providerBaseUrl,
           headers: providerHeaders

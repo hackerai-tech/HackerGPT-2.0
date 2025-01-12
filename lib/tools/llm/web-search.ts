@@ -42,6 +42,8 @@ export async function executeWebSearch({
   const { providerHeaders, selectedModel } =
     await getProviderConfig(chatSettings)
 
+  console.log("[WebSearch] Executing web search with model:", selectedModel)
+
   const response = await fetch(llmConfig.openrouter.url, {
     method: "POST",
     headers: {
