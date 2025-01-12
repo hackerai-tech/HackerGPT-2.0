@@ -13,13 +13,13 @@ import { generateStandaloneQuestion } from "@/lib/models/question-generator"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createOpenAI as createOpenRouterAI } from "@ai-sdk/openai"
 import { createMistral } from "@ai-sdk/mistral"
-import { createDataStreamResponse, streamText } from "ai"
+import { createDeepSeek } from "@ai-sdk/deepseek"
+import { streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
 import { executeWebSearch } from "@/lib/tools/llm/web-search"
-// import { executeFragments } from "@/lib/tools/e2b/fragments/fragment-tool"
-import { handlePluginExecution } from "@/lib/ai-helper"
+import { createStreamResponse } from "@/lib/ai-helper"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -120,8 +120,6 @@ export async function POST(request: Request) {
           llmConfig.systemPrompts.pentestgptCurrentDateOnly,
           true,
           similarityTopK,
-          providerBaseUrl,
-          providerHeaders,
           llmConfig.models.pentestgpt_standalone_question_openrouter
         )
 
@@ -160,15 +158,15 @@ export async function POST(request: Request) {
 
     const handleMessages = (shouldUncensor: boolean) => {
       if (includeImages) {
-        selectedModel = "mistralai/pixtral-large-2411"
+        selectedModel = "pixtral-large-2411"
         return filterEmptyAssistantMessages(messages)
       }
 
       if (shouldUncensor) {
         if (selectedModel === "deepseek/deepseek-chat") {
           selectedModel = isPentestGPTPro
-            ? "mistralai/mistral-large"
-            : "mistralai/mistral-small"
+            ? "mistral-large-2411"
+            : "mistral-small-2409"
         }
         return handleAssistantMessages(messages)
       }
@@ -180,8 +178,22 @@ export async function POST(request: Request) {
 
     try {
       let provider
+
       if (selectedModel.startsWith("mistralai")) {
         provider = createMistral({
+          apiKey: providerApiKey,
+          baseURL: providerBaseUrl,
+          headers: providerHeaders
+        })
+      } else if (
+        selectedModel.startsWith("mistral-") ||
+        selectedModel.startsWith("pixtral")
+      ) {
+        provider = createMistral({
+          apiKey: llmConfig.mistral.apiKey
+        })
+      } else if (selectedModel.startsWith("deepseek")) {
+        provider = createDeepSeek({
           apiKey: providerApiKey,
           baseURL: providerBaseUrl,
           headers: providerHeaders
@@ -196,64 +208,44 @@ export async function POST(request: Request) {
       // Handle web search plugin
       switch (selectedPlugin) {
         case PluginID.WEB_SEARCH:
-          return handlePluginExecution(async dataStream => {
+          return createStreamResponse(async dataStream => {
             await executeWebSearch({
               config: { chatSettings, messages, profile, dataStream }
             })
           })
-
-        // case PluginID.ARTIFACTS:
-        //   return handlePluginExecution(async dataStream => {
-        //     await executeFragments({
-        //       config: { chatSettings, messages, profile, dataStream }
-        //     })
-        //   })
       }
 
       // Remove last message if it's a continuation to remove the continue prompt
       const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
 
-      return createDataStreamResponse({
-        execute: dataStream => {
-          dataStream.writeData({ ragUsed, ragId })
+      return createStreamResponse(dataStream => {
+        dataStream.writeData({ ragUsed, ragId })
 
-          let tools
-          if (isPentestGPTPro) {
-            const toolSchemas = createToolSchemas({
-              chatSettings,
-              messages: cleanedMessages,
-              profile,
-              dataStream
-            })
-            tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
-          }
-
-          const result = streamText({
-            model: provider(
-              selectedModel || "",
-              isPentestGPTPro ? { parallelToolCalls: false } : {}
-            ),
-            system: systemPrompt,
-            messages: toVercelChatMessages(cleanedMessages, includeImages),
-            temperature: modelTemperature,
-            maxTokens: isPentestGPTPro ? 2048 : 1024,
-            // abortSignal isn't working for some reason.
-            abortSignal: request.signal,
-            ...(isPentestGPTPro ? { tools } : null)
+        let tools
+        if (isPentestGPTPro) {
+          const toolSchemas = createToolSchemas({
+            chatSettings,
+            messages: cleanedMessages,
+            profile,
+            dataStream
           })
-
-          result.mergeIntoDataStream(dataStream)
-        },
-        onError: error => {
-          // Log the error message to the server console
-          console.error(
-            "Error occurred:",
-            error instanceof Error ? error.message : String(error)
-          )
-
-          // Return a generic error message to the client
-          return "An error occurred while processing your request."
+          tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
         }
+
+        const result = streamText({
+          model: provider(
+            selectedModel || "",
+            isPentestGPTPro ? { parallelToolCalls: false } : {}
+          ),
+          system: systemPrompt,
+          messages: toVercelChatMessages(cleanedMessages, includeImages),
+          temperature: modelTemperature,
+          maxTokens: isPentestGPTPro ? 2048 : 1024,
+          abortSignal: request.signal,
+          ...(isPentestGPTPro ? { tools } : null)
+        })
+
+        result.mergeIntoDataStream(dataStream)
       })
     } catch (error) {
       return handleErrorResponse(error)

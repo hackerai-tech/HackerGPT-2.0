@@ -5,11 +5,11 @@ import { IconArrowUpRight } from "@tabler/icons-react"
 export const metadata: Metadata = {
   title: "Download PentestGPT",
   description:
-    "Download PentestGPT desktop app for macOS. Experience advanced AI-powered penetration testing with a native desktop experience. Available for macOS 14+ with Apple Silicon.",
+    "Download PentestGPT desktop app and experience advanced AI-powered penetration testing with a native desktop experience.",
   openGraph: {
     title: "Download PentestGPT Desktop App",
     description:
-      "Get PentestGPT on your desktop for enhanced penetration testing capabilities. Native app available for macOS.",
+      "Get PentestGPT on your desktop for enhanced penetration testing capabilities.",
     type: "website",
     images: [
       {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Download PentestGPT Desktop App",
     description:
-      "Get PentestGPT on your desktop for enhanced penetration testing capabilities. Native app available for macOS.",
+      "Get PentestGPT on your desktop for enhanced penetration testing capabilities.",
     images: [`${process.env.NEXT_PUBLIC_BUCKET_URL}/pentestgpt-mac-app.png`]
   }
 }
@@ -37,6 +37,12 @@ const DOWNLOAD_OPTIONS = [
     description: "For macOS 14+ with Apple Silicon",
     filename: "PentestGPT.dmg",
     showAsterisk: true
+  },
+  {
+    platform: "Linux",
+    description: "For AMD64 architecture only",
+    filename: "PentestGPT.AppImage",
+    showAsterisk: false
   }
   // {
   //   platform: "Windows",
@@ -44,12 +50,6 @@ const DOWNLOAD_OPTIONS = [
   //   filename: "PentestGPT.exe",
   //   showAsterisk: false
   // },
-  // {
-  //   platform: "Linux",
-  //   description: "Available for major Linux distributions",
-  //   filename: "PentestGPT.AppImage",
-  //   showAsterisk: false
-  // }
 ]
 
 interface DownloadOptionProps {
@@ -137,6 +137,8 @@ export default function DownloadPage() {
         <p className="text-xs italic">
           *The macOS desktop app is only available for macOS 14+ with Apple
           Silicon (M1 or better).
+          <br />
+          The Linux app is compatible with AMD64 architecture only.
           <br />
           Access to the app may depend on your company&apos;s IT policies.
         </p>

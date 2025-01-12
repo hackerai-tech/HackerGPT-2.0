@@ -26,6 +26,9 @@ const llmConfig = {
     url: "https://api.openai.com/v1/chat/completions",
     apiKey: process.env.OPENAI_API_KEY
   },
+  mistral: {
+    apiKey: process.env.MISTRAL_API_KEY
+  },
   systemPrompts: {
     // For question generator
     pentestgptCurrentDateOnly: `${initialSystemPrompt}\n${currentDate}`,

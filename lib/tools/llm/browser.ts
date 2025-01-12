@@ -119,6 +119,8 @@ export async function executeBrowserTool({
     apiKey: llmConfig.openai.apiKey
   })
 
+  console.log("[BrowserTool] Executing browser tool with model:", selectedModel)
+
   const { fullStream } = streamText({
     model: openai(selectedModel),
     system: buildSystemPrompt(

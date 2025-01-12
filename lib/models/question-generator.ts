@@ -1,7 +1,8 @@
 import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
-import { createOpenAI } from "@ai-sdk/openai"
 import { generateText } from "ai"
 import endent from "endent"
+import llmConfig from "./llm/llm-config"
+import { createMistral } from "@ai-sdk/mistral"
 
 export async function generateStandaloneQuestion(
   messages: any[],
@@ -9,8 +10,6 @@ export async function generateStandaloneQuestion(
   systemMessageContent: string,
   generateAtomicQuestions: boolean = false,
   numAtomicQuestions: number = 4,
-  openRouterBaseUrl: string | undefined,
-  openRouterHeaders: any,
   selectedStandaloneQuestionModel: string | undefined
 ) {
   filterEmptyAssistantMessages(messages)
@@ -53,17 +52,12 @@ export async function generateStandaloneQuestion(
   }
 
   try {
-    const openrouter = createOpenAI({
-      baseURL: openRouterBaseUrl,
-      headers: {
-        ...openRouterHeaders,
-        "HTTP-Referer": "https://pentestgpt.com/question-generator",
-        "X-Title": "question-generator"
-      }
+    const mistral = createMistral({
+      apiKey: llmConfig.mistral.apiKey
     })
 
     const result = await generateText({
-      model: openrouter(`${selectedStandaloneQuestionModel}`),
+      model: mistral(`${selectedStandaloneQuestionModel}`),
       temperature: 0.5,
       maxTokens: 1024,
       messages: [

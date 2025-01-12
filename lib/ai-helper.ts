@@ -122,17 +122,33 @@ export function updateSystemMessage(
   }
 }
 
-export const handlePluginExecution = (
-  executor: (dataStream: any) => Promise<void>
-) => {
+export function handleStreamError(error: unknown): string {
+  const errorStr = String(error)
+
+  // Ignore abort errors
+  if (
+    error instanceof Error &&
+    (error.message === "aborted" ||
+      (error as any).code === "ECONNRESET" ||
+      errorStr.includes("ResponseAborted") ||
+      errorStr.includes("Network connection lost"))
+  ) {
+    return "Stream aborted by client"
+  }
+
+  // Log other errors
+  console.error(
+    "Error occurred:",
+    error instanceof Error ? error.message : errorStr
+  )
+
+  // Return a generic error message to the client
+  return "An error occurred while processing your request."
+}
+
+export const createStreamResponse = (executor: (dataStream: any) => void) => {
   return createDataStreamResponse({
     execute: executor,
-    onError: error => {
-      console.error(
-        "Error occurred:",
-        error instanceof Error ? error.message : String(error)
-      )
-      throw error
-    }
+    onError: handleStreamError
   })
 }
