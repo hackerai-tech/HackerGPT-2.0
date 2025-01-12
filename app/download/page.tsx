@@ -5,11 +5,11 @@ import { IconArrowUpRight } from "@tabler/icons-react"
 export const metadata: Metadata = {
   title: "Download PentestGPT",
   description:
-    "Download PentestGPT desktop app for macOS. Experience advanced AI-powered penetration testing with a native desktop experience. Available for macOS 14+ with Apple Silicon.",
+    "Download PentestGPT desktop app and experience advanced AI-powered penetration testing with a native desktop experience.",
   openGraph: {
     title: "Download PentestGPT Desktop App",
     description:
-      "Get PentestGPT on your desktop for enhanced penetration testing capabilities. Native app available for macOS.",
+      "Get PentestGPT on your desktop for enhanced penetration testing capabilities.",
     type: "website",
     images: [
       {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Download PentestGPT Desktop App",
     description:
-      "Get PentestGPT on your desktop for enhanced penetration testing capabilities. Native app available for macOS.",
+      "Get PentestGPT on your desktop for enhanced penetration testing capabilities.",
     images: [`${process.env.NEXT_PUBLIC_BUCKET_URL}/pentestgpt-mac-app.png`]
   }
 }
