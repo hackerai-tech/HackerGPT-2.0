@@ -8,13 +8,12 @@ import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { createOpenAI } from "@ai-sdk/openai"
-import { createDataStreamResponse, streamText } from "ai"
+import { streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
 import { executeWebSearch } from "@/lib/tools/llm/web-search"
-// import { executeFragments } from "@/lib/tools/e2b/fragments/fragment-tool"
-import { handlePluginExecution } from "@/lib/ai-helper"
+import { createStreamResponse } from "@/lib/ai-helper"
 import { executeTerminal } from "@/lib/tools/llm/terminal"
 
 export const runtime: ServerRuntime = "edge"
@@ -58,25 +57,18 @@ export async function POST(request: Request) {
     // Handle special plugins
     switch (selectedPlugin) {
       case PluginID.WEB_SEARCH:
-        return handlePluginExecution(async dataStream => {
+        return createStreamResponse(async dataStream => {
           await executeWebSearch({
             config: { chatSettings, messages, profile, dataStream }
           })
         })
 
       case PluginID.TERMINAL || isTerminalContinuation:
-        return handlePluginExecution(async dataStream => {
+        return createStreamResponse(async dataStream => {
           await executeTerminal({
             config: { messages, profile, dataStream, isTerminalContinuation }
           })
         })
-
-      // case PluginID.ARTIFACTS:
-      //   return handlePluginExecution(async dataStream => {
-      //     await executeFragments({
-      //       config: { chatSettings, messages, profile, dataStream }
-      //     })
-      //   })
     }
 
     const systemPrompt = buildSystemPrompt(
@@ -89,35 +81,26 @@ export async function POST(request: Request) {
       apiKey: llmConfig.openai.apiKey
     })
 
-    return createDataStreamResponse({
-      execute: dataStream => {
-        const { getSelectedSchemas } = createToolSchemas({
-          chatSettings,
-          messages,
-          profile,
-          dataStream,
-          isTerminalContinuation
-        })
+    return createStreamResponse(dataStream => {
+      const { getSelectedSchemas } = createToolSchemas({
+        chatSettings,
+        messages,
+        profile,
+        dataStream,
+        isTerminalContinuation
+      })
 
-        const result = streamText({
-          model: openai("gpt-4o", { parallelToolCalls: false }),
-          system: systemPrompt,
-          messages: toVercelChatMessages(messages, true),
-          temperature: 0.5,
-          maxTokens: 2048,
-          abortSignal: request.signal,
-          tools: getSelectedSchemas("all")
-        })
+      const result = streamText({
+        model: openai("gpt-4o", { parallelToolCalls: false }),
+        system: systemPrompt,
+        messages: toVercelChatMessages(messages, true),
+        temperature: 0.5,
+        maxTokens: 2048,
+        abortSignal: request.signal,
+        tools: getSelectedSchemas("all")
+      })
 
-        result.mergeIntoDataStream(dataStream)
-      },
-      onError: error => {
-        console.error(
-          "Error occurred:",
-          error instanceof Error ? error.message : String(error)
-        )
-        throw error
-      }
+      result.mergeIntoDataStream(dataStream)
     })
   } catch (error: any) {
     const errorMessage = error.message || "An unexpected error occurred"
