@@ -12,6 +12,7 @@ import llmConfig from "@/lib/models/llm/llm-config"
 import { generateStandaloneQuestion } from "@/lib/models/question-generator"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createOpenAI as createOpenRouterAI } from "@ai-sdk/openai"
+import { createMistral } from "@ai-sdk/mistral"
 import { createDataStreamResponse, streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
@@ -66,7 +67,8 @@ export async function POST(request: Request) {
       rateLimitCheckResult,
       similarityTopK,
       modelTemperature,
-      isPentestGPTPro
+      isPentestGPTPro,
+      providerApiKey
     } = await getProviderConfig(chatSettings, profile, country)
 
     if (rateLimitCheckResult !== null) {
@@ -177,10 +179,19 @@ export async function POST(request: Request) {
     handleMessages(shouldUncensorResponse)
 
     try {
-      const provider = createOpenRouterAI({
-        baseURL: providerBaseUrl,
-        headers: providerHeaders
-      })
+      let provider
+      if (selectedModel.startsWith("mistralai")) {
+        provider = createMistral({
+          apiKey: providerApiKey,
+          baseURL: providerBaseUrl,
+          headers: providerHeaders
+        })
+      } else {
+        provider = createOpenRouterAI({
+          baseURL: providerBaseUrl,
+          headers: providerHeaders
+        })
+      }
 
       // Handle web search plugin
       switch (selectedPlugin) {
@@ -295,6 +306,7 @@ async function getProviderConfig(
     rateLimitCheckResult,
     similarityTopK,
     isPentestGPTPro,
-    modelTemperature
+    modelTemperature,
+    providerApiKey
   }
 }
