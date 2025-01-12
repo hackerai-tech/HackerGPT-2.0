@@ -121,8 +121,6 @@ export async function POST(request: Request) {
           llmConfig.systemPrompts.pentestgptCurrentDateOnly,
           true,
           similarityTopK,
-          providerBaseUrl,
-          providerHeaders,
           llmConfig.models.pentestgpt_standalone_question_openrouter
         )
 
