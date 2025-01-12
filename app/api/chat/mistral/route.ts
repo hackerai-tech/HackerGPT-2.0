@@ -168,8 +168,8 @@ export async function POST(request: Request) {
       if (shouldUncensor) {
         if (selectedModel === "deepseek/deepseek-chat") {
           selectedModel = isPentestGPTPro
-            ? "mistralai/mistral-large"
-            : "mistralai/mistral-small"
+            ? "mistral-large-2411"
+            : "mistral-small-2409"
         }
         return handleAssistantMessages(messages)
       }
@@ -181,11 +181,16 @@ export async function POST(request: Request) {
 
     try {
       let provider
+
       if (selectedModel.startsWith("mistralai")) {
         provider = createMistral({
           apiKey: providerApiKey,
           baseURL: providerBaseUrl,
           headers: providerHeaders
+        })
+      } else if (selectedModel.startsWith("mistral-")) {
+        provider = createMistral({
+          apiKey: llmConfig.mistral.apiKey
         })
       } else if (selectedModel.startsWith("deepseek")) {
         provider = createDeepSeek({
@@ -220,6 +225,8 @@ export async function POST(request: Request) {
       // Remove last message if it's a continuation to remove the continue prompt
       const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
 
+      console.log(selectedModel)
+      console.log(provider)
       return createDataStreamResponse({
         execute: dataStream => {
           dataStream.writeData({ ragUsed, ragId })
