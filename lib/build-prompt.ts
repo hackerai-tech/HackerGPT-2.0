@@ -329,7 +329,9 @@ export const toVercelChatMessages = (
  * @returns boolean - True if any messages contain an image, false otherwise
  */
 export function messagesIncludeImages(messages: BuiltChatMessage[]): boolean {
-  return messages.some(
+  const recentMessages = messages.slice(-6)
+  
+  return recentMessages.some(
     message =>
       Array.isArray(message.content) &&
       message.content.some(
