@@ -43,10 +43,6 @@ export async function buildFinalMessages(
   let CHUNK_SIZE = 8000
   if (chatSettings.model === GPT4o.modelId) {
     CHUNK_SIZE = 12000
-  } else if (chatSettings.model === "mistral-large") {
-    CHUNK_SIZE = 9000
-  } else if (chatSettings.model === "mistral-medium") {
-    CHUNK_SIZE = 9000
   }
 
   // Lower chunk size for terminal plugins
@@ -56,7 +52,7 @@ export async function buildFinalMessages(
 
   // Adjusting the chunk size for RAG
   if (shouldUseRAG) {
-    CHUNK_SIZE = 7500
+    CHUNK_SIZE = 6000
   }
 
   const PROMPT_TOKENS = encode(BUILT_PROMPT).length
