@@ -114,7 +114,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.5",
     "@types/pdf-parse": "^1.1.4",
-    "@types/react": "^19.0.3",
+    "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.2",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/uuid": "^10.0.0",
