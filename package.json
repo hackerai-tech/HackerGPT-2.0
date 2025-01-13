@@ -78,7 +78,7 @@
     "endent": "^2.1.0",
     "gpt-tokenizer": "^2.8.1",
     "husky": "^9.1.7",
-    "isomorphic-dompurify": "^2.19.0",
+    "isomorphic-dompurify": "^2.20.0",
     "jest-environment-jsdom": "^29.7.0",
     "langchain": "^0.3.9",
     "lucide-react": "^0.469.0",
