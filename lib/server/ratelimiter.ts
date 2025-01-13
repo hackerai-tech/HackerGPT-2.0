@@ -190,10 +190,10 @@ function _makeStorageKey(userId: string, model: string): string {
   return `ratelimit:${userId}:${fixedModelName}`
 }
 
-export function resetRateLimit(model: string, userId: string) {
-  const storageKey = _makeStorageKey(userId, model)
-  return getRedis().del(storageKey)
-}
+// export function resetRateLimit(model: string, userId: string) {
+//   const storageKey = _makeStorageKey(userId, model)
+//   return getRedis().del(storageKey)
+// }
 
 export function getRateLimitErrorMessage(
   timeRemaining: number,

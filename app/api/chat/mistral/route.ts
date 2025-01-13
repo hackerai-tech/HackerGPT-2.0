@@ -176,48 +176,48 @@ export async function POST(request: Request) {
 
     handleMessages(shouldUncensorResponse)
 
-    try {
-      let provider
-
-      if (selectedModel.startsWith("mistralai")) {
-        provider = createMistral({
-          apiKey: providerApiKey,
-          baseURL: providerBaseUrl,
-          headers: providerHeaders
-        })
-      } else if (
-        selectedModel.startsWith("mistral-") ||
-        selectedModel.startsWith("pixtral")
-      ) {
-        provider = createMistral({
-          apiKey: llmConfig.mistral.apiKey
-        })
-      } else if (selectedModel.startsWith("deepseek")) {
-        provider = createDeepSeek({
-          apiKey: providerApiKey,
-          baseURL: providerBaseUrl,
-          headers: providerHeaders
-        })
-      } else {
-        provider = createOpenRouterAI({
-          baseURL: providerBaseUrl,
-          headers: providerHeaders
-        })
-      }
-
-      // Handle web search plugin
-      switch (selectedPlugin) {
-        case PluginID.WEB_SEARCH:
-          return createStreamResponse(async dataStream => {
-            await executeWebSearch({
-              config: { chatSettings, messages, profile, dataStream }
-            })
+    // Handle web search plugin
+    switch (selectedPlugin) {
+      case PluginID.WEB_SEARCH:
+        return createStreamResponse(async dataStream => {
+          await executeWebSearch({
+            config: { chatSettings, messages, profile, dataStream }
           })
-      }
+        })
+    }
 
-      // Remove last message if it's a continuation to remove the continue prompt
-      const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
+    let provider
 
+    if (selectedModel.startsWith("mistralai")) {
+      provider = createMistral({
+        apiKey: providerApiKey,
+        baseURL: providerBaseUrl,
+        headers: providerHeaders
+      })
+    } else if (
+      selectedModel.startsWith("mistral-") ||
+      selectedModel.startsWith("pixtral")
+    ) {
+      provider = createMistral({
+        apiKey: llmConfig.mistral.apiKey
+      })
+    } else if (selectedModel.startsWith("deepseek")) {
+      provider = createDeepSeek({
+        apiKey: providerApiKey,
+        baseURL: providerBaseUrl,
+        headers: providerHeaders
+      })
+    } else {
+      provider = createOpenRouterAI({
+        baseURL: providerBaseUrl,
+        headers: providerHeaders
+      })
+    }
+
+    // Remove last message if it's a continuation to remove the continue prompt
+    const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
+
+    try {
       return createStreamResponse(dataStream => {
         dataStream.writeData({ ragUsed, ragId })
 
