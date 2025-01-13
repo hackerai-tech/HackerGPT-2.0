@@ -7,6 +7,7 @@ RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
+SET statement_timeout = '60s'
 AS $$
 DECLARE
     is_authorized BOOLEAN;
