@@ -6,7 +6,7 @@ import {
   MessageImage
 } from "@/types"
 import { PluginID } from "@/types/plugins"
-import { encode } from "gpt-tokenizer"
+import { countTokens } from "gpt-tokenizer"
 import { GPT4o } from "./models/llm/openai-llm-list"
 import endent from "endent"
 import { toast } from "sonner"
@@ -44,7 +44,7 @@ export async function buildFinalMessages(
         .map(item => (item.type === "text" ? item.text : ""))
         .join(" ")
     : lastUserMessage
-  const lastUserMessageTokens = encode(lastUserMessageContent).length
+  const lastUserMessageTokens = countTokens(lastUserMessageContent)
 
   if (lastUserMessageTokens > CHUNK_SIZE) {
     const errorMessage =
@@ -108,7 +108,7 @@ export async function buildFinalMessages(
     }
     const message = processedChatMessages[i].message
 
-    const messageTokens = encode(message.content).length
+    const messageTokens = countTokens(message.content)
 
     if (messageTokens <= remainingTokens) {
       remainingTokens -= messageTokens
