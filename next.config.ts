@@ -24,9 +24,7 @@ const config: NextConfig = withPWA({
     ],
     unoptimized: true
   },
-  experimental: {
-    serverComponentsExternalPackages: ["sharp", "onnxruntime-node"]
-  },
+  serverExternalPackages: ["sharp", "onnxruntime-node"],
   async headers() {
     return [
       {
