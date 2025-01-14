@@ -3,6 +3,7 @@ import { ServerRuntime } from "next"
 import { buildSystemPrompt } from "@/lib/ai/prompts"
 import {
   filterEmptyAssistantMessages,
+  handleAssistantMessages,
   messagesIncludeImages,
   toVercelChatMessages
 } from "@/lib/build-prompt"
@@ -166,6 +167,7 @@ export async function POST(request: Request) {
             ? "mistral-large-2411"
             : "mistral-small-2409"
         }
+        return handleAssistantMessages(messages)
       }
 
       return filterEmptyAssistantMessages(messages)

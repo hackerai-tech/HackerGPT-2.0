@@ -296,6 +296,26 @@ export const toVercelChatMessages = (
     .filter(message => message !== null)
 }
 
+export function handleAssistantMessages(
+  messages: any[],
+  onlyLast: boolean = false
+) {
+  let foundAssistant = false
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === "assistant") {
+      foundAssistant = true
+      if (messages[i].content.trim() === "") {
+        messages[i].content = "Sure, "
+      }
+      if (onlyLast) break
+    }
+  }
+
+  if (!foundAssistant) {
+    messages.push({ role: "assistant", content: "Sure, " })
+  }
+}
+
 /**
  * Checks if any messages in the conversation include images.
  * This function is used to determine if image processing capabilities are needed
