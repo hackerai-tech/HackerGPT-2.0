@@ -3,7 +3,7 @@ import { ServerRuntime } from "next"
 import { buildSystemPrompt } from "@/lib/ai/prompts"
 import {
   filterEmptyAssistantMessages,
-  // handleAssistantMessages,
+  handleAssistantMessages,
   messagesIncludeImages,
   toVercelChatMessages
 } from "@/lib/build-prompt"
@@ -15,7 +15,7 @@ import { createOpenAI as createOpenRouterAI } from "@ai-sdk/openai"
 import { createMistral } from "@ai-sdk/mistral"
 import { createDeepSeek } from "@ai-sdk/deepseek"
 import { streamText } from "ai"
-// import { getModerationResult } from "@/lib/server/moderation"
+import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
 import { executeWebSearch } from "@/lib/tools/llm/web-search"
@@ -88,12 +88,12 @@ export async function POST(request: Request) {
 
     const includeImages = messagesIncludeImages(messages)
 
-    const shouldUncensorResponse = false
-    // if (!includeImages && !isContinuation && !shouldUseRAG) {
-    //   const { shouldUncensorResponse: moderationResult } =
-    //     await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
-    //   shouldUncensorResponse = moderationResult
-    // }
+    let shouldUncensorResponse = false
+    if (!includeImages && !isContinuation && !shouldUseRAG) {
+      const { shouldUncensorResponse: moderationResult } =
+        await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
+      shouldUncensorResponse = moderationResult
+    }
 
     const baseSystemPrompt = isPentestGPTPro
       ? llmConfig.systemPrompts.pgptLarge
@@ -163,13 +163,12 @@ export async function POST(request: Request) {
       }
 
       if (shouldUncensor) {
-        return filterEmptyAssistantMessages(messages)
-        // if (selectedModel === "deepseek/deepseek-chat") {
-        //   selectedModel = isPentestGPTPro
-        //     ? "mistral-large-2411"
-        //     : "mistral-small-2409"
-        // }
-        // return handleAssistantMessages(messages)
+        if (selectedModel === "deepseek/deepseek-chat") {
+          selectedModel = isPentestGPTPro
+            ? "mistral-large-2411"
+            : "mistral-small-2409"
+        }
+        return handleAssistantMessages(messages)
       }
 
       return filterEmptyAssistantMessages(messages)

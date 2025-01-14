@@ -113,7 +113,7 @@ function _getLimit(
     !subscriptionInfo.isPremium &&
     !subscriptionInfo.isTeam
   ) {
-    return 3 // Lower limit for restricted countries using pentestgpt-small (free users only)
+    return 15 // Lower limit for restricted countries using pentestgpt-small (free users only)
   }
 
   // Special case for fragments-reload
