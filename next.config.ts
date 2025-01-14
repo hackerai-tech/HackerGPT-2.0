@@ -1,6 +1,7 @@
-const withPWA = require("next-pwa");
+import type { NextConfig } from 'next'
+const withPWA = require("next-pwa")
 
-const config = withPWA({
+const config: NextConfig = withPWA({
   dest: "public",
   register: true,
   skipWaiting: true,
@@ -23,9 +24,7 @@ const config = withPWA({
     ],
     unoptimized: true
   },
-  experimental: {
-    serverComponentsExternalPackages: ["sharp", "onnxruntime-node"]
-  },
+  serverExternalPackages: ["sharp", "onnxruntime-node"],
   async headers() {
     return [
       {
@@ -51,6 +50,6 @@ const config = withPWA({
       }
     ]
   }
-});
+})
 
-module.exports = config;
+export default config

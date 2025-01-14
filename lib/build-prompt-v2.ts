@@ -8,6 +8,7 @@ import {
 import { PluginID } from "@/types/plugins"
 import { countTokens } from "gpt-tokenizer"
 import { GPT4o } from "./models/llm/openai-llm-list"
+import { PGPT4 } from "./models/llm/hackerai-llm-list"
 import endent from "endent"
 import { toast } from "sonner"
 import { getTerminalPlugins } from "./tools/tool-store/tools-helper"
@@ -23,7 +24,9 @@ export async function buildFinalMessages(
 
   let CHUNK_SIZE = 8000
   if (chatSettings.model === GPT4o.modelId) {
-    CHUNK_SIZE = 12000
+    CHUNK_SIZE = 32000 - 4000 // -4000 for the system prompt, custom instructions, and more
+  } else if (chatSettings.model === PGPT4.modelId) {
+    CHUNK_SIZE = 16000 - 4000 // -4000 for the system prompt, custom instructions, and more
   }
 
   // Lower chunk size for terminal plugins
