@@ -78,6 +78,7 @@
     "endent": "^2.1.0",
     "gpt-tokenizer": "^2.8.1",
     "husky": "^9.1.7",
+    "input-otp": "^1.4.2",
     "isomorphic-dompurify": "^2.20.0",
     "jest-environment-jsdom": "^29.7.0",
     "langchain": "^0.3.11",

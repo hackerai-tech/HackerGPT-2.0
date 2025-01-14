@@ -3,12 +3,18 @@
 import { useContext, useState } from "react"
 import { Brand } from "@/components/ui/brand"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { IconAlertCircle } from "@tabler/icons-react"
 import { supabase } from "@/lib/supabase/browser-client"
 import { useRouter } from "next/navigation"
 import { PentestGPTContext } from "@/context/context"
 import { getHomeWorkspaceByUserId } from "@/db/workspaces"
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot
+} from "@/components/ui/input-otp"
+import { REGEXP_ONLY_DIGITS } from "input-otp"
 
 interface MFAVerificationProps {
   onVerify: (code: string) => Promise<{ success: boolean; error?: string }>
@@ -80,20 +86,25 @@ export function MFAVerification({ onVerify }: MFAVerificationProps) {
         </p>
 
         <div className="flex justify-center">
-          <div className="flex w-full max-w-[280px] gap-2">
-            <Input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              className="text-center text-lg tracking-widest"
-              value={verifyCode}
-              onChange={e => setVerifyCode(e.target.value.replace(/\D/g, ""))}
-              placeholder="000000"
-              disabled={isVerifying}
-              required
-            />
-          </div>
+          <InputOTP
+            maxLength={6}
+            value={verifyCode}
+            onChange={value => setVerifyCode(value)}
+            disabled={isVerifying}
+            pattern={REGEXP_ONLY_DIGITS}
+          >
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+            </InputOTPGroup>
+            <InputOTPSeparator />
+            <InputOTPGroup>
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
         </div>
 
         {error && (

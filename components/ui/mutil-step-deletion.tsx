@@ -6,6 +6,13 @@ import { Input } from "../ui/input"
 import { Loader2 } from "lucide-react"
 import { useMFA } from "../utility/mfa/use-mfa"
 import { toast } from "sonner"
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot
+} from "../ui/input-otp"
+import { REGEXP_ONLY_DIGITS } from "input-otp"
 
 interface MultiStepDeleteAccountDialogProps {
   isOpen: boolean
@@ -102,17 +109,27 @@ export const MultiStepDeleteAccountDialog: FC<
             <p className="mb-4 text-center text-sm">
               For security purposes, please enter your 2FA code to continue
             </p>
-            <Input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              value={mfaCode}
-              onChange={e => setMfaCode(e.target.value.replace(/\D/g, ""))}
-              placeholder="000000"
-              className="mb-4 text-center"
-              disabled={isDeleting}
-            />
+            <div className="flex justify-center">
+              <InputOTP
+                maxLength={6}
+                value={mfaCode}
+                onChange={value => setMfaCode(value)}
+                disabled={isDeleting}
+                pattern={REGEXP_ONLY_DIGITS}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                </InputOTPGroup>
+                <InputOTPSeparator />
+                <InputOTPGroup>
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
             <div className="mt-4 flex justify-center space-x-4">
               <Button onClick={handleClose} disabled={isDeleting}>
                 Cancel
