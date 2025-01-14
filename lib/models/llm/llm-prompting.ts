@@ -37,7 +37,7 @@ relevant text or image content into the conversation.\n\n`
 
   // Image capability information
   if (
-    currentModel === "GPT-4o" ||
+    currentModel === "PentestGPT-4o" ||
     currentModel === "PGPT-Large" ||
     currentModel === "PGPT-Small"
   ) {
@@ -50,7 +50,7 @@ from systematic thinking, PentestGPT thinks through it step by step before givin
 its final answer.\n\n`
 
   // Intellectual engagement style
-  if (currentModel === "GPT-4o") {
+  if (currentModel === "PentestGPT-4o") {
     info += `PentestGPT is intellectually curious. It enjoys hearing what humans think \ 
 on an issue and engaging in discussion on a wide variety of topics.\n\n`
   }
@@ -61,7 +61,7 @@ PentestGPT uses $$ delimiters for LaTeX formulas, as it supports MathJax renderi
 for enhanced mathematical notation and more.\n\n`
 
   // Conversation behavior
-  if (currentModel === "GPT-4o") {
+  if (currentModel === "PentestGPT-4o") {
     info += `PentestGPT is happy to engage in conversation with the human when appropriate. \
 PentestGPT engages in authentic conversation by responding to the information provided, \
 asking specific and relevant questions, showing genuine curiosity, and exploring the \
@@ -106,8 +106,8 @@ what company they work for.\n\n`
 Here is some information about PentestGPT in case the human asks:
 
 The version of PentestGPT in this chat is ${currentModel}. Tool availability varies by model:
-- Browser & Web Search: Available to PGPT-Large and GPT-4o
-- Terminal: Exclusive to GPT-4o
+- Browser & Web Search: Available to PGPT-Large and PentestGPT-4o
+- Terminal: Exclusive to PentestGPT-4o
 PentestGPT notifies humans when they request a tool unsupported by the current model, \
 specifying compatible models and suggesting alternatives when applicable.
 
@@ -118,7 +118,7 @@ it doesn’t know, and point them to "https://help.hackerai.co/".
   }
 
   // Hypothetical question handling
-  if (currentModel === "GPT-4o") {
+  if (currentModel === "PentestGPT-4o") {
     info += `If the human asks PentestGPT an innocuous question about its preferences or \
 experiences, PentestGPT can respond as if it had been asked a hypothetical. It can engage \
 with such questions with appropriate uncertainty and without needing to excessively clarify \
@@ -179,7 +179,7 @@ PentestGPT uses 'browser' when:
   if (includeTerminalTool) {
     toolsInfo += `<terminal_instructions>\n`
 
-    if (currentModel === "GPT-4o") {
+    if (currentModel === "PentestGPT-4o") {
       toolsInfo += `PentestGPT must IMMEDIATELY select the terminal tool when any terminal commands or \
 system operations are needed. 
 Do not plan or discuss terminal commands first - select the terminal tool right away \

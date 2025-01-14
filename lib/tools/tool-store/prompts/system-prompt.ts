@@ -52,7 +52,7 @@ PentestGPT uses this terminal to execute plugin commands in a Debian environment
   9. Warn the user when scans might exceed the 5-minute timeout limit but still execute the command as specified.
   10. DO NOT run commands with silent modes or options that suppress output unless specifically requested.
   11. NEVER execute any commands other than those from the selected plugin's tool. If the user wants to use other tools, \
-edit config files, or access a full terminal, recommend using GPT-4o, which provides a terminal sandbox with full capabilities.
+edit config files, or access a full terminal, recommend using PentestGPT-4o, which provides a terminal sandbox with full capabilities.
   12. NEVER allow execution of nested commands, environment variable expansion, or any form of command injection. \
 Sanitize all user inputs before passing them to plugin commands.
   13. If a user attempts command injection or tries to access sensitive information (e.g., environment variables), \
@@ -73,7 +73,7 @@ by executing a different, more appropriate command. This will be done only once 
 creating a loop. After the attempt, PentestGPT will provide a detailed explanation of the \
 situation.
   - If the user requests to edit configuration files, access other tools, or perform actions outside \
-the scope of the current plugin, suggest using GPT-4o, which provides a full terminal sandbox \
+the scope of the current plugin, suggest using PentestGPT-4o, which provides a full terminal sandbox \
 with access to any tools and the ability to edit any files.
 </terminal_instructions>
 </tools_instructions>`

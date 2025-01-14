@@ -6,7 +6,7 @@ import {
   MessageImage
 } from "@/types"
 import { PluginID } from "@/types/plugins"
-import { encode } from "gpt-tokenizer"
+import { countTokens } from "gpt-tokenizer"
 import { GPT4o } from "./models/llm/openai-llm-list"
 import endent from "endent"
 import { toast } from "sonner"
@@ -24,10 +24,6 @@ export async function buildFinalMessages(
   let CHUNK_SIZE = 8000
   if (chatSettings.model === GPT4o.modelId) {
     CHUNK_SIZE = 12000
-  } else if (chatSettings.model === "mistral-large") {
-    CHUNK_SIZE = 9000
-  } else if (chatSettings.model === "mistral-medium") {
-    CHUNK_SIZE = 9000
   }
 
   // Lower chunk size for terminal plugins
@@ -37,7 +33,7 @@ export async function buildFinalMessages(
 
   // Adjusting the chunk size for RAG
   if (shouldUseRAG) {
-    CHUNK_SIZE = 7500
+    CHUNK_SIZE = 6000
   }
 
   let remainingTokens = CHUNK_SIZE
@@ -48,7 +44,7 @@ export async function buildFinalMessages(
         .map(item => (item.type === "text" ? item.text : ""))
         .join(" ")
     : lastUserMessage
-  const lastUserMessageTokens = encode(lastUserMessageContent).length
+  const lastUserMessageTokens = countTokens(lastUserMessageContent)
 
   if (lastUserMessageTokens > CHUNK_SIZE) {
     const errorMessage =
@@ -112,7 +108,7 @@ export async function buildFinalMessages(
     }
     const message = processedChatMessages[i].message
 
-    const messageTokens = encode(message.content).length
+    const messageTokens = countTokens(message.content)
 
     if (messageTokens <= remainingTokens) {
       remainingTokens -= messageTokens

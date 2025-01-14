@@ -113,7 +113,7 @@ function _getLimit(
     !subscriptionInfo.isPremium &&
     !subscriptionInfo.isTeam
   ) {
-    return 3 // Lower limit for restricted countries using pentestgpt-small (free users only)
+    return 15 // Lower limit for restricted countries using pentestgpt-small (free users only)
   }
 
   // Special case for fragments-reload
@@ -190,10 +190,10 @@ function _makeStorageKey(userId: string, model: string): string {
   return `ratelimit:${userId}:${fixedModelName}`
 }
 
-export function resetRateLimit(model: string, userId: string) {
-  const storageKey = _makeStorageKey(userId, model)
-  return getRedis().del(storageKey)
-}
+// export function resetRateLimit(model: string, userId: string) {
+//   const storageKey = _makeStorageKey(userId, model)
+//   return getRedis().del(storageKey)
+// }
 
 export function getRateLimitErrorMessage(
   timeRemaining: number,
@@ -221,16 +221,16 @@ export function getRateLimitErrorMessage(
 
   if (premium) {
     if (model === "pentestgpt") {
-      message += `\n\nIn the meantime, you can use PGPT-Large or GPT-4o`
+      message += `\n\nIn the meantime, you can use PGPT-Large or PentestGPT-4o`
     } else if (model === "pentestgpt-pro") {
-      message += `\n\nIn the meantime, you can use GPT-4o or PGPT-Small`
+      message += `\n\nIn the meantime, you can use PentestGPT-4o or PGPT-Small`
     } else if (model === "gpt-4") {
       message += `\n\nIn the meantime, you can use PGPT-Large or PGPT-Small`
     }
   } else {
     message += `\n\n🔓 Want more? Upgrade to Pro or Team and unlock a world of features:
 - Higher usage limits
-- Access to PGPT-Large and GPT-4o
+- Access to PGPT-Large and PentestGPT-4o
 - Access to file uploads, vision, web search and browsing
 - Access to advanced plugins like SQLi Exploiter, XSS Exploiter, and more
 - Access to terminal`
