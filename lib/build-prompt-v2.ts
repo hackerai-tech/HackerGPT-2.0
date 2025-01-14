@@ -40,7 +40,7 @@ export async function buildFinalMessages(
   }
 
   let remainingTokens = CHUNK_SIZE
-  console.log("CHUNK_SIZE", CHUNK_SIZE)
+
   const lastUserMessage = chatMessages[chatMessages.length - 2].message.content
   const lastUserMessageContent = Array.isArray(lastUserMessage)
     ? lastUserMessage
