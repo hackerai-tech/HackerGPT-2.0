@@ -8,6 +8,7 @@ import { IconRefresh } from "@tabler/icons-react"
 import { useRouter } from "next/navigation"
 import { FC, useContext, useState } from "react"
 import { toast } from "sonner"
+import { Separator } from "@/components/ui/separator"
 
 interface SubscriptionTabProps {
   userEmail: string
@@ -126,7 +127,7 @@ export const SubscriptionTab: FC<SubscriptionTabProps> = ({
         </div>
       )}
 
-      <hr className="border-border my-4 border-t" />
+      <Separator className="my-4" />
 
       <div
         className={

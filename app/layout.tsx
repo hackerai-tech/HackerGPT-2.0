@@ -1,4 +1,3 @@
-import { Toaster } from "@/components/ui/sonner"
 import { GlobalState } from "@/components/utility/global-state"
 import { Providers } from "@/components/utility/providers"
 import { Metadata, Viewport } from "next"
@@ -102,7 +101,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       <body className={inter.className + " h-full"}>
         <Providers attribute="class" defaultTheme="dark">
           <PluginProvider isLoggedIn={!!user}>
-            <Toaster richColors position="top-center" duration={3000} />
             <div className="bg-background text-foreground flex h-dvh flex-col items-center overflow-x-auto">
               {user ? <GlobalState>{children}</GlobalState> : children}
             </div>
