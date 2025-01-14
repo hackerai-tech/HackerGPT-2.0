@@ -222,26 +222,6 @@ export function filterEmptyAssistantMessages(messages: any[]) {
   }
 }
 
-export function handleAssistantMessages(
-  messages: any[],
-  onlyLast: boolean = false
-) {
-  let foundAssistant = false
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].role === "assistant") {
-      foundAssistant = true
-      if (messages[i].content.trim() === "") {
-        messages[i].content = "Sure, "
-      }
-      if (onlyLast) break
-    }
-  }
-
-  if (!foundAssistant) {
-    messages.push({ role: "assistant", content: "Sure, " })
-  }
-}
-
 export const toVercelChatMessages = (
   messages: BuiltChatMessage[],
   supportsImages: boolean = false
