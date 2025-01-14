@@ -186,7 +186,7 @@ export const UpgradePlan: FC = () => {
           >
             <PlanStatement>Early access to new features</PlanStatement>
             <PlanStatement>
-              Access to PGPT-Large, GPT-4o, PGPT-Small
+              Access to PGPT-Large, PentestGPT-4o, PGPT-Small
             </PlanStatement>
             <PlanStatement>
               Access to file uploads, vision, web search and browsing

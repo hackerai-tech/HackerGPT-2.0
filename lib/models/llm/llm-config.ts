@@ -42,16 +42,16 @@ const llmConfig = {
     pgptSmall: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-Small")}\n${systemPromptEnding}`,
     // For PGPT-Large
     pgptLarge: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-Large")}\n${getPentestGPTToolsInfo(true, true)}\n${systemPromptEnding}`,
-    // For GPT-4o
-    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "GPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, false, "GPT-4o")}\n${systemPromptEnding}`,
+    // For PentestGPT-4o
+    gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PentestGPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, false, "PentestGPT-4o")}\n${systemPromptEnding}`,
     // For browser tool
     pentestGPTBrowser: `${getPentestGPTInfo(initialSystemPrompt, true, true)}\n${systemPromptEnding}`,
     // For webSearch tool
     pentestGPTWebSearch: `${getPentestGPTInfo(initialSystemPrompt, false, true)}\n${systemPromptEnding}`,
     // For terminal tool
-    pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, false, "GPT-4o")}\n\n${getPentestGPTToolsInfo(false, false, true)}\n${getTerminalResultInstructions()}\n${systemPromptEnding}`,
+    pentestGPTTerminal: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PentestGPT-4o")}\n\n${getPentestGPTToolsInfo(false, false, true)}\n${getTerminalResultInstructions()}\n${systemPromptEnding}`,
     // For fragment tool
-    pentestGPTFragment: `${getPentestGPTInfo(initialSystemPrompt, true, false, "GPT-4o")}}`
+    pentestGPTFragment: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PentestGPT-4o")}}`
   },
   models: {
     // OpenRouter

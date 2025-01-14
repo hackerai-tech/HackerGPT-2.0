@@ -138,7 +138,7 @@ export const SwitchModel: FC<SwitchModelProps> = ({
               </div>
 
               {[
-                { id: GPT4o.modelId, name: "GPT-4o" },
+                { id: GPT4o.modelId, name: "PGPT-4o" },
                 { id: "mistral-large", name: "PGPT-Large" },
                 { id: "mistral-medium", name: "PGPT-Small" }
               ]
@@ -168,7 +168,7 @@ export const SwitchModel: FC<SwitchModelProps> = ({
               <div className="bg-muted-foreground/50 mx-2 my-1 h-px" />
 
               {[
-                { id: GPT4o.modelId, name: "GPT-4o" },
+                { id: GPT4o.modelId, name: "PGPT-4o" },
                 { id: "mistral-large", name: "PGPT-Large" },
                 { id: "mistral-medium", name: "PGPT-Small" }
               ]
