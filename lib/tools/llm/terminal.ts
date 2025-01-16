@@ -4,7 +4,7 @@ import llmConfig from "@/lib/models/llm/llm-config"
 import { createOpenAI } from "@ai-sdk/openai"
 import { streamText, tool } from "ai"
 import { z } from "zod"
-import { terminalExecutor } from "./terminal-executor"
+import { persistentSandbox } from "./terminal-executor"
 import {
   streamTerminalOutput,
   reduceTerminalOutput
@@ -20,7 +20,7 @@ interface TerminalToolConfig {
   isTerminalContinuation?: boolean
 }
 
-export async function executeTerminal({
+export async function executeTerminalTool({
   config
 }: {
   config: TerminalToolConfig
@@ -73,10 +73,10 @@ export async function executeTerminal({
           command: z.string().describe("The terminal command to execute")
         }),
         execute: async ({ command }) => {
-          const terminalStream = await terminalExecutor({
+          const terminalStream = await persistentSandbox({
             userID: profile.user_id,
             command,
-            template: "bash-terminal-v1"
+            template: "persistent-sandbox"
           })
           let terminalOutput = ""
           await streamTerminalOutput(terminalStream, chunk => {

@@ -18,7 +18,7 @@ import { streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
-import { executeWebSearch } from "@/lib/tools/llm/web-search"
+import { executeWebSearchTool } from "@/lib/tools/llm/web-search"
 import { createStreamResponse } from "@/lib/ai-helper"
 
 export const runtime: ServerRuntime = "edge"
@@ -179,7 +179,7 @@ export async function POST(request: Request) {
     switch (selectedPlugin) {
       case PluginID.WEB_SEARCH:
         return createStreamResponse(async dataStream => {
-          await executeWebSearch({
+          await executeWebSearchTool({
             config: { chatSettings, messages, profile, dataStream }
           })
         })

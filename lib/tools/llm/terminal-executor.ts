@@ -1,29 +1,32 @@
 import { OutputMessage, Sandbox } from "@e2b/code-interpreter"
 import { CustomExecutionError } from "../tool-store/tools-terminal"
-import { createOrConnectTerminal } from "../e2b/sandbox"
+import { createOrConnectTerminal, pauseSandbox } from "../e2b/sandbox"
 
 const BASH_SANDBOX_TIMEOUT = 15 * 60 * 1000
 const MAX_EXECUTION_TIME = 5 * 60 * 1000
 const ENCODER = new TextEncoder()
 
-interface TerminalExecutorOptions {
+interface PersistentSandboxOptions {
   userID: string
   command: string
-  template: "bash-terminal-v1"
+  template: "persistent-sandbox"
 }
 
-export const terminalExecutor = async ({
+export const persistentSandbox = async ({
   userID,
   command,
   template
-}: TerminalExecutorOptions): Promise<ReadableStream<Uint8Array>> => {
+}: PersistentSandboxOptions): Promise<ReadableStream<Uint8Array>> => {
   let sbx: Sandbox | null = null
   let hasTerminalOutput = false
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       controller.enqueue(ENCODER.encode(`\n\`\`\`terminal\n${command}\n\`\`\``))
-      console.log(`[${userID}] Executing terminal command: ${command}`)
+      console.log(`[${userID}] Starting persistent Sandbox:
+        - Command: ${command}
+        - Template: ${template}
+        - Timeout: ${MAX_EXECUTION_TIME}ms`)
 
       try {
         sbx = await createOrConnectTerminal(
@@ -51,11 +54,13 @@ export const terminalExecutor = async ({
         })
 
         if (isOutputStarted) controller.enqueue(ENCODER.encode("\n```"))
-
         handleExecutionResult(execution, controller, userID, hasTerminalOutput)
       } catch (error) {
         handleError(error, controller, sbx, userID)
       } finally {
+        if (sbx?.sandboxId) {
+          pauseSandbox(sbx)
+        }
         controller.close()
       }
     }

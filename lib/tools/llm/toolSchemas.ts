@@ -1,5 +1,5 @@
-import { executeWebSearch } from "./web-search"
-import { executeTerminal } from "./terminal"
+import { executeWebSearchTool } from "./web-search"
+import { executeTerminalTool } from "./terminal"
 import { executeBrowserTool } from "./browser"
 import { executeFragments } from "../e2b/fragments/fragment-tool"
 import { z } from "zod"
@@ -37,7 +37,7 @@ export const createToolSchemas = ({
         search: z.boolean().describe("Set to true to search the web")
       }),
       execute: async () => {
-        return executeWebSearch({
+        return executeWebSearchTool({
           config: { chatSettings, messages, profile, dataStream }
         })
       }
@@ -53,7 +53,7 @@ export const createToolSchemas = ({
           )
       }),
       execute: async () => {
-        return executeTerminal({
+        return executeTerminalTool({
           config: {
             messages,
             profile,
