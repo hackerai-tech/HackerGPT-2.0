@@ -1,5 +1,6 @@
 import { Sandbox } from "@e2b/code-interpreter"
 import { createClient } from "@supabase/supabase-js"
+import { after } from "next/server"
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -132,8 +133,7 @@ export async function pauseSandbox(sandbox: Sandbox): Promise<string | null> {
     .update({ status: "pausing" })
     .eq("sandbox_id", sandbox.sandboxId)
 
-  // Fire and forget pause operation
-  const pausePromise = (async () => {
+  after(async () => {
     try {
       await sandbox.pause()
       // Update status to paused
@@ -152,13 +152,6 @@ export async function pauseSandbox(sandbox: Sandbox): Promise<string | null> {
         .update({ status: "active" })
         .eq("sandbox_id", sandbox.sandboxId)
     }
-  })()
-
-  pausePromise.catch(error => {
-    console.error(
-      `Background: Unhandled error in pause operation for ${sandbox.sandboxId}:`,
-      error
-    )
   })
 
   return sandbox.sandboxId
