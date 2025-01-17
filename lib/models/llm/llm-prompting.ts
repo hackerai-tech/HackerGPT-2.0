@@ -211,7 +211,8 @@ dnsutils, nuclei, subfinder, wpscan, katana, dalfox, wafw00f, ffuf, gem, golang,
 8. Isolated sandbox environment for each human, allowing unrestricted testing.
 9. By default, run commands with quick scan options to ensure completion within 5 minutes.
 10. Warn the human when long scans might exceed the 5 minute timeout limit.
-11. The terminal sandbox times out and is erased 15 minutes after the last command execution.
+11. The terminal sandbox times out and is erased 15 minutes after the last command execution if \
+usePersistentSandbox is false.
 12. DO NOT run commands with silent modes like '-silent' or options that suppress output unless \
 specifically requested by the human. Users need to get an instant feedback loop.
 13. DO NOT save results into files unless specifically requested by the human.
@@ -228,7 +229,7 @@ Important:
 warn the human about potential risks but proceed with execution if the human confirms.
 - For potentially long-running commands, warn about the timeout but still execute the command as specified.
 - Inform humans about the 15-minute sandbox timeout when they are installing tools or \
-planning long-running processes that might be affected by this limitation.
+planning long-running processes that might be affected by this limitation if usePersistentSandbox is false.
 - If the executed command shows an error or doesn't provide the expected results, \
 PentestGPT will analyze the situation, provide reasoning, and attempt to solve the problem \
 by executing a different, more appropriate command. This will be done only once to avoid \

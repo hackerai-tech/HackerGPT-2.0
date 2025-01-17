@@ -1,5 +1,6 @@
 import { Sandbox, SandboxInfo } from "@e2b/code-interpreter"
 import { createClient } from "@supabase/supabase-js"
+import { waitUntil } from "@vercel/functions"
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -178,35 +179,36 @@ export async function pauseSandbox(sandbox: Sandbox): Promise<string | null> {
 
   console.log(`Background: Starting pause for sandbox ${sandbox.sandboxId}`)
 
-  // Update status to pausing without awaiting
-  supabaseAdmin
+  // Update status to pausing
+  await supabaseAdmin
     .from("e2b_sandboxes")
     .update({ status: "pausing" })
     .eq("sandbox_id", sandbox.sandboxId)
-    .then(() => {
-      // Execute pause without awaiting
-      sandbox
-        .pause()
-        .then(() => {
-          console.log(
-            `Background: Successfully paused sandbox ${sandbox.sandboxId}`
-          )
-          return supabaseAdmin
-            .from("e2b_sandboxes")
-            .update({ status: "paused" })
-            .eq("sandbox_id", sandbox.sandboxId)
-        })
-        .catch(error => {
-          console.error(
-            `Background: Error pausing sandbox ${sandbox.sandboxId}:`,
-            error
-          )
-          return supabaseAdmin
-            .from("e2b_sandboxes")
-            .update({ status: "active" })
-            .eq("sandbox_id", sandbox.sandboxId)
-        })
-    })
+
+  // Use waitUntil for the pause operation and status update
+  waitUntil(
+    sandbox
+      .pause()
+      .then(() => {
+        console.log(
+          `Background: Successfully paused sandbox ${sandbox.sandboxId}`
+        )
+        return supabaseAdmin
+          .from("e2b_sandboxes")
+          .update({ status: "paused" })
+          .eq("sandbox_id", sandbox.sandboxId)
+      })
+      .catch(error => {
+        console.error(
+          `Background: Error pausing sandbox ${sandbox.sandboxId}:`,
+          error
+        )
+        return supabaseAdmin
+          .from("e2b_sandboxes")
+          .update({ status: "active" })
+          .eq("sandbox_id", sandbox.sandboxId)
+      })
+  )
 
   return sandbox.sandboxId
 }
