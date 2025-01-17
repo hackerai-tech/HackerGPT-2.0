@@ -234,6 +234,15 @@ export const processResponse = async (
               ragId =
                 firstValue.ragId !== null ? String(firstValue.ragId) : null
             }
+
+            // Handle sandbox type
+            if (firstValue?.type === "sandbox-type") {
+              if (firstValue.sandboxType === "persistent-sandbox") {
+                setToolInUse("persistent-sandbox")
+              } else {
+                setToolInUse("temporary-sandbox")
+              }
+            }
           }
         },
         onToolCallPart: async value => {

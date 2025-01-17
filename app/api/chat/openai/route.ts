@@ -76,10 +76,7 @@ export async function POST(request: Request) {
       profile.profile_context
     )
 
-    const openai = createOpenAI({
-      baseURL: llmConfig.openai.baseURL,
-      apiKey: llmConfig.openai.apiKey
-    })
+    const openai = createOpenAI()
 
     return createStreamResponse(dataStream => {
       const { getSelectedSchemas } = createToolSchemas({

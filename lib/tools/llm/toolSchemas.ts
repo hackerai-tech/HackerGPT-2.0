@@ -1,7 +1,7 @@
 import { executeWebSearchTool } from "./web-search"
 import { executeTerminalTool } from "./terminal"
 import { executeBrowserTool } from "./browser"
-import { executeFragments } from "../e2b/fragments/fragment-tool"
+// import { executeFragments } from "../e2b/fragments/fragment-tool"
 import { z } from "zod"
 
 export const createToolSchemas = ({
@@ -62,18 +62,18 @@ export const createToolSchemas = ({
           }
         })
       }
-    },
-    fragments: {
-      description: "Creates a Next.js website or execute a python code",
-      parameters: z.object({
-        search: z.boolean().describe("Set to true to create artifact")
-      }),
-      execute: async () => {
-        return executeFragments({
-          config: { chatSettings, messages, profile, dataStream }
-        })
-      }
     }
+    // fragments: {
+    //   description: "Creates a Next.js website or execute a python code",
+    //   parameters: z.object({
+    //     search: z.boolean().describe("Set to true to create artifact")
+    //   }),
+    //   execute: async () => {
+    //     return executeFragments({
+    //       config: { chatSettings, messages, profile, dataStream }
+    //     })
+    //   }
+    // }
   }
 
   type SchemaKey = keyof typeof allSchemas

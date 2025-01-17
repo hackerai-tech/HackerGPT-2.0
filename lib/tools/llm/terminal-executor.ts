@@ -1,46 +1,37 @@
 import { OutputMessage, Sandbox } from "@e2b/code-interpreter"
 import { CustomExecutionError } from "../tool-store/tools-terminal"
-import { createOrConnectTerminal, pauseSandbox } from "../e2b/sandbox"
 
-const BASH_SANDBOX_TIMEOUT = 15 * 60 * 1000
 const MAX_EXECUTION_TIME = 5 * 60 * 1000
 const ENCODER = new TextEncoder()
 
-interface PersistentSandboxOptions {
-  userID: string
-  command: string
-  template: "persistent-sandbox"
-}
-
-export const persistentSandbox = async ({
+export const executeTerminalCommand = async ({
   userID,
   command,
-  template
-}: PersistentSandboxOptions): Promise<ReadableStream<Uint8Array>> => {
-  let sbx: Sandbox | null = null
+  usePersistentSandbox = false,
+  sandbox = null
+}: {
+  userID: string
+  command: string
+  usePersistentSandbox?: boolean
+  sandbox?: Sandbox | null
+}): Promise<ReadableStream<Uint8Array>> => {
   let hasTerminalOutput = false
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       controller.enqueue(ENCODER.encode(`\n\`\`\`terminal\n${command}\n\`\`\``))
-      console.log(`[${userID}] Starting persistent Sandbox:
+      console.log(`[${userID}] Starting terminal execution:
         - Command: ${command}
-        - Template: ${template}
+        - Persistent: ${usePersistentSandbox}
         - Timeout: ${MAX_EXECUTION_TIME}ms`)
 
       try {
-        sbx = await createOrConnectTerminal(
-          userID,
-          template,
-          BASH_SANDBOX_TIMEOUT
-        )
-
-        if (!sbx) {
+        if (!sandbox) {
           throw new Error("Failed to create or connect to sandbox")
         }
 
         let isOutputStarted = false
-        const execution = await sbx.runCode(command, {
+        const execution = await sandbox.runCode(command, {
           language: "bash",
           timeoutMs: MAX_EXECUTION_TIME,
           onStdout: (data: OutputMessage) => {
@@ -56,11 +47,8 @@ export const persistentSandbox = async ({
         if (isOutputStarted) controller.enqueue(ENCODER.encode("\n```"))
         handleExecutionResult(execution, controller, userID, hasTerminalOutput)
       } catch (error) {
-        handleError(error, controller, sbx, userID)
+        handleError(error, controller, sandbox, userID)
       } finally {
-        if (sbx?.sandboxId) {
-          pauseSandbox(sbx)
-        }
         controller.close()
       }
     }
