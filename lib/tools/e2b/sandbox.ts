@@ -104,15 +104,21 @@ export async function createOrConnectPersistentTerminal(
               timeoutMs,
               domain: "e2b-foxtrot.dev"
             })
-            
+
             await supabaseAdmin
               .from("e2b_sandboxes")
               .update({ status: "active" })
               .eq("sandbox_id", existingSandbox.sandbox_id)
-              
+
             return sandbox
           } catch (e) {
-            throw new Error("Sandbox is stuck in pausing state. Please try again later.")
+            console.error(
+              `[${existingSandbox.sandbox_id}] Failed to recover sandbox from pausing state:`,
+              e
+            )
+            throw new Error(
+              "Sandbox is stuck in pausing state. Please try again later."
+            )
           }
         }
       }
