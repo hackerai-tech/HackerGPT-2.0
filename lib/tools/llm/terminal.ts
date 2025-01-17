@@ -9,7 +9,6 @@ import {
   streamTerminalOutput,
   reduceTerminalOutput
 } from "@/lib/ai/terminal-utils"
-import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
 import { ratelimit } from "@/lib/server/ratelimiter"
 import { epochTimeToNaturalLanguage } from "@/lib/utils"
 import { Sandbox } from "@e2b/code-interpreter"
@@ -41,16 +40,6 @@ export async function executeTerminalTool({
   const userID = profile.user_id
 
   try {
-    const subscriptionInfo = await getSubscriptionInfo(userID)
-    if (!subscriptionInfo.isPremium) {
-      dataStream.writeData({
-        type: "error",
-        content:
-          "Access Denied: This feature is exclusive to Pro and Team members."
-      })
-      return "Access Denied: Premium feature only"
-    }
-
     const rateLimitResult = await ratelimit(userID, "terminal")
     if (!rateLimitResult.allowed) {
       const waitTime = epochTimeToNaturalLanguage(
@@ -147,11 +136,9 @@ export async function executeTerminalTool({
     const finalFinishReason = await finishReason
     dataStream.writeData({ finishReason: finalFinishReason })
   } finally {
-    // Only pause/cleanup sandbox at the end of the API request
+    // Pause sandbox at the end of the API request
     if (sandbox && persistentSandbox) {
       const persistentSandbox = sandbox as Sandbox
-      console.log(`[${userID}] Cleaning up sandbox ${persistentSandbox.sandboxId}:
-        - Type: ${persistentSandbox ? "Persistent" : "Temporary"}`)
       await pauseSandbox(persistentSandbox)
     }
   }

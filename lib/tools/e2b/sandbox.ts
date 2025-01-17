@@ -7,6 +7,15 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+/**
+ * Creates or connects to a temporary sandbox instance
+ * Temporary sandboxes are destroyed after the session ends
+ *
+ * @param userID - User identifier for sandbox ownership
+ * @param template - Sandbox environment template name
+ * @param timeoutMs - Operation timeout in milliseconds
+ * @returns Connected or newly created sandbox instance
+ */
 export async function createOrConnectTemporaryTerminal(
   userID: string,
   template: string,
@@ -36,18 +45,20 @@ export async function createOrConnectTemporaryTerminal(
 }
 
 /**
- * Creates a new sandbox or connects to an existing one
+ * Creates or connects to a persistent sandbox instance
+ * Persistent sandboxes are stored for up to 30 days
  *
- * @param userID - The authenticated user's ID
- * @param template - The sandbox environment template to use
- * @param timeoutMs - Maximum time to wait for sandbox operations
- * @returns Promise<Sandbox> - The connected or created sandbox instance
+ * @param userID - User identifier for sandbox ownership
+ * @param template - Sandbox environment template name
+ * @param timeoutMs - Operation timeout in milliseconds
+ * @returns Connected or newly created sandbox instance
  *
  * Flow:
- * 1. Look for existing sandbox less than 30 days old
- * 2. If found, try to resume it
- * 3. If resume fails or no sandbox exists, create new one
- * 4. Store sandbox details in database
+ * 1. Checks for existing sandbox in database (< 30 days old)
+ * 2. If found with status "pausing", waits for pause completion
+ * 3. If found with status "active"/"paused", attempts to resume
+ * 4. If no valid sandbox found, creates new one
+ * 5. Updates database with sandbox details
  */
 export async function createOrConnectPersistentTerminal(
   userID: string,
@@ -55,12 +66,7 @@ export async function createOrConnectPersistentTerminal(
   timeoutMs: number
 ): Promise<Sandbox> {
   try {
-    console.log(`[${userID}] Starting createOrConnectPersistentTerminal:
-      - Template: ${template}
-      - Timeout: ${timeoutMs}ms`)
-
     // Only check DB for persistent sandboxes
-    console.log(`[${userID}] Looking for existing persistent sandbox`)
     const { data: existingSandbox } = await supabaseAdmin
       .from("e2b_sandboxes")
       .select("sandbox_id, status")
@@ -72,51 +78,34 @@ export async function createOrConnectPersistentTerminal(
       )
       .single()
 
-    console.log(`[${userID}] Existing sandbox found:`, existingSandbox)
-
     if (existingSandbox?.sandbox_id) {
       let currentStatus = existingSandbox.status
-      console.log(`[${userID}] Sandbox status: ${currentStatus}`)
 
       if (currentStatus === "pausing") {
-        console.log(
-          `[${userID}] Sandbox is pausing, waiting for pause completion`
-        )
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 5; i++) {
           const { data: updatedSandbox } = await supabaseAdmin
             .from("e2b_sandboxes")
             .select("status")
             .eq("sandbox_id", existingSandbox.sandbox_id)
             .single()
 
-          console.log(
-            `[${userID}] Attempt ${i + 1}: Status = ${updatedSandbox?.status}`
-          )
-
           if (updatedSandbox?.status === "paused") {
             currentStatus = "paused"
             break
           }
 
-          await new Promise(resolve => setTimeout(resolve, 2000))
+          await new Promise(resolve => setTimeout(resolve, 5000))
         }
 
         if (currentStatus === "pausing") {
-          console.log(
-            `[${userID}] Sandbox still pausing after timeout, creating new sandbox`
+          throw new Error(
+            "Sandbox pause operation timed out. Please try again later."
           )
-          return await Sandbox.create(template, {
-            timeoutMs,
-            domain: "e2b-foxtrot.dev"
-          })
         }
       }
 
       if (currentStatus === "active" || currentStatus === "paused") {
         try {
-          console.log(
-            `[${userID}] Attempting to resume sandbox ${existingSandbox.sandbox_id}`
-          )
           const sandbox = await Sandbox.resume(existingSandbox.sandbox_id, {
             timeoutMs,
             domain: "e2b-foxtrot.dev"
@@ -127,7 +116,6 @@ export async function createOrConnectPersistentTerminal(
             .update({ status: "active" })
             .eq("sandbox_id", existingSandbox.sandbox_id)
 
-          console.log(`[${userID}] Successfully resumed sandbox`)
           return sandbox
         } catch (e) {
           console.error(
@@ -139,13 +127,11 @@ export async function createOrConnectPersistentTerminal(
     }
 
     // Create new persistent sandbox
-    console.log(`[${userID}] Creating new persistent sandbox`)
     const sandbox = await Sandbox.create(template, {
       timeoutMs,
       domain: "e2b-foxtrot.dev"
     })
 
-    console.log(`[${userID}] Created new sandbox: ${sandbox.sandboxId}`)
     await supabaseAdmin.from("e2b_sandboxes").upsert(
       {
         user_id: userID,
@@ -166,18 +152,25 @@ export async function createOrConnectPersistentTerminal(
 }
 
 /**
- * Pauses an active sandbox
+ * Initiates a background task to pause an active sandbox
+ * Uses Vercel's waitUntil to handle the pause operation asynchronously
  *
- * @param sandbox - The sandbox instance to pause
- * @returns Promise<string | null> - The sandbox ID if successfully paused, null otherwise
+ * @param sandbox - Active sandbox instance to pause
+ * @returns sandboxId if pause initiated, null if invalid sandbox
+ *
+ * State Transitions:
+ * 1. active -> pausing: Initial state update
+ * 2. pausing -> paused: Successful pause
+ * 3. pausing -> active: Failed pause (reverts)
+ *
+ * Note: The actual pause operation continues in the background
+ * after this function returns
  */
 export async function pauseSandbox(sandbox: Sandbox): Promise<string | null> {
   if (!sandbox?.sandboxId) {
-    console.log("Background: No sandbox ID provided for pausing")
+    console.error("Background: No sandbox ID provided for pausing")
     return null
   }
-
-  console.log(`Background: Starting pause for sandbox ${sandbox.sandboxId}`)
 
   // Update status to pausing
   await supabaseAdmin
@@ -190,9 +183,6 @@ export async function pauseSandbox(sandbox: Sandbox): Promise<string | null> {
     sandbox
       .pause()
       .then(async () => {
-        console.log(
-          `Background: Successfully paused sandbox ${sandbox.sandboxId}`
-        )
         await supabaseAdmin
           .from("e2b_sandboxes")
           .update({ status: "paused" })
