@@ -98,9 +98,22 @@ export async function createOrConnectPersistentTerminal(
         }
 
         if (currentStatus === "pausing") {
-          throw new Error(
-            "Sandbox pause operation timed out. Please try again later."
-          )
+          // Try to resume the sandbox if it's stuck in pausing state
+          try {
+            const sandbox = await Sandbox.resume(existingSandbox.sandbox_id, {
+              timeoutMs,
+              domain: "e2b-foxtrot.dev"
+            })
+            
+            await supabaseAdmin
+              .from("e2b_sandboxes")
+              .update({ status: "active" })
+              .eq("sandbox_id", existingSandbox.sandbox_id)
+              
+            return sandbox
+          } catch (e) {
+            throw new Error("Sandbox is stuck in pausing state. Please try again later.")
+          }
         }
       }
 
