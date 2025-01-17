@@ -3,7 +3,7 @@ import {
   ExecutionResultWeb,
   Fragment
 } from "./types"
-import { createOrConnectTerminal } from "../sandbox"
+import { createOrConnectTemporaryTerminal } from "../sandbox"
 
 export async function executeFragment(
   fragment: Fragment,
@@ -11,7 +11,7 @@ export async function executeFragment(
   sandboxTimeout: number
 ) {
   // Create a interpreter or a sandbox
-  const sbx = await createOrConnectTerminal(
+  const sbx = await createOrConnectTemporaryTerminal(
     userID,
     fragment.template,
     sandboxTimeout

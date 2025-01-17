@@ -61,10 +61,7 @@ export async function commandGeneratorHandler({
   let provider, model
   if (isPremium) {
     model = "gpt-4o"
-    provider = createOpenAI({
-      baseURL: llmConfig.openai.baseURL,
-      apiKey: llmConfig.openai.apiKey
-    })
+    provider = createOpenAI()
   } else {
     model = "openai/gpt-4o-mini"
     provider = createOpenAI({

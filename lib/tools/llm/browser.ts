@@ -114,10 +114,7 @@ export async function executeBrowserTool({
   const lastUserMessage = getLastUserMessage(messages)
   const browserPrompt = createBrowserPrompt(browserResult, lastUserMessage)
 
-  const openai = createOpenAI({
-    baseURL: llmConfig.openai.baseURL,
-    apiKey: llmConfig.openai.apiKey
-  })
+  const openai = createOpenAI()
 
   console.log("[BrowserTool] Executing browser tool with model:", selectedModel)
 

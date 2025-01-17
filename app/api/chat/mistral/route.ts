@@ -3,6 +3,7 @@ import { ServerRuntime } from "next"
 import { buildSystemPrompt } from "@/lib/ai/prompts"
 import {
   filterEmptyAssistantMessages,
+  handleAssistantMessages,
   messagesIncludeImages,
   toVercelChatMessages
 } from "@/lib/build-prompt"
@@ -17,7 +18,7 @@ import { streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
-import { executeWebSearch } from "@/lib/tools/llm/web-search"
+import { executeWebSearchTool } from "@/lib/tools/llm/web-search"
 import { createStreamResponse } from "@/lib/ai-helper"
 
 export const runtime: ServerRuntime = "edge"
@@ -50,7 +51,6 @@ export async function POST(request: Request) {
     isRagEnabled,
     selectedPlugin
   } = await request.json()
-  const country = request.headers.get("x-vercel-ip-country")
 
   let ragUsed = false
   let ragId: string | null = null
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
       modelTemperature,
       isPentestGPTPro,
       providerApiKey
-    } = await getProviderConfig(chatSettings, profile, country)
+    } = await getProviderConfig(chatSettings, profile)
 
     if (rateLimitCheckResult !== null) {
       return rateLimitCheckResult.response
@@ -167,6 +167,7 @@ export async function POST(request: Request) {
             ? "mistral-large-2411"
             : "mistral-small-2409"
         }
+        return handleAssistantMessages(messages)
       }
 
       return filterEmptyAssistantMessages(messages)
@@ -178,7 +179,7 @@ export async function POST(request: Request) {
     switch (selectedPlugin) {
       case PluginID.WEB_SEARCH:
         return createStreamResponse(async dataStream => {
-          await executeWebSearch({
+          await executeWebSearchTool({
             config: { chatSettings, messages, profile, dataStream }
           })
         })
@@ -258,11 +259,7 @@ export async function POST(request: Request) {
   }
 }
 
-async function getProviderConfig(
-  chatSettings: any,
-  profile: any,
-  country: string | null
-) {
+async function getProviderConfig(chatSettings: any, profile: any) {
   const isPentestGPTPro = chatSettings.model === "mistral-large"
 
   const defaultModel = llmConfig.models.pentestgpt_default_openrouter
@@ -284,8 +281,7 @@ async function getProviderConfig(
   const selectedModel = isPentestGPTPro ? proModel : defaultModel
   const rateLimitCheckResult = await checkRatelimitOnApi(
     profile.user_id,
-    isPentestGPTPro ? "pentestgpt-pro" : "pentestgpt",
-    country ? country : undefined
+    isPentestGPTPro ? "pentestgpt-pro" : "pentestgpt"
   )
 
   return {

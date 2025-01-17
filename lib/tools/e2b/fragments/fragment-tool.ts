@@ -1,5 +1,4 @@
 import { toVercelChatMessages } from "@/lib/build-prompt"
-import llmConfig from "@/lib/models/llm/llm-config"
 import { createOpenAI } from "@ai-sdk/openai"
 import { streamObject } from "ai"
 import { fragmentSchema } from "./fragment-schema"
@@ -44,10 +43,7 @@ export async function executeFragments({
     return "Rate limit exceeded"
   }
 
-  const openaiClient = createOpenAI({
-    baseURL: llmConfig.openai.baseURL,
-    apiKey: llmConfig.openai.apiKey
-  })
+  const openaiClient = createOpenAI()
 
   const { object: finalObjectPromise, partialObjectStream } = streamObject({
     model: openaiClient("gpt-4o"),

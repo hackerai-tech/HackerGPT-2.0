@@ -5,18 +5,10 @@ import { cn } from "@/lib/utils"
 import { Tables } from "@/supabase/types"
 import { ChatMessage, LLM, LLMID, MessageImage } from "@/types"
 import {
-  IconPuzzle,
-  IconWorld,
   IconCaretDownFilled,
   IconCaretRightFilled,
-  IconCircleFilled,
   IconFileFilled,
-  IconFileText,
-  IconFileTypePdf,
-  // IconDatabaseSearch,
-  // IconCode,
-  IconTerminal2
-  // IconPhoto
+  IconFileTypePdf
 } from "@tabler/icons-react"
 import Image from "next/image"
 import { FC, RefObject, useContext, useEffect, useRef, useState } from "react"
@@ -27,11 +19,11 @@ import { MessageActions } from "./message-actions"
 import MessageDetailedFeedback from "./message-detailed-feedback"
 import { MessageQuickFeedback } from "./message-quick-feedback"
 import { MessageTypeResolver } from "./message-type-solver"
-import { PluginID } from "@/types/plugins"
 import useHotkey from "@/lib/hooks/use-hotkey"
 import { toast } from "sonner"
 import { Fragment } from "@/lib/tools/e2b/fragments/types"
 import { MessageFragment } from "./message-fragment"
+import { LoadingState } from "./loading-states"
 import dynamic from "next/dynamic"
 
 const DynamicFilePreview = dynamic(() => import("../ui/file-preview"), {
@@ -266,65 +258,13 @@ export const Message: FC<MessageProps> = ({
             </div>
 
             {!firstTokenReceived &&
-            isGenerating &&
-            isLast &&
-            message.role === "assistant" ? (
-              <>
-                {(() => {
-                  switch (toolInUse) {
-                    case "none":
-                      return (
-                        <IconCircleFilled className="animate-pulse" size={20} />
-                      )
-                    case "retrieval":
-                      return (
-                        <div className="flex animate-pulse items-center space-x-2">
-                          <IconFileText size={20} />
+              isGenerating &&
+              isLast &&
+              message.role === "assistant" && (
+                <LoadingState toolInUse={toolInUse} />
+              )}
 
-                          <div>Searching files...</div>
-                        </div>
-                      )
-                    case PluginID.WEB_SEARCH:
-                      return (
-                        <div className="flex animate-pulse items-center space-x-2">
-                          <IconWorld size={20} />
-
-                          <div>Searching the web...</div>
-                        </div>
-                      )
-                    case PluginID.BROWSER:
-                      return (
-                        <div className="flex animate-pulse items-center space-x-2">
-                          <IconWorld size={20} />
-
-                          <div>Browsing the web...</div>
-                        </div>
-                      )
-                    case PluginID.TERMINAL:
-                      return (
-                        <div className="flex animate-pulse items-center space-x-2">
-                          <IconTerminal2 size={20} />
-                          <div>Using Terminal...</div>
-                        </div>
-                      )
-                    case PluginID.REASON_LLM:
-                      return (
-                        <div className="flex animate-pulse items-center space-x-2">
-                          <div>Thinking with OpenAI o1...</div>
-                        </div>
-                      )
-                    default:
-                      return (
-                        <div className="flex animate-pulse items-center space-x-2">
-                          <IconPuzzle size={20} />
-
-                          <div>Using {toolInUse}...</div>
-                        </div>
-                      )
-                  }
-                })()}
-              </>
-            ) : isEditing ? (
+            {isEditing ? (
               <TextareaAutosize
                 textareaRef={editInputRef as RefObject<HTMLTextAreaElement>}
                 className="text-md"

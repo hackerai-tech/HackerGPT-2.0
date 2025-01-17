@@ -1,17 +1,17 @@
 import { FC, useState, useEffect } from "react"
 import { DialogPanel, DialogTitle } from "@headlessui/react"
-import { Button } from "../ui/button"
-import { TransitionedDialog } from "../ui/transitioned-dialog"
-import { Input } from "../ui/input"
+import { Button } from "@/components/ui/button"
+import { TransitionedDialog } from "@/components/ui/transitioned-dialog"
+import { Input } from "@/components/ui/input"
 import { Loader2 } from "lucide-react"
-import { useMFA } from "../utility/mfa/use-mfa"
+import { useMFA } from "./use-mfa"
 import { toast } from "sonner"
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot
-} from "../ui/input-otp"
+} from "../../ui/input-otp"
 import { REGEXP_ONLY_DIGITS } from "input-otp"
 
 interface MultiStepDeleteAccountDialogProps {

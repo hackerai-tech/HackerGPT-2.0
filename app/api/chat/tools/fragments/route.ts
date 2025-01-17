@@ -3,7 +3,6 @@ import {
   filterEmptyAssistantMessages,
   toVercelChatMessages
 } from "@/lib/build-prompt"
-import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
@@ -42,10 +41,7 @@ export async function POST(request: Request) {
     filterEmptyAssistantMessages(messages)
     replaceWordsInLastUserMessage(messages)
 
-    const openaiClient = createOpenAI({
-      baseURL: llmConfig.openai.baseURL,
-      apiKey: llmConfig.openai.apiKey
-    })
+    const openaiClient = createOpenAI()
 
     // custom provider with different model settings:
     const registry = createProviderRegistry({

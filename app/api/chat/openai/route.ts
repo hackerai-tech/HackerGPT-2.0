@@ -12,9 +12,9 @@ import { streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
-import { executeWebSearch } from "@/lib/tools/llm/web-search"
+import { executeWebSearchTool } from "@/lib/tools/llm/web-search"
 import { createStreamResponse } from "@/lib/ai-helper"
-import { executeTerminal } from "@/lib/tools/llm/terminal"
+import { executeTerminalTool } from "@/lib/tools/llm/terminal"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -58,14 +58,14 @@ export async function POST(request: Request) {
     switch (selectedPlugin) {
       case PluginID.WEB_SEARCH:
         return createStreamResponse(async dataStream => {
-          await executeWebSearch({
+          await executeWebSearchTool({
             config: { chatSettings, messages, profile, dataStream }
           })
         })
 
       case PluginID.TERMINAL || isTerminalContinuation:
         return createStreamResponse(async dataStream => {
-          await executeTerminal({
+          await executeTerminalTool({
             config: { messages, profile, dataStream, isTerminalContinuation }
           })
         })
@@ -76,10 +76,7 @@ export async function POST(request: Request) {
       profile.profile_context
     )
 
-    const openai = createOpenAI({
-      baseURL: llmConfig.openai.baseURL,
-      apiKey: llmConfig.openai.apiKey
-    })
+    const openai = createOpenAI()
 
     return createStreamResponse(dataStream => {
       const { getSelectedSchemas } = createToolSchemas({

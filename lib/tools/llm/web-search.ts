@@ -32,7 +32,7 @@ async function getProviderConfig(chatSettings: any) {
   }
 }
 
-export async function executeWebSearch({
+export async function executeWebSearchTool({
   config
 }: {
   config: WebSearchConfig
