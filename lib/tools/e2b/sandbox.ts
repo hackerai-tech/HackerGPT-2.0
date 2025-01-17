@@ -185,25 +185,25 @@ export async function pauseSandbox(sandbox: Sandbox): Promise<string | null> {
     .update({ status: "pausing" })
     .eq("sandbox_id", sandbox.sandboxId)
 
-  // Use waitUntil for the pause operation and status update
+  // Start background task and return immediately
   waitUntil(
     sandbox
       .pause()
-      .then(() => {
+      .then(async () => {
         console.log(
           `Background: Successfully paused sandbox ${sandbox.sandboxId}`
         )
-        return supabaseAdmin
+        await supabaseAdmin
           .from("e2b_sandboxes")
           .update({ status: "paused" })
           .eq("sandbox_id", sandbox.sandboxId)
       })
-      .catch(error => {
+      .catch(async error => {
         console.error(
           `Background: Error pausing sandbox ${sandbox.sandboxId}:`,
           error
         )
-        return supabaseAdmin
+        await supabaseAdmin
           .from("e2b_sandboxes")
           .update({ status: "active" })
           .eq("sandbox_id", sandbox.sandboxId)
