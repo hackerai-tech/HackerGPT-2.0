@@ -201,11 +201,7 @@ export async function POST(request: Request) {
         apiKey: llmConfig.mistral.apiKey
       })
     } else if (selectedModel.startsWith("deepseek")) {
-      provider = createDeepSeek({
-        apiKey: providerApiKey,
-        baseURL: providerBaseUrl,
-        headers: providerHeaders
-      })
+      provider = createDeepSeek()
     } else {
       provider = createOpenRouterAI({
         baseURL: providerBaseUrl,
