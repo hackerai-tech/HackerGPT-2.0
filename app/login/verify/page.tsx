@@ -8,6 +8,8 @@ interface VerifyMFAResponse {
 }
 
 export default async function VerifyMFA() {
+  "use server"
+
   const supabase = await createClient()
 
   const [

@@ -1,3 +1,5 @@
+"use server"
+
 import React from "react"
 import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
