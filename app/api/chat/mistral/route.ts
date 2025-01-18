@@ -67,7 +67,6 @@ export async function POST(request: Request) {
       similarityTopK,
       modelTemperature,
       isPentestGPTPro,
-      providerApiKey
     } = await getProviderConfig(chatSettings, profile)
 
     if (rateLimitCheckResult !== null) {
@@ -165,7 +164,7 @@ export async function POST(request: Request) {
         if (selectedModel?.includes("deepseek")) {
           selectedModel = isPentestGPTPro
             ? "mistral-large-2411"
-            : "mistral-small-2409"
+            : "codestral-latest"
         }
         return handleAssistantMessages(messages)
       }
@@ -187,19 +186,12 @@ export async function POST(request: Request) {
 
     let provider
 
-    if (selectedModel.startsWith("mistralai")) {
-      provider = createMistral({
-        apiKey: providerApiKey,
-        baseURL: providerBaseUrl,
-        headers: providerHeaders
-      })
-    } else if (
+    if (
       selectedModel.startsWith("mistral-") ||
-      selectedModel.startsWith("pixtral")
+      selectedModel.startsWith("pixtral") ||
+      selectedModel.startsWith("codestral")
     ) {
-      provider = createMistral({
-        apiKey: llmConfig.mistral.apiKey
-      })
+      provider = createMistral()
     } else if (selectedModel.startsWith("deepseek")) {
       provider = createDeepSeek()
     } else {
@@ -263,10 +255,9 @@ async function getProviderConfig(chatSettings: any, profile: any) {
 
   const providerUrl = llmConfig.openrouter.url
   const providerBaseUrl = llmConfig.openrouter.baseURL
-  const providerApiKey = llmConfig.openrouter.apiKey
 
   const providerHeaders = {
-    Authorization: `Bearer ${providerApiKey}`,
+    Authorization: `Bearer ${llmConfig.openrouter.apiKey}`,
     "Content-Type": "application/json",
     "HTTP-Referer": `https://pentestgpt.com/${chatSettings.model}`,
     "X-Title": chatSettings.model
@@ -288,7 +279,6 @@ async function getProviderConfig(chatSettings: any, profile: any) {
     rateLimitCheckResult,
     similarityTopK,
     isPentestGPTPro,
-    modelTemperature,
-    providerApiKey
+    modelTemperature
   }
 }

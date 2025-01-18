@@ -1,7 +1,6 @@
 import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
 import { generateText } from "ai"
 import endent from "endent"
-import llmConfig from "./llm/llm-config"
 import { createMistral } from "@ai-sdk/mistral"
 
 export async function generateStandaloneQuestion(
@@ -52,9 +51,7 @@ export async function generateStandaloneQuestion(
   }
 
   try {
-    const mistral = createMistral({
-      apiKey: llmConfig.mistral.apiKey
-    })
+    const mistral = createMistral()
 
     const result = await generateText({
       model: mistral(`${selectedStandaloneQuestionModel}`),

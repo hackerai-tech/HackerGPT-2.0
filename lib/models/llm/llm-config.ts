@@ -22,12 +22,7 @@ const llmConfig = {
     apiKey: process.env.OPENROUTER_API_KEY
   },
   openai: {
-    baseURL: "https://api.openai.com/v1",
-    url: "https://api.openai.com/v1/chat/completions",
     apiKey: process.env.OPENAI_API_KEY
-  },
-  mistral: {
-    apiKey: process.env.MISTRAL_API_KEY
   },
   systemPrompts: {
     // For question generator
