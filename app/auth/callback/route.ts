@@ -38,11 +38,31 @@ export async function GET(request: Request) {
           }
         }
       }
-    } catch (error) {
-      console.error("Error exchanging code for session:", error)
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN || requestUrl.origin}/login?message=auth`
+    } catch (error: unknown) {
+      // Handle email confirmation success case when user confirms email in the different browser session
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        (error.code === "bad_code_verifier" ||
+          error.code === "validation_failed")
+      ) {
+        const redirectUrl = new URL(
+          "/login",
+          process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN || requestUrl.origin
+        )
+        redirectUrl.searchParams.set("message", "signin_success")
+        return NextResponse.redirect(redirectUrl)
+      }
+
+      // For all other errors, log and redirect with generic auth error
+      console.error("Authentication error:", error)
+      const redirectUrl = new URL(
+        "/login",
+        process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN || requestUrl.origin
       )
+      redirectUrl.searchParams.set("message", "auth")
+      return NextResponse.redirect(redirectUrl)
     }
   }
 

@@ -1,8 +1,6 @@
 import { PluginID } from "@/types/plugins"
 import { OutputMessage, Sandbox } from "@e2b/code-interpreter"
 
-const DEFAULT_TEMPLATE = "pro-terminal-tools"
-const DEFAULT_BASH_SANDBOX_TIMEOUT = 5 * 60 * 1000
 const MAX_EXECUTION_TIME = 5 * 60 * 1000
 const ENCODER = new TextEncoder()
 
@@ -10,18 +8,15 @@ interface TerminalExecutorOptions {
   userID: string
   command: string
   pluginID: string
-  sandboxTimeout?: number
-  sandboxTemplate?: string
+  sandbox: Sandbox
 }
 
 export const terminalExecutor = async ({
   userID,
   command,
   pluginID,
-  sandboxTimeout = DEFAULT_BASH_SANDBOX_TIMEOUT,
-  sandboxTemplate = DEFAULT_TEMPLATE
+  sandbox
 }: TerminalExecutorOptions): Promise<ReadableStream<Uint8Array>> => {
-  let sbx: Sandbox | null = null
   let hasTerminalOutput = false
 
   return new ReadableStream<Uint8Array>({
@@ -32,10 +27,8 @@ export const terminalExecutor = async ({
       )
 
       try {
-        sbx = await createTerminal(userID, sandboxTemplate, sandboxTimeout)
-
         let isOutputStarted = false
-        const execution = await sbx.runCode(command, {
+        const execution = await sandbox.runCode(command, {
           language: "bash",
           timeoutMs: MAX_EXECUTION_TIME,
           onStdout: (data: OutputMessage) => {
@@ -54,11 +47,8 @@ export const terminalExecutor = async ({
 
         handleExecutionResult(execution, controller, userID, hasTerminalOutput)
       } catch (error) {
-        handleError(error, controller, sbx, userID)
+        handleError(error, controller, sandbox, userID)
       } finally {
-        if (sbx) {
-          await sbx.kill()
-        }
         controller.close()
       }
     }
@@ -155,7 +145,7 @@ function isConnectionError(error: Error): boolean {
   )
 }
 
-async function createTerminal(
+export async function createTerminal(
   userID: string,
   template: string,
   timeoutMs: number
