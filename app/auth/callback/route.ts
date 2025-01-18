@@ -39,13 +39,13 @@ export async function GET(request: Request) {
         }
       }
     } catch (error: unknown) {
-      // Handle successful email confirmation case
-      // This error occurs when user confirms email in the different browser session
+      // Handle email confirmation success case when user confirms email in the different browser session
       if (
-        error instanceof Error &&
-        error.message?.includes(
-          "both auth code and code verifier should be non-empty"
-        )
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        (error.code === "bad_code_verifier" ||
+          error.code === "validation_failed")
       ) {
         const redirectUrl = new URL(
           "/login",
@@ -55,10 +55,8 @@ export async function GET(request: Request) {
         return NextResponse.redirect(redirectUrl)
       }
 
-      // Log error only for actual error cases
-      console.error("Error exchanging code for session:", error)
-
-      // Handle all other authentication errors
+      // For all other errors, log and redirect with generic auth error
+      console.error("Authentication error:", error)
       const redirectUrl = new URL(
         "/login",
         process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN || requestUrl.origin
