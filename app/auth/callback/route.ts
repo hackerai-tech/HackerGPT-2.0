@@ -38,11 +38,33 @@ export async function GET(request: Request) {
           }
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      // Handle successful email confirmation case
+      // This error occurs when user confirms email in the different browser session
+      if (
+        error instanceof Error &&
+        error.message?.includes(
+          "both auth code and code verifier should be non-empty"
+        )
+      ) {
+        const redirectUrl = new URL(
+          "/login",
+          process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN || requestUrl.origin
+        )
+        redirectUrl.searchParams.set("message", "signin_success")
+        return NextResponse.redirect(redirectUrl)
+      }
+
+      // Log error only for actual error cases
       console.error("Error exchanging code for session:", error)
-      return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN || requestUrl.origin}/login?message=auth`
+
+      // Handle all other authentication errors
+      const redirectUrl = new URL(
+        "/login",
+        process.env.NEXT_PUBLIC_PRODUCTION_ORIGIN || requestUrl.origin
       )
+      redirectUrl.searchParams.set("message", "auth")
+      return NextResponse.redirect(redirectUrl)
     }
   }
 
