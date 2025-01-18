@@ -20,6 +20,11 @@ import {
   streamTerminalOutput,
   reduceTerminalOutput
 } from "@/lib/ai/terminal-utils"
+import { Sandbox } from "@e2b/code-interpreter"
+import { createTerminal } from "@/lib/tools/tool-store/tools-terminal"
+
+const DEFAULT_BASH_SANDBOX_TIMEOUT = 5 * 60 * 1000
+const DEFAULT_TEMPLATE = "pro-terminal-tools"
 
 interface CommandGeneratorHandlerOptions {
   userID: string
@@ -58,6 +63,7 @@ export async function commandGeneratorHandler({
     "X-Title": "tools-terminal"
   }
 
+  let sandbox: Sandbox | any = null
   let provider, model
   if (isPremium) {
     model = "gpt-4o"
@@ -89,11 +95,19 @@ export async function commandGeneratorHandler({
                 command: z.string().describe("The terminal command to execute")
               }),
               execute: async ({ command }) => {
+                if (!sandbox) {
+                  sandbox = await createTerminal(
+                    userID,
+                    getTerminalTemplate(pluginID) || DEFAULT_TEMPLATE,
+                    DEFAULT_BASH_SANDBOX_TIMEOUT
+                  )
+                }
+
                 const terminalStream = await terminalExecutor({
                   userID,
                   command,
                   pluginID,
-                  sandboxTemplate: getTerminalTemplate(pluginID)
+                  sandbox
                 })
                 let terminalOutput = ""
                 await streamTerminalOutput(terminalStream, chunk => {
@@ -106,7 +120,12 @@ export async function commandGeneratorHandler({
               }
             })
           },
-          maxSteps: 2
+          maxSteps: 2,
+          onFinish: async () => {
+            if (sandbox) {
+              await sandbox.kill()
+            }
+          }
         })
 
         for await (const chunk of textStream) {
@@ -128,6 +147,9 @@ export async function commandGeneratorHandler({
       }
     })
   } catch (error) {
+    if (sandbox) {
+      await sandbox.kill()
+    }
     console.error(`[${userID}] commandGeneratorHandler error:`, error)
     const { statusCode, message } = getErrorDetails(
       error instanceof Error ? error.message : "An unexpected error occurred"
