@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 
 export async function getServerUserAndProfile() {
+  "use server"
+
   const supabase = await createClient()
 
   const user = (await supabase.auth.getUser()).data.user
@@ -22,11 +24,15 @@ export async function getServerUserAndProfile() {
 }
 
 export async function getServerProfile() {
+  "use server"
+
   const { profile } = await getServerUserAndProfile()
   return profile
 }
 
 export async function getAIProfile() {
+  "use server"
+
   const supabase = await createClient()
 
   const user = (await supabase.auth.getUser()).data.user

@@ -83,11 +83,17 @@ export const viewport: Viewport = {
 }
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  const supabase = await createClient()
+  const getUser = async () => {
+    "use server"
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser()
+    const supabase = await createClient()
+    const {
+      data: { user }
+    } = await supabase.auth.getUser()
+    return user
+  }
+
+  const user = await getUser()
 
   return (
     <html lang="en" suppressHydrationWarning className="h-full">
