@@ -162,7 +162,7 @@ export async function POST(request: Request) {
       }
 
       if (shouldUncensor) {
-        if (selectedModel === "deepseek/deepseek-chat") {
+        if (selectedModel?.includes("deepseek")) {
           selectedModel = isPentestGPTPro
             ? "mistral-large-2411"
             : "mistral-small-2409"
@@ -201,11 +201,7 @@ export async function POST(request: Request) {
         apiKey: llmConfig.mistral.apiKey
       })
     } else if (selectedModel.startsWith("deepseek")) {
-      provider = createDeepSeek({
-        apiKey: providerApiKey,
-        baseURL: providerBaseUrl,
-        headers: providerHeaders
-      })
+      provider = createDeepSeek()
     } else {
       provider = createOpenRouterAI({
         baseURL: providerBaseUrl,
