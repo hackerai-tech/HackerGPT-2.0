@@ -162,7 +162,7 @@ export async function POST(request: Request) {
       }
 
       if (shouldUncensor) {
-        if (selectedModel === "deepseek/deepseek-chat") {
+        if (selectedModel?.includes("deepseek")) {
           selectedModel = isPentestGPTPro
             ? "mistral-large-2411"
             : "mistral-small-2409"
