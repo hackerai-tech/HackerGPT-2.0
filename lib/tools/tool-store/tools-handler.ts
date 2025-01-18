@@ -63,7 +63,7 @@ export async function commandGeneratorHandler({
     model = "gpt-4o"
     provider = createOpenAI()
   } else {
-    model = "openai/gpt-4o-mini"
+    model = "openai/gpt-4o"
     provider = createOpenAI({
       baseURL: llmConfig.openrouter.baseURL,
       headers: providerHeaders

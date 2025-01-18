@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       rateLimitCheckResult,
       similarityTopK,
       modelTemperature,
-      isPentestGPTPro,
+      isPentestGPTPro
     } = await getProviderConfig(chatSettings, profile)
 
     if (rateLimitCheckResult !== null) {
