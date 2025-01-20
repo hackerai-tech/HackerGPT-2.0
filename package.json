@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^0.0.4",
-    "@ai-sdk/mistral": "^1.0.8",
+    "@ai-sdk/mistral": "^1.1.0",
     "@ai-sdk/openai": "^1.0.18",
     "@e2b/code-interpreter": "^1.0.5-beta.3",
     "@headlessui/react": "^2.2.0",
