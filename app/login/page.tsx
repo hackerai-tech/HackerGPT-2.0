@@ -82,23 +82,29 @@ export default async function Login({
     errorMessage = errorMessages.ratelimit_defaul
   }
 
-  const supabase = await createClient()
-  const {
-    data: { user }
-  } = await supabase.auth.getUser()
+  const checkAuth = async () => {
+    "use server"
 
-  if (user) {
-    const { data: homeWorkspace } = await supabase
-      .from("workspaces")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("is_home", true)
-      .single()
+    const supabase = await createClient()
+    const {
+      data: { user }
+    } = await supabase.auth.getUser()
 
-    if (homeWorkspace) {
-      return redirect(`/${homeWorkspace.id}/chat`)
+    if (user) {
+      const { data: homeWorkspace } = await supabase
+        .from("workspaces")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("is_home", true)
+        .single()
+
+      if (homeWorkspace) {
+        return redirect(`/${homeWorkspace.id}/chat`)
+      }
     }
   }
+
+  await checkAuth()
 
   const signIn = async (formData: FormData) => {
     "use server"
