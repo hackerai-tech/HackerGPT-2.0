@@ -10,6 +10,7 @@ import { LLMID } from "@/types"
 import { useParams, useRouter } from "next/navigation"
 import { ReactNode, useContext, useEffect, useState } from "react"
 import Loading from "../loading"
+import { getSubscriptionByUserId } from "@/db/subscriptions"
 
 interface WorkspaceLayoutProps {
   children: ReactNode
@@ -39,7 +40,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
 
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {    
+  useEffect(() => {
     const initializeWorkspace = async () => {
       const {
         data: { user }
@@ -49,9 +50,20 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
         return router.push("/login")
       }
 
+      const subscription = await getSubscriptionByUserId(user.id)
+
+      setChatSettings({
+        model:
+          subscription?.status === "active"
+            ? "gpt-4-turbo-preview"
+            : ("mistral-medium" as LLMID),
+        includeProfileContext: true,
+        embeddingsProvider: "openai"
+      })
+
       await fetchWorkspaceData(workspaceId)
-      
-      // Reset states
+
+      // Reset chat-specific states
       setUserInput("")
       setChatMessages([])
       setSelectedChat(null)
@@ -86,12 +98,6 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
 
       setChats(chats)
       setFiles(fileData.files)
-
-      setChatSettings({
-        model: "mistral-medium" as LLMID,
-        includeProfileContext: workspace?.include_profile_context || true,
-        embeddingsProvider: "openai"
-      })
     } catch (error) {
       console.error("Error fetching workspace data:", error)
       router.push("/")
