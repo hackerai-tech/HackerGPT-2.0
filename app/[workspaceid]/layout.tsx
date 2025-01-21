@@ -10,6 +10,7 @@ import { LLMID } from "@/types"
 import { useParams, useRouter } from "next/navigation"
 import { ReactNode, useContext, useEffect, useState } from "react"
 import Loading from "../loading"
+import { getSubscriptionByUserId } from "@/db/subscriptions"
 
 interface WorkspaceLayoutProps {
   children: ReactNode
@@ -17,7 +18,6 @@ interface WorkspaceLayoutProps {
 
 export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   const router = useRouter()
-
   const params = useParams()
   const workspaceId = params.workspaceid as string
 
@@ -41,34 +41,42 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    ;(async () => {
+    const initializeWorkspace = async () => {
       const {
         data: { user }
       } = await supabase.auth.getUser()
 
       if (!user) {
         return router.push("/login")
-      } else {
-        await fetchWorkspaceData(workspaceId)
       }
-    })()
-  }, [])
 
-  useEffect(() => {
-    ;(async () => await fetchWorkspaceData(workspaceId))()
+      const subscription = await getSubscriptionByUserId(user.id)
 
-    setUserInput("")
-    setChatMessages([])
-    setSelectedChat(null)
+      setChatSettings({
+        model:
+          subscription?.status === "active"
+            ? "gpt-4-turbo-preview"
+            : ("mistral-medium" as LLMID),
+        includeProfileContext: true,
+        embeddingsProvider: "openai"
+      })
 
-    setIsGenerating(false)
-    setFirstTokenReceived(false)
+      await fetchWorkspaceData(workspaceId)
 
-    setChatFiles([])
-    setChatImages([])
-    setNewMessageFiles([])
-    setNewMessageImages([])
-    setShowFilesDisplay(false)
+      // Reset chat-specific states
+      setUserInput("")
+      setChatMessages([])
+      setSelectedChat(null)
+      setIsGenerating(false)
+      setFirstTokenReceived(false)
+      setChatFiles([])
+      setChatImages([])
+      setNewMessageFiles([])
+      setNewMessageImages([])
+      setShowFilesDisplay(false)
+    }
+
+    initializeWorkspace()
   }, [workspaceId])
 
   const fetchWorkspaceData = async (workspaceId: string) => {
@@ -90,12 +98,6 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
 
       setChats(chats)
       setFiles(fileData.files)
-
-      setChatSettings({
-        model: "mistral-medium" as LLMID,
-        includeProfileContext: workspace?.include_profile_context || true,
-        embeddingsProvider: "openai"
-      })
     } catch (error) {
       console.error("Error fetching workspace data:", error)
       router.push("/")

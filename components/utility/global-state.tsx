@@ -211,9 +211,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
       setUserEmail(userFromAuth.email || "Not available")
 
       const profile = await getProfileByUserId(userFromAuth.id)
-      if (!profile) {
-        return
-      }
+      if (!profile) return
 
       setProfile(profile)
 

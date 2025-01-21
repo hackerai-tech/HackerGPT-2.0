@@ -8,7 +8,7 @@ import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
 import { createOpenAI } from "@ai-sdk/openai"
-import { streamText } from "ai"
+import { smoothStream, streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
@@ -94,7 +94,8 @@ export async function POST(request: Request) {
         temperature: 0.5,
         maxTokens: 2048,
         abortSignal: request.signal,
-        tools: getSelectedSchemas("all")
+        tools: getSelectedSchemas("all"),
+        experimental_transform: smoothStream()
       })
 
       result.mergeIntoDataStream(dataStream)

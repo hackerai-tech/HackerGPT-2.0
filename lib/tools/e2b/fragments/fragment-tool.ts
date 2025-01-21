@@ -33,7 +33,11 @@ export async function executeFragments({
     return "Access Denied: Premium feature only"
   }
 
-  const rateLimitResult = await ratelimit(profile.user_id, "fragments")
+  const rateLimitResult = await ratelimit(
+    profile.user_id,
+    "fragments",
+    subscriptionInfo
+  )
   if (!rateLimitResult.allowed) {
     const waitTime = epochTimeToNaturalLanguage(rateLimitResult.timeRemaining!)
     dataStream.writeData({

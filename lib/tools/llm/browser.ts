@@ -2,7 +2,7 @@ import { buildSystemPrompt } from "@/lib/ai/prompts"
 import { toVercelChatMessages } from "@/lib/build-prompt"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { createOpenAI } from "@ai-sdk/openai"
-import { streamText } from "ai"
+import { smoothStream, streamText } from "ai"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 import { PGPT4 } from "@/lib/models/llm/hackerai-llm-list"
 
@@ -129,7 +129,8 @@ export async function executeBrowserTool({
       { role: "user", content: browserPrompt }
     ],
     temperature: 0.5,
-    maxTokens: 1024
+    maxTokens: 1024,
+    experimental_transform: smoothStream()
   })
 
   for await (const delta of fullStream) {

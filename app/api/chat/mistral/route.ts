@@ -14,7 +14,7 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { createOpenAI as createOpenRouterAI } from "@ai-sdk/openai"
 import { createMistral } from "@ai-sdk/mistral"
 import { createDeepSeek } from "@ai-sdk/deepseek"
-import { streamText } from "ai"
+import { smoothStream, streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
@@ -161,11 +161,6 @@ export async function POST(request: Request) {
       }
 
       if (shouldUncensor) {
-        if (selectedModel?.includes("deepseek")) {
-          selectedModel = isPentestGPTPro
-            ? "mistral-large-2411"
-            : "codestral-latest"
-        }
         return handleAssistantMessages(messages)
       }
 
@@ -229,7 +224,8 @@ export async function POST(request: Request) {
           temperature: modelTemperature,
           maxTokens: isPentestGPTPro ? 2048 : 1024,
           abortSignal: request.signal,
-          ...(isPentestGPTPro ? { tools } : null)
+          ...(isPentestGPTPro ? { tools } : null),
+          experimental_transform: smoothStream()
         })
 
         result.mergeIntoDataStream(dataStream)

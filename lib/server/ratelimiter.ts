@@ -24,13 +24,14 @@ export type RateLimitResult =
  */
 export async function ratelimit(
   userId: string,
-  model: string
+  model: string,
+  subscriptionInfo?: SubscriptionInfo
 ): Promise<RateLimitResult> {
   if (!isRateLimiterEnabled()) {
     return { allowed: true, remaining: -1, timeRemaining: null }
   }
-  const subscriptionInfo = await getSubscriptionInfo(userId)
-  return _ratelimit(model, userId, subscriptionInfo)
+  const subInfo = subscriptionInfo || (await getSubscriptionInfo(userId))
+  return _ratelimit(model, userId, subInfo)
 }
 
 function isRateLimiterEnabled(): boolean {
@@ -170,11 +171,6 @@ function _makeStorageKey(userId: string, model: string): string {
   return `ratelimit:${userId}:${fixedModelName}`
 }
 
-// export function resetRateLimit(model: string, userId: string) {
-//   const storageKey = _makeStorageKey(userId, model)
-//   return getRedis().del(storageKey)
-// }
-
 export function getRateLimitErrorMessage(
   timeRemaining: number,
   premium: boolean,
@@ -235,16 +231,19 @@ function getModelName(model: string): string {
 
 export async function checkRatelimitOnApi(
   userId: string,
-  model: string
+  model: string,
+  subscriptionInfo?: SubscriptionInfo
 ): Promise<{ response: Response; result: RateLimitResult } | null> {
-  const result = await ratelimit(userId, model)
+  const result = await ratelimit(userId, model, subscriptionInfo)
   if (result.allowed) {
     return null
   }
-  const subscriptionInfo = await getSubscriptionInfo(userId)
+
+  const subInfo = subscriptionInfo || (await getSubscriptionInfo(userId))
+
   const message = getRateLimitErrorMessage(
     result.timeRemaining!,
-    subscriptionInfo.isPremium,
+    subInfo.isPremium,
     model
   )
   const response = new Response(

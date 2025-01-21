@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
 
   const rateLimitCheckResult = await checkRatelimitOnApi(
     profile.user_id,
-    "stt-1"
+    "stt-1",
+    subscriptionInfo
   )
   if (rateLimitCheckResult !== null) {
     return rateLimitCheckResult.response
