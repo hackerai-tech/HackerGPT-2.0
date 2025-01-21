@@ -189,3 +189,38 @@ function buildRetrievalText(fileItems: Tables<"file_items">[]) {
 
   return `${retrievalText}`
 }
+
+/**
+ * Filters out empty assistant messages and their preceding user messages.
+ * Specifically handles Mistral API's edge case of empty responses.
+ * Used in both chat and question generation flows.
+ *
+ * @param messages - Array of chat messages
+ * @returns Filtered array with valid messages only
+ */
+export function validateMessages(messages: any[]) {
+  const validMessages = []
+
+  for (let i = 0; i < messages.length; i++) {
+    const currentMessage = messages[i]
+    const nextMessage = messages[i + 1]
+
+    // Skip empty assistant responses (Mistral-specific)
+    const isInvalidExchange =
+      currentMessage.role === "user" &&
+      nextMessage?.role === "assistant" &&
+      !nextMessage.content
+
+    if (isInvalidExchange) {
+      i++ // Skip next message
+      continue
+    }
+
+    // Keep valid messages
+    if (currentMessage.role !== "assistant" || currentMessage.content) {
+      validMessages.push(currentMessage)
+    }
+  }
+
+  return validMessages
+}
