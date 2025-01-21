@@ -69,7 +69,8 @@ export async function POST(request: Request) {
 
     const terminalRateLimitCheck = await checkRatelimitOnApi(
       profile.user_id,
-      "terminal"
+      "terminal",
+      subscriptionInfo
     )
     if (terminalRateLimitCheck !== null) {
       return terminalRateLimitCheck.response
@@ -77,7 +78,8 @@ export async function POST(request: Request) {
 
     const rateLimitCheckResultForChatSettingsModel = await checkRatelimitOnApi(
       profile.user_id,
-      ratelimitmodel
+      ratelimitmodel,
+      subscriptionInfo
     )
     if (rateLimitCheckResultForChatSettingsModel !== null) {
       return rateLimitCheckResultForChatSettingsModel.response

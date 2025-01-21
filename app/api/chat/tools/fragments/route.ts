@@ -32,7 +32,8 @@ export async function POST(request: Request) {
 
     const rateLimitCheck = await checkRatelimitOnApi(
       profile.user_id,
-      "fragments"
+      "fragments",
+      subscriptionInfo
     )
     if (rateLimitCheck) {
       return rateLimitCheck.response

@@ -19,7 +19,8 @@ export async function POST(request: Request) {
 
     const rateLimitCheck = await checkRatelimitOnApi(
       profile.user_id,
-      "fragments-reload"
+      "fragments-reload",
+      subscriptionInfo
     )
     if (rateLimitCheck) {
       return rateLimitCheck.response
