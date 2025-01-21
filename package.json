@@ -81,6 +81,7 @@
     "input-otp": "^1.4.2",
     "isomorphic-dompurify": "^2.20.0",
     "jest-environment-jsdom": "^29.7.0",
+    "katex": "^0.16.21",
     "langchain": "^0.3.12",
     "lucide-react": "^0.473.0",
     "mammoth": "^1.9.0",
