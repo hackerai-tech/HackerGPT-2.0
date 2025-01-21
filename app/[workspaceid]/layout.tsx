@@ -17,7 +17,6 @@ interface WorkspaceLayoutProps {
 
 export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
   const router = useRouter()
-
   const params = useParams()
   const workspaceId = params.workspaceid as string
 
@@ -40,35 +39,32 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
 
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    ;(async () => {
+  useEffect(() => {    
+    const initializeWorkspace = async () => {
       const {
         data: { user }
       } = await supabase.auth.getUser()
 
       if (!user) {
         return router.push("/login")
-      } else {
-        await fetchWorkspaceData(workspaceId)
       }
-    })()
-  }, [])
 
-  useEffect(() => {
-    ;(async () => await fetchWorkspaceData(workspaceId))()
+      await fetchWorkspaceData(workspaceId)
+      
+      // Reset states
+      setUserInput("")
+      setChatMessages([])
+      setSelectedChat(null)
+      setIsGenerating(false)
+      setFirstTokenReceived(false)
+      setChatFiles([])
+      setChatImages([])
+      setNewMessageFiles([])
+      setNewMessageImages([])
+      setShowFilesDisplay(false)
+    }
 
-    setUserInput("")
-    setChatMessages([])
-    setSelectedChat(null)
-
-    setIsGenerating(false)
-    setFirstTokenReceived(false)
-
-    setChatFiles([])
-    setChatImages([])
-    setNewMessageFiles([])
-    setNewMessageImages([])
-    setShowFilesDisplay(false)
+    initializeWorkspace()
   }, [workspaceId])
 
   const fetchWorkspaceData = async (workspaceId: string) => {
