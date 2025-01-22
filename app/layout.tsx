@@ -106,12 +106,16 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body className={inter.className + " h-full"}>
         <Providers attribute="class" defaultTheme="dark">
-          <PluginProvider isLoggedIn={!!user}>
-            <div className="bg-background text-foreground flex h-dvh flex-col items-center overflow-x-auto">
-              {user ? <GlobalState>{children}</GlobalState> : children}
-            </div>
-            <GlobalAlertDialog />
-          </PluginProvider>
+          <div className="bg-background text-foreground flex h-dvh flex-col items-center overflow-x-auto">
+            {user ? (
+              <PluginProvider>
+                <GlobalState>{children}</GlobalState>
+              </PluginProvider>
+            ) : (
+              children
+            )}
+          </div>
+          <GlobalAlertDialog />
         </Providers>
       </body>
     </html>
