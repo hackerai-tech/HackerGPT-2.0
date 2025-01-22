@@ -20,6 +20,7 @@ import { WithTooltip } from "../ui/with-tooltip"
 import { ChatRetrievalSettings } from "./chat-retrieval-settings"
 import { dragHelper } from "@/components/chat/chat-helpers/drag"
 import dynamic from "next/dynamic"
+import { useUIContext } from "@/context/ui-context"
 
 const DynamicFilePreview = dynamic(() => import("../ui/file-preview"), {
   ssr: false
@@ -37,9 +38,10 @@ export const ChatFilesDisplay: FC = () => {
     chatImages,
     setChatImages,
     setChatFiles,
-    setUseRetrieval,
-    isMobile
+    setUseRetrieval
   } = useContext(PentestGPTContext)
+
+  const { isMobile } = useUIContext()
 
   const [selectedFile, setSelectedFile] = useState<ChatFile | null>(null)
   const [selectedImage, setSelectedImage] = useState<MessageImage | null>(null)

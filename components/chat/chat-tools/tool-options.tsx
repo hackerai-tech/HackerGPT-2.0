@@ -9,6 +9,7 @@ import {
 } from "@tabler/icons-react"
 import { useContext } from "react"
 import { WithTooltip } from "../../ui/with-tooltip"
+import { useUIContext } from "@/context/ui-context"
 
 interface ToolOptionsProps {
   fileInputRef: React.RefObject<HTMLInputElement>
@@ -23,13 +24,14 @@ export const ToolOptions = ({
 }: ToolOptionsProps) => {
   const TOOLTIP_DELAY = 500
 
+  const { isPremiumSubscription } = useContext(PentestGPTContext)
+
   const {
-    isPremiumSubscription,
     selectedPlugin,
     isEnhancedMenuOpen,
     setSelectedPlugin,
     setIsEnhancedMenuOpen
-  } = useContext(PentestGPTContext)
+  } = useUIContext()
 
   const handleWebSearchToggle = () => {
     if (selectedPlugin === PluginID.WEB_SEARCH) {

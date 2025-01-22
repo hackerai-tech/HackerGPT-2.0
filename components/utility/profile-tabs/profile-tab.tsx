@@ -1,10 +1,10 @@
-import { FC, useContext } from "react"
+import { FC } from "react"
 import { Button } from "../../ui/button"
 import { Label } from "../../ui/label"
 import { ThemeSwitcher } from "../theme-switcher"
 import { IconLogout } from "@tabler/icons-react"
 import { Switch } from "@/components/ui/switch"
-import { PentestGPTContext } from "@/context/context"
+import { useUIContext } from "@/context/ui-context"
 
 interface ProfileTabProps {
   handleDeleteAllChats: () => void
@@ -15,8 +15,7 @@ export const ProfileTab: FC<ProfileTabProps> = ({
   handleDeleteAllChats,
   handleSignOut
 }) => {
-  const { showTerminalOutput, setShowTerminalOutput } =
-    useContext(PentestGPTContext)
+  const { showTerminalOutput, setShowTerminalOutput } = useUIContext()
 
   const handleToggleTerminalOutput = (checked: boolean) => {
     setShowTerminalOutput(checked)

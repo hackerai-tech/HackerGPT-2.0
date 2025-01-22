@@ -54,11 +54,9 @@ export async function commandGeneratorHandler({
   if (isTerminalContinuation) {
     messages.pop()
   }
-
   let sandbox: Sandbox | any = null
-  let provider, model
-  isPremium ? (model = "gpt-4o") : (model = "gpt-4o-mini")
-  provider = createOpenAI()
+  const provider = createOpenAI()
+  const model = isPremium ? "gpt-4o" : "gpt-4o-mini"
 
   try {
     const stream = new ReadableStream<Uint8Array>({

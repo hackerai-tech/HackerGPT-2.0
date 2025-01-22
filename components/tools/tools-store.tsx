@@ -4,6 +4,7 @@ import { PluginID, PluginSummary } from "@/types/plugins"
 import { useChatHandler } from "../chat/chat-hooks/use-chat-handler"
 import { Header, SearchBar, CategorySelection } from "./tools"
 import { PluginCard } from "./tools-card"
+import { useUIContext } from "@/context/ui-context"
 
 interface PluginStorePageProps {
   pluginsData: PluginSummary[]
@@ -18,13 +19,10 @@ export default function ToolsStorePage({
 }: PluginStorePageProps) {
   const { handleNewChat } = useChatHandler()
 
-  const {
-    setSelectedPlugin,
-    setContentType,
-    subscription,
-    isEnhancedMenuOpen,
-    setIsEnhancedMenuOpen
-  } = useContext(PentestGPTContext)
+  const { setContentType, subscription } = useContext(PentestGPTContext)
+
+  const { setSelectedPlugin, isEnhancedMenuOpen, setIsEnhancedMenuOpen } =
+    useUIContext()
 
   const filters = [
     "Free",

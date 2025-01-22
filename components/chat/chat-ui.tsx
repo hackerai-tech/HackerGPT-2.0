@@ -32,6 +32,7 @@ import { GlobalDeleteChatDialog } from "./global-delete-chat-dialog"
 import { useFragments } from "./chat-hooks/use-fragments"
 import { Settings } from "../utility/settings"
 import { ShareChatButton } from "./chat-share-button"
+import { useUIContext } from "@/context/ui-context"
 
 interface ChatUIProps {}
 
@@ -50,18 +51,17 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   const {
     chatMessages,
     selectedChat,
-    isGenerating,
-    setIsReadyToChat,
-    showSidebar,
     isTemporaryChat,
     setTemporaryChatMessages,
     fetchMessages,
     fetchChat,
     loadMoreMessages,
     isLoadingMore,
-    allMessagesLoaded,
-    isMobile
+    allMessagesLoaded
   } = useContext(PentestGPTContext)
+
+  const { isMobile, isGenerating, showSidebar, setIsReadyToChat } =
+    useUIContext()
 
   const {
     handleNewChat,

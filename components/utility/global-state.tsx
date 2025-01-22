@@ -13,7 +13,6 @@ import {
 import { getTeamMembersByTeamId } from "@/db/teams"
 // import { getWorkspacesByUserId } from "@/db/workspaces"
 import { convertBlobToBase64 } from "@/lib/blob-to-b64"
-import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
 import { fetchHostedModels } from "@/lib/models/fetch-models"
 import { supabase } from "@/lib/supabase/browser-client"
 import { ProcessedTeamMember } from "@/lib/team-utils"
@@ -28,7 +27,6 @@ import {
   MessageImage,
   SubscriptionStatus
 } from "@/types"
-import { PluginID } from "@/types/plugins"
 import { User } from "@supabase/supabase-js"
 import { useRouter, useSearchParams } from "next/navigation"
 import { FC, useCallback, useEffect, useMemo, useState } from "react"
@@ -91,25 +89,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [selectedChat, setSelectedChat] = useState<Tables<"chats"> | null>(null)
 
   // ACTIVE CHAT STORE
-  const [isGenerating, setIsGenerating] = useState<boolean>(false)
-  const [firstTokenReceived, setFirstTokenReceived] = useState<boolean>(false)
   const [abortController, setAbortController] =
     useState<AbortController | null>(null)
-
-  // ENHANCE MENU STORE
-  const [isEnhancedMenuOpen, setIsEnhancedMenuOpen] = useLocalStorageState(
-    "isEnhancedMenuOpen",
-    true
-  )
-  const [selectedPluginType, setSelectedPluginType] = useState("")
-  const [selectedPlugin, setSelectedPlugin] = useState(PluginID.NONE)
-
-  // CHAT INPUT COMMAND STORE
-  const [slashCommand, setSlashCommand] = useState("")
-  const [isAtPickerOpen, setIsAtPickerOpen] = useState(false)
-  const [atCommand, setAtCommand] = useState("")
-  const [toolCommand, setToolCommand] = useState("")
-  const [focusFile, setFocusFile] = useState(false)
 
   // ATTACHMENTS STORE
   const [chatFiles, setChatFiles] = useState<ChatFile[]>([])
@@ -122,32 +103,11 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [useRetrieval, setUseRetrieval] = useState<boolean>(false)
   const [sourceCount, setSourceCount] = useState<number>(4)
 
-  // TOOL STORE
-  const [toolInUse, setToolInUse] = useState<string>("none")
-  const [isToolPickerOpen, setIsToolPickerOpen] = useState(false)
-  const [focusTool, setFocusTool] = useState(false)
-
-  // Define the isMobile state
-  const [isMobile, setIsMobile] = useState<boolean>(false)
-
-  // Define is ready to chat state
-  const [isReadyToChat, setIsReadyToChat] = useState<boolean>(true)
-
-  // SIDEBAR
-  const [showSidebar, setShowSidebar] = useLocalStorageState(
-    "showSidebar",
-    false
-  )
-
   // Audio
   const [currentPlayingMessageId, setCurrentPlayingMessageId] = useState<
     string | null
   >(null)
   const [isMicSupported, setIsMicSupported] = useState(true)
-
-  // Terminal output setting
-  const [showTerminalOutput, setShowTerminalOutput] =
-    useLocalStorageState<boolean>("showTerminalOutput", true)
 
   // TEMPORARY CHAT STORE
   const [isTemporaryChat, setIsTemporaryChat] = useState(false)
@@ -161,24 +121,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   useEffect(() => {
     setIsTemporaryChat(searchParams.get("temporary-chat") === "true")
   }, [searchParams])
-
-  // Handle window resize to update isMobile
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 640)
-    }
-
-    // Set initial value
-    setIsMobile(window.innerWidth <= 640)
-
-    // Add event listener
-    window.addEventListener("resize", handleResize)
-
-    // Clean up the event listener on component unmount
-    return () => {
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [])
 
   useEffect(() => {
     fetchStartingData()
@@ -488,32 +430,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setSelectedChat,
 
         // ACTIVE CHAT STORE
-        isGenerating,
-        setIsGenerating,
-        firstTokenReceived,
-        setFirstTokenReceived,
         abortController,
         setAbortController,
-
-        // ENHANCE MENU STORE
-        isEnhancedMenuOpen,
-        setIsEnhancedMenuOpen,
-        selectedPluginType,
-        setSelectedPluginType,
-        selectedPlugin,
-        setSelectedPlugin,
-
-        // CHAT INPUT COMMAND STORE
-        slashCommand,
-        setSlashCommand,
-        isAtPickerOpen,
-        setIsAtPickerOpen,
-        atCommand,
-        setAtCommand,
-        toolCommand,
-        setToolCommand,
-        focusFile,
-        setFocusFile,
 
         // ATTACHMENT STORE
         chatFiles,
@@ -532,28 +450,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setUseRetrieval,
         sourceCount,
         setSourceCount,
-
-        // TOOL STORE
-        toolInUse,
-        setToolInUse,
-        isToolPickerOpen,
-        setIsToolPickerOpen,
-        focusTool,
-        setFocusTool,
-
-        isMobile,
-
-        // Is ready to chat state
-        isReadyToChat,
-        setIsReadyToChat,
-
-        // Sidebar
-        showSidebar,
-        setShowSidebar,
-
-        // Terminal output setting
-        showTerminalOutput,
-        setShowTerminalOutput,
 
         // Audio
         currentPlayingMessageId,

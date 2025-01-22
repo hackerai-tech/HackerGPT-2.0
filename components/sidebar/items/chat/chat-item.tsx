@@ -13,19 +13,16 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu"
 import { ShareChatButton } from "@/components/chat/chat-share-button"
+import { useUIContext } from "@/context/ui-context"
 
 interface ChatItemProps {
   chat: Tables<"chats">
 }
 
 export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
-  const {
-    selectedChat,
-    isMobile,
-    setShowSidebar,
-    contentType,
-    setContentType
-  } = useContext(PentestGPTContext)
+  const { selectedChat, contentType, setContentType } =
+    useContext(PentestGPTContext)
+  const { isMobile, setShowSidebar } = useUIContext()
   const { handleSelectChat } = useChatHandler()
   const params = useParams()
   const isActive = params.chatid === chat.id || selectedChat?.id === chat.id

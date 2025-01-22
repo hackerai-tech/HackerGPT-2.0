@@ -10,13 +10,13 @@ import {
 import { Button } from "@/components/ui/button"
 import { useFragments } from "./chat-hooks/use-fragments"
 import { MessageMarkdown } from "../messages/message-markdown"
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-import { PentestGPTContext } from "@/context/context"
 import { CopyButton } from "@/components/ui/copy-button"
 import dynamic from "next/dynamic"
+import { useUIContext } from "@/context/ui-context"
 
 const DynamicFragmentPreview = dynamic(() => import("./fragment-preview"), {
   ssr: false
@@ -32,7 +32,8 @@ export function ChatFragment() {
     closeFragmentBar,
     updateFragment
   } = useFragments()
-  const { isMobile } = useContext(PentestGPTContext)
+
+  const { isMobile } = useUIContext()
 
   const handleReload = async () => {
     if (

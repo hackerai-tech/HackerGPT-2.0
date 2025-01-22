@@ -88,7 +88,7 @@ export const MessageTooLong: FC<MessageTooLongProps> = ({
         </div>
       </div>
       <Modal isOpen={showModal}>
-        <div className="size-screen fixed inset-0 z-50 bg-black bg-opacity-50 backdrop-blur-sm dark:bg-opacity-75"></div>
+        <div className="size-screen bg/50 dark:bg/75 fixed inset-0 z-50 bg-black backdrop-blur-sm"></div>
         <div
           className="fixed inset-0 z-50 flex size-full items-center justify-center"
           onClick={handleCloseModal}

@@ -11,6 +11,7 @@ import { SidebarHeader } from "./sidebar-header"
 import { SidebarSwitcher } from "./sidebar-switcher"
 import { WithTooltip } from "../ui/with-tooltip"
 import { Settings } from "../utility/settings"
+import { useUIContext } from "@/context/ui-context"
 
 export const SIDEBAR_ICON_SIZE = 26
 
@@ -25,13 +26,12 @@ export const SidebarContent: FC<SidebarContentProps> = ({
 }) => {
   const {
     isPremiumSubscription,
-    setShowSidebar,
-    isMobile,
     subscription,
     membershipData,
     teamMembers,
     setContentType
   } = useContext(PentestGPTContext)
+  const { isMobile, setShowSidebar } = useUIContext()
   const isInvitationPending = membershipData?.invitation_status === "pending"
 
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)

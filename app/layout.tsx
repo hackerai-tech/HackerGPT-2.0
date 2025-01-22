@@ -7,6 +7,7 @@ import "./globals.css"
 import { GlobalAlertDialog } from "./global-alert-dialog"
 import { PluginProvider } from "@/components/chat/chat-hooks/PluginProvider"
 import { createClient } from "@/lib/supabase/server"
+import { UIState } from "@/components/utility/ui-state"
 
 const inter = Inter({ subsets: ["latin"] })
 const APP_NAME = "PentestGPT"
@@ -109,7 +110,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           <div className="bg-background text-foreground flex h-dvh flex-col items-center overflow-x-auto">
             {user ? (
               <PluginProvider>
-                <GlobalState>{children}</GlobalState>
+                <GlobalState>
+                  <UIState>{children}</UIState>
+                </GlobalState>
               </PluginProvider>
             ) : (
               children

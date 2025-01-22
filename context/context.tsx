@@ -69,30 +69,6 @@ interface PentestGPTContextType {
   // ACTIVE CHAT STORE
   abortController: AbortController | null
   setAbortController: Dispatch<SetStateAction<AbortController | null>>
-  firstTokenReceived: boolean
-  setFirstTokenReceived: Dispatch<SetStateAction<boolean>>
-  isGenerating: boolean
-  setIsGenerating: Dispatch<SetStateAction<boolean>>
-
-  // ENHANCE MENU
-  isEnhancedMenuOpen: boolean
-  setIsEnhancedMenuOpen: Dispatch<SetStateAction<boolean>>
-  selectedPluginType: string
-  setSelectedPluginType: Dispatch<SetStateAction<string>>
-  selectedPlugin: PluginID
-  setSelectedPlugin: Dispatch<SetStateAction<PluginID>>
-
-  // CHAT INPUT COMMAND STORE
-  slashCommand: string
-  setSlashCommand: Dispatch<SetStateAction<string>>
-  isAtPickerOpen: boolean
-  setIsAtPickerOpen: Dispatch<SetStateAction<boolean>>
-  atCommand: string
-  setAtCommand: Dispatch<SetStateAction<string>>
-  toolCommand: string
-  setToolCommand: Dispatch<SetStateAction<string>>
-  focusFile: boolean
-  setFocusFile: Dispatch<SetStateAction<boolean>>
 
   // ATTACHMENTS STORE
   chatFiles: ChatFile[]
@@ -111,25 +87,6 @@ interface PentestGPTContextType {
   setUseRetrieval: Dispatch<SetStateAction<boolean>>
   sourceCount: number
   setSourceCount: Dispatch<SetStateAction<number>>
-
-  // TOOL STORE
-  toolInUse: string
-  setToolInUse: Dispatch<SetStateAction<string>>
-
-  isMobile: boolean
-
-  isReadyToChat: boolean
-  setIsReadyToChat: Dispatch<SetStateAction<boolean>>
-
-  // Sidebar
-  showSidebar: boolean
-  setShowSidebar: (value: boolean | ((prevState: boolean) => boolean)) => void
-
-  // Terminal output setting
-  showTerminalOutput: boolean
-  setShowTerminalOutput: (
-    value: boolean | ((prevState: boolean) => boolean)
-  ) => void
 
   // Audio
   currentPlayingMessageId: string | null
@@ -152,12 +109,6 @@ interface PentestGPTContextType {
   // User Email
   userEmail: string
   setUserEmail: (email: string) => void
-
-  // Tools
-  isToolPickerOpen: boolean
-  setIsToolPickerOpen: Dispatch<SetStateAction<boolean>>
-  focusTool: boolean
-  setFocusTool: Dispatch<SetStateAction<boolean>>
 }
 
 export const PentestGPTContext = createContext<PentestGPTContextType>({
@@ -214,32 +165,8 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   setTemporaryChatMessages: () => {},
 
   // ACTIVE CHAT STORE
-  isGenerating: false,
-  setIsGenerating: () => {},
-  firstTokenReceived: false,
-  setFirstTokenReceived: () => {},
   abortController: null,
   setAbortController: () => {},
-
-  // ENHANCE MENU STORE
-  isEnhancedMenuOpen: false,
-  setIsEnhancedMenuOpen: () => {},
-  selectedPluginType: "",
-  setSelectedPluginType: () => {},
-  selectedPlugin: PluginID.NONE,
-  setSelectedPlugin: () => {},
-
-  // CHAT INPUT COMMAND STORE
-  slashCommand: "",
-  setSlashCommand: () => {},
-  isAtPickerOpen: false,
-  setIsAtPickerOpen: () => {},
-  atCommand: "",
-  setAtCommand: () => {},
-  toolCommand: "",
-  setToolCommand: () => {},
-  focusFile: false,
-  setFocusFile: () => {},
 
   // ATTACHMENTS STORE
   chatFiles: [],
@@ -258,23 +185,6 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   setUseRetrieval: () => {},
   sourceCount: 4,
   setSourceCount: () => {},
-
-  // TOOL STORE
-  toolInUse: "none",
-  setToolInUse: () => {},
-
-  isMobile: false,
-
-  isReadyToChat: false,
-  setIsReadyToChat: () => {},
-
-  // Sidebar
-  showSidebar: false,
-  setShowSidebar: () => {},
-
-  // Terminal output setting
-  showTerminalOutput: false,
-  setShowTerminalOutput: () => {},
 
   // Audio
   currentPlayingMessageId: null,
@@ -296,13 +206,7 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
 
   // User Email
   userEmail: "",
-  setUserEmail: () => {},
-
-  // Tools
-  isToolPickerOpen: false,
-  setIsToolPickerOpen: () => {},
-  focusTool: false,
-  setFocusTool: () => {}
+  setUserEmail: () => {}
 })
 
 export const usePentestGPT = () => useContext(PentestGPTContext)

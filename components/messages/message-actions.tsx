@@ -16,6 +16,7 @@ import { FC, useContext, useEffect, useState } from "react"
 import { WithTooltip } from "../ui/with-tooltip"
 import { SwitchModel } from "../ui/switch-model"
 import { useAudioPlayer } from "../chat/chat-hooks/use-audio-player"
+import { useUIContext } from "@/context/ui-context"
 
 export const MESSAGE_ICON_SIZE = 20
 
@@ -57,14 +58,15 @@ export const MessageActions: FC<MessageActionsProps> = ({
   messageSequenceNumber
 }) => {
   const {
-    isGenerating,
     currentPlayingMessageId,
     setCurrentPlayingMessageId,
     selectedChat,
-    isMobile,
     isPremiumSubscription,
     isTemporaryChat
   } = useContext(PentestGPTContext)
+
+  const { isMobile, isGenerating } = useUIContext()
+
   const { playAudio, stopAudio, isLoading, isPlaying } = useAudioPlayer()
   const [showCheckmark, setShowCheckmark] = useState(false)
 

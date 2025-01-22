@@ -60,22 +60,23 @@ export async function POST(request: Request) {
   try {
     const profile = await getAIProfile()
 
-    let {
+    const {
       providerBaseUrl,
       providerHeaders,
-      selectedModel,
       rateLimitCheckResult,
       similarityTopK,
       modelTemperature,
       isPentestGPTPro
     } = await getProviderConfig(chatSettings, profile)
 
-    if (rateLimitCheckResult !== null) {
-      return rateLimitCheckResult.response
-    }
+    let { selectedModel } = await getProviderConfig(chatSettings, profile)
 
     if (!selectedModel) {
       throw new Error("Selected model is undefined")
+    }
+
+    if (rateLimitCheckResult !== null) {
+      return rateLimitCheckResult.response
     }
 
     // On normal chat, the last user message is the target standalone message

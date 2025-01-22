@@ -7,6 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
 import { ModelSelect } from "../models/model-select"
 import { WithTooltip } from "../ui/with-tooltip"
 import { ChatSecondaryButtons } from "./chat-secondary-buttons"
+import { useUIContext } from "@/context/ui-context"
 
 interface ChatSettingsProps {
   handleCleanChat?: () => void
@@ -16,11 +17,12 @@ export const ChatSettings: FC<ChatSettingsProps> = ({ handleCleanChat }) => {
   const {
     chatSettings,
     setChatSettings,
-    isMobile,
     profile,
     isPremiumSubscription,
     isTemporaryChat
   } = useContext(PentestGPTContext)
+
+  const { isMobile } = useUIContext()
 
   const [isOpen, setIsOpen] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)

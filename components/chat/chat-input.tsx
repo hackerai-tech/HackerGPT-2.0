@@ -26,6 +26,7 @@ import useSpeechRecognition from "./chat-hooks/use-speech-recognition"
 import VoiceRecordingBar from "@/components/ui/voice-recording-bar"
 import VoiceLoadingBar from "@/components/ui/voice-loading-bar"
 import { ToolOptions } from "./chat-tools/tool-options"
+import { useUIContext } from "@/context/ui-context"
 
 export const ChatInput: FC = () => {
   const TOOLTIP_DELAY = 500
@@ -42,24 +43,27 @@ export const ChatInput: FC = () => {
   const {
     userInput,
     chatMessages,
+    chatSettings,
+    newMessageFiles,
+    newMessageImages,
+    isPremiumSubscription,
+    isMicSupported,
+    isTemporaryChat
+  } = useContext(PentestGPTContext)
+
+  const {
     isGenerating,
     focusFile,
     isAtPickerOpen,
     setFocusFile,
-    chatSettings,
-    newMessageFiles,
-    newMessageImages,
     isEnhancedMenuOpen,
     setIsEnhancedMenuOpen,
     selectedPlugin,
-    isPremiumSubscription,
     isMobile,
-    isMicSupported,
-    isTemporaryChat,
     isToolPickerOpen,
     focusTool,
     setFocusTool
-  } = useContext(PentestGPTContext)
+  } = useUIContext()
 
   const {
     chatInputRef,

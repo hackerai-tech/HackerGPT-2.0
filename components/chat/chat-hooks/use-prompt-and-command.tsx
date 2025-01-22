@@ -1,4 +1,5 @@
 import { PentestGPTContext } from "@/context/context"
+import { useUIContext } from "@/context/ui-context"
 import { Tables } from "@/supabase/types"
 import { PluginSummary } from "@/types/plugins"
 import { useContext } from "react"
@@ -9,13 +10,16 @@ export const usePromptAndCommand = () => {
     userInput,
     setUserInput,
     setShowFilesDisplay,
+    setUseRetrieval
+  } = useContext(PentestGPTContext)
+
+  const {
     setIsAtPickerOpen,
     setSlashCommand,
     setAtCommand,
-    setUseRetrieval,
     setIsToolPickerOpen,
     setSelectedPlugin
-  } = useContext(PentestGPTContext)
+  } = useUIContext()
 
   const handleInputChange = (value: string) => {
     const slashMatch = value.match(/(?:^|\s)\/([^ ]*)$/)

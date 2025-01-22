@@ -32,6 +32,7 @@ import {
 import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { toast } from "sonner"
 import dynamic from "next/dynamic"
+import { useUIContext } from "@/context/ui-context"
 
 const DynamicKeyboardShortcutsPopup = dynamic(
   () => import("../chat/keyboard-shortcuts-popup"),
@@ -50,15 +51,10 @@ interface DashboardProps {
 }
 
 export const Dashboard: FC<DashboardProps> = ({ children }) => {
-  const {
-    isPremiumSubscription,
-    isReadyToChat,
-    isMobile,
-    showSidebar,
-    setShowSidebar,
-    contentType,
-    setContentType
-  } = useContext(PentestGPTContext)
+  const { isPremiumSubscription, contentType, setContentType } =
+    useContext(PentestGPTContext)
+  const { isReadyToChat, isMobile, showSidebar, setShowSidebar } =
+    useUIContext()
 
   const searchParams = useSearchParams()
   const tabValue = searchParams.get("tab") || "chats"
@@ -239,7 +235,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
       {isMobile && showSidebar && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50"
+          className="bg/50 fixed inset-0 z-40 bg-black"
           onClick={handleOverlayClick}
         />
       )}
