@@ -48,7 +48,10 @@ export const getFileWorkspacesByWorkspaceId = async (workspaceId: string) => {
 
   // Sort files by updated_at after fetching
   workspace.files.sort((a, b) => {
-    return new Date(b.updated_at || "").getTime() - new Date(a.updated_at || "").getTime()
+    return (
+      new Date(b.updated_at || "").getTime() -
+      new Date(a.updated_at || "").getTime()
+    )
   })
 
   return workspace
@@ -59,8 +62,8 @@ export const getFileWorkspacesByWorkspaceId = async (workspaceId: string) => {
 //     .from("files")
 //     .select(
 //       `
-//       id, 
-//       name, 
+//       id,
+//       name,
 //       workspaces (*)
 //     `
 //     )
