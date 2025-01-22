@@ -20,6 +20,7 @@ import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
 import { executeWebSearchTool } from "@/lib/tools/llm/web-search"
 import { createStreamResponse } from "@/lib/ai-helper"
+import { validateMessages } from "@/lib/build-prompt-v2"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -199,6 +200,9 @@ export async function POST(request: Request) {
     // Remove last message if it's a continuation to remove the continue prompt
     const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
 
+    // Remove invalid message exchanges
+    const validatedMessages = validateMessages(cleanedMessages)
+
     try {
       return createStreamResponse(dataStream => {
         dataStream.writeData({ ragUsed, ragId })
@@ -220,7 +224,7 @@ export async function POST(request: Request) {
             isPentestGPTPro ? { parallelToolCalls: false } : {}
           ),
           system: systemPrompt,
-          messages: toVercelChatMessages(cleanedMessages, includeImages),
+          messages: toVercelChatMessages(validatedMessages, includeImages),
           temperature: modelTemperature,
           maxTokens: isPentestGPTPro ? 2048 : 1024,
           abortSignal: request.signal,

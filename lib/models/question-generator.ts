@@ -1,4 +1,5 @@
 import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
+import { validateMessages } from "@/lib/build-prompt-v2"
 import { generateText } from "ai"
 import endent from "endent"
 import { createMistral } from "@ai-sdk/mistral"
@@ -13,7 +14,10 @@ export async function generateStandaloneQuestion(
 ) {
   filterEmptyAssistantMessages(messages)
 
-  const chatHistory = messages
+  // Validate messages to handle empty Mistral responses
+  const validatedMessages = validateMessages(messages)
+
+  const chatHistory = validatedMessages
     .slice(1, -1) // Remove the first (system prompt) and the last message (user message)
     .slice(-3) // Get the last 3 messages only (assistant, user, assistant)
     .map(msg => `${msg.role}: ${msg.content}`)

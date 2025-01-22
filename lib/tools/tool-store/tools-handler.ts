@@ -1,7 +1,6 @@
 import { tool } from "ai"
 import { createOpenAI } from "@ai-sdk/openai"
 import { streamText } from "ai"
-import llmConfig from "@/lib/models/llm/llm-config"
 import {
   filterEmptyAssistantMessages,
   toVercelChatMessages
@@ -56,25 +55,10 @@ export async function commandGeneratorHandler({
     messages.pop()
   }
 
-  const providerHeaders = {
-    Authorization: `Bearer ${llmConfig.openrouter.apiKey}`,
-    "Content-Type": "application/json",
-    "HTTP-Referer": `https://hacktheworld.com/tools-terminal`,
-    "X-Title": "tools-terminal"
-  }
-
   let sandbox: Sandbox | any = null
   let provider, model
-  if (isPremium) {
-    model = "gpt-4o"
-    provider = createOpenAI()
-  } else {
-    model = "openai/gpt-4o"
-    provider = createOpenAI({
-      baseURL: llmConfig.openrouter.baseURL,
-      headers: providerHeaders
-    })
-  }
+  isPremium ? (model = "gpt-4o") : (model = "gpt-4o-mini")
+  provider = createOpenAI()
 
   try {
     const stream = new ReadableStream<Uint8Array>({
