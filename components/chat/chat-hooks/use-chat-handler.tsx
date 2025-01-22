@@ -60,7 +60,8 @@ export const useChatHandler = () => {
     setIsReadyToChat,
     isTemporaryChat,
     temporaryChatMessages,
-    setTemporaryChatMessages
+    setTemporaryChatMessages,
+    setSelectedPlugin
   } = useContext(PentestGPTContext)
 
   let { selectedPlugin } = useContext(PentestGPTContext)
@@ -127,6 +128,7 @@ export const useChatHandler = () => {
     setUseRetrieval(false)
 
     setToolInUse("none")
+    setSelectedPlugin(PluginID.NONE)
 
     setFragment(null)
 
