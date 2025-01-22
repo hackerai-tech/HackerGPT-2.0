@@ -10,12 +10,12 @@ import {
 import { PentestGPTContext } from "@/context/context"
 import { updateChat } from "@/db/chats"
 import {
-  createFileWorkspaces,
-  deleteFileWorkspace,
+  // createFileWorkspaces,
+  // deleteFileWorkspace,
   // getFileWorkspacesByFileId,
   updateFile
 } from "@/db/files"
-import { Tables, TablesUpdate } from "@/supabase/types"
+import { TablesUpdate } from "@/supabase/types"
 import { ContentType, DataItemType } from "@/types"
 import { FC, useContext, useEffect, useRef, useState, JSX } from "react"
 import { toast } from "sonner"
@@ -38,14 +38,14 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
   updateState,
   isTyping
 }) => {
-  const { selectedWorkspace, setChats, setFiles } =
+  const { setChats, setFiles } =
     useContext(PentestGPTContext)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   const [isOpen, setIsOpen] = useState(false)
-  const [startingWorkspaces] = useState<Tables<"workspaces">[]>([])
-  const [selectedWorkspaces] = useState<Tables<"workspaces">[]>([])
+  // const [startingWorkspaces] = useState<Tables<"workspaces">[]>([])
+  // const [selectedWorkspaces] = useState<Tables<"workspaces">[]>([])
 
   useEffect(() => {
     if (isOpen) {
@@ -99,73 +99,73 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
   //   return workspaces
   // }
 
-  const handleWorkspaceUpdates = async (
-    startingWorkspaces: Tables<"workspaces">[],
-    selectedWorkspaces: Tables<"workspaces">[],
-    itemId: string,
-    deleteWorkspaceFn: (
-      itemId: string,
-      workspaceId: string
-    ) => Promise<boolean>,
-    createWorkspaceFn: (
-      workspaces: { user_id: string; item_id: string; workspace_id: string }[]
-    ) => Promise<void>,
-    itemIdKey: string
-  ) => {
-    if (!selectedWorkspace) return
+  // const handleWorkspaceUpdates = async (
+  //   startingWorkspaces: Tables<"workspaces">[],
+  //   selectedWorkspaces: Tables<"workspaces">[],
+  //   itemId: string,
+  //   deleteWorkspaceFn: (
+  //     itemId: string,
+  //     workspaceId: string
+  //   ) => Promise<boolean>,
+  //   createWorkspaceFn: (
+  //     workspaces: { user_id: string; item_id: string; workspace_id: string }[]
+  //   ) => Promise<void>,
+  //   itemIdKey: string
+  // ) => {
+  //   if (!selectedWorkspace) return
 
-    const deleteList = startingWorkspaces.filter(
-      startingWorkspace =>
-        !selectedWorkspaces.some(
-          selectedWorkspace => selectedWorkspace.id === startingWorkspace.id
-        )
-    )
+  //   const deleteList = startingWorkspaces.filter(
+  //     startingWorkspace =>
+  //       !selectedWorkspaces.some(
+  //         selectedWorkspace => selectedWorkspace.id === startingWorkspace.id
+  //       )
+  //   )
 
-    for (const workspace of deleteList) {
-      await deleteWorkspaceFn(itemId, workspace.id)
-    }
+  //   for (const workspace of deleteList) {
+  //     await deleteWorkspaceFn(itemId, workspace.id)
+  //   }
 
-    if (deleteList.map(w => w.id).includes(selectedWorkspace.id)) {
-      const setStateFunction = stateUpdateFunctions[contentType]
+  //   if (deleteList.map(w => w.id).includes(selectedWorkspace.id)) {
+  //     const setStateFunction = stateUpdateFunctions[contentType]
 
-      if (setStateFunction) {
-        setStateFunction((prevItems: any) =>
-          prevItems.filter((prevItem: any) => prevItem.id !== item.id)
-        )
-      }
-    }
+  //     if (setStateFunction) {
+  //       setStateFunction((prevItems: any) =>
+  //         prevItems.filter((prevItem: any) => prevItem.id !== item.id)
+  //       )
+  //     }
+  //   }
 
-    const createList = selectedWorkspaces.filter(
-      selectedWorkspace =>
-        !startingWorkspaces.some(
-          startingWorkspace => startingWorkspace.id === selectedWorkspace.id
-        )
-    )
+  //   const createList = selectedWorkspaces.filter(
+  //     selectedWorkspace =>
+  //       !startingWorkspaces.some(
+  //         startingWorkspace => startingWorkspace.id === selectedWorkspace.id
+  //       )
+  //   )
 
-    await createWorkspaceFn(
-      createList.map(workspace => {
-        return {
-          user_id: workspace.user_id,
-          [itemIdKey]: itemId,
-          workspace_id: workspace.id
-        } as any
-      })
-    )
-  }
+  //   await createWorkspaceFn(
+  //     createList.map(workspace => {
+  //       return {
+  //         user_id: workspace.user_id,
+  //         [itemIdKey]: itemId,
+  //         workspace_id: workspace.id
+  //       } as any
+  //     })
+  //   )
+  // }
 
   const updateFunctions = {
     chats: updateChat,
     files: async (fileId: string, updateState: TablesUpdate<"files">) => {
       const updatedFile = await updateFile(fileId, updateState)
 
-      await handleWorkspaceUpdates(
-        startingWorkspaces,
-        selectedWorkspaces,
-        fileId,
-        deleteFileWorkspace,
-        createFileWorkspaces as any,
-        "file_id"
-      )
+      // await handleWorkspaceUpdates(
+      //   startingWorkspaces,
+      //   selectedWorkspaces,
+      //   fileId,
+      //   deleteFileWorkspace,
+      //   createFileWorkspaces as any,
+      //   "file_id"
+      // )
 
       return updatedFile
     },

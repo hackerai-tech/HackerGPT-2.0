@@ -42,7 +42,7 @@ export default function ToolsStorePage({
     filters.forEach(filter => {
       categoryRefs.current[filter] = React.createRef<HTMLDivElement>()
     })
-  }, [])
+  }, [categoryRefs])
 
   const scrollToCategory = (category: string) => {
     categoryRefs.current[category]?.current?.scrollIntoView({

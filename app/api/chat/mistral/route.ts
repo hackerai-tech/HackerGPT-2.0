@@ -88,13 +88,6 @@ export async function POST(request: Request) {
 
     const includeImages = messagesIncludeImages(messages)
 
-    let shouldUncensorResponse = false
-    if (!includeImages && !isContinuation && !shouldUseRAG) {
-      const { shouldUncensorResponse: moderationResult } =
-        await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
-      shouldUncensorResponse = moderationResult
-    }
-
     const baseSystemPrompt = isPentestGPTPro
       ? llmConfig.systemPrompts.pgptLarge
       : llmConfig.systemPrompts.pgptSmall
@@ -167,6 +160,13 @@ export async function POST(request: Request) {
       }
 
       return filterEmptyAssistantMessages(messages)
+    }
+
+    let shouldUncensorResponse = false
+    if (!includeImages && !isContinuation && !shouldUseRAG) {
+      const { shouldUncensorResponse: moderationResult } =
+        await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
+      shouldUncensorResponse = moderationResult
     }
 
     handleMessages(shouldUncensorResponse)
