@@ -11,7 +11,7 @@ import {
   getSubscriptionByUserId
 } from "@/db/subscriptions"
 import { getTeamMembersByTeamId } from "@/db/teams"
-import { getWorkspacesByUserId } from "@/db/workspaces"
+// import { getWorkspacesByUserId } from "@/db/workspaces"
 import { convertBlobToBase64 } from "@/lib/blob-to-b64"
 import { useLocalStorageState } from "@/lib/hooks/use-local-storage-state"
 import { fetchHostedModels } from "@/lib/models/fetch-models"
@@ -67,7 +67,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   // ITEMS STORE
   const [chats, setChats] = useState<Tables<"chats">[]>([])
   const [files, setFiles] = useState<Tables<"files">[]>([])
-  const [workspaces, setWorkspaces] = useState<Tables<"workspaces">[]>([])
+  // const [workspaces, setWorkspaces] = useState<Tables<"workspaces">[]>([])
 
   // MODELS STORE
   const [envKeyMap, setEnvKeyMap] = useState<Record<string, boolean>>({})
@@ -219,13 +219,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         return router.push("/setup")
       }
 
-      const [subscription, workspaces] = await Promise.all([
-        getSubscriptionByUserId(userFromAuth.id),
-        getWorkspacesByUserId(userFromAuth.id)
-      ])
-
+      const subscription = await getSubscriptionByUserId(userFromAuth.id)
       updateSubscription(subscription)
-      setWorkspaces(workspaces)
 
       const members = await getTeamMembersByTeamId(
         userFromAuth.id,
@@ -467,8 +462,8 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setChats,
         files,
         setFiles,
-        workspaces,
-        setWorkspaces,
+        // workspaces,
+        // setWorkspaces,
 
         // MODELS STORE
         envKeyMap,

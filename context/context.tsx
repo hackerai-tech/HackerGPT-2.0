@@ -41,8 +41,8 @@ interface PentestGPTContextType {
   setChats: Dispatch<SetStateAction<Tables<"chats">[]>>
   files: Tables<"files">[]
   setFiles: Dispatch<SetStateAction<Tables<"files">[]>>
-  workspaces: Tables<"workspaces">[]
-  setWorkspaces: Dispatch<SetStateAction<Tables<"workspaces">[]>>
+  // workspaces: Tables<"workspaces">[]
+  // setWorkspaces: Dispatch<SetStateAction<Tables<"workspaces">[]>>
 
   // MODELS STORE
   envKeyMap: Record<string, boolean>
@@ -188,8 +188,8 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   setChats: () => {},
   files: [],
   setFiles: () => {},
-  workspaces: [],
-  setWorkspaces: () => {},
+  // workspaces: [],
+  // setWorkspaces: () => {},
 
   // MODELS STORE
   envKeyMap: {},

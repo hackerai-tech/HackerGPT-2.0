@@ -57,27 +57,25 @@ export const getWorkspaceCount = async () => {
   return count
 }
 
-export const getWorkspacesByUserId = async (userId: string) => {
-  const { data: workspaces, error } = await supabase
-    .from("workspaces")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
+// export const getWorkspacesByUserId = async (userId: string) => {
+//   const { data: workspaces, error } = await supabase
+//     .from("workspaces")
+//     .select("*")
+//     .eq("user_id", userId)
+//     .order("created_at", { ascending: false })
 
-  if (!workspaces) {
-    throw new Error(error.message)
-  }
+//   if (!workspaces) {
+//     throw new Error(error.message)
+//   }
 
-  return workspaces
-}
+//   return workspaces
+// }
 
 export const createWorkspace = async (
   workspace: TablesInsert<"workspaces">
 ) => {
   const workspaceCount = (await getWorkspaceCount()) || 0
-  const maxWorkspaces = parseInt(
-    process.env.NEXT_PUBLIC_RATELIMITER_LIMIT_WORKSPACES || "10"
-  )
+  const maxWorkspaces = parseInt("1")
 
   if (workspaceCount >= maxWorkspaces) return false
 
@@ -112,15 +110,15 @@ export const updateWorkspace = async (
   return updatedWorkspace
 }
 
-export const deleteWorkspace = async (workspaceId: string) => {
-  const { error } = await supabase
-    .from("workspaces")
-    .delete()
-    .eq("id", workspaceId)
+// export const deleteWorkspace = async (workspaceId: string) => {
+//   const { error } = await supabase
+//     .from("workspaces")
+//     .delete()
+//     .eq("id", workspaceId)
 
-  if (error) {
-    throw new Error(error.message)
-  }
+//   if (error) {
+//     throw new Error(error.message)
+//   }
 
-  return true
-}
+//   return true
+// }

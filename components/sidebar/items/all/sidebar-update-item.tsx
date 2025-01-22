@@ -12,7 +12,7 @@ import { updateChat } from "@/db/chats"
 import {
   createFileWorkspaces,
   deleteFileWorkspace,
-  getFileWorkspacesByFileId,
+  // getFileWorkspacesByFileId,
   updateFile
 } from "@/db/files"
 import { Tables, TablesUpdate } from "@/supabase/types"
@@ -38,27 +38,23 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
   updateState,
   isTyping
 }) => {
-  const { workspaces, selectedWorkspace, setChats, setFiles } =
+  const { selectedWorkspace, setChats, setFiles } =
     useContext(PentestGPTContext)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   const [isOpen, setIsOpen] = useState(false)
-  const [startingWorkspaces, setStartingWorkspaces] = useState<
-    Tables<"workspaces">[]
-  >([])
-  const [selectedWorkspaces, setSelectedWorkspaces] = useState<
-    Tables<"workspaces">[]
-  >([])
+  const [startingWorkspaces] = useState<Tables<"workspaces">[]>([])
+  const [selectedWorkspaces] = useState<Tables<"workspaces">[]>([])
 
   useEffect(() => {
     if (isOpen) {
       const fetchData = async () => {
-        if (workspaces.length > 1) {
-          const workspaces = await fetchSelectedWorkspaces()
-          setStartingWorkspaces(workspaces)
-          setSelectedWorkspaces(workspaces)
-        }
+        // if (workspaces.length > 1) {
+        //   const workspaces = await fetchSelectedWorkspaces()
+        //   setStartingWorkspaces(workspaces)
+        //   setSelectedWorkspaces(workspaces)
+        // }
 
         const fetchDataFunction = fetchDataFunctions[contentType]
         if (!fetchDataFunction) return
@@ -84,24 +80,24 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
     tools: null
   }
 
-  const fetchWorkpaceFunctions = {
-    chats: null,
-    files: async (fileId: string) => {
-      const item = await getFileWorkspacesByFileId(fileId)
-      return item.workspaces
-    },
-    tools: null
-  }
+  // const fetchWorkpaceFunctions = {
+  //   chats: null,
+  //   files: async (fileId: string) => {
+  //     const item = await getFileWorkspacesByFileId(fileId)
+  //     return item.workspaces
+  //   },
+  //   tools: null
+  // }
 
-  const fetchSelectedWorkspaces = async () => {
-    const fetchFunction = fetchWorkpaceFunctions[contentType]
+  // const fetchSelectedWorkspaces = async () => {
+  //   const fetchFunction = fetchWorkpaceFunctions[contentType]
 
-    if (!fetchFunction) return []
+  //   if (!fetchFunction) return []
 
-    const workspaces = await fetchFunction(item.id)
+  //   const workspaces = await fetchFunction(item.id)
 
-    return workspaces
-  }
+  //   return workspaces
+  // }
 
   const handleWorkspaceUpdates = async (
     startingWorkspaces: Tables<"workspaces">[],
