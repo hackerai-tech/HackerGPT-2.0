@@ -163,7 +163,6 @@ export const handleCreateMessages = async (
     const lastStartingMessage = chatMessages[chatMessages.length - 1].message
 
     const updatedMessage = await updateMessage(lastStartingMessage.id, {
-      ...lastStartingMessage,
       content: lastStartingMessage.content + generatedText
     })
 
