@@ -224,10 +224,12 @@ export const handleCreateMessages = async (
       ...generatedImages
     ])
 
-    const updatedMessage = await updateMessage(createdMessages[0].id, {
-      ...createdMessages[0],
-      image_paths: paths
-    })
+    let messageWithPaths = createdMessages[0]
+    if (paths.length > 0) {
+      messageWithPaths = await updateMessage(createdMessages[0].id, {
+        image_paths: paths
+      })
+    }
 
     await createMessageFileItems(
       retrievedFileItems.map(fileItem => {
@@ -247,7 +249,7 @@ export const handleCreateMessages = async (
           )
         : chatMessages),
       {
-        message: updatedMessage,
+        message: messageWithPaths,
         fileItems: [],
         isFinal: true
       },
