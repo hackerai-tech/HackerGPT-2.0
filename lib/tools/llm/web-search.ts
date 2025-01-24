@@ -11,11 +11,11 @@ interface WebSearchConfig {
   dataStream: any
 }
 
-async function getProviderConfig(chatSettings: any) {
+async function getProviderConfig(chatSettings: any, profile: any) {
   const isProModel =
     chatSettings.model === PGPT4.modelId || chatSettings.model === GPT4o.modelId
 
-  const defaultModel = "perplexity/llama-3.1-sonar-small-128k-online"
+  const defaultModel = "perplexity/llama-3.1-sonar-large-128k-online"
   const proModel = "perplexity/llama-3.1-sonar-large-128k-online"
 
   const providerHeaders = {
@@ -25,10 +25,15 @@ async function getProviderConfig(chatSettings: any) {
 
   const selectedModel = isProModel ? proModel : defaultModel
 
+  const systemPrompt = buildSystemPrompt(
+    llmConfig.systemPrompts.pentestGPTWebSearch,
+    profile.profile_context
+  )
+
   return {
+    systemPrompt,
     providerHeaders,
-    selectedModel,
-    isProModel
+    selectedModel
   }
 }
 
@@ -37,10 +42,14 @@ export async function executeWebSearchTool({
 }: {
   config: WebSearchConfig
 }) {
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error("OpenRouter API key is not set for web search")
+  }
+
   const { chatSettings, messages, profile, dataStream } = config
 
-  const { providerHeaders, selectedModel } =
-    await getProviderConfig(chatSettings)
+  const { systemPrompt, providerHeaders, selectedModel } =
+    await getProviderConfig(chatSettings, profile)
 
   console.log("[WebSearch] Executing web search with model:", selectedModel)
 
@@ -56,10 +65,7 @@ export async function executeWebSearchTool({
       messages: [
         {
           role: "system",
-          content: buildSystemPrompt(
-            llmConfig.systemPrompts.pentestGPTWebSearch,
-            profile.profile_context
-          )
+          content: systemPrompt
         },
         ...toVercelChatMessages(messages)
       ],

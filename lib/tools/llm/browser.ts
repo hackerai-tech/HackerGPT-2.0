@@ -108,6 +108,10 @@ export async function executeBrowserTool({
   open_url: string
   config: BrowserToolConfig
 }) {
+  if (!process.env.JINA_API_TOKEN) {
+    throw new Error("JINA_API_TOKEN environment variable is not set")
+  }
+
   const { chatSettings, profile, messages, dataStream } = config
   const { selectedModel } = await getProviderConfig(chatSettings)
   const browserResult = await browsePage(open_url)
