@@ -3,13 +3,15 @@ import { FC, useContext } from "react"
 import { usePromptAndCommand } from "./chat-hooks/use-prompt-and-command"
 import { FilePicker } from "./file-picker"
 import { ToolPicker } from "./tool-picker"
+import { useUIContext } from "@/context/ui-context"
 
 interface ChatCommandInputProps {}
 
 export const ChatCommandInput: FC<ChatCommandInputProps> = ({}) => {
+  const { newMessageFiles, chatFiles, isPremiumSubscription } =
+    useContext(PentestGPTContext)
+
   const {
-    newMessageFiles,
-    chatFiles,
     isAtPickerOpen,
     setIsAtPickerOpen,
     atCommand,
@@ -17,9 +19,8 @@ export const ChatCommandInput: FC<ChatCommandInputProps> = ({}) => {
     isToolPickerOpen,
     setIsToolPickerOpen,
     slashCommand,
-    focusTool,
-    isPremiumSubscription
-  } = useContext(PentestGPTContext)
+    focusTool
+  } = useUIContext()
 
   const { handleSelectUserFile, handleSelectTool } = usePromptAndCommand()
 

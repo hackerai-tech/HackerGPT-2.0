@@ -3,6 +3,7 @@ import { Tables } from "@/supabase/types"
 import { IconBooks } from "@tabler/icons-react"
 import { FC, useContext, useEffect, useRef } from "react"
 import { FileIcon } from "../ui/file-icon"
+import { useUIContext } from "@/context/ui-context"
 
 interface FilePickerProps {
   isOpen: boolean
@@ -21,7 +22,9 @@ export const FilePicker: FC<FilePickerProps> = ({
   onSelectFile,
   isFocused
 }) => {
-  const { files, setIsAtPickerOpen } = useContext(PentestGPTContext)
+  const { files } = useContext(PentestGPTContext)
+
+  const { setIsAtPickerOpen } = useUIContext()
 
   const itemsRef = useRef<(HTMLDivElement | null)[]>([])
 

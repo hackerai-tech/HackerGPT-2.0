@@ -157,7 +157,7 @@ export const TeamTab: FC = () => {
                     <MenuButton className="flex items-center rounded-full p-1 hover:bg-gray-100">
                       <MoreHorizontal className="size-4 text-gray-500" />
                     </MenuButton>
-                    <MenuItems className="absolute right-0 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <MenuItems className="ring/5 absolute right-0 mt-2 w-40 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black focus:outline-none">
                       <div className="p-1">
                         <MenuItem>
                           {({ active }) => (

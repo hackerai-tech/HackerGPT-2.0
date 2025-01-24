@@ -20,19 +20,18 @@ import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
 import { DialogPanel } from "@headlessui/react"
 import { usePathname, useRouter } from "next/navigation"
+import { useUIContext } from "@/context/ui-context"
 
 interface PluginSelectorProps {
   onPluginSelect: (type: string) => void
 }
 
 const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
-  const {
-    isPremiumSubscription,
-    setSelectedPlugin,
-    selectedPlugin,
-    chatSettings,
-    setContentType
-  } = useContext(PentestGPTContext)
+  const { isPremiumSubscription, chatSettings, setContentType } =
+    useContext(PentestGPTContext)
+
+  const { setSelectedPlugin, selectedPlugin } = useUIContext()
+
   const [selectedPluginName, setSelectedPluginName] =
     useState("No plugin selected")
   const [showLockedPluginDialog, setShowLockedPluginDialog] = useState(false)

@@ -1,9 +1,9 @@
 import { useStickToBottom } from "use-stick-to-bottom"
-import { PentestGPTContext } from "@/context/context"
-import { useContext, useEffect, useCallback } from "react"
+import { useEffect, useCallback } from "react"
+import { useUIContext } from "@/context/ui-context"
 
 export const useScroll = () => {
-  const { isGenerating } = useContext(PentestGPTContext)
+  const { isGenerating } = useUIContext()
 
   const stickToBottom = useStickToBottom({
     resize: "smooth",

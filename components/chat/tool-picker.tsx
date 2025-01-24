@@ -4,6 +4,7 @@ import { IconTool } from "@tabler/icons-react"
 import Image from "next/image"
 import { FC, useContext, useEffect, useRef } from "react"
 import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
+import { useUIContext } from "@/context/ui-context"
 
 interface ToolPickerProps {
   isOpen: boolean
@@ -20,8 +21,8 @@ export const ToolPicker: FC<ToolPickerProps> = ({
   onSelectTool,
   isFocused
 }) => {
-  const { setIsToolPickerOpen, isPremiumSubscription } =
-    useContext(PentestGPTContext)
+  const { isPremiumSubscription } = useContext(PentestGPTContext)
+  const { setIsToolPickerOpen } = useUIContext()
   const itemsRef = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => {

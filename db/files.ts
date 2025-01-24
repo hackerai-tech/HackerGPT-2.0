@@ -36,7 +36,6 @@ export const getFileWorkspacesByWorkspaceId = async (workspaceId: string) => {
     .select(
       `
       id,
-      name,
       files (*)
     `
     )
@@ -47,28 +46,36 @@ export const getFileWorkspacesByWorkspaceId = async (workspaceId: string) => {
     throw new Error(error.message)
   }
 
+  // Sort files by updated_at after fetching
+  workspace.files.sort((a, b) => {
+    return (
+      new Date(b.updated_at || "").getTime() -
+      new Date(a.updated_at || "").getTime()
+    )
+  })
+
   return workspace
 }
 
-export const getFileWorkspacesByFileId = async (fileId: string) => {
-  const { data: file, error } = await supabase
-    .from("files")
-    .select(
-      `
-      id, 
-      name, 
-      workspaces (*)
-    `
-    )
-    .eq("id", fileId)
-    .single()
+// export const getFileWorkspacesByFileId = async (fileId: string) => {
+//   const { data: file, error } = await supabase
+//     .from("files")
+//     .select(
+//       `
+//       id,
+//       name,
+//       workspaces (*)
+//     `
+//     )
+//     .eq("id", fileId)
+//     .single()
 
-  if (!file) {
-    throw new Error(error.message)
-  }
+//   if (!file) {
+//     throw new Error(error.message)
+//   }
 
-  return file
-}
+//   return file
+// }
 
 export const createFileBasedOnExtension = async (
   file: File,
@@ -234,29 +241,29 @@ export const createDocXFile = async (
   return fetchedFile
 }
 
-export const createFiles = async (
-  files: TablesInsert<"files">[],
-  workspace_id: string
-) => {
-  const { data: createdFiles, error } = await supabase
-    .from("files")
-    .insert(files)
-    .select("*")
+// export const createFiles = async (
+//   files: TablesInsert<"files">[],
+//   workspace_id: string
+// ) => {
+//   const { data: createdFiles, error } = await supabase
+//     .from("files")
+//     .insert(files)
+//     .select("*")
 
-  if (error) {
-    throw new Error(error.message)
-  }
+//   if (error) {
+//     throw new Error(error.message)
+//   }
 
-  await createFileWorkspaces(
-    createdFiles.map(file => ({
-      user_id: file.user_id,
-      file_id: file.id,
-      workspace_id
-    }))
-  )
+//   await createFileWorkspaces(
+//     createdFiles.map(file => ({
+//       user_id: file.user_id,
+//       file_id: file.id,
+//       workspace_id
+//     }))
+//   )
 
-  return createdFiles
-}
+//   return createdFiles
+// }
 
 export const createFileWorkspace = async (item: {
   user_id: string

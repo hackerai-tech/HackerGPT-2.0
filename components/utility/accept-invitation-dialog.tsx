@@ -6,6 +6,7 @@ import { FC, useContext } from "react"
 import { toast } from "sonner"
 import { Button } from "../ui/button"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
+import { useUIContext } from "@/context/ui-context"
 
 interface AcceptInvitationDialogProps {
   isOpen: boolean
@@ -16,8 +17,8 @@ export const AcceptInvitationDialog: FC<AcceptInvitationDialogProps> = ({
   isOpen,
   onClose
 }) => {
-  const { isMobile, membershipData, refreshTeamMembers } =
-    useContext(PentestGPTContext)
+  const { membershipData, refreshTeamMembers } = useContext(PentestGPTContext)
+  const { isMobile } = useUIContext()
 
   const invitation = membershipData?.invitation_status === "pending"
 

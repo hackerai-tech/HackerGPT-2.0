@@ -1,7 +1,7 @@
 import { IconDownload } from "@tabler/icons-react"
-import { useContext, useCallback } from "react"
-import { PentestGPTContext } from "@/context/context"
+import { useCallback } from "react"
 import { WithTooltip } from "./with-tooltip"
+import { useUIContext } from "@/context/ui-context"
 
 interface TableData {
   headers: string[]
@@ -9,7 +9,7 @@ interface TableData {
 }
 
 export function DownloadCSVTable() {
-  const { isGenerating } = useContext(PentestGPTContext)
+  const { isGenerating } = useUIContext()
 
   const getTableData = useCallback((): TableData => {
     const headers = Array.from(document.querySelectorAll("table th")).map(

@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useContext,
-  useEffect,
-  useCallback
-} from "react"
+import React, { useState, useMemo, useEffect, useCallback } from "react"
 import { MessageMarkdown } from "../message-markdown"
 import {
   IconChevronDown,
@@ -13,8 +7,8 @@ import {
 } from "@tabler/icons-react"
 import { PluginID } from "@/types/plugins"
 import { MessageTooLong } from "../message-too-long"
-import { PentestGPTContext } from "@/context/context"
 import { terminalPlugins } from "../message-type-solver"
+import { useUIContext } from "@/context/ui-context"
 
 interface MessageTerminalProps {
   content: string
@@ -38,7 +32,7 @@ export const MessageTerminal: React.FC<MessageTerminalProps> = ({
   messageId,
   isAssistant
 }) => {
-  const { showTerminalOutput, toolInUse } = useContext(PentestGPTContext)
+  const { showTerminalOutput, toolInUse } = useUIContext()
   const contentBlocks = useMemo(() => parseContent(content), [content])
 
   const [closedBlocks, setClosedBlocks] = useState(() => new Set<number>())

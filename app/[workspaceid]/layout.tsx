@@ -11,6 +11,7 @@ import { useParams, useRouter } from "next/navigation"
 import { ReactNode, useContext, useEffect, useState } from "react"
 import Loading from "../loading"
 import { getSubscriptionByUserId } from "@/db/subscriptions"
+import { useUIContext } from "@/context/ui-context"
 
 interface WorkspaceLayoutProps {
   children: ReactNode
@@ -29,14 +30,14 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     setSelectedChat,
     setChatMessages,
     setUserInput,
-    setIsGenerating,
-    setFirstTokenReceived,
     setChatFiles,
     setChatImages,
     setNewMessageFiles,
     setNewMessageImages,
     setShowFilesDisplay
   } = useContext(PentestGPTContext)
+
+  const { setIsGenerating, setFirstTokenReceived } = useUIContext()
 
   const [loading, setLoading] = useState(true)
 

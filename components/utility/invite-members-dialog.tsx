@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { TransitionedDialog } from "../ui/transitioned-dialog"
+import { useUIContext } from "@/context/ui-context"
 
 interface InviteMembersDialogProps {
   isOpen: boolean
@@ -17,8 +18,8 @@ export const InviteMembersDialog: FC<InviteMembersDialogProps> = ({
   isOpen,
   onClose
 }) => {
-  const { isMobile, teamMembers, refreshTeamMembers } =
-    useContext(PentestGPTContext)
+  const { teamMembers, refreshTeamMembers } = useContext(PentestGPTContext)
+  const { isMobile } = useUIContext()
   const [email, setEmail] = useState("")
 
   const handleInvite = async () => {

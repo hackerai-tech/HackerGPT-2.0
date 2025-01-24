@@ -59,19 +59,6 @@ export const createChat = async (chat: TablesInsert<"chats">) => {
   return createdChat
 }
 
-export const createChats = async (chats: TablesInsert<"chats">[]) => {
-  const { data: createdChats, error } = await supabase
-    .from("chats")
-    .insert(chats)
-    .select("*")
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return createdChats
-}
-
 export const updateChat = async (
   chatId: string,
   chat: TablesUpdate<"chats">

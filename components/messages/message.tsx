@@ -25,6 +25,7 @@ import { Fragment } from "@/lib/tools/e2b/fragments/types"
 import { MessageFragment } from "./message-fragment"
 import { LoadingState } from "./loading-states"
 import dynamic from "next/dynamic"
+import { useUIContext } from "@/context/ui-context"
 
 const DynamicFilePreview = dynamic(() => import("../ui/file-preview"), {
   ssr: false
@@ -60,17 +61,20 @@ export const Message: FC<MessageProps> = ({
   onSendFeedback
 }) => {
   const {
-    isGenerating,
-    setIsGenerating,
-    firstTokenReceived,
     chatMessages,
     temporaryChatMessages,
     isTemporaryChat,
     chatImages,
-    toolInUse,
-    files,
-    isMobile
+    files
   } = useContext(PentestGPTContext)
+
+  const {
+    isGenerating,
+    setIsGenerating,
+    firstTokenReceived,
+    toolInUse,
+    isMobile
+  } = useUIContext()
 
   const { message, fileItems, feedback } = chatMessage
 

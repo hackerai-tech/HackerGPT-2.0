@@ -55,30 +55,27 @@ const pluginReducer = (state: State, action: Action): State => {
 
 export const PluginProvider: React.FC<{
   children: React.ReactNode
-  isLoggedIn: boolean
-}> = ({ children, isLoggedIn }) => {
+}> = ({ children }) => {
   const [state, dispatch] = useReducer(pluginReducer, initialState)
 
   useEffect(() => {
-    if (isLoggedIn) {
-      const localData = localStorage.getItem("installedPluginIds")
-      let installedPluginIds: number[] = localData ? JSON.parse(localData) : []
+    const localData = localStorage.getItem("installedPluginIds")
+    let installedPluginIds: number[] = localData ? JSON.parse(localData) : []
 
-      if (!localData) {
-        const defaultPluginIds = [1, 2, 3, 9, 10]
-        installedPluginIds = defaultPluginIds
-        localStorage.setItem(
-          "installedPluginIds",
-          JSON.stringify(installedPluginIds)
-        )
-      }
-
-      dispatch({
-        type: ActionTypes.SET_INSTALLED_PLUGIN_IDS,
-        payload: installedPluginIds
-      })
+    if (!localData) {
+      const defaultPluginIds = [1, 2, 3, 9, 10]
+      installedPluginIds = defaultPluginIds
+      localStorage.setItem(
+        "installedPluginIds",
+        JSON.stringify(installedPluginIds)
+      )
     }
-  }, [isLoggedIn])
+
+    dispatch({
+      type: ActionTypes.SET_INSTALLED_PLUGIN_IDS,
+      payload: installedPluginIds
+    })
+  }, [])
 
   return (
     <PluginContext.Provider value={{ state, dispatch }}>

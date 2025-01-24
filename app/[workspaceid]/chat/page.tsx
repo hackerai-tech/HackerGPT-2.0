@@ -14,6 +14,7 @@ import { ChatPluginInfo } from "@/components/chat/chat-plugin-info"
 import { TemporaryChatInfo } from "@/components/chat/temporary-chat-info"
 import { Settings } from "@/components/utility/settings"
 import { WithTooltip } from "@/components/ui/with-tooltip"
+import { useUIContext } from "@/context/ui-context"
 
 export default function ChatPage() {
   useHotkey("o", () => handleNewChat())
@@ -21,14 +22,10 @@ export default function ChatPage() {
     handleFocusChatInput()
   })
 
-  const {
-    chatMessages,
-    temporaryChatMessages,
-    selectedPlugin,
-    isMobile,
-    showSidebar,
-    isTemporaryChat
-  } = useContext(PentestGPTContext)
+  const { chatMessages, temporaryChatMessages, isTemporaryChat } =
+    useContext(PentestGPTContext)
+
+  const { selectedPlugin, isMobile, showSidebar } = useUIContext()
 
   const { handleNewChat, handleFocusChatInput } = useChatHandler()
 

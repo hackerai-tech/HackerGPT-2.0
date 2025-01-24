@@ -60,22 +60,23 @@ export async function POST(request: Request) {
   try {
     const profile = await getAIProfile()
 
-    let {
+    const {
       providerBaseUrl,
       providerHeaders,
-      selectedModel,
       rateLimitCheckResult,
       similarityTopK,
       modelTemperature,
       isPentestGPTPro
     } = await getProviderConfig(chatSettings, profile)
 
-    if (rateLimitCheckResult !== null) {
-      return rateLimitCheckResult.response
-    }
+    let { selectedModel } = await getProviderConfig(chatSettings, profile)
 
     if (!selectedModel) {
       throw new Error("Selected model is undefined")
+    }
+
+    if (rateLimitCheckResult !== null) {
+      return rateLimitCheckResult.response
     }
 
     // On normal chat, the last user message is the target standalone message
@@ -86,13 +87,6 @@ export async function POST(request: Request) {
       : messages[messages.length - 2]
 
     const includeImages = messagesIncludeImages(messages)
-
-    let shouldUncensorResponse = false
-    if (!includeImages && !isContinuation && !shouldUseRAG) {
-      const { shouldUncensorResponse: moderationResult } =
-        await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
-      shouldUncensorResponse = moderationResult
-    }
 
     const baseSystemPrompt = isPentestGPTPro
       ? llmConfig.systemPrompts.pgptLarge
@@ -162,10 +156,19 @@ export async function POST(request: Request) {
       }
 
       if (shouldUncensor) {
+        isPentestGPTPro &&
+          console.log("[Premium User] Uncensored mode activated")
         return handleAssistantMessages(messages)
       }
 
       return filterEmptyAssistantMessages(messages)
+    }
+
+    let shouldUncensorResponse = false
+    if (!includeImages && !isContinuation && !shouldUseRAG) {
+      const { shouldUncensorResponse: moderationResult } =
+        await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
+      shouldUncensorResponse = moderationResult
     }
 
     handleMessages(shouldUncensorResponse)

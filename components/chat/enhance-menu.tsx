@@ -1,9 +1,9 @@
-import React, { useContext } from "react"
-import { PentestGPTContext } from "@/context/context"
+import React from "react"
 import PluginSelector from "./plugin-selector"
+import { useUIContext } from "@/context/ui-context"
 
 export const EnhancedMenuPicker: React.FC = () => {
-  const { setSelectedPluginType } = useContext(PentestGPTContext)
+  const { setSelectedPluginType } = useUIContext()
 
   const handleSelectPlugin = (type: string) => {
     setSelectedPluginType(type)

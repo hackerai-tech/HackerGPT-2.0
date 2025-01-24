@@ -17,12 +17,14 @@ import { toast } from "sonner"
 import { useTheme } from "next-themes"
 import PentestGPTTextSVG from "@/components/icons/pentestgpt-text-svg"
 import { TabGroup, TabList, Tab } from "@headlessui/react"
+import { useUIContext } from "@/context/ui-context"
 
 const YEARLY_PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_YEARLY_PRO_PRICE_ID
 
 export const UpgradePlan: FC = () => {
   const router = useRouter()
-  const { profile, isMobile } = useContext(PentestGPTContext)
+  const { profile } = useContext(PentestGPTContext)
+  const { isMobile } = useUIContext()
   const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(

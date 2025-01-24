@@ -20,6 +20,7 @@ import {
 } from "../chat-helpers"
 import { useFragments } from "./use-fragments"
 import { Fragment } from "@/lib/tools/e2b/fragments/types"
+import { useUIContext } from "@/context/ui-context"
 
 export const useChatHandler = () => {
   const router = useRouter()
@@ -31,9 +32,7 @@ export const useChatHandler = () => {
     setUserInput,
     setNewMessageImages,
     profile,
-    setIsGenerating,
     setChatMessages,
-    setFirstTokenReceived,
     selectedChat,
     selectedWorkspace,
     setSelectedChat,
@@ -49,21 +48,27 @@ export const useChatHandler = () => {
     setNewMessageFiles,
     setShowFilesDisplay,
     newMessageFiles,
-    setToolInUse,
     useRetrieval,
     sourceCount,
-    setIsAtPickerOpen,
     setChatSettings,
-    isAtPickerOpen,
-    isGenerating,
     setUseRetrieval,
-    setIsReadyToChat,
     isTemporaryChat,
     temporaryChatMessages,
     setTemporaryChatMessages
   } = useContext(PentestGPTContext)
 
-  let { selectedPlugin } = useContext(PentestGPTContext)
+  const {
+    setIsGenerating,
+    setFirstTokenReceived,
+    setToolInUse,
+    setIsAtPickerOpen,
+    isAtPickerOpen,
+    isGenerating,
+    setIsReadyToChat,
+    setSelectedPlugin
+  } = useUIContext()
+
+  let { selectedPlugin } = useUIContext()
 
   const { setFragment } = useFragments()
 
@@ -127,6 +132,7 @@ export const useChatHandler = () => {
     setUseRetrieval(false)
 
     setToolInUse("none")
+    setSelectedPlugin(PluginID.NONE)
 
     setFragment(null)
 
