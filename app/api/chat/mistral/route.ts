@@ -218,7 +218,7 @@ export async function POST(request: Request) {
             profile,
             dataStream
           })
-          tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
+          tools = toolSchemas.getSelectedSchemas(["webSearch"])
         }
 
         const result = streamText({
