@@ -174,10 +174,7 @@ export const handleCreateMessages = async (
   } else {
     const createdMessages = await createMessages([
       finalUserMessage,
-      {
-        ...finalAssistantMessage,
-        citations: citations || []
-      }
+      finalAssistantMessage
     ])
 
     // Upload each image (stored in newMessageImages) for the user message to message_images bucket
