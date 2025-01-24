@@ -5,7 +5,6 @@ import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 
 import { PluginID } from "@/types/plugins"
 import { getSubscriptionInfo } from "@/lib/server/subscription-utils"
-import { buildFinalMessages } from "@/lib/build-prompt"
 import { commandGeneratorHandler } from "@/lib/tools/tool-store/tools-handler"
 import {
   isFreePlugin,
@@ -35,10 +34,10 @@ export const preferredRegion = [
 
 export async function POST(request: Request) {
   const json = await request.json()
-  const { payload, chatImages, selectedPlugin, isTerminalContinuation } =
+  const { messages, payload, selectedPlugin, isTerminalContinuation } =
     json as {
+      messages: any[]
       payload: any
-      chatImages: any[]
       selectedPlugin: string
       isTerminalContinuation: boolean
     }
@@ -85,18 +84,11 @@ export async function POST(request: Request) {
       return rateLimitCheckResultForChatSettingsModel.response
     }
 
-    const formattedMessages = (await buildFinalMessages(
-      payload,
-      profile,
-      chatImages,
-      selectedPlugin as PluginID
-    )) as any
-
     if (isTerminalPlugin(selectedPlugin as PluginID)) {
       return await commandGeneratorHandler({
         userID: profile.user_id,
         profile_context: profile.profile_context,
-        messages: formattedMessages,
+        messages,
         pluginID: selectedPlugin as PluginID,
         isTerminalContinuation: isTerminalContinuation,
         isPremium: subscriptionInfo.isPremium

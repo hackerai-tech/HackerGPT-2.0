@@ -15,7 +15,7 @@ import {
 } from "@/types"
 import React from "react"
 import { toast } from "sonner"
-import { buildFinalMessages } from "@/lib/build-prompt-v2"
+import { buildFinalMessages } from "@/lib/build-prompt"
 import { Fragment } from "@/lib/tools/e2b/fragments/types"
 import { processResponse } from "./stream-processor"
 
@@ -146,9 +146,15 @@ export const handleHostedPluginsChat = async (
 ) => {
   const apiEndpoint = "/api/chat/plugins"
 
+  const formattedMessages = await buildFinalMessages(
+    payload,
+    chatImages,
+    selectedPlugin
+  )
+
   const requestBody: any = {
+    messages: formattedMessages,
     payload: payload,
-    chatImages: chatImages,
     selectedPlugin: selectedPlugin,
     isTerminalContinuation: isTerminalContinuation
   }

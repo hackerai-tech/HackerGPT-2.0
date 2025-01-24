@@ -1,5 +1,7 @@
-import { filterEmptyAssistantMessages } from "@/lib/build-prompt"
-import { validateMessages } from "@/lib/build-prompt-v2"
+import {
+  filterEmptyAssistantMessages,
+  validateMessages
+} from "@/lib/build-prompt"
 import { generateText } from "ai"
 import endent from "endent"
 import { createMistral } from "@ai-sdk/mistral"

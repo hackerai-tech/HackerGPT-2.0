@@ -5,7 +5,8 @@ import {
   filterEmptyAssistantMessages,
   handleAssistantMessages,
   messagesIncludeImages,
-  toVercelChatMessages
+  toVercelChatMessages,
+  validateMessages
 } from "@/lib/build-prompt"
 import { handleErrorResponse } from "@/lib/models/llm/api-error"
 import llmConfig from "@/lib/models/llm/llm-config"
@@ -20,7 +21,6 @@ import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
 import { executeWebSearchTool } from "@/lib/tools/llm/web-search"
 import { createStreamResponse } from "@/lib/ai-helper"
-import { validateMessages } from "@/lib/build-prompt-v2"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
