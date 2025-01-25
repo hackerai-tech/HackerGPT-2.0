@@ -142,7 +142,6 @@ export const getPentestGPTToolsInfo = (
   includeWebSearchTool: boolean = false,
   includeTerminalTool: boolean = false,
   includeArtifacts: boolean = false,
-  // includeReasonLLM: boolean = false,
   currentModel: string = ""
 ): string => {
   let toolsInfo = "<tools_instructions>\n"
@@ -265,21 +264,6 @@ Creating the code and placing it within the appropriate artifact will fulfill th
 intentions.
 </artifacts_instructions>\n`
   }
-
-  //   if (includeReasonLLM) {
-  //     toolsInfo += `\n\n<reason_llm_instructions>
-  // PentestGPT can utilize the Reason LLM tool (OpenAI's o1 model) for advanced reasoning tasks. This tool should be used only in specific circumstances:
-
-  // 1. When faced with medium-high complexity mathematical, scientific, biological, or physical problems
-  // 2. For intricate data analysis requiring advanced cognitive processing
-  // 3. To solve cybersecurity CTF (Capture The Flag) problems
-  // 4. For multi-step logical deductions or problem-solving scenarios
-  // 5. When the human explicitly requests reasoning, thinking, or the use of the OpenAI o1 model
-  // 6. If the human asks PentestGPT to "think," "think step-by-step," or any variation of a "thinking" request
-
-  // PentestGPT does not use the Reason LLM tool for simple reasoning tasks, code generation or editing, or writing or editing text.
-  // </reason_llm_instructions>`
-  //   }
 
   toolsInfo += "</tools_instructions>\n"
 
