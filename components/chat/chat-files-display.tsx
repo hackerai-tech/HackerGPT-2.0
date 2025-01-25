@@ -164,6 +164,14 @@ export const ChatFilesDisplay: FC = () => {
                               f => f.messageId !== image.messageId
                             )
                           )
+
+                          // Check if this is the last file/image and reset showFilesDisplay
+                          const remainingImages =
+                            newMessageImages.length + chatImages.length - 1
+                          const remainingFiles = combinedChatFiles.length
+                          if (remainingImages + remainingFiles === 0) {
+                            setShowFilesDisplay(false)
+                          }
                         }}
                       />
                     }
@@ -231,7 +239,7 @@ export const ChatFilesDisplay: FC = () => {
                           className="bg-secondary border-primary absolute right-[-6px] top-[-6px] flex size-5 cursor-pointer items-center justify-center rounded-full border text-[10px] hover:border-red-500 hover:bg-white hover:text-red-500"
                           onClick={e => {
                             e.stopPropagation()
-                            if (combinedChatFiles.length == 1) {
+                            if (combinedChatFiles.length === 1) {
                               setUseRetrieval(false)
                             }
                             setNewMessageFiles(
@@ -240,6 +248,13 @@ export const ChatFilesDisplay: FC = () => {
                             setChatFiles(
                               chatFiles.filter(f => f.id !== file.id)
                             )
+
+                            // Check if this is the last file/image and reset showFilesDisplay
+                            const remainingFiles = combinedChatFiles.length - 1
+                            const remainingImages = messageImages.length
+                            if (remainingFiles + remainingImages === 0) {
+                              setShowFilesDisplay(false)
+                            }
                           }}
                         />
                       }

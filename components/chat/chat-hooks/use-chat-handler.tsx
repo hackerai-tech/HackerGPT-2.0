@@ -322,7 +322,9 @@ export const useChatHandler = () => {
       }
 
       let generatedText = ""
-      let finishReasonFromResponse = ""
+      let thinkingText = ""
+      let thinkingElapsedSecs: number | null = null
+      let finishReason = ""
       let ragUsed = false
       let ragId = null
       let assistantGeneratedImages: string[] = []
@@ -335,11 +337,12 @@ export const useChatHandler = () => {
         selectedPlugin !== PluginID.WEB_SEARCH &&
         selectedPlugin !== PluginID.ENHANCED_SEARCH &&
         selectedPlugin !== PluginID.TERMINAL &&
-        selectedPlugin !== PluginID.ARTIFACTS
+        selectedPlugin !== PluginID.ARTIFACTS &&
+        selectedPlugin !== PluginID.REASON_LLM
       ) {
         const {
           fullText,
-          finishReason,
+          finishReason: finishReasonFromResponse,
           citations: citationsFromResponse
         } = await handleHostedPluginsChat(
           payload,
@@ -361,12 +364,14 @@ export const useChatHandler = () => {
           setFragment
         )
         generatedText = fullText
-        finishReasonFromResponse = finishReason
+        finishReason = finishReasonFromResponse
         citations = citationsFromResponse
       } else {
         const {
           fullText,
-          finishReason,
+          thinkingText: thinkingTextFromResponse,
+          thinkingElapsedSecs: thinkingElapsedSecsFromResponse,
+          finishReason: finishReasonFromResponse,
           ragUsed: ragUsedFromResponse,
           ragId: ragIdFromResponse,
           selectedPlugin: updatedSelectedPlugin,
@@ -393,7 +398,9 @@ export const useChatHandler = () => {
           setFragment
         )
         generatedText = fullText
-        finishReasonFromResponse = finishReason
+        thinkingText = thinkingTextFromResponse
+        thinkingElapsedSecs = thinkingElapsedSecsFromResponse
+        finishReason = finishReasonFromResponse
         ragUsed = ragUsedFromResponse
         ragId = ragIdFromResponse
         selectedPlugin = updatedSelectedPlugin
@@ -414,6 +421,9 @@ export const useChatHandler = () => {
                 message: {
                   ...msg.message,
                   content: generatedText,
+                  thinking_content: thinkingText,
+                  thinking_enabled: thinkingText ? true : false,
+                  thinking_elapsed_secs: thinkingElapsedSecs,
                   citations: citations || [],
                   fragment: fragment ? JSON.stringify(fragment) : null
                 }
@@ -429,7 +439,7 @@ export const useChatHandler = () => {
             selectedWorkspace!,
             messageContent || "",
             newMessageFiles,
-            finishReasonFromResponse,
+            finishReason,
             setSelectedChat,
             setChats,
             setChatFiles
@@ -437,7 +447,7 @@ export const useChatHandler = () => {
         } else {
           const updatedChat = await updateChat(currentChat.id, {
             updated_at: new Date().toISOString(),
-            finish_reason: finishReasonFromResponse,
+            finish_reason: finishReason,
             model: chatSettings?.model
           })
 
@@ -475,7 +485,9 @@ export const useChatHandler = () => {
           isTemporaryChat,
           citations,
           fragment,
-          setFragment
+          setFragment,
+          thinkingText,
+          thinkingElapsedSecs
         )
       }
 

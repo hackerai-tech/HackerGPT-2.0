@@ -26,6 +26,9 @@ export const createTempMessages = ({
     message: {
       chat_id: "",
       content: messageContentInternal,
+      thinking_content: "",
+      thinking_elapsed_secs: null,
+      thinking_enabled: false,
       created_at: "",
       id: uuidv4(),
       image_paths: b64Images,
@@ -47,6 +50,9 @@ export const createTempMessages = ({
     message: {
       chat_id: "",
       content: "",
+      thinking_content: "",
+      thinking_elapsed_secs: null,
+      thinking_enabled: false,
       created_at: "",
       id: uuidv4(),
       image_paths: [],

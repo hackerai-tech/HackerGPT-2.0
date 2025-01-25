@@ -34,7 +34,9 @@ export const handleCreateMessages = async (
   isTemporary: boolean = false,
   citations?: string[],
   fragment?: Fragment | null,
-  setFragment?: (fragment: Fragment | null, chatMessage?: ChatMessage) => void
+  setFragment?: (fragment: Fragment | null, chatMessage?: ChatMessage) => void,
+  thinkingText?: string,
+  thinkingElapsedSecs?: number | null
 ) => {
   const isEdit = editSequenceNumber !== undefined
 
@@ -46,6 +48,9 @@ export const handleCreateMessages = async (
         chat_id: "",
         content: messageContent || "",
         role: "user",
+        thinking_content: null,
+        thinking_enabled: selectedPlugin === PluginID.REASON_LLM,
+        thinking_elapsed_secs: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         sequence_number: lastSequenceNumber(chatMessages) + 1,
@@ -67,6 +72,9 @@ export const handleCreateMessages = async (
         id: uuidv4(),
         chat_id: "",
         content: generatedText,
+        thinking_content: thinkingText || null,
+        thinking_enabled: selectedPlugin === PluginID.REASON_LLM,
+        thinking_elapsed_secs: thinkingElapsedSecs || null,
         role: "assistant",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -92,6 +100,9 @@ export const handleCreateMessages = async (
     chat_id: currentChat.id,
     user_id: profile.user_id,
     content: messageContent || "",
+    thinking_content: null,
+    thinking_enabled: selectedPlugin === PluginID.REASON_LLM,
+    thinking_elapsed_secs: null,
     model: modelData.modelId,
     plugin: selectedPlugin,
     role: "user",
@@ -107,6 +118,9 @@ export const handleCreateMessages = async (
     chat_id: currentChat.id,
     user_id: profile.user_id,
     content: generatedText,
+    thinking_content: thinkingText || null,
+    thinking_enabled: selectedPlugin === PluginID.REASON_LLM,
+    thinking_elapsed_secs: thinkingElapsedSecs || null,
     model: modelData.modelId,
     plugin: selectedPlugin,
     role: "assistant",

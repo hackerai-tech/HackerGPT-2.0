@@ -15,6 +15,7 @@ import { PluginID } from "@/types/plugins"
 import { executeWebSearchTool } from "@/lib/tools/llm/web-search"
 import { createStreamResponse } from "@/lib/ai-helper"
 import { executeTerminalTool } from "@/lib/tools/llm/terminal"
+import { executeReasonLLMTool } from "@/lib/tools/llm/reason-llm"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -67,6 +68,13 @@ export async function POST(request: Request) {
         return createStreamResponse(async dataStream => {
           await executeTerminalTool({
             config: { messages, profile, dataStream, isTerminalContinuation }
+          })
+        })
+
+      case PluginID.REASON_LLM:
+        return createStreamResponse(async dataStream => {
+          await executeReasonLLMTool({
+            config: { messages, profile, dataStream }
           })
         })
     }

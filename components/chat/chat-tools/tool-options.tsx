@@ -5,7 +5,8 @@ import {
   IconPaperclip,
   IconPuzzle,
   IconPuzzleOff,
-  IconWorld
+  IconWorld,
+  IconAtom
 } from "@tabler/icons-react"
 import { useContext } from "react"
 import { WithTooltip } from "../../ui/with-tooltip"
@@ -24,33 +25,61 @@ export const ToolOptions = ({
 }: ToolOptionsProps) => {
   const TOOLTIP_DELAY = 500
 
-  const { isPremiumSubscription } = useContext(PentestGPTContext)
+  const { isPremiumSubscription, showFilesDisplay } =
+    useContext(PentestGPTContext)
 
   const {
     selectedPlugin,
     isEnhancedMenuOpen,
     setSelectedPlugin,
-    setIsEnhancedMenuOpen
+    setIsEnhancedMenuOpen,
+    isMobile
   } = useUIContext()
 
   const handleWebSearchToggle = () => {
-    if (selectedPlugin === PluginID.WEB_SEARCH) {
-      setSelectedPlugin(PluginID.NONE)
-    } else {
-      setSelectedPlugin(PluginID.WEB_SEARCH)
-      // Close enhanced menu if open
-      if (isEnhancedMenuOpen) {
-        setIsEnhancedMenuOpen(false)
-      }
+    if (showFilesDisplay) return
+    setSelectedPlugin(
+      selectedPlugin === PluginID.WEB_SEARCH
+        ? PluginID.NONE
+        : PluginID.WEB_SEARCH
+    )
+    if (isEnhancedMenuOpen) {
+      setIsEnhancedMenuOpen(false)
     }
   }
 
   const handlePluginsMenuToggle = () => {
     handleToggleEnhancedMenu()
-    // Disable web search if active
-    if (selectedPlugin === PluginID.WEB_SEARCH) {
+    // Disable web search and reason llm if active
+    if (
+      selectedPlugin === PluginID.WEB_SEARCH ||
+      selectedPlugin === PluginID.REASON_LLM
+    ) {
       setSelectedPlugin(PluginID.NONE)
     }
+  }
+
+  const handleReasonLLMToggle = () => {
+    if (showFilesDisplay) return
+    setSelectedPlugin(
+      selectedPlugin === PluginID.REASON_LLM
+        ? PluginID.NONE
+        : PluginID.REASON_LLM
+    )
+    if (isEnhancedMenuOpen) {
+      setIsEnhancedMenuOpen(false)
+    }
+  }
+
+  const handleFileClick = () => {
+    // Deselect plugins when user attempts to upload a file
+    if (
+      selectedPlugin === PluginID.WEB_SEARCH ||
+      selectedPlugin === PluginID.REASON_LLM
+    ) {
+      setSelectedPlugin(PluginID.NONE)
+    }
+    fileInputRef.current?.click()
   }
 
   return (
@@ -68,7 +97,7 @@ export const ToolOptions = ({
           trigger={
             <div
               className="flex flex-row items-center"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleFileClick}
             >
               <IconPaperclip
                 className="cursor-pointer rounded-lg rounded-bl-xl p-1 hover:bg-black/10 focus-visible:outline-black dark:hover:bg-white/10 dark:focus-visible:outline-white"
@@ -110,6 +139,54 @@ export const ToolOptions = ({
         />
       )}
 
+      {/* Reason LLM Toggle */}
+      {isPremiumSubscription && (
+        <WithTooltip
+          delayDuration={TOOLTIP_DELAY}
+          side="top"
+          display={
+            <div className="flex flex-col">
+              <p className="font-medium">Solve reasoning problems</p>
+            </div>
+          }
+          trigger={
+            <div
+              className={cn(
+                "relative flex flex-row items-center rounded-lg transition-colors duration-300",
+                selectedPlugin === PluginID.REASON_LLM
+                  ? "bg-primary/10"
+                  : "hover:bg-black/10 dark:hover:bg-white/10",
+                showFilesDisplay && "pointer-events-none opacity-50"
+              )}
+              onClick={handleReasonLLMToggle}
+            >
+              <IconAtom
+                className={cn(
+                  "cursor-pointer rounded-lg rounded-bl-xl p-1 focus-visible:outline-black dark:focus-visible:outline-white",
+                  selectedPlugin === PluginID.REASON_LLM
+                    ? "text-primary"
+                    : "opacity-50"
+                )}
+                size={32}
+              />
+              <div
+                className={cn(
+                  "whitespace-nowrap text-xs font-medium",
+                  "transition-all duration-300",
+                  !isMobile && "max-w-[100px] pr-2",
+                  isMobile &&
+                    (selectedPlugin === PluginID.REASON_LLM
+                      ? "max-w-[100px] pr-2 opacity-100"
+                      : "max-w-0 opacity-0")
+                )}
+              >
+                Think
+              </div>
+            </div>
+          }
+        />
+      )}
+
       {/* Web Search Toggle */}
       <WithTooltip
         delayDuration={TOOLTIP_DELAY}
@@ -125,8 +202,10 @@ export const ToolOptions = ({
               "relative flex flex-row items-center rounded-lg transition-colors duration-300",
               selectedPlugin === PluginID.WEB_SEARCH
                 ? "bg-primary/10"
-                : "hover:bg-black/10 dark:hover:bg-white/10"
+                : "hover:bg-black/10 dark:hover:bg-white/10",
+              showFilesDisplay && "pointer-events-none opacity-50"
             )}
+            onClick={handleWebSearchToggle}
           >
             <IconWorld
               className={cn(
@@ -135,17 +214,17 @@ export const ToolOptions = ({
                   ? "text-primary"
                   : "opacity-50"
               )}
-              onClick={handleWebSearchToggle}
               size={32}
             />
-            {/* Animated Search Text */}
             <div
               className={cn(
                 "whitespace-nowrap text-xs font-medium",
                 "transition-all duration-300",
-                selectedPlugin === PluginID.WEB_SEARCH
-                  ? "text-primary max-w-[100px] pr-2 opacity-100"
-                  : "max-w-0 opacity-0"
+                !isMobile && "max-w-[100px] pr-2",
+                isMobile &&
+                  (selectedPlugin === PluginID.WEB_SEARCH
+                    ? "max-w-[100px] pr-2 opacity-100"
+                    : "max-w-0 opacity-0")
               )}
             >
               Search

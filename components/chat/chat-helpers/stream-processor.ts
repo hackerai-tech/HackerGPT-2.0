@@ -55,7 +55,9 @@ export const processResponse = async (
 
   if (response.body) {
     let fullText = ""
+    let thinkingText = ""
     let finishReason = ""
+    let thinkingElapsedSecs: number | null = null
     let ragUsed = false
     let ragId = null
     let isFirstChunk = true
@@ -119,54 +121,119 @@ export const processResponse = async (
           ) {
             const firstValue = value[0] as DataPartValue
 
-            // Handle text-delta type
-            if (firstValue.type === "text-delta") {
-              // Check if this is the first chunk and matches the last message
-              if (isFirstChunk) {
-                isFirstChunkReceived = true
-                if (
-                  isContinuation &&
-                  lastChatMessage?.message?.content === firstValue.content
-                ) {
-                  shouldSkipFirstChunk = true
+            if (firstValue.type) {
+              if (firstValue.type === "text-delta") {
+                // Check if this is the first chunk and matches the last message
+                if (isFirstChunk) {
+                  isFirstChunkReceived = true
+                  if (
+                    isContinuation &&
+                    lastChatMessage?.message?.content === firstValue.content
+                  ) {
+                    shouldSkipFirstChunk = true
+                    isFirstChunk = false
+                    return
+                  }
+                  setFirstTokenReceived(true)
                   isFirstChunk = false
+                }
+
+                // Skip if this was a duplicate first chunk
+                if (shouldSkipFirstChunk) {
+                  shouldSkipFirstChunk = false
                   return
                 }
-                setFirstTokenReceived(true)
-                isFirstChunk = false
+
+                fullText += firstValue.content
+
+                setChatMessages(prev =>
+                  prev.map(chatMessage =>
+                    chatMessage.message.id === lastChatMessage.message.id
+                      ? {
+                          ...chatMessage,
+                          message: {
+                            ...chatMessage.message,
+                            content: fullText
+                          }
+                        }
+                      : chatMessage
+                  )
+                )
               }
 
-              // Skip if this was a duplicate first chunk
-              if (shouldSkipFirstChunk) {
-                shouldSkipFirstChunk = false
+              if (firstValue?.type === "thinking") {
+                if (isFirstChunk) {
+                  setFirstTokenReceived(true)
+                  isFirstChunk = false
+                }
+
+                thinkingText += firstValue.content
+
+                setChatMessages(prev =>
+                  prev.map(chatMessage =>
+                    chatMessage.message.id === lastChatMessage.message.id
+                      ? {
+                          ...chatMessage,
+                          message: {
+                            ...chatMessage.message,
+                            thinking_content: thinkingText
+                          }
+                        }
+                      : chatMessage
+                  )
+                )
+              }
+
+              // Handle thinking time
+              if (
+                firstValue?.type === "thinking-time" &&
+                firstValue.elapsed_secs
+              ) {
+                thinkingElapsedSecs = firstValue.elapsed_secs
+                setChatMessages(prev =>
+                  prev.map(chatMessage =>
+                    chatMessage.message.id === lastChatMessage.message.id
+                      ? {
+                          ...chatMessage,
+                          message: {
+                            ...chatMessage.message,
+                            thinking_elapsed_secs: thinkingElapsedSecs
+                          }
+                        }
+                      : chatMessage
+                  )
+                )
+              }
+
+              // Handle tools errors
+              if (firstValue?.type === "error") {
+                const errorMessage =
+                  firstValue.content || "An unknown error occurred"
+
+                if (errorMessage.includes("reached the limit")) {
+                  alertDispatch({
+                    type: "SHOW",
+                    payload: {
+                      message: errorMessage,
+                      title: "Usage Cap Error"
+                    }
+                  })
+                } else {
+                  toast.error(errorMessage)
+                }
+
+                setIsGenerating(false)
+                controller.abort()
                 return
               }
 
-              fullText += firstValue.content
-
-              setChatMessages(prev =>
-                prev.map(chatMessage =>
-                  chatMessage.message.id === lastChatMessage.message.id
-                    ? {
-                        ...chatMessage,
-                        message: {
-                          ...chatMessage.message,
-                          content:
-                            chatMessage.message.content + firstValue.content,
-                          image_paths: chatMessage.message.image_paths
-                        }
-                      }
-                    : chatMessage
-                )
-              )
-            }
-
-            // Handle finishReason
-            if (firstValue?.finishReason) {
-              if (firstValue.finishReason === "tool-calls") {
-                finishReason = "terminal-calls"
-              } else {
-                finishReason = firstValue.finishReason
+              // Handle sandbox type
+              if (firstValue?.type === "sandbox-type") {
+                if (firstValue.sandboxType === "persistent-sandbox") {
+                  setToolInUse("persistent-sandbox")
+                } else {
+                  setToolInUse("temporary-sandbox")
+                }
               }
             }
 
@@ -201,28 +268,6 @@ export const processResponse = async (
               setFragment(fragment, lastChatMessage)
             }
 
-            // Handle tools errors
-            if (firstValue?.type === "error") {
-              const errorMessage =
-                firstValue.content || "An unknown error occurred"
-
-              if (errorMessage.includes("reached the limit")) {
-                alertDispatch({
-                  type: "SHOW",
-                  payload: {
-                    message: errorMessage,
-                    title: "Usage Cap Error"
-                  }
-                })
-              } else {
-                toast.error(errorMessage)
-              }
-
-              setIsGenerating(false)
-              controller.abort()
-              return
-            }
-
             // Handle citations
             if (firstValue?.citations) {
               citations = firstValue.citations
@@ -235,12 +280,12 @@ export const processResponse = async (
                 firstValue.ragId !== null ? String(firstValue.ragId) : null
             }
 
-            // Handle sandbox type
-            if (firstValue?.type === "sandbox-type") {
-              if (firstValue.sandboxType === "persistent-sandbox") {
-                setToolInUse("persistent-sandbox")
+            // Handle finishReason
+            if (firstValue?.finishReason) {
+              if (firstValue.finishReason === "tool-calls") {
+                finishReason = "terminal-calls"
               } else {
-                setToolInUse("temporary-sandbox")
+                finishReason = firstValue.finishReason
               }
             }
           }
@@ -297,6 +342,8 @@ export const processResponse = async (
 
     return {
       fullText,
+      thinkingText,
+      thinkingElapsedSecs,
       finishReason,
       ragUsed,
       ragId,

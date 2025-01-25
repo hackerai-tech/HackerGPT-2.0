@@ -3,7 +3,8 @@ import {
   IconFileText,
   IconPuzzle,
   IconTerminal2,
-  IconWorld
+  IconWorld,
+  IconAtom
 } from "@tabler/icons-react"
 import { PluginID } from "@/types/plugins"
 
@@ -23,6 +24,10 @@ export const loadingStates = {
   [PluginID.BROWSER]: {
     icon: <IconWorld size={20} />,
     text: "Browsing the web..."
+  },
+  [PluginID.REASON_LLM]: {
+    icon: <IconAtom size={20} />,
+    text: "Thinking..."
   },
   ["temporary-sandbox"]: {
     icon: <IconTerminal2 size={20} />,
