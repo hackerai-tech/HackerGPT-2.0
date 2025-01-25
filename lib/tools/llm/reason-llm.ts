@@ -22,7 +22,7 @@ export async function executeReasonLLMTool({
   const { messages, profile, dataStream } = config
 
   console.log("[ReasonLLM] Executing reasonLLM")
-  
+
   const deepseek = createDeepSeek()
   let thinkingStartTime: number | null = null
   let thinkingElapsedSecs: number | null = null
