@@ -36,7 +36,7 @@ const llmConfig = {
     // For PGPT-Small
     pgptSmall: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-Small")}\n${systemPromptEnding}`,
     // For PGPT-Large
-    pgptLarge: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PGPT-Large")}\n${getPentestGPTToolsInfo(false, true)}\n${systemPromptEnding}`,
+    pgptLarge: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-Large")}\n${systemPromptEnding}`,
     // For PentestGPT-4o
     gpt4o: `${getPentestGPTInfo(initialSystemPrompt, true, true, "PentestGPT-4o")}\n${getPentestGPTToolsInfo(true, true, true, false, "PentestGPT-4o")}\n${systemPromptEnding}`,
     // For browser tool

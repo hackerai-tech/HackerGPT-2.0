@@ -51,7 +51,11 @@ export async function executeWebSearchTool({
   const { systemPrompt, providerHeaders, selectedModel } =
     await getProviderConfig(chatSettings, profile)
 
-  console.log("[WebSearch] Executing web search with model:", selectedModel)
+  console.log(
+    "[WebSearch] Executing web search with model:",
+    selectedModel,
+    chatSettings.model
+  )
 
   const response = await fetch(llmConfig.openrouter.url, {
     method: "POST",
