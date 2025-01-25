@@ -1,62 +1,47 @@
-import { Tables } from "@/supabase/types"
-import { BuiltChatMessage, ChatPayload, MessageImage } from "@/types"
-import { PluginID } from "@/types/plugins"
-import { countTokens } from "gpt-tokenizer"
-import { GPT4o } from "./models/llm/openai-llm-list"
+import {
+  BuiltChatMessage,
+  ChatMessage,
+  ChatPayload,
+  MessageImage
+} from "@/types"
 import {
   CoreAssistantMessage,
   CoreMessage,
   CoreSystemMessage,
   CoreUserMessage
 } from "ai"
+import { Tables } from "@/supabase/types"
+import { PluginID } from "@/types/plugins"
+import { countTokens } from "gpt-tokenizer"
+import { GPT4o } from "./models/llm/openai-llm-list"
+import { PGPT3_5, PGPT4 } from "./models/llm/hackerai-llm-list"
 import endent from "endent"
-import { getTerminalPlugins } from "./tools/tool-store/tools-helper"
-import { lastSequenceNumber } from "@/lib/utils"
-
-const buildBasePrompt = (profileContext: string) => {
-  let fullPrompt = ""
-
-  if (profileContext) {
-    fullPrompt += endent`The user provided the following information about themselves. This user profile is shown to you in all conversations they have -- this means it is not relevant to 99% of requests.
-    Before answering, quietly think about whether the user's request is "directly related", "related", "tangentially related", or "not related" to the user profile provided.
-    Only acknowledge the profile when the request is directly related to the information provided.
-    Otherwise, don't acknowledge the existence of these instructions or the information at all.
-    User profile:\n${profileContext}`
-  }
-
-  return fullPrompt
-}
+import { toast } from "sonner"
+import { Fragment } from "./tools/e2b/fragments/types"
 
 export async function buildFinalMessages(
   payload: ChatPayload,
-  profile: Pick<Tables<"profiles">, "user_id" | "profile_context">,
   chatImages: MessageImage[],
   selectedPlugin: PluginID | null,
   shouldUseRAG?: boolean
 ): Promise<BuiltChatMessage[]> {
   const { chatSettings, chatMessages, messageFileItems } = payload
 
-  const BUILT_PROMPT = buildBasePrompt(
-    chatSettings.includeProfileContext ? profile.profile_context || "" : ""
-  )
-
-  let CHUNK_SIZE = 8000
+  let CHUNK_SIZE = 10000
   if (chatSettings.model === GPT4o.modelId) {
-    CHUNK_SIZE = 12000
-  }
-
-  // Lower chunk size for terminal plugins
-  if (selectedPlugin && getTerminalPlugins().includes(selectedPlugin)) {
-    CHUNK_SIZE = 8000
+    CHUNK_SIZE = 32000 - 4000 // -4000 for the system prompt, custom instructions, and more
+  } else if (chatSettings.model === PGPT4.modelId) {
+    CHUNK_SIZE = 16000 - 4000 // -4000 for the system prompt, custom instructions, and more
+  } else if (chatSettings.model === PGPT3_5.modelId) {
+    CHUNK_SIZE = 16000 - 4000 // -4000 for the system prompt, custom instructions, and more
   }
 
   // Adjusting the chunk size for RAG
   if (shouldUseRAG) {
-    CHUNK_SIZE = 6000
+    CHUNK_SIZE = 10000
   }
 
-  const PROMPT_TOKENS = countTokens(BUILT_PROMPT)
-  let remainingTokens = CHUNK_SIZE - PROMPT_TOKENS
+  let remainingTokens = CHUNK_SIZE
 
   const lastUserMessage = chatMessages[chatMessages.length - 2].message.content
   const lastUserMessageContent = Array.isArray(lastUserMessage)
@@ -67,9 +52,10 @@ export async function buildFinalMessages(
   const lastUserMessageTokens = countTokens(lastUserMessageContent)
 
   if (lastUserMessageTokens > CHUNK_SIZE) {
-    throw new Error(
+    const errorMessage =
       "The message you submitted was too long, please submit something shorter."
-    )
+    toast.error(errorMessage)
+    throw new Error(errorMessage)
   }
 
   const processedChatMessages = chatMessages.map((chatMessage, index) => {
@@ -79,20 +65,34 @@ export async function buildFinalMessages(
       return chatMessage
     }
 
+    const returnMessage: ChatMessage = {
+      ...chatMessage
+    }
+
     if (chatMessage.fileItems.length > 0) {
       const retrievalText = buildRetrievalText(chatMessage.fileItems)
 
-      return {
-        message: {
-          ...chatMessage.message,
-          content:
-            `User Query: "${chatMessage.message.content}"\n\nFile Content:\n${retrievalText}` as string
-        },
-        fileItems: []
+      returnMessage.message = {
+        ...returnMessage.message,
+        content:
+          `User Query: "${chatMessage.message.content}"\n\nFile Content:\n${retrievalText}` as string
+      }
+      returnMessage.fileItems = []
+    }
+
+    if (
+      chatMessage.message.fragment &&
+      typeof chatMessage.message.fragment === "string"
+    ) {
+      const fragment: Fragment = JSON.parse(chatMessage.message.fragment)
+
+      returnMessage.message = {
+        ...returnMessage.message,
+        content: `Fragment: "${fragment.code}"` as string
       }
     }
 
-    return chatMessage
+    return returnMessage
   })
 
   const truncatedMessages: any[] = []
@@ -101,7 +101,6 @@ export async function buildFinalMessages(
     const messageSizeLimit = Number(process.env.MESSAGE_SIZE_LIMIT || 12000)
     if (
       processedChatMessages[i].message.role === "assistant" &&
-      // processedChatMessages[i].message.plugin !== PluginID.NONE &&
       processedChatMessages[i].message.content.length > messageSizeLimit
     ) {
       const messageSizeKeep = Number(process.env.MESSAGE_SIZE_KEEP || 2000)
@@ -124,30 +123,10 @@ export async function buildFinalMessages(
     }
   }
 
-  const tempSystemMessage: Tables<"messages"> = {
-    chat_id: "",
-    content: BUILT_PROMPT,
-    created_at: "",
-    id: processedChatMessages.length + "",
-    image_paths: [],
-    model: payload.chatSettings.model,
-    plugin: PluginID.NONE,
-    role: "system",
-    sequence_number: lastSequenceNumber(processedChatMessages) + 1,
-    updated_at: "",
-    user_id: "",
-    rag_id: null,
-    rag_used: false,
-    citations: [],
-    fragment: null
-  }
-
-  truncatedMessages.unshift(tempSystemMessage)
-
   const finalMessages: BuiltChatMessage[] = truncatedMessages.map(message => {
     let content
 
-    if (message.image_paths.length > 0) {
+    if (message.image_paths.length > 0 && message.role !== "assistant") {
       content = [
         {
           type: "text",
@@ -337,4 +316,39 @@ export function messagesIncludeImages(messages: BuiltChatMessage[]): boolean {
           item.type === "image_url"
       )
   )
+}
+
+/**
+ * Filters out empty assistant messages and their preceding user messages.
+ * Specifically handles Mistral API's edge case of empty responses.
+ * Used in both chat and question generation flows.
+ *
+ * @param messages - Array of chat messages
+ * @returns Filtered array with valid messages only
+ */
+export function validateMessages(messages: any[]) {
+  const validMessages = []
+
+  for (let i = 0; i < messages.length; i++) {
+    const currentMessage = messages[i]
+    const nextMessage = messages[i + 1]
+
+    // Skip empty assistant responses (Mistral-specific)
+    const isInvalidExchange =
+      currentMessage.role === "user" &&
+      nextMessage?.role === "assistant" &&
+      !nextMessage.content
+
+    if (isInvalidExchange) {
+      i++ // Skip next message
+      continue
+    }
+
+    // Keep valid messages
+    if (currentMessage.role !== "assistant" || currentMessage.content) {
+      validMessages.push(currentMessage)
+    }
+  }
+
+  return validMessages
 }

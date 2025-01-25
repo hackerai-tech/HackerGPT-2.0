@@ -5,6 +5,7 @@ import { MessageMarkdown } from "./message-markdown"
 import { MessagePluginFile } from "./message-plugin-file"
 import { MessageTerminal } from "./e2b-messages/message-terminal"
 import { MessageCitations } from "./message-citations"
+import { MessageThinking } from "./message-thinking"
 
 interface MessageTypeResolverProps {
   message: Tables<"messages">
@@ -84,53 +85,6 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
     )
   }
 
-  // If the previous message is a plugin command and the current message is the output
-  // if (
-  //   isPluginOutput &&
-  //   previousMessage?.content.startsWith("/") &&
-  //   (previousMessage.content.split("/n/n")[0].includes(" -output ") ||
-  //     previousMessage.content.split("/n/n")[0].includes(" --output "))
-  // ) {
-  //   const outputFilename = extractOutputFilename(previousMessage.content)
-
-  //   return (
-  //     <MessagePluginFile
-  //       created_at={message.created_at}
-  //       content={message.content}
-  //       plugin={message.plugin ?? PluginID.NONE}
-  //       autoDownloadEnabled={true}
-  //       id={message.id}
-  //       filename={outputFilename}
-  //       isLastMessage={isLastMessage}
-  //       isAssistant={message.role === "assistant"}
-  //     />
-  //   )
-  // }
-
-  // If the current message is a plugin command and the previous message is the output
-  // if (
-  //   isPluginOutput &&
-  //   (message.content.split("/n/n")[0].includes(" -output ") ||
-  //     message.content.split("/n/n")[0].includes(" --output "))
-  // ) {
-  //   const outputFilename = extractOutputFilename(
-  //     message.content.split("/n/n")[0]
-  //   )
-
-  //   return (
-  //     <MessagePluginFile
-  //       created_at={message.created_at}
-  //       content={message.content}
-  //       plugin={message.plugin ?? PluginID.NONE}
-  //       autoDownloadEnabled={true}
-  //       id={message.id}
-  //       filename={outputFilename}
-  //       isLastMessage={isLastMessage}
-  //       isAssistant={message.role === "assistant"}
-  //     />
-  //   )
-  // }
-
   if (
     typeof message.content === "string" &&
     message.content.length > messageSizeLimit
@@ -144,6 +98,17 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
         id={message.id}
         filename={message.plugin + "-" + message.id + ".md"}
         isLastMessage={isLastMessage}
+        isAssistant={message.role === "assistant"}
+      />
+    )
+  }
+
+  if (toolInUse === PluginID.REASON_LLM || message.thinking_content) {
+    return (
+      <MessageThinking
+        content={message.content}
+        thinking_content={message.thinking_content}
+        thinking_elapsed_secs={message.thinking_elapsed_secs}
         isAssistant={message.role === "assistant"}
       />
     )

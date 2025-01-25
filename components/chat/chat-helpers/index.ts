@@ -15,7 +15,7 @@ import {
 } from "@/types"
 import React from "react"
 import { toast } from "sonner"
-import { buildFinalMessages } from "@/lib/build-prompt-v2"
+import { buildFinalMessages } from "@/lib/build-prompt"
 import { Fragment } from "@/lib/tools/e2b/fragments/types"
 import { processResponse } from "./stream-processor"
 
@@ -51,6 +51,9 @@ export const handleHostedChat = async (
     apiEndpoint = "/api/chat/openai"
     setToolInUse(PluginID.TERMINAL)
     selectedPlugin = PluginID.TERMINAL
+  } else if (selectedPlugin === PluginID.REASON_LLM) {
+    apiEndpoint = "/api/chat/openai"
+    setToolInUse(PluginID.REASON_LLM)
   } else if (selectedPlugin === PluginID.ARTIFACTS) {
     apiEndpoint = "/api/chat/tools/fragments"
     setToolInUse(PluginID.ARTIFACTS)
@@ -146,9 +149,15 @@ export const handleHostedPluginsChat = async (
 ) => {
   const apiEndpoint = "/api/chat/plugins"
 
+  const formattedMessages = await buildFinalMessages(
+    payload,
+    chatImages,
+    selectedPlugin
+  )
+
   const requestBody: any = {
+    messages: formattedMessages,
     payload: payload,
-    chatImages: chatImages,
     selectedPlugin: selectedPlugin,
     isTerminalContinuation: isTerminalContinuation
   }

@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -71,13 +71,6 @@ export interface Database {
             referencedRelation: "files"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "chat_files_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
         ]
       }
       chats: {
@@ -135,27 +128,43 @@ export interface Database {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chats_shared_by_fkey"
-            columns: ["shared_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "chats_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "chats_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
-          }
+          },
         ]
+      }
+      e2b_sandboxes: {
+        Row: {
+          created_at: string
+          id: string
+          sandbox_id: string
+          status: string
+          template: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          sandbox_id: string
+          status?: string
+          template: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          sandbox_id?: string
+          status?: string
+          template?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       feedback: {
         Row: {
@@ -217,13 +226,6 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "feedback_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fk_chat"
             columns: ["chat_id"]
             isOneToOne: false
@@ -236,7 +238,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "messages"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       feedback_reviews: {
@@ -269,13 +271,6 @@ export interface Database {
             referencedRelation: "feedback"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "feedback_reviews_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
         ]
       }
       file_items: {
@@ -323,13 +318,6 @@ export interface Database {
             referencedRelation: "files"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "file_items_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
         ]
       }
       file_workspaces: {
@@ -363,19 +351,12 @@ export interface Database {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "file_workspaces_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "file_workspaces_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       files: {
@@ -418,15 +399,7 @@ export interface Database {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "files_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       message_file_items: {
         Row: {
@@ -465,13 +438,6 @@ export interface Database {
             referencedRelation: "messages"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "message_file_items_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
         ]
       }
       messages: {
@@ -489,6 +455,9 @@ export interface Database {
           rag_used: boolean
           role: string
           sequence_number: number
+          thinking_content: string | null
+          thinking_elapsed_secs: number | null
+          thinking_enabled: boolean
           updated_at: string | null
           user_id: string
         }
@@ -506,6 +475,9 @@ export interface Database {
           rag_used?: boolean
           role: string
           sequence_number: number
+          thinking_content?: string | null
+          thinking_elapsed_secs?: number | null
+          thinking_enabled?: boolean
           updated_at?: string | null
           user_id: string
         }
@@ -523,6 +495,9 @@ export interface Database {
           rag_used?: boolean
           role?: string
           sequence_number?: number
+          thinking_content?: string | null
+          thinking_elapsed_secs?: number | null
+          thinking_enabled?: boolean
           updated_at?: string | null
           user_id?: string
         }
@@ -534,13 +509,6 @@ export interface Database {
             referencedRelation: "chats"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "messages_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
         ]
       }
       profiles: {
@@ -577,15 +545,7 @@ export interface Database {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       subscriptions: {
         Row: {
@@ -647,13 +607,6 @@ export interface Database {
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
         ]
       }
       team_invitations: {
@@ -686,19 +639,12 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "team_invitations_inviter_id_fkey"
-            columns: ["inviter_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "team_invitations_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       team_members: {
@@ -741,13 +687,6 @@ export interface Database {
             referencedRelation: "teams"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "team_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
         ]
       }
       teams: {
@@ -790,15 +729,7 @@ export interface Database {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_role_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       voice_assistant_events: {
         Row: {
@@ -861,15 +792,7 @@ export interface Database {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "workspaces_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -880,6 +803,10 @@ export interface Database {
         Args: {
           p_invitation_id: string
         }
+        Returns: boolean
+      }
+      check_mfa: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       check_user_has_team_or_subscription_or_invitation: {
@@ -982,6 +909,10 @@ export interface Database {
           test_user_id: string
         }
         Returns: boolean
+      }
+      log_old_private_chats: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       match_file_items_local: {
         Args: {
@@ -1112,6 +1043,7 @@ export interface Database {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -1125,6 +1057,7 @@ export interface Database {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -1138,6 +1071,7 @@ export interface Database {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -1147,7 +1081,105 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "buckets"
             referencedColumns: ["id"]
-          }
+          },
+        ]
+      }
+      s3_multipart_uploads: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          id: string
+          in_progress_size: number
+          key: string
+          owner_id: string | null
+          upload_signature: string
+          user_metadata: Json | null
+          version: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          id: string
+          in_progress_size?: number
+          key: string
+          owner_id?: string | null
+          upload_signature: string
+          user_metadata?: Json | null
+          version: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          id?: string
+          in_progress_size?: number
+          key?: string
+          owner_id?: string | null
+          upload_signature?: string
+          user_metadata?: Json | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "s3_multipart_uploads_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      s3_multipart_uploads_parts: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          etag: string
+          id: string
+          key: string
+          owner_id: string | null
+          part_number: number
+          size: number
+          upload_id: string
+          version: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          etag: string
+          id?: string
+          key: string
+          owner_id?: string | null
+          part_number: number
+          size?: number
+          upload_id: string
+          version: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          etag?: string
+          id?: string
+          key?: string
+          owner_id?: string | null
+          part_number?: number
+          size?: number
+          upload_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "s3_multipart_uploads_parts_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "s3_multipart_uploads_parts_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "s3_multipart_uploads"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
@@ -1180,7 +1212,7 @@ export interface Database {
         Args: {
           name: string
         }
-        Returns: unknown
+        Returns: string[]
       }
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
@@ -1188,6 +1220,41 @@ export interface Database {
           size: number
           bucket_id: string
         }[]
+      }
+      list_multipart_uploads_with_delimiter: {
+        Args: {
+          bucket_id: string
+          prefix_param: string
+          delimiter_param: string
+          max_keys?: number
+          next_key_token?: string
+          next_upload_token?: string
+        }
+        Returns: {
+          key: string
+          id: string
+          created_at: string
+        }[]
+      }
+      list_objects_with_delimiter: {
+        Args: {
+          bucket_id: string
+          prefix_param: string
+          delimiter_param: string
+          max_keys?: number
+          start_after?: string
+          next_token?: string
+        }
+        Returns: {
+          name: string
+          id: string
+          metadata: Json
+          updated_at: string
+        }[]
+      }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       search: {
         Args: {
@@ -1219,14 +1286,16 @@ export interface Database {
   }
 }
 
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -1234,68 +1303,82 @@ export type Tables<
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
-      Database["public"]["Views"])
-  ? (Database["public"]["Tables"] &
-      Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
-  : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof Database["public"]["Tables"]
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
-  : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof Database["public"]["Tables"]
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
     : never
-  : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
-    | keyof Database["public"]["Enums"]
+    | keyof PublicSchema["Enums"]
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never
+    : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-  ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-  : never
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
 
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
