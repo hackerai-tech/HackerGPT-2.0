@@ -123,7 +123,7 @@
     "autoprefixer": "^10.4.20",
     "babel-loader": "^9.2.1",
     "clsx": "^2.1.1",
-    "eslint": "^9.18.0",
+    "eslint": "^9.19.0",
     "eslint-config-next": "^15.1.5",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-tailwindcss": "^3.18.0",
