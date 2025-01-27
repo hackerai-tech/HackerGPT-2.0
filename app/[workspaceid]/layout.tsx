@@ -56,7 +56,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
       setChatSettings({
         model:
           subscription?.status === "active"
-            ? "gpt-4-turbo-preview"
+            ? "mistral-large"
             : ("mistral-medium" as LLMID),
         includeProfileContext: true,
         embeddingsProvider: "openai"
