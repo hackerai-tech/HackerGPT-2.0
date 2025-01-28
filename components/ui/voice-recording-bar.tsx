@@ -60,7 +60,7 @@ const VoiceRecordingBar: FC<VoiceRecordingBarProps> = ({
     <div
       className={`bg-secondary ${
         isEnhancedMenuOpen ? "mt-3" : "mt-0"
-      } flex min-h-[56px] items-center justify-between rounded-xl px-4 py-3`}
+      } flex min-h-[96px] items-center justify-between rounded-xl px-4 py-3`}
     >
       <IconX
         className="bg-primary text-secondary cursor-pointer rounded p-1 hover:opacity-50"
