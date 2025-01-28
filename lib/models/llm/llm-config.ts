@@ -32,7 +32,7 @@ const llmConfig = {
     // For Hacker RAG
     RAG: `${initialSystemPrompt} ${process.env.RAG_SYSTEM_PROMPT}\n${currentDate}`,
     // For PGPT
-    pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt)}\n${systemPromptEnding}`,
+    pentestGPTChat: `${getPentestGPTInfo(initialSystemPrompt, true)}\n${systemPromptEnding}`,
     // For PGPT-Small
     pgptSmall: `${getPentestGPTInfo(initialSystemPrompt, true, false, "PGPT-Small")}\n${systemPromptEnding}`,
     // For PGPT-Large
@@ -54,7 +54,8 @@ const llmConfig = {
       process.env.OPENROUTER_PENTESTGPT_DEFAULT_MODEL,
     pentestgpt_standalone_question_openrouter:
       process.env.OPENROUTER_STANDALONE_QUESTION_MODEL,
-    pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL
+    pentestgpt_pro_openrouter: process.env.OPENROUTER_PENTESTGPT_PRO_MODEL,
+    reasoning: process.env.REASONING_MODEL
   },
   hackerRAG: {
     enabled:

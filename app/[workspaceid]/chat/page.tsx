@@ -45,10 +45,10 @@ export default function ChatPage() {
           <div
             className={`absolute left-1/2 -translate-x-1/2 ${isMobile && (selectedPluginInfo || isTemporaryChat) ? "-translate-y-2/4" : "-translate-y-3/4"}`}
           >
-            {isTemporaryChat ? (
-              <TemporaryChatInfo />
-            ) : selectedPluginInfo ? (
+            {selectedPluginInfo ? (
               <ChatPluginInfo pluginInfo={selectedPluginInfo} />
+            ) : isTemporaryChat ? (
+              <TemporaryChatInfo />
             ) : isMobile ? (
               <div className="-mx-24 mb-12">
                 <h1 className="text-2xl font-semibold">
@@ -83,16 +83,14 @@ export default function ChatPage() {
 
           <div className="flex grow flex-col items-center justify-center" />
 
-          {!isTemporaryChat && (
-            <div
-              className={`z-10 -mx-2 w-full min-w-[300px] items-end px-2 pb-1 sm:w-[600px] md:w-[650px] lg:w-[700px] xl:w-[800px]`}
-            >
-              <ChatStarters
-                selectedPlugin={selectedPlugin}
-                chatMessages={chatMessages}
-              />
-            </div>
-          )}
+          <div
+            className={`z-10 -mx-2 w-full min-w-[300px] items-end px-2 pb-1 sm:w-[600px] md:w-[650px] lg:w-[700px] xl:w-[800px]`}
+          >
+            <ChatStarters
+              selectedPlugin={selectedPlugin}
+              chatMessages={chatMessages}
+            />
+          </div>
 
           {/* Chat input */}
           <div className="flex w-full justify-center">

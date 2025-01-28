@@ -21,7 +21,8 @@ export const ToolPicker: FC<ToolPickerProps> = ({
   onSelectTool,
   isFocused
 }) => {
-  const { isPremiumSubscription } = useContext(PentestGPTContext)
+  const { isPremiumSubscription, isTemporaryChat } =
+    useContext(PentestGPTContext)
   const { setIsToolPickerOpen } = useUIContext()
   const itemsRef = useRef<(HTMLDivElement | null)[]>([])
 
@@ -74,7 +75,11 @@ export const ToolPicker: FC<ToolPickerProps> = ({
   return (
     <>
       {isOpen && (
-        <div className="bg-secondary flex flex-col space-y-1 rounded-xl border-2 p-2 text-sm">
+        <div
+          className={`flex flex-col space-y-1 rounded-xl border-2 p-2 text-sm ${
+            isTemporaryChat ? "bg-tertiary" : "bg-secondary"
+          }`}
+        >
           {filteredTools.length === 0 ? (
             <div className="text-md flex h-14 cursor-pointer items-center justify-center italic hover:opacity-50">
               No matching tools.
