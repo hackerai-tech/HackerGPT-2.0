@@ -63,6 +63,15 @@ async function processStream({
   profile: any
   dataStream: any
 }) {
+  if (llmConfig.models.reasoning === "deepseek-reasoner") {
+    dataStream.writeData({
+      type: "text-delta",
+      content:
+        "DeepSeek services are currently experiencing degraded performance due to large-scale malicious attacks. The service is partially available but may be unstable. We apologize for the inconvenience and recommend trying again later."
+    })
+    return
+  }
+
   let thinkingStartTime = null
   let enteredReasoning = false
   let enteredText = false
