@@ -2,7 +2,6 @@ import { createContext, useContext, useState } from "react"
 import { Fragment } from "@/lib/tools/e2b/fragments/types"
 import { ChatMessage } from "@/types/chat-message"
 import { updateMessage } from "@/db/messages"
-import { PentestGPTContext } from "@/context/context"
 
 type TabType = "code" | "execution"
 
@@ -61,11 +60,10 @@ function useFragmentsHook(): UseFragmentsReturn {
   const [isFragmentBarOpen, setIsFragmentBarOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<TabType>("code")
   const [chatMessage, setChatMessage] = useState<ChatMessage | null>(null)
-  const { isTemporaryChat } = useContext(PentestGPTContext)
 
   const updateFragment = async (newFragment: Fragment | null) => {
     if (chatMessage) {
-      if (chatMessage.isFinal && !isTemporaryChat) {
+      if (chatMessage.isFinal) {
         const fragmentJson = newFragment ? JSON.stringify(newFragment) : null
         const updatedMessage = await updateMessage(chatMessage.message.id, {
           fragment: fragmentJson

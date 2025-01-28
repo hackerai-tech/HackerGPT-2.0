@@ -14,13 +14,11 @@ import { useUIContext } from "@/context/ui-context"
 
 interface ToolOptionsProps {
   fileInputRef: React.RefObject<HTMLInputElement>
-  isTemporaryChat: boolean
   handleToggleEnhancedMenu: () => void
 }
 
 export const ToolOptions = ({
   fileInputRef,
-  isTemporaryChat,
   handleToggleEnhancedMenu
 }: ToolOptionsProps) => {
   const TOOLTIP_DELAY = 500
@@ -120,35 +118,33 @@ export const ToolOptions = ({
       )}
 
       {/* Plugins Menu Toggle */}
-      {!isTemporaryChat && (
-        <WithTooltip
-          delayDuration={TOOLTIP_DELAY}
-          side="top"
-          display={
-            <div className="flex flex-col">
-              <p className="font-medium">Show/Hide Plugins Menu</p>
-            </div>
-          }
-          trigger={
-            <div
-              className="flex flex-row items-center"
-              onClick={handlePluginsMenuToggle}
-            >
-              {isEnhancedMenuOpen ? (
-                <IconPuzzle
-                  className="cursor-pointer rounded-lg rounded-bl-xl p-1 hover:bg-black/10 focus-visible:outline-black dark:hover:bg-white/10 dark:focus-visible:outline-white"
-                  size={32}
-                />
-              ) : (
-                <IconPuzzleOff
-                  className="cursor-pointer rounded-lg rounded-bl-xl p-1 opacity-50 hover:bg-black/10 focus-visible:outline-black dark:hover:bg-white/10 dark:focus-visible:outline-white"
-                  size={32}
-                />
-              )}
-            </div>
-          }
-        />
-      )}
+      <WithTooltip
+        delayDuration={TOOLTIP_DELAY}
+        side="top"
+        display={
+          <div className="flex flex-col">
+            <p className="font-medium">Show/Hide Plugins Menu</p>
+          </div>
+        }
+        trigger={
+          <div
+            className="flex flex-row items-center"
+            onClick={handlePluginsMenuToggle}
+          >
+            {isEnhancedMenuOpen ? (
+              <IconPuzzle
+                className="cursor-pointer rounded-lg rounded-bl-xl p-1 hover:bg-black/10 focus-visible:outline-black dark:hover:bg-white/10 dark:focus-visible:outline-white"
+                size={32}
+              />
+            ) : (
+              <IconPuzzleOff
+                className="cursor-pointer rounded-lg rounded-bl-xl p-1 opacity-50 hover:bg-black/10 focus-visible:outline-black dark:hover:bg-white/10 dark:focus-visible:outline-white"
+                size={32}
+              />
+            )}
+          </div>
+        }
+      />
 
       {/* Reason LLM Toggle */}
       {isPremiumSubscription && (

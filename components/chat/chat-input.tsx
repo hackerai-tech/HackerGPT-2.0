@@ -215,7 +215,7 @@ export const ChatInput: FC = () => {
         )}
       >
         <ChatFilesDisplay />
-        {isEnhancedMenuOpen && !isTemporaryChat && <EnhancedMenuPicker />}
+        {isEnhancedMenuOpen && <EnhancedMenuPicker />}
       </div>
 
       {/* Chat Input Area */}
@@ -239,11 +239,10 @@ export const ChatInput: FC = () => {
           <div
             className={cn(
               "bg-secondary border-input relative w-full rounded-xl border-2",
-              isTemporaryChat
-                ? "bg-tertiary border-tertiary"
-                : selectedPlugin && selectedPlugin !== PluginID.NONE
-                  ? "border-primary"
-                  : "border-secondary"
+              isTemporaryChat && "bg-tertiary border-tertiary",
+              selectedPlugin &&
+                selectedPlugin !== PluginID.NONE &&
+                "border-primary"
             )}
             ref={divRef}
           >
@@ -315,7 +314,6 @@ export const ChatInput: FC = () => {
               <div className="absolute bottom-[10px] left-2 flex flex-row">
                 <ToolOptions
                   fileInputRef={fileInputRef as RefObject<HTMLInputElement>}
-                  isTemporaryChat={isTemporaryChat}
                   handleToggleEnhancedMenu={handleToggleEnhancedMenu}
                 />
               </div>

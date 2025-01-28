@@ -27,8 +27,12 @@ interface PluginSelectorProps {
 }
 
 const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
-  const { isPremiumSubscription, chatSettings, setContentType } =
-    useContext(PentestGPTContext)
+  const {
+    isPremiumSubscription,
+    chatSettings,
+    setContentType,
+    isTemporaryChat
+  } = useContext(PentestGPTContext)
 
   const { setSelectedPlugin, selectedPlugin } = useUIContext()
 
@@ -133,7 +137,9 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
         <DropdownMenuContent
           side="top"
           align="start"
-          className="bg-secondary z-50 min-w-32 overflow-hidden rounded-md border p-1 shadow-md"
+          className={`${
+            isTemporaryChat ? "bg-tertiary" : "bg-secondary"
+          } z-50 min-w-32 overflow-hidden rounded-md border p-1 shadow-md`}
         >
           {renderPluginOptions()}
         </DropdownMenuContent>

@@ -10,10 +10,13 @@ const InfoCard: React.FC<{
   title: string
   description: string
   onClick: () => void
-}> = ({ title, description, onClick }) => {
+  isTemporaryChat: boolean
+}> = ({ title, description, onClick, isTemporaryChat }) => {
   return (
     <button
-      className="bg-secondary hover:bg-select min-w-72 rounded-xl p-3.5 text-left duration-300 ease-in-out focus:outline-none"
+      className={`${
+        isTemporaryChat ? "bg-tertiary" : "bg-secondary"
+      } hover:bg-select min-w-72 rounded-xl p-3.5 text-left duration-300 ease-in-out focus:outline-none`}
       onClick={onClick}
     >
       <div className="pb-1 text-sm font-bold">{title}</div>
@@ -31,7 +34,7 @@ const ChatStarters: React.FC<ChatStartersProps> = ({
   selectedPlugin,
   chatMessages
 }) => {
-  const { userInput, newMessageFiles, newMessageImages } =
+  const { userInput, newMessageFiles, newMessageImages, isTemporaryChat } =
     useContext(PentestGPTContext)
   const chatHandler = useChatHandler()
   const pluginStarters = availablePlugins.find(
@@ -60,6 +63,7 @@ const ChatStarters: React.FC<ChatStartersProps> = ({
               onClick={() =>
                 handleSendMessage(starter.chatMessage, chatMessages, false)
               }
+              isTemporaryChat={isTemporaryChat}
             />
           ))}
       </div>
