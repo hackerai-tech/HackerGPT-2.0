@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
       profile.user_id,
-      "gpt-4"
+      selectedPlugin === PluginID.REASON_LLM ? "reasoning" : "gpt-4"
     )
     if (rateLimitCheckResult !== null) {
       return rateLimitCheckResult.response
