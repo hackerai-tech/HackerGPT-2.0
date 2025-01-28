@@ -123,7 +123,7 @@ function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
         ? 50
         : subscriptionInfo.isPremium
           ? 30
-          : 15
+          : 0
       : Number(process.env[limitKey])
 
   if (isNaN(limit) || limit < 0) {
