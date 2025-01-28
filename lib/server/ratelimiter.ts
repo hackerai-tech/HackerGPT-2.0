@@ -123,7 +123,7 @@ function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
         ? 50
         : subscriptionInfo.isPremium
           ? 30
-          : 15
+          : 0
       : Number(process.env[limitKey])
 
   if (isNaN(limit) || limit < 0) {
@@ -185,15 +185,7 @@ export function getRateLimitErrorMessage(
       : `${baseMessage}\n\n🚀 Consider upgrading to Pro or Team for higher terminal usage limits and more features.`
   }
 
-  if (model === "fragments-reload") {
-    return `⚠️ You've reached the limit for fragment reloads.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
-  }
-
-  if (model === "fragments") {
-    return `⚠️ You've reached the limit for artifacts usage.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
-  }
-
-  let message = `⚠️ Usage Limit Reached for ${getModelName(model)}\n⏰ Access will be restored in ${remainingText}`
+  let message = `⚠️ You've reached the limit for ${getModelName(model)}.\n\nTo ensure fair usage for all users, please wait ${remainingText} before trying again.`
 
   if (premium) {
     if (model === "pentestgpt") {
@@ -224,7 +216,8 @@ function getModelName(model: string): string {
     "tts-1": "text-to-speech",
     "stt-1": "speech-to-text",
     "fragments-reload": "fragment reloads",
-    fragments: "artifacts"
+    fragments: "artifacts",
+    reasoning: "reasoning model"
   }
   return modelNames[model] || model
 }

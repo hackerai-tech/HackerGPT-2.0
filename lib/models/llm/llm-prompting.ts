@@ -141,8 +141,8 @@ export const getPentestGPTToolsInfo = (
   includeBrowserTool: boolean = false,
   includeWebSearchTool: boolean = false,
   includeTerminalTool: boolean = false,
-  includeArtifacts: boolean = false,
-  currentModel: string = ""
+  persistentSandbox: boolean = false
+  // includeArtifacts: boolean = false
 ): string => {
   let toolsInfo = "<tools_instructions>\n"
 
@@ -178,13 +178,17 @@ PentestGPT uses 'browser' when:
   if (includeTerminalTool) {
     toolsInfo += `<terminal_instructions>\n`
 
-    if (currentModel === "PentestGPT-4o") {
+    if (persistentSandbox) {
       toolsInfo += `PentestGPT must IMMEDIATELY select the terminal tool when any terminal commands or \
 system operations are needed. Do not plan or discuss terminal commands first - select the terminal tool \
 right away to engage the specialized terminal AI.
 
 By default, use temporary sandbox (usePersistentSandbox: false) which is \
 erased after 15 minutes.
+
+Persistent sandbox only includes essential tools (iputils-ping, nmap, whois, curl, wget, whatweb, \
+dnsutils, wafw00f, golang) \
+for faster startup.
 
 Set usePersistentSandbox: true when:
 1. Installing tools
@@ -200,8 +204,8 @@ The persistent sandbox keeps data for 30 days.\n\n`
 Commands timeout after 5 minutes. Key points:
   
 1. Text output only; no graphical interfaces.
-2. Pre-installed with various tools including: nmap, whois, curl, wget, sqlmap, nikto, whatweb, \
-dnsutils, nuclei, subfinder, wpscan, katana, dalfox, wafw00f, ffuf, gem, golang, and other basic tools. 
+2. Temporary sandbox comes pre-installed with various tools including: nmap, whois, curl, wget, sqlmap, nikto, whatweb, \
+dnsutils, nuclei, subfinder, wpscan, katana, dalfox, wafw00f, ffuf, gem, golang, and other basic tools.
 3. Can install additional packages using 'apt-get install', 'gem install', or any other way.
 4. Never uses 'apt-get update' or updates the package list before installing packages.
 5. Executes all commands without human confirmation.
@@ -237,33 +241,33 @@ situation.
 </terminal_instructions>\n\n`
   }
 
-  if (includeArtifacts) {
-    toolsInfo += `<artifacts_instructions>
-PentestGPT can create and reference artifacts during conversations. Artifacts are for substantial, \
-self-contained content that humans might modify or reuse, displayed in a separate UI window for clarity.
+  //   if (includeArtifacts) {
+  //     toolsInfo += `<artifacts_instructions>
+  // PentestGPT can create and reference artifacts during conversations. Artifacts are for substantial, \
+  // self-contained content that humans might modify or reuse, displayed in a separate UI window for clarity.
 
-# Don't use artifacts for...
-- Simple, informational, or short content, such as brief code snippets, mathematical equations, \
-or small examples
-- Primarily explanatory, instructional, or illustrative content, such as examples provided \
-to clarify a concept
-- Suggestions, commentary, or feedback on existing artifacts
-- Conversational or explanatory content that doesn't represent a standalone piece of work
-- Content that is dependent on the current conversational context to be useful
-- Content that is unlikely to be modified or iterated upon by the human
-- Request from humans that appears to be a one-off question
+  // # Don't use artifacts for...
+  // - Simple, informational, or short content, such as brief code snippets, mathematical equations, \
+  // or small examples
+  // - Primarily explanatory, instructional, or illustrative content, such as examples provided \
+  // to clarify a concept
+  // - Suggestions, commentary, or feedback on existing artifacts
+  // - Conversational or explanatory content that doesn't represent a standalone piece of work
+  // - Content that is dependent on the current conversational context to be useful
+  // - Content that is unlikely to be modified or iterated upon by the human
+  // - Request from humans that appears to be a one-off question
 
-# Usage notes
-- One artifact per message unless specifically requested
-- Prefer in-line content (don't use artifacts) when possible. Unnecessary use of artifacts \
-can be jarring for humans.
-- Currently only Python and Next.js code artifacts are supported
-- If a human asks the assistant to "run python visualization" or "make a website," the \
-assistant does not need to explain that it doesn't have these capabilities. \
-Creating the code and placing it within the appropriate artifact will fulfill the human's \
-intentions.
-</artifacts_instructions>\n`
-  }
+  // # Usage notes
+  // - One artifact per message unless specifically requested
+  // - Prefer in-line content (don't use artifacts) when possible. Unnecessary use of artifacts \
+  // can be jarring for humans.
+  // - Currently only Python and Next.js code artifacts are supported
+  // - If a human asks the assistant to "run python visualization" or "make a website," the \
+  // assistant does not need to explain that it doesn't have these capabilities. \
+  // Creating the code and placing it within the appropriate artifact will fulfill the human's \
+  // intentions.
+  // </artifacts_instructions>\n`
+  //   }
 
   toolsInfo += "</tools_instructions>\n"
 
