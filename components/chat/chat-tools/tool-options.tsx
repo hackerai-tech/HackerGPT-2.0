@@ -23,10 +23,8 @@ export const ToolOptions = ({
 }: ToolOptionsProps) => {
   const TOOLTIP_DELAY = 500
 
-  const {
-    isPremiumSubscription,
-    newMessageImages,
-  } = useContext(PentestGPTContext)
+  const { isPremiumSubscription, newMessageImages } =
+    useContext(PentestGPTContext)
 
   const {
     selectedPlugin,
@@ -36,8 +34,7 @@ export const ToolOptions = ({
     isMobile
   } = useUIContext()
 
-  const hasImageAttached =
-    newMessageImages.length > 0
+  const hasImageAttached = newMessageImages.length > 0
 
   const handleWebSearchToggle = () => {
     if (hasImageAttached) return
@@ -157,7 +154,7 @@ export const ToolOptions = ({
                 selectedPlugin === PluginID.REASON_LLM
                   ? "bg-primary/10"
                   : "hover:bg-black/10 dark:hover:bg-white/10",
-                  hasImageAttached && "pointer-events-none opacity-50"
+                hasImageAttached && "pointer-events-none opacity-50"
               )}
               onClick={handleReasonLLMToggle}
             >
@@ -204,7 +201,7 @@ export const ToolOptions = ({
               selectedPlugin === PluginID.WEB_SEARCH
                 ? "bg-primary/10"
                 : "hover:bg-black/10 dark:hover:bg-white/10",
-                hasImageAttached && "pointer-events-none opacity-50"
+              hasImageAttached && "pointer-events-none opacity-50"
             )}
             onClick={handleWebSearchToggle}
           >
