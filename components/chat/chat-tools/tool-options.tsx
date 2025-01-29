@@ -165,9 +165,12 @@ export const ToolOptions = ({
           delayDuration={TOOLTIP_DELAY}
           side="top"
           display={
-            <div className="flex flex-col">
-              <p className="font-medium">Solve reasoning problems</p>
-            </div>
+            selectedPlugin !== PluginID.REASONING &&
+            selectedPlugin !== PluginID.REASONING_WEB_SEARCH && (
+              <div className="flex flex-col">
+                <p className="font-medium">Solve reasoning problems</p>
+              </div>
+            )
           }
           trigger={
             <div
@@ -214,9 +217,12 @@ export const ToolOptions = ({
         delayDuration={TOOLTIP_DELAY}
         side="top"
         display={
-          <div className="flex flex-col">
-            <p className="font-medium">Search the Web</p>
-          </div>
+          selectedPlugin !== PluginID.WEB_SEARCH &&
+          selectedPlugin !== PluginID.REASONING_WEB_SEARCH && (
+            <div className="flex flex-col">
+              <p className="font-medium">Search the Web</p>
+            </div>
+          )
         }
         trigger={
           <div
