@@ -7,7 +7,7 @@ import {
 import llmConfig from "@/lib/models/llm/llm-config"
 import { checkRatelimitOnApi } from "@/lib/server/ratelimiter"
 import { getAIProfile } from "@/lib/server/server-chat-helpers"
-import { createOpenAI } from "@ai-sdk/openai"
+import { openai } from "@ai-sdk/openai"
 import { smoothStream, streamText } from "ai"
 import { ServerRuntime } from "next"
 import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
@@ -16,6 +16,7 @@ import { executeWebSearchTool } from "@/lib/tools/llm/web-search"
 import { createStreamResponse } from "@/lib/ai-helper"
 import { executeTerminalTool } from "@/lib/tools/llm/terminal"
 import { executeReasonLLMTool } from "@/lib/tools/llm/reason-llm"
+import { executeReasoningWebSearchTool } from "@/lib/tools/llm/reasoning-web-search"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -46,7 +47,10 @@ export async function POST(request: Request) {
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
       profile.user_id,
-      selectedPlugin === PluginID.REASON_LLM ? "reasoning" : "gpt-4"
+      selectedPlugin === PluginID.REASONING ||
+        selectedPlugin === PluginID.REASONING_WEB_SEARCH
+        ? "reasoning"
+        : "gpt-4"
     )
     if (rateLimitCheckResult !== null) {
       return rateLimitCheckResult.response
@@ -71,9 +75,16 @@ export async function POST(request: Request) {
           })
         })
 
-      case PluginID.REASON_LLM:
+      case PluginID.REASONING:
         return createStreamResponse(async dataStream => {
           await executeReasonLLMTool({
+            config: { messages, profile, dataStream }
+          })
+        })
+
+      case PluginID.REASONING_WEB_SEARCH:
+        return createStreamResponse(async dataStream => {
+          await executeReasoningWebSearchTool({
             config: { messages, profile, dataStream }
           })
         })
@@ -83,8 +94,6 @@ export async function POST(request: Request) {
       llmConfig.systemPrompts.gpt4o,
       profile.profile_context
     )
-
-    const openai = createOpenAI()
 
     return createStreamResponse(dataStream => {
       const { getSelectedSchemas } = createToolSchemas({

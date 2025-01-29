@@ -23,13 +23,8 @@ export const ToolOptions = ({
 }: ToolOptionsProps) => {
   const TOOLTIP_DELAY = 500
 
-  const {
-    isPremiumSubscription,
-    newMessageFiles,
-    chatFiles,
-    newMessageImages,
-    chatImages
-  } = useContext(PentestGPTContext)
+  const { isPremiumSubscription, newMessageImages } =
+    useContext(PentestGPTContext)
 
   const {
     selectedPlugin,
@@ -39,19 +34,26 @@ export const ToolOptions = ({
     isMobile
   } = useUIContext()
 
-  const hasFilesAttached =
-    newMessageFiles.length > 0 ||
-    chatFiles.length > 0 ||
-    newMessageImages.length > 0 ||
-    chatImages.length > 0
+  const hasImageAttached = newMessageImages.length > 0
 
   const handleWebSearchToggle = () => {
-    if (hasFilesAttached) return
-    setSelectedPlugin(
-      selectedPlugin === PluginID.WEB_SEARCH
-        ? PluginID.NONE
-        : PluginID.WEB_SEARCH
-    )
+    if (hasImageAttached) return
+
+    if (selectedPlugin === PluginID.REASONING) {
+      // If reason LLM is active, clicking web search will enable combined mode
+      setSelectedPlugin(PluginID.REASONING_WEB_SEARCH)
+    } else if (selectedPlugin === PluginID.REASONING_WEB_SEARCH) {
+      // If in combined mode, keep reason LLM active
+      setSelectedPlugin(PluginID.REASONING)
+    } else {
+      // Normal web search toggle behavior
+      setSelectedPlugin(
+        selectedPlugin === PluginID.WEB_SEARCH
+          ? PluginID.NONE
+          : PluginID.WEB_SEARCH
+      )
+    }
+
     if (isEnhancedMenuOpen) {
       setIsEnhancedMenuOpen(false)
     }
@@ -62,19 +64,30 @@ export const ToolOptions = ({
     // Disable web search and reason llm if active
     if (
       selectedPlugin === PluginID.WEB_SEARCH ||
-      selectedPlugin === PluginID.REASON_LLM
+      selectedPlugin === PluginID.REASONING
     ) {
       setSelectedPlugin(PluginID.NONE)
     }
   }
 
   const handleReasonLLMToggle = () => {
-    if (hasFilesAttached) return
-    setSelectedPlugin(
-      selectedPlugin === PluginID.REASON_LLM
-        ? PluginID.NONE
-        : PluginID.REASON_LLM
-    )
+    if (hasImageAttached) return
+
+    if (selectedPlugin === PluginID.WEB_SEARCH) {
+      // If web search is active, clicking reason LLM will enable combined mode
+      setSelectedPlugin(PluginID.REASONING_WEB_SEARCH)
+    } else if (selectedPlugin === PluginID.REASONING_WEB_SEARCH) {
+      // If in combined mode, keep web search active
+      setSelectedPlugin(PluginID.WEB_SEARCH)
+    } else {
+      // Normal reason LLM toggle behavior
+      setSelectedPlugin(
+        selectedPlugin === PluginID.REASONING
+          ? PluginID.NONE
+          : PluginID.REASONING
+      )
+    }
+
     if (isEnhancedMenuOpen) {
       setIsEnhancedMenuOpen(false)
     }
@@ -84,7 +97,7 @@ export const ToolOptions = ({
     // Deselect plugins when user attempts to upload a file
     if (
       selectedPlugin === PluginID.WEB_SEARCH ||
-      selectedPlugin === PluginID.REASON_LLM
+      selectedPlugin === PluginID.REASONING
     ) {
       setSelectedPlugin(PluginID.NONE)
     }
@@ -152,25 +165,30 @@ export const ToolOptions = ({
           delayDuration={TOOLTIP_DELAY}
           side="top"
           display={
-            <div className="flex flex-col">
-              <p className="font-medium">Solve reasoning problems</p>
-            </div>
+            selectedPlugin !== PluginID.REASONING &&
+            selectedPlugin !== PluginID.REASONING_WEB_SEARCH && (
+              <div className="flex flex-col">
+                <p className="font-medium">Solve reasoning problems</p>
+              </div>
+            )
           }
           trigger={
             <div
               className={cn(
                 "relative flex flex-row items-center rounded-lg transition-colors duration-300",
-                selectedPlugin === PluginID.REASON_LLM
+                selectedPlugin === PluginID.REASONING ||
+                  selectedPlugin === PluginID.REASONING_WEB_SEARCH
                   ? "bg-primary/10"
                   : "hover:bg-black/10 dark:hover:bg-white/10",
-                hasFilesAttached && "pointer-events-none opacity-50"
+                hasImageAttached && "pointer-events-none opacity-50"
               )}
               onClick={handleReasonLLMToggle}
             >
               <IconAtom
                 className={cn(
                   "cursor-pointer rounded-lg rounded-bl-xl p-1 focus-visible:outline-black dark:focus-visible:outline-white",
-                  selectedPlugin === PluginID.REASON_LLM
+                  selectedPlugin === PluginID.REASONING ||
+                    selectedPlugin === PluginID.REASONING_WEB_SEARCH
                     ? "text-primary"
                     : "opacity-50"
                 )}
@@ -182,7 +200,7 @@ export const ToolOptions = ({
                   "transition-all duration-300",
                   !isMobile && "max-w-[100px] pr-2",
                   isMobile &&
-                    (selectedPlugin === PluginID.REASON_LLM
+                    (selectedPlugin === PluginID.REASONING
                       ? "max-w-[100px] pr-2 opacity-100"
                       : "max-w-0 opacity-0")
                 )}
@@ -199,25 +217,30 @@ export const ToolOptions = ({
         delayDuration={TOOLTIP_DELAY}
         side="top"
         display={
-          <div className="flex flex-col">
-            <p className="font-medium">Search the Web</p>
-          </div>
+          selectedPlugin !== PluginID.WEB_SEARCH &&
+          selectedPlugin !== PluginID.REASONING_WEB_SEARCH && (
+            <div className="flex flex-col">
+              <p className="font-medium">Search the Web</p>
+            </div>
+          )
         }
         trigger={
           <div
             className={cn(
               "relative flex flex-row items-center rounded-lg transition-colors duration-300",
-              selectedPlugin === PluginID.WEB_SEARCH
+              selectedPlugin === PluginID.WEB_SEARCH ||
+                selectedPlugin === PluginID.REASONING_WEB_SEARCH
                 ? "bg-primary/10"
                 : "hover:bg-black/10 dark:hover:bg-white/10",
-              hasFilesAttached && "pointer-events-none opacity-50"
+              hasImageAttached && "pointer-events-none opacity-50"
             )}
             onClick={handleWebSearchToggle}
           >
             <IconWorld
               className={cn(
                 "cursor-pointer rounded-lg rounded-bl-xl p-1 focus-visible:outline-black dark:focus-visible:outline-white",
-                selectedPlugin === PluginID.WEB_SEARCH
+                selectedPlugin === PluginID.WEB_SEARCH ||
+                  selectedPlugin === PluginID.REASONING_WEB_SEARCH
                   ? "text-primary"
                   : "opacity-50"
               )}

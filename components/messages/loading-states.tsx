@@ -25,7 +25,11 @@ export const loadingStates = {
     icon: <IconWorld size={20} />,
     text: "Browsing the web..."
   },
-  [PluginID.REASON_LLM]: {
+  [PluginID.REASONING]: {
+    icon: <IconAtom size={20} />,
+    text: "Thinking..."
+  },
+  [PluginID.REASONING_WEB_SEARCH]: {
     icon: <IconAtom size={20} />,
     text: "Thinking..."
   },

@@ -34,9 +34,11 @@ export const WithTooltip: FC<WithTooltipProps> = ({
     <TooltipProvider delayDuration={delayDuration}>
       <Tooltip>
         <TooltipTrigger asChild>{trigger}</TooltipTrigger>
-        <TooltipContent side={tooltipSide} align={align} sideOffset={5}>
-          {display}
-        </TooltipContent>
+        {display && (
+          <TooltipContent side={tooltipSide} align={align} sideOffset={5}>
+            {display}
+          </TooltipContent>
+        )}
       </Tooltip>
     </TooltipProvider>
   )

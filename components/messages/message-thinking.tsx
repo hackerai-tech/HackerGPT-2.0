@@ -2,22 +2,33 @@ import React, { useState, useCallback } from "react"
 import { MessageMarkdown } from "./message-markdown"
 import { IconChevronDown, IconChevronUp, IconAtom } from "@tabler/icons-react"
 import { useUIContext } from "@/context/ui-context"
+import { PluginID } from "@/types/plugins"
+import { MessageCitations } from "./message-citations"
 
 interface MessageThinkingProps {
   content: string
   thinking_content?: string | null
   thinking_elapsed_secs?: number | null
   isAssistant: boolean
+  citations?: string[]
 }
 
 export const MessageThinking: React.FC<MessageThinkingProps> = ({
   content,
   thinking_content,
   thinking_elapsed_secs,
-  isAssistant
+  isAssistant,
+  citations = []
 }) => {
   const { toolInUse } = useUIContext()
   const [closedBlocks, setClosedBlocks] = useState(new Set<number>())
+  const toggleBlock = useCallback((index: number) => {
+    setClosedBlocks(prev => {
+      const newSet = new Set(prev)
+      newSet.has(index) ? newSet.delete(index) : newSet.add(index)
+      return newSet
+    })
+  }, [])
 
   const formatThinkingTime = (seconds: number | null | undefined) => {
     if (!seconds) return "Thoughts..."
@@ -36,19 +47,22 @@ export const MessageThinking: React.FC<MessageThinkingProps> = ({
     return `Thought for ${minutes} minutes ${remainingSeconds} seconds`
   }
 
-  const toggleBlock = useCallback((index: number) => {
-    setClosedBlocks(prev => {
-      const newSet = new Set(prev)
-      newSet.has(index) ? newSet.delete(index) : newSet.add(index)
-      return newSet
-    })
-  }, [])
-
-  if (!thinking_content) {
+  if (!thinking_content && citations.length > 0) {
+    return (
+      <MessageCitations
+        content={content}
+        isAssistant={isAssistant}
+        citations={citations}
+      />
+    )
+  } else if (!thinking_content) {
     return <MessageMarkdown content={content} isAssistant={isAssistant} />
   }
 
-  const isThinking = toolInUse === "reason-llm" && !content
+  const isThinking =
+    (toolInUse === PluginID.REASONING ||
+      toolInUse === PluginID.REASONING_WEB_SEARCH) &&
+    !content
   const thinkingTitle = isThinking
     ? "Thinking..."
     : formatThinkingTime(thinking_elapsed_secs)
@@ -85,11 +99,12 @@ export const MessageThinking: React.FC<MessageThinkingProps> = ({
               {/* Vertical line */}
               <div className="bg-muted absolute inset-y-0 left-0 w-1 rounded-full" />
               <div className="pl-6 pr-4">
-                <div className="prose dark:prose-invert prose-p:leading-relaxed prose-pre:p-0 min-w-full max-w-[80vw] space-y-6 break-words md:w-full">
-                  <p className="mb-2 whitespace-pre-wrap text-sm last:mb-0">
-                    {thinking_content}
-                  </p>
-                </div>
+                <MessageCitations
+                  content={thinking_content}
+                  isAssistant={isAssistant}
+                  citations={citations}
+                  reasoningWithCitations={true}
+                />
               </div>
             </div>
           </div>
@@ -97,9 +112,16 @@ export const MessageThinking: React.FC<MessageThinkingProps> = ({
       </div>
 
       {/* Main Content */}
-      {content && (
-        <MessageMarkdown content={content} isAssistant={isAssistant} />
-      )}
+      {content &&
+        (citations.length > 0 ? (
+          <MessageCitations
+            content={content}
+            isAssistant={isAssistant}
+            citations={citations}
+          />
+        ) : (
+          <MessageMarkdown content={content} isAssistant={isAssistant} />
+        ))}
     </div>
   )
 }

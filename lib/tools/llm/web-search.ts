@@ -1,5 +1,5 @@
 import { buildSystemPrompt } from "@/lib/ai/prompts"
-import { toVercelChatMessages } from "@/lib/build-prompt"
+import { toVercelChatMessages, removeLastSureMessage } from "@/lib/build-prompt"
 import { PGPT4 } from "@/lib/models/llm/hackerai-llm-list"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
@@ -15,13 +15,8 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   const isProModel =
     chatSettings.model === PGPT4.modelId || chatSettings.model === GPT4o.modelId
 
-  const defaultModel = "perplexity/llama-3.1-sonar-large-128k-online"
-  const proModel = "perplexity/llama-3.1-sonar-large-128k-online"
-
-  const providerHeaders = {
-    "HTTP-Referer": "https://pentestgpt.com/web-search",
-    "X-Title": "web-search"
-  }
+  const defaultModel = "sonar"
+  const proModel = "sonar-pro"
 
   const selectedModel = isProModel ? proModel : defaultModel
 
@@ -32,7 +27,6 @@ async function getProviderConfig(chatSettings: any, profile: any) {
 
   return {
     systemPrompt,
-    providerHeaders,
     selectedModel
   }
 }
@@ -48,21 +42,20 @@ export async function executeWebSearchTool({
 
   const { chatSettings, messages, profile, dataStream } = config
 
-  const { systemPrompt, providerHeaders, selectedModel } =
-    await getProviderConfig(chatSettings, profile)
-
-  console.log(
-    "[WebSearch] Executing web search with model:",
-    selectedModel,
-    chatSettings.model
+  const { systemPrompt, selectedModel } = await getProviderConfig(
+    chatSettings,
+    profile
   )
 
-  const response = await fetch(llmConfig.openrouter.url, {
+  console.log("[WebSearch] Executing web search with model:", selectedModel)
+
+  const cleanedMessages = removeLastSureMessage(messages)
+
+  const response = await fetch(llmConfig.perplexity.url, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${llmConfig.openrouter.apiKey}`,
-      "Content-Type": "application/json",
-      ...providerHeaders
+      Authorization: `Bearer ${llmConfig.perplexity.apiKey}`,
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
       model: selectedModel,
@@ -71,7 +64,7 @@ export async function executeWebSearchTool({
           role: "system",
           content: systemPrompt
         },
-        ...toVercelChatMessages(messages)
+        ...toVercelChatMessages(cleanedMessages)
       ],
       max_tokens: 1024,
       temperature: 0.5,
