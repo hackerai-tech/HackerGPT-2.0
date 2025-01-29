@@ -127,6 +127,6 @@ function determineShouldUncensorResponse(
   )
 
   return (
-    moderationLevel >= 0.4 && moderationLevel <= 0.90 && !hasForbiddenCategory
+    moderationLevel >= 0.4 && moderationLevel <= 0.9 && !hasForbiddenCategory
   )
 }
