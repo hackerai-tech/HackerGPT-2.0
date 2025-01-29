@@ -30,7 +30,7 @@ export const isTerminalPlugin = (plugin: PluginID): boolean =>
 
 export const getTerminalTemplate = (plugin: PluginID): string => {
   if (plugin === PluginID.URL_FUZZER) {
-    return "terminal-fuzzing"
+    return "terminal-fuzzing-v1"
   }
-  return isFreePlugin(plugin) ? "free-terminal-tools-v1" : "pro-terminal-tools"
+  return isFreePlugin(plugin) ? "free-terminal-plugins-v1" : "pro-terminal-tools"
 }
