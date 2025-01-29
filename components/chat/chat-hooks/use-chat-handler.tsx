@@ -338,7 +338,8 @@ export const useChatHandler = () => {
         selectedPlugin !== PluginID.ENHANCED_SEARCH &&
         selectedPlugin !== PluginID.TERMINAL &&
         selectedPlugin !== PluginID.ARTIFACTS &&
-        selectedPlugin !== PluginID.REASON_LLM
+        selectedPlugin !== PluginID.REASONING &&
+        selectedPlugin !== PluginID.REASONING_WEB_SEARCH
       ) {
         const {
           fullText,

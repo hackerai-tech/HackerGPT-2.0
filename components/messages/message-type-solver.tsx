@@ -72,20 +72,6 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
   }
 
   if (
-    message.plugin === PluginID.WEB_SEARCH ||
-    toolInUse === PluginID.WEB_SEARCH ||
-    message.citations?.length > 0
-  ) {
-    return (
-      <MessageCitations
-        content={message.content}
-        isAssistant={message.role === "assistant"}
-        citations={message.citations || []}
-      />
-    )
-  }
-
-  if (
     typeof message.content === "string" &&
     message.content.length > messageSizeLimit
   ) {
@@ -103,13 +89,32 @@ export const MessageTypeResolver: FC<MessageTypeResolverProps> = ({
     )
   }
 
-  if (toolInUse === PluginID.REASON_LLM || message.thinking_content) {
+  if (
+    toolInUse === PluginID.REASONING ||
+    toolInUse === PluginID.REASONING_WEB_SEARCH ||
+    message.thinking_content
+  ) {
     return (
       <MessageThinking
         content={message.content}
         thinking_content={message.thinking_content}
         thinking_elapsed_secs={message.thinking_elapsed_secs}
         isAssistant={message.role === "assistant"}
+        citations={message.citations || []}
+      />
+    )
+  }
+
+  if (
+    message.plugin === PluginID.WEB_SEARCH ||
+    toolInUse === PluginID.WEB_SEARCH ||
+    message.citations?.length > 0
+  ) {
+    return (
+      <MessageCitations
+        content={message.content}
+        isAssistant={message.role === "assistant"}
+        citations={message.citations || []}
       />
     )
   }

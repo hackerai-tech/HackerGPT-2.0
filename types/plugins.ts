@@ -31,7 +31,8 @@ export enum PluginID {
   WEB_SEARCH = "websearch",
   BROWSER = "browser",
   TERMINAL = "terminal",
-  REASON_LLM = "reason-llm",
+  REASONING = "reasoning",
+  REASONING_WEB_SEARCH = "reasoning-web-search",
 
   // Pentest tools
   SSL_SCANNER = "ssl-scanner",

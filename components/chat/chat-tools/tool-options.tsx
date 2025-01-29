@@ -38,11 +38,22 @@ export const ToolOptions = ({
 
   const handleWebSearchToggle = () => {
     if (hasImageAttached) return
-    setSelectedPlugin(
-      selectedPlugin === PluginID.WEB_SEARCH
-        ? PluginID.NONE
-        : PluginID.WEB_SEARCH
-    )
+
+    if (selectedPlugin === PluginID.REASONING) {
+      // If reason LLM is active, clicking web search will enable combined mode
+      setSelectedPlugin(PluginID.REASONING_WEB_SEARCH)
+    } else if (selectedPlugin === PluginID.REASONING_WEB_SEARCH) {
+      // If in combined mode, keep reason LLM active
+      setSelectedPlugin(PluginID.REASONING)
+    } else {
+      // Normal web search toggle behavior
+      setSelectedPlugin(
+        selectedPlugin === PluginID.WEB_SEARCH
+          ? PluginID.NONE
+          : PluginID.WEB_SEARCH
+      )
+    }
+
     if (isEnhancedMenuOpen) {
       setIsEnhancedMenuOpen(false)
     }
@@ -53,7 +64,7 @@ export const ToolOptions = ({
     // Disable web search and reason llm if active
     if (
       selectedPlugin === PluginID.WEB_SEARCH ||
-      selectedPlugin === PluginID.REASON_LLM
+      selectedPlugin === PluginID.REASONING
     ) {
       setSelectedPlugin(PluginID.NONE)
     }
@@ -61,11 +72,22 @@ export const ToolOptions = ({
 
   const handleReasonLLMToggle = () => {
     if (hasImageAttached) return
-    setSelectedPlugin(
-      selectedPlugin === PluginID.REASON_LLM
-        ? PluginID.NONE
-        : PluginID.REASON_LLM
-    )
+
+    if (selectedPlugin === PluginID.WEB_SEARCH) {
+      // If web search is active, clicking reason LLM will enable combined mode
+      setSelectedPlugin(PluginID.REASONING_WEB_SEARCH)
+    } else if (selectedPlugin === PluginID.REASONING_WEB_SEARCH) {
+      // If in combined mode, keep web search active
+      setSelectedPlugin(PluginID.WEB_SEARCH)
+    } else {
+      // Normal reason LLM toggle behavior
+      setSelectedPlugin(
+        selectedPlugin === PluginID.REASONING
+          ? PluginID.NONE
+          : PluginID.REASONING
+      )
+    }
+
     if (isEnhancedMenuOpen) {
       setIsEnhancedMenuOpen(false)
     }
@@ -75,7 +97,7 @@ export const ToolOptions = ({
     // Deselect plugins when user attempts to upload a file
     if (
       selectedPlugin === PluginID.WEB_SEARCH ||
-      selectedPlugin === PluginID.REASON_LLM
+      selectedPlugin === PluginID.REASONING
     ) {
       setSelectedPlugin(PluginID.NONE)
     }
@@ -151,7 +173,8 @@ export const ToolOptions = ({
             <div
               className={cn(
                 "relative flex flex-row items-center rounded-lg transition-colors duration-300",
-                selectedPlugin === PluginID.REASON_LLM
+                selectedPlugin === PluginID.REASONING ||
+                  selectedPlugin === PluginID.REASONING_WEB_SEARCH
                   ? "bg-primary/10"
                   : "hover:bg-black/10 dark:hover:bg-white/10",
                 hasImageAttached && "pointer-events-none opacity-50"
@@ -161,7 +184,8 @@ export const ToolOptions = ({
               <IconAtom
                 className={cn(
                   "cursor-pointer rounded-lg rounded-bl-xl p-1 focus-visible:outline-black dark:focus-visible:outline-white",
-                  selectedPlugin === PluginID.REASON_LLM
+                  selectedPlugin === PluginID.REASONING ||
+                    selectedPlugin === PluginID.REASONING_WEB_SEARCH
                     ? "text-primary"
                     : "opacity-50"
                 )}
@@ -173,7 +197,7 @@ export const ToolOptions = ({
                   "transition-all duration-300",
                   !isMobile && "max-w-[100px] pr-2",
                   isMobile &&
-                    (selectedPlugin === PluginID.REASON_LLM
+                    (selectedPlugin === PluginID.REASONING
                       ? "max-w-[100px] pr-2 opacity-100"
                       : "max-w-0 opacity-0")
                 )}
@@ -198,7 +222,8 @@ export const ToolOptions = ({
           <div
             className={cn(
               "relative flex flex-row items-center rounded-lg transition-colors duration-300",
-              selectedPlugin === PluginID.WEB_SEARCH
+              selectedPlugin === PluginID.WEB_SEARCH ||
+                selectedPlugin === PluginID.REASONING_WEB_SEARCH
                 ? "bg-primary/10"
                 : "hover:bg-black/10 dark:hover:bg-white/10",
               hasImageAttached && "pointer-events-none opacity-50"
@@ -208,7 +233,8 @@ export const ToolOptions = ({
             <IconWorld
               className={cn(
                 "cursor-pointer rounded-lg rounded-bl-xl p-1 focus-visible:outline-black dark:focus-visible:outline-white",
-                selectedPlugin === PluginID.WEB_SEARCH
+                selectedPlugin === PluginID.WEB_SEARCH ||
+                  selectedPlugin === PluginID.REASONING_WEB_SEARCH
                   ? "text-primary"
                   : "opacity-50"
               )}

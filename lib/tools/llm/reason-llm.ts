@@ -17,13 +17,13 @@ export async function executeReasonLLMTool({
   config: ReasonLLMConfig
 }) {
   const { messages, profile, dataStream } = config
-  console.log("[ReasonLLM] Executing reasonLLM")
 
-  // Simplified provider selection
   const reasoningProvider =
     llmConfig.models.reasoning === "deepseek-reasoner"
       ? initializeDeepSeek()
       : initializeOpenRouter()
+
+  console.log("[ReasonLLM] Executing reasonLLM")
 
   await processStream({
     reasoningProvider,

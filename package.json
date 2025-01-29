@@ -33,6 +33,7 @@
     "@ai-sdk/deepseek": "^0.1.6",
     "@ai-sdk/mistral": "^1.1.5",
     "@ai-sdk/openai": "^1.1.5",
+    "@ai-sdk/perplexity": "^0.0.4",
     "@e2b/code-interpreter": "^1.2.0-beta.1",
     "@headlessui/react": "^2.2.0",
     "@langchain/community": "^0.3.27",
