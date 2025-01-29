@@ -9,7 +9,7 @@ const components: Partial<Components> = {
         title={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="bg-foreground/20 hover:bg-foreground/30 inline-flex size-[14px] items-center justify-center rounded-full text-[10px] no-underline"
+        className="bg-foreground/20 hover:bg-foreground/30 ml-1 inline-flex size-[16px] items-center justify-center rounded-full text-[10px] no-underline"
       >
         {children}
       </a>
