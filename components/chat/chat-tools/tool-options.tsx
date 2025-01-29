@@ -25,10 +25,7 @@ export const ToolOptions = ({
 
   const {
     isPremiumSubscription,
-    newMessageFiles,
-    chatFiles,
     newMessageImages,
-    chatImages
   } = useContext(PentestGPTContext)
 
   const {
@@ -39,14 +36,11 @@ export const ToolOptions = ({
     isMobile
   } = useUIContext()
 
-  const hasFilesAttached =
-    newMessageFiles.length > 0 ||
-    chatFiles.length > 0 ||
-    newMessageImages.length > 0 ||
-    chatImages.length > 0
+  const hasImageAttached =
+    newMessageImages.length > 0
 
   const handleWebSearchToggle = () => {
-    if (hasFilesAttached) return
+    if (hasImageAttached) return
     setSelectedPlugin(
       selectedPlugin === PluginID.WEB_SEARCH
         ? PluginID.NONE
@@ -69,7 +63,7 @@ export const ToolOptions = ({
   }
 
   const handleReasonLLMToggle = () => {
-    if (hasFilesAttached) return
+    if (hasImageAttached) return
     setSelectedPlugin(
       selectedPlugin === PluginID.REASON_LLM
         ? PluginID.NONE
@@ -163,7 +157,7 @@ export const ToolOptions = ({
                 selectedPlugin === PluginID.REASON_LLM
                   ? "bg-primary/10"
                   : "hover:bg-black/10 dark:hover:bg-white/10",
-                hasFilesAttached && "pointer-events-none opacity-50"
+                  hasImageAttached && "pointer-events-none opacity-50"
               )}
               onClick={handleReasonLLMToggle}
             >
@@ -210,7 +204,7 @@ export const ToolOptions = ({
               selectedPlugin === PluginID.WEB_SEARCH
                 ? "bg-primary/10"
                 : "hover:bg-black/10 dark:hover:bg-white/10",
-              hasFilesAttached && "pointer-events-none opacity-50"
+                hasImageAttached && "pointer-events-none opacity-50"
             )}
             onClick={handleWebSearchToggle}
           >
