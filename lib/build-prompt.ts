@@ -352,3 +352,22 @@ export function validateMessages(messages: any[]) {
 
   return validMessages
 }
+
+/**
+ * Removes the last assistant message if it only contains "Sure, "
+ * @param messages - Array of chat messages
+ * @returns Filtered array without the "Sure, " message
+ */
+export function removeLastSureMessage(messages: any[]) {
+  if (messages.length === 0) return messages
+
+  const lastMessage = messages[messages.length - 1]
+  if (
+    lastMessage.role === "assistant" &&
+    lastMessage.content.trim().toLowerCase() === "sure,"
+  ) {
+    return messages.slice(0, -1)
+  }
+
+  return messages
+}

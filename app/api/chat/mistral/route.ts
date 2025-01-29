@@ -144,7 +144,7 @@ export async function POST(request: Request) {
 
         systemPrompt = buildSystemPrompt(ragPrompt, profile.profile_context)
       } else {
-        selectedModel = "perplexity/llama-3.1-sonar-large-128k-online"
+        selectedModel = "perplexity/sonar"
       }
       ragId = data?.resultId
     }
@@ -165,7 +165,12 @@ export async function POST(request: Request) {
     }
 
     let shouldUncensorResponse = false
-    if (!includeImages && !isContinuation && !shouldUseRAG) {
+    if (
+      !includeImages &&
+      !isContinuation &&
+      !shouldUseRAG &&
+      selectedPlugin !== PluginID.WEB_SEARCH
+    ) {
       const { shouldUncensorResponse: moderationResult } =
         await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
       shouldUncensorResponse = moderationResult

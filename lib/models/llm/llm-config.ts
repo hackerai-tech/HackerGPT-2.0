@@ -24,6 +24,10 @@ const llmConfig = {
   openai: {
     apiKey: process.env.OPENAI_API_KEY
   },
+  perplexity: {
+    apiKey: process.env.PERPLEXITY_API_KEY,
+    url: "https://api.perplexity.ai/chat/completions"
+  },
   systemPrompts: {
     // For question generator
     pentestgptCurrentDateOnly: `${initialSystemPrompt}\n${currentDate}`,
