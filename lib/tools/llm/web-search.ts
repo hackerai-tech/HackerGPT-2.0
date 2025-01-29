@@ -15,8 +15,8 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   const isProModel =
     chatSettings.model === PGPT4.modelId || chatSettings.model === GPT4o.modelId
 
-  const defaultModel = "perplexity/llama-3.1-sonar-large-128k-online"
-  const proModel = "perplexity/llama-3.1-sonar-large-128k-online"
+  const defaultModel = "perplexity/sonar"
+  const proModel = "perplexity/sonar"
 
   const providerHeaders = {
     "HTTP-Referer": "https://pentestgpt.com/web-search",
