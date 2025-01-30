@@ -47,7 +47,7 @@ async function processStream({
   const result = streamText({
     model: perplexity("sonar-reasoning"),
     temperature: 0.5,
-    maxTokens: 2048 ,
+    maxTokens: 2048,
     system: buildSystemPrompt(
       llmConfig.systemPrompts.pentestGPTWebSearch,
       profile.profile_context
