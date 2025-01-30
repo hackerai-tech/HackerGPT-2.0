@@ -72,7 +72,7 @@ async function processStream({
         const thinkingContent = text.split("<think>")[1] || ""
         if (thinkingContent) {
           dataStream.writeData({
-            type: "thinking",
+            type: "reasoning",
             content: thinkingContent
           })
         }
@@ -91,7 +91,7 @@ async function processStream({
           const finalThinking = text.split("</think>")[0]
           if (finalThinking) {
             dataStream.writeData({
-              type: "thinking",
+              type: "reasoning",
               content: finalThinking
             })
           }
@@ -113,7 +113,7 @@ async function processStream({
         } else {
           // Send thinking content immediately
           dataStream.writeData({
-            type: "thinking",
+            type: "reasoning",
             content: text
           })
         }

@@ -118,6 +118,7 @@ export const MessageThinking: React.FC<MessageThinkingProps> = ({
             content={content}
             isAssistant={isAssistant}
             citations={citations}
+            reasoningWithCitations={false}
           />
         ) : (
           <MessageMarkdown content={content} isAssistant={isAssistant} />

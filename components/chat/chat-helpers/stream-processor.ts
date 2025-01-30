@@ -161,7 +161,7 @@ export const processResponse = async (
                 )
               }
 
-              if (firstValue?.type === "thinking") {
+              if (firstValue.type === "reasoning") {
                 if (isFirstChunk) {
                   setFirstTokenReceived(true)
                   isFirstChunk = false
@@ -186,7 +186,7 @@ export const processResponse = async (
 
               // Handle thinking time
               if (
-                firstValue?.type === "thinking-time" &&
+                firstValue.type === "thinking-time" &&
                 firstValue.elapsed_secs
               ) {
                 thinkingElapsedSecs = firstValue.elapsed_secs
@@ -206,7 +206,7 @@ export const processResponse = async (
               }
 
               // Handle tools errors
-              if (firstValue?.type === "error") {
+              if (firstValue.type === "error") {
                 const errorMessage =
                   firstValue.content || "An unknown error occurred"
 
@@ -228,7 +228,7 @@ export const processResponse = async (
               }
 
               // Handle sandbox type
-              if (firstValue?.type === "sandbox-type") {
+              if (firstValue.type === "sandbox-type") {
                 if (firstValue.sandboxType === "persistent-sandbox") {
                   setToolInUse("persistent-sandbox")
                 } else {
