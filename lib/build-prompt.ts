@@ -11,7 +11,6 @@ import {
   CoreUserMessage
 } from "ai"
 import { Tables } from "@/supabase/types"
-import { PluginID } from "@/types/plugins"
 import { countTokens } from "gpt-tokenizer"
 import { GPT4o } from "./models/llm/openai-llm-list"
 import { PGPT3_5, PGPT4 } from "./models/llm/hackerai-llm-list"
@@ -22,23 +21,22 @@ import { Fragment } from "./tools/e2b/fragments/types"
 export async function buildFinalMessages(
   payload: ChatPayload,
   chatImages: MessageImage[],
-  selectedPlugin: PluginID | null,
   shouldUseRAG?: boolean
 ): Promise<BuiltChatMessage[]> {
   const { chatSettings, chatMessages, messageFileItems } = payload
 
-  let CHUNK_SIZE = 10000
+  let CHUNK_SIZE = 12000
   if (chatSettings.model === GPT4o.modelId) {
     CHUNK_SIZE = 32000 - 4000 // -4000 for the system prompt, custom instructions, and more
   } else if (chatSettings.model === PGPT4.modelId) {
-    CHUNK_SIZE = 16000 - 4000 // -4000 for the system prompt, custom instructions, and more
+    CHUNK_SIZE = 32000 - 4000 // -4000 for the system prompt, custom instructions, and more
   } else if (chatSettings.model === PGPT3_5.modelId) {
-    CHUNK_SIZE = 16000 - 4000 // -4000 for the system prompt, custom instructions, and more
+    CHUNK_SIZE = 12000 - 4000 // -4000 for the system prompt, custom instructions, and more
   }
 
   // Adjusting the chunk size for RAG
   if (shouldUseRAG) {
-    CHUNK_SIZE = 10000
+    CHUNK_SIZE = 12000
   }
 
   let remainingTokens = CHUNK_SIZE

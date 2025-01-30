@@ -20,7 +20,7 @@ import {
 
 const BASH_SANDBOX_TIMEOUT = 15 * 60 * 1000
 const PERSISTENT_SANDBOX_TEMPLATE = "persistent-sandbox"
-const TEMPORARY_SANDBOX_TEMPLATE = "bash-terminal-v1"
+const TEMPORARY_SANDBOX_TEMPLATE = "temporary-sandbox"
 
 interface TerminalToolConfig {
   messages: any[]

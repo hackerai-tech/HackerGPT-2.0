@@ -21,6 +21,8 @@ export async function executeReasoningWebSearchTool({
     throw new Error("Perplexity API key is not set for reason LLM")
   }
 
+  console.log("[ReasoningWebSearch] Executing reasoning web search")
+
   await processStream({
     messages,
     profile,
@@ -45,7 +47,7 @@ async function processStream({
   const result = streamText({
     model: perplexity("sonar-reasoning"),
     temperature: 0.5,
-    maxTokens: 1024,
+    maxTokens: 2048,
     system: buildSystemPrompt(
       llmConfig.systemPrompts.pentestGPTWebSearch,
       profile.profile_context
@@ -72,7 +74,7 @@ async function processStream({
         const thinkingContent = text.split("<think>")[1] || ""
         if (thinkingContent) {
           dataStream.writeData({
-            type: "thinking",
+            type: "reasoning",
             content: thinkingContent
           })
         }
@@ -91,7 +93,7 @@ async function processStream({
           const finalThinking = text.split("</think>")[0]
           if (finalThinking) {
             dataStream.writeData({
-              type: "thinking",
+              type: "reasoning",
               content: finalThinking
             })
           }
@@ -113,7 +115,7 @@ async function processStream({
         } else {
           // Send thinking content immediately
           dataStream.writeData({
-            type: "thinking",
+            type: "reasoning",
             content: text
           })
         }

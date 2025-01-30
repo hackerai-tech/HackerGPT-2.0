@@ -63,14 +63,14 @@ async function processStream({
   profile: any
   dataStream: any
 }) {
-  if (llmConfig.models.reasoning === "deepseek-reasoner") {
-    dataStream.writeData({
-      type: "text-delta",
-      content:
-        "DeepSeek services are currently experiencing degraded performance due to large-scale malicious attacks. The service is partially available but may be unstable. We apologize for the inconvenience and recommend trying again later."
-    })
-    return
-  }
+  // if (llmConfig.models.reasoning === "deepseek-reasoner") {
+  //   dataStream.writeData({
+  //     type: "text-delta",
+  //     content:
+  //       "DeepSeek services are currently experiencing degraded performance due to large-scale malicious attacks. The service is partially available but may be unstable. We apologize for the inconvenience and recommend trying again later."
+  //   })
+  //   return
+  // }
 
   let thinkingStartTime = null
   let enteredReasoning = false
@@ -79,7 +79,7 @@ async function processStream({
   const result = streamText({
     model: reasoningProvider(llmConfig.models.reasoning),
     temperature: 0.5,
-    maxTokens: 1024,
+    maxTokens: 2048,
     system: buildSystemPrompt(
       llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
@@ -91,7 +91,7 @@ async function processStream({
     if (part.type === "reasoning" && !enteredReasoning) {
       enteredReasoning = true
       thinkingStartTime = Date.now()
-      dataStream.writeData({ type: "thinking", content: part.textDelta })
+      dataStream.writeData({ type: "reasoning", content: part.textDelta })
     } else if (part.type === "text-delta" && !enteredText) {
       enteredText = true
       if (thinkingStartTime) {

@@ -23,7 +23,7 @@ import { Sandbox } from "@e2b/code-interpreter"
 import { createTerminal } from "@/lib/tools/tool-store/tools-terminal"
 
 const DEFAULT_BASH_SANDBOX_TIMEOUT = 5 * 60 * 1000
-const DEFAULT_TEMPLATE = "pro-terminal-tools"
+const DEFAULT_TEMPLATE = "pro-terminal-plugins-v1"
 
 interface CommandGeneratorHandlerOptions {
   userID: string
