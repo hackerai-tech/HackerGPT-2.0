@@ -73,7 +73,6 @@ export const handleHostedChat = async (
   const formattedMessages = await buildFinalMessages(
     payload,
     chatImages,
-    selectedPlugin,
     isRagEnabled
   )
   const chatSettings = payload.chatSettings
@@ -154,8 +153,7 @@ export const handleHostedPluginsChat = async (
 
   const formattedMessages = await buildFinalMessages(
     payload,
-    chatImages,
-    selectedPlugin
+    chatImages
   )
 
   const requestBody: any = {
