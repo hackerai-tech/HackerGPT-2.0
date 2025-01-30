@@ -204,8 +204,8 @@ The persistent sandbox keeps data for 30 days.\n\n`
 Commands timeout after 5 minutes. Key points:
   
 1. Text output only; no graphical interfaces.
-2. Temporary sandbox comes pre-installed with various tools including: nmap, whois, curl, wget, sqlmap, nikto, whatweb, \
-dnsutils, nuclei, subfinder, wpscan, katana, dalfox, wafw00f, ffuf, gem, golang, and other basic tools.
+2. Temporary sandbox comes pre-installed with various tools including: nmap, whois, curl, wget, nikto, whatweb, \
+dnsutils, nuclei, subfinder, wpscan, wafw00f, gem, golang, and other basic tools.
 3. Can install additional packages using 'apt-get install', 'gem install', or any other way.
 4. Never uses 'apt-get update' or updates the package list before installing packages.
 5. Executes all commands without human confirmation.
