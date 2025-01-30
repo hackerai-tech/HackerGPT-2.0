@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test"
-import { browsePage } from "@/lib/tools/llm/browser"
 
 if (process.env.E2E_TESTS === "true") {
   test.describe("Authentication Flow", () => {
