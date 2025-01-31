@@ -44,14 +44,10 @@ export const preferredRegion = [
 ]
 
 export async function POST(request: Request) {
-  const {
-    messages,
-    chatSettings,
-    isRetrieval,
-    isContinuation,
-    isRagEnabled,
-    selectedPlugin
-  } = await request.json()
+  const requestData = await request.json()
+  const { messages, chatSettings, isRetrieval, isContinuation, isRagEnabled } =
+    requestData
+  let { selectedPlugin } = requestData
 
   let ragUsed = false
   let ragId: string | null = null
@@ -144,7 +140,7 @@ export async function POST(request: Request) {
 
         systemPrompt = buildSystemPrompt(ragPrompt, profile.profile_context)
       } else {
-        selectedModel = "perplexity/sonar"
+        selectedPlugin = PluginID.WEB_SEARCH
       }
       ragId = data?.resultId
     }
