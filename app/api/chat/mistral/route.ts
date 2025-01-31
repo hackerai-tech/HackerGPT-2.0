@@ -151,7 +151,7 @@ export async function POST(request: Request) {
         return filterEmptyAssistantMessages(messages)
       }
 
-      if (shouldUncensor && isPentestGPTPro) {
+      if (shouldUncensor) {
         console.log("[Premium User] Uncensored mode activated")
         return handleAssistantMessages(messages)
       }
