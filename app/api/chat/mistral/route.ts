@@ -242,7 +242,7 @@ export async function POST(request: Request) {
           temperature: modelTemperature,
           maxTokens: 2048,
           abortSignal: request.signal,
-          tools,
+          ...(shouldUseRAG ? { tools } : null),
           experimental_transform: smoothStream()
         })
 
