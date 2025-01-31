@@ -111,7 +111,7 @@ export async function POST(request: Request) {
         temperature: 0.5,
         maxTokens: 2048,
         abortSignal: request.signal,
-        tools: getSelectedSchemas("all"),
+        tools: getSelectedSchemas(["browser", "webSearch", "terminal"]),
         experimental_transform: smoothStream()
       })
 

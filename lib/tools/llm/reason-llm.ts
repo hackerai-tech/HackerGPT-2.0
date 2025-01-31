@@ -84,7 +84,7 @@ async function processStream({
       llmConfig.systemPrompts.pentestGPTChat,
       profile.profile_context
     ),
-    messages: toVercelChatMessages(messages, true)
+    messages: toVercelChatMessages(messages)
   })
 
   for await (const part of result.fullStream) {

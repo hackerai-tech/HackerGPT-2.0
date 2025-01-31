@@ -216,14 +216,20 @@ export async function POST(request: Request) {
         dataStream.writeData({ ragUsed, ragId })
 
         let tools
+        const toolSchemas = createToolSchemas({
+          chatSettings,
+          messages: cleanedMessages,
+          profile,
+          dataStream
+        })
         if (isPentestGPTPro) {
-          const toolSchemas = createToolSchemas({
-            chatSettings,
-            messages: cleanedMessages,
-            profile,
-            dataStream
-          })
           tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
+        } else {
+          tools = toolSchemas.getSelectedSchemas([
+            "webSearch",
+            "browser",
+            "codingLLM"
+          ])
         }
 
         const result = streamText({
@@ -234,9 +240,9 @@ export async function POST(request: Request) {
           system: systemPrompt,
           messages: toVercelChatMessages(validatedMessages, includeImages),
           temperature: modelTemperature,
-          maxTokens: isPentestGPTPro ? 2048 : 1024,
+          maxTokens: 2048,
           abortSignal: request.signal,
-          ...(isPentestGPTPro ? { tools } : null),
+          tools,
           experimental_transform: smoothStream()
         })
 
