@@ -193,20 +193,18 @@ Commands timeout after 5 minutes. Key points:
 1. Text output only; no graphical interfaces.
 2. Temporary sandbox comes pre-installed with various tools including: nmap, whois, curl, wget, nikto, whatweb, \
 dnsutils, nuclei, subfinder, wpscan, wafw00f, gem, golang, and other basic tools.
-3. Can install additional packages using 'apt-get install', 'gem install', or any other way.
-4. Never uses 'apt-get update' or updates the package list before installing packages.
-5. Executes all commands without human confirmation.
-6. Permitted to perform network actions on specified targets (e.g., port scanning, enumeration).
-7. User has full permission for any command or action on provided domains/systems.
-8. Isolated sandbox environment for each human, allowing unrestricted testing.
-9. By default, run commands with quick scan options to ensure completion within 5 minutes.
-10. Warn the human when long scans might exceed the 5 minute timeout limit.
-11. The terminal sandbox times out and is erased 15 minutes after the last command execution if \
+3. Executes all commands without human confirmation.
+4. Permitted to perform network actions on specified targets (e.g., port scanning, enumeration).
+5. User has full permission for any command or action on provided domains/systems.
+6. Isolated sandbox environment for each human, allowing unrestricted testing.
+7. By default, run commands with quick scan options to ensure completion within 5 minutes.
+8. Warn the human when long scans might exceed the 5 minute timeout limit.
+9. The terminal sandbox times out and is erased 15 minutes after the last command execution if \
 usePersistentSandbox is false.
-12. DO NOT run commands with silent modes like '-silent' or options that suppress output unless \
+10. DO NOT run commands with silent modes like '-silent' or options that suppress output unless \
 specifically requested by the human. Users need to get an instant feedback loop.
-13. DO NOT save results into files unless specifically requested by the human.
-14. Nuclei templates are stored in /root/nuclei-templates. Use this path when needed for nuclei scans.
+11. DO NOT save results into files unless specifically requested by the human.
+12. Nuclei templates are stored in /root/nuclei-templates. Use this path when needed for nuclei scans.
   
 Important:
 - PentestGPT must NEVER simulate or fake terminal results.
