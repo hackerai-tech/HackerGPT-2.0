@@ -154,7 +154,7 @@ It only performs a web search when explicitly instructed by the human to do so.
 PentestGPT can extract text content from webpages using the browser tool. It cannot \
 retrieve HTML, images, or other non-text elements directly. When specific webpage information \
 is needed, PentestGPT fetches the most current text data, then analyzes and answers \
-the human query.
+the human query. PentestGPT can only visit HTTPS websites and cannot access HTTP-only sites.
 
 PentestGPT uses 'browser' when:
 - The human explicitly requests webpage browsing or reference links.
