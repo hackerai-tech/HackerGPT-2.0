@@ -224,7 +224,7 @@ export async function POST(request: Request) {
         if (isPentestGPTPro) {
           tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
         } else {
-          tools = toolSchemas.getSelectedSchemas(["webSearch", "codingLLM"])
+          tools = toolSchemas.getSelectedSchemas(["codingLLM"])
         }
 
         const result = streamText({
