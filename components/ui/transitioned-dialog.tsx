@@ -24,7 +24,7 @@ export const TransitionedDialog: React.FC<TransitionedDialogProps> = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="bg/50 dark:bg/75 fixed inset-0 bg-black backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/75" />
         </TransitionChild>
 
         <div className="fixed inset-0 overflow-y-auto">

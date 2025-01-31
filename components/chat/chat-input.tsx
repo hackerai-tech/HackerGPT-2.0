@@ -238,7 +238,7 @@ export const ChatInput: FC = () => {
         <div className="relative flex flex-col">
           <div
             className={cn(
-              "bg-secondary border-input relative w-full rounded-xl border-2",
+              "bg-secondary border-secondary relative w-full rounded-xl border-2",
               isTemporaryChat && "bg-tertiary border-tertiary",
               selectedPlugin &&
                 selectedPlugin !== PluginID.NONE &&
