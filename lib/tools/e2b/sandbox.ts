@@ -136,11 +136,23 @@ export async function createOrConnectPersistentTerminal(
             .eq("sandbox_id", existingSandbox.sandbox_id)
 
           return sandbox
-        } catch (e) {
-          console.error(
-            `[${userID}] Failed to resume sandbox ${existingSandbox.sandbox_id}:`,
-            e
-          )
+        } catch (e: any) {
+          // Handle sandbox not found error (expired/deleted)
+          if (e.name === "NotFoundError" || e.message?.includes("not found")) {
+            console.log(
+              `[${userID}] Sandbox ${existingSandbox.sandbox_id} expired/deleted, creating new one`
+            )
+            // Delete the expired sandbox record
+            await supabaseAdmin
+              .from("e2b_sandboxes")
+              .delete()
+              .eq("sandbox_id", existingSandbox.sandbox_id)
+          } else {
+            console.error(
+              `[${userID}] Failed to resume sandbox ${existingSandbox.sandbox_id}:`,
+              e
+            )
+          }
         }
       }
     }

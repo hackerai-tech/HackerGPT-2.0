@@ -44,14 +44,10 @@ export const preferredRegion = [
 ]
 
 export async function POST(request: Request) {
-  const {
-    messages,
-    chatSettings,
-    isRetrieval,
-    isContinuation,
-    isRagEnabled,
-    selectedPlugin
-  } = await request.json()
+  const requestData = await request.json()
+  const { messages, chatSettings, isRetrieval, isContinuation, isRagEnabled } =
+    requestData
+  let { selectedPlugin } = requestData
 
   let ragUsed = false
   let ragId: string | null = null
@@ -144,7 +140,7 @@ export async function POST(request: Request) {
 
         systemPrompt = buildSystemPrompt(ragPrompt, profile.profile_context)
       } else {
-        selectedModel = "perplexity/sonar"
+        selectedPlugin = PluginID.WEB_SEARCH
       }
       ragId = data?.resultId
     }
@@ -155,9 +151,8 @@ export async function POST(request: Request) {
         return filterEmptyAssistantMessages(messages)
       }
 
-      if (shouldUncensor) {
-        isPentestGPTPro &&
-          console.log("[Premium User] Uncensored mode activated")
+      if (shouldUncensor && isPentestGPTPro) {
+        console.log("[Premium User] Uncensored mode activated")
         return handleAssistantMessages(messages)
       }
 
@@ -216,14 +211,16 @@ export async function POST(request: Request) {
         dataStream.writeData({ ragUsed, ragId })
 
         let tools
+        const toolSchemas = createToolSchemas({
+          chatSettings,
+          messages: cleanedMessages,
+          profile,
+          dataStream
+        })
         if (isPentestGPTPro) {
-          const toolSchemas = createToolSchemas({
-            chatSettings,
-            messages: cleanedMessages,
-            profile,
-            dataStream
-          })
           tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
+        } else {
+          tools = toolSchemas.getSelectedSchemas(["codingLLM"])
         }
 
         const result = streamText({
@@ -234,9 +231,9 @@ export async function POST(request: Request) {
           system: systemPrompt,
           messages: toVercelChatMessages(validatedMessages, includeImages),
           temperature: modelTemperature,
-          maxTokens: isPentestGPTPro ? 2048 : 1024,
+          maxTokens: 2048,
           abortSignal: request.signal,
-          ...(isPentestGPTPro ? { tools } : null),
+          ...(!shouldUseRAG ? { tools } : null),
           experimental_transform: smoothStream()
         })
 

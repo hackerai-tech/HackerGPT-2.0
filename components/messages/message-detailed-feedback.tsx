@@ -54,7 +54,7 @@ const MessageDetailedFeedback: React.FC<MessageDetailedFeedbackProps> = ({
 
   return (
     <Modal isOpen={isOpen}>
-      <div className="size-screen bg/50 dark:bg/75 fixed inset-0 z-50 bg-black backdrop-blur-sm"></div>
+      <div className="size-screen fixed inset-0 z-50 bg-black/50 backdrop-blur-sm dark:bg-black/80"></div>
 
       <div className="fixed inset-0 z-50 flex items-center justify-center rounded-md  p-4 ">
         <div className="bg-background w-full max-w-lg rounded-md border p-10 shadow-lg">

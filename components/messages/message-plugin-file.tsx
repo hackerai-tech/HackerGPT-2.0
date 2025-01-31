@@ -147,7 +147,7 @@ export const MessagePluginFile: FC<MessagePluginFileProps> = ({
         )}
       </div>
       <Modal isOpen={showModal}>
-        <div className="size-screen bg/50 dark:bg/75 fixed inset-0 z-50 bg-black backdrop-blur-sm"></div>
+        <div className="size-screen fixed inset-0 z-50 bg-black/50 backdrop-blur-sm dark:bg-black/80"></div>
         <div
           className="fixed inset-0 z-50 flex size-full items-center justify-center"
           onClick={handleCloseModal}
