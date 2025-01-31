@@ -227,7 +227,6 @@ export async function POST(request: Request) {
         } else {
           tools = toolSchemas.getSelectedSchemas([
             "webSearch",
-            "browser",
             "codingLLM"
           ])
         }
