@@ -3,7 +3,7 @@ import { executeTerminalTool } from "./terminal"
 import { executeBrowserTool } from "./browser"
 // import { executeFragments } from "../e2b/fragments/fragment-tool"
 import { z } from "zod"
-import { executeCodingLLM } from "./cooding-llm"
+// import { executeCodingLLM } from "./cooding-llm"
 
 export const createToolSchemas = ({
   chatSettings,
@@ -63,27 +63,27 @@ export const createToolSchemas = ({
           }
         })
       }
-    },
-    codingLLM: {
-      description:
-        "Use this tool for code-related questions, explanations, and assistance. This includes code generation, debugging, best practices, and architectural guidance.",
-      parameters: z.object({
-        use_coding_llm: z
-          .boolean()
-          .describe(
-            "Set to true when the user's question is specifically about coding, programming, or software development."
-          )
-      }),
-      execute: async () => {
-        return executeCodingLLM({
-          config: {
-            messages,
-            profile,
-            dataStream
-          }
-        })
-      }
     }
+    // codingLLM: {
+    //   description:
+    //     "Use this tool for code-related questions, explanations, and assistance. This includes code generation, debugging, best practices, and architectural guidance.",
+    //   parameters: z.object({
+    //     use_coding_llm: z
+    //       .boolean()
+    //       .describe(
+    //         "Set to true when the user's question is specifically about coding, programming, or software development."
+    //       )
+    //   }),
+    //   execute: async () => {
+    //     return executeCodingLLM({
+    //       config: {
+    //         messages,
+    //         profile,
+    //         dataStream
+    //       }
+    //     })
+    //   }
+    // }
   }
 
   type SchemaKey = keyof typeof allSchemas
