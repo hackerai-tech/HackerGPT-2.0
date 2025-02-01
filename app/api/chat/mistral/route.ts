@@ -211,16 +211,14 @@ export async function POST(request: Request) {
         dataStream.writeData({ ragUsed, ragId })
 
         let tools
-        const toolSchemas = createToolSchemas({
-          chatSettings,
-          messages: cleanedMessages,
-          profile,
-          dataStream
-        })
         if (isPentestGPTPro) {
+          const toolSchemas = createToolSchemas({
+            chatSettings,
+            messages: cleanedMessages,
+            profile,
+            dataStream
+          })
           tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
-        } else {
-          tools = toolSchemas.getSelectedSchemas(["codingLLM"])
         }
 
         const result = streamText({
@@ -233,7 +231,7 @@ export async function POST(request: Request) {
           temperature: modelTemperature,
           maxTokens: 2048,
           abortSignal: request.signal,
-          ...(!shouldUseRAG ? { tools } : null),
+          ...(!shouldUseRAG && isPentestGPTPro ? { tools } : null),
           experimental_transform: smoothStream()
         })
 
