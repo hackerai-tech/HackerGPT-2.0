@@ -44,37 +44,37 @@ export const preferredRegion = [
 ]
 
 export async function POST(request: Request) {
-  const requestData = await request.json()
-  const { messages, chatSettings, isRetrieval, isContinuation, isRagEnabled } =
-    requestData
-  let { selectedPlugin } = requestData
-
-  let ragUsed = false
-  let ragId: string | null = null
-  const shouldUseRAG = !isRetrieval && isRagEnabled
+  const {
+    messages,
+    chatSettings,
+    isRetrieval,
+    isContinuation,
+    isRagEnabled,
+    selectedPlugin: initialPlugin
+  } = await request.json()
 
   try {
     const profile = await getAIProfile()
+    const config = await getProviderConfig(chatSettings, profile)
 
-    const {
-      providerBaseUrl,
-      providerHeaders,
-      rateLimitCheckResult,
-      similarityTopK,
-      modelTemperature,
-      isPentestGPTPro
-    } = await getProviderConfig(chatSettings, profile)
-
-    let { selectedModel } = await getProviderConfig(chatSettings, profile)
-
-    if (!selectedModel) {
+    // Early validation
+    if (!config.selectedModel) {
       throw new Error("Selected model is undefined")
     }
-
-    if (rateLimitCheckResult !== null) {
-      return rateLimitCheckResult.response
+    if (config.rateLimitCheckResult !== null) {
+      return config.rateLimitCheckResult.response
     }
 
+    // Build system prompt
+    const baseSystemPrompt = config.isPentestGPTPro
+      ? llmConfig.systemPrompts.pgptLarge
+      : llmConfig.systemPrompts.pgptSmall
+    let systemPrompt = buildSystemPrompt(
+      baseSystemPrompt,
+      profile.profile_context
+    )
+
+    // Process RAG
     // On normal chat, the last user message is the target standalone message
     // On continuation, the tartget is the last generated message by the system
     const targetStandAloneMessage = messages[messages.length - 2].content
@@ -82,16 +82,10 @@ export async function POST(request: Request) {
       ? messages[messages.length - 3]
       : messages[messages.length - 2]
 
-    const includeImages = messagesIncludeImages(messages)
-
-    const baseSystemPrompt = isPentestGPTPro
-      ? llmConfig.systemPrompts.pgptLarge
-      : llmConfig.systemPrompts.pgptSmall
-
-    let systemPrompt = buildSystemPrompt(
-      baseSystemPrompt,
-      profile.profile_context
-    )
+    let ragUsed = false
+    let ragId: string | null = null
+    let selectedPlugin = initialPlugin
+    const shouldUseRAG = !isRetrieval && isRagEnabled
 
     if (
       shouldUseRAG &&
@@ -108,7 +102,7 @@ export async function POST(request: Request) {
           targetStandAloneMessage,
           llmConfig.systemPrompts.pentestgptCurrentDateOnly,
           true,
-          similarityTopK,
+          config.similarityTopK,
           llmConfig.models.pentestgpt_standalone_question_openrouter
         )
 
@@ -121,7 +115,7 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           query: standaloneQuestion,
           questions: atomicQuestions,
-          chunks: similarityTopK
+          chunks: config.similarityTopK
         })
       })
 
@@ -145,6 +139,10 @@ export async function POST(request: Request) {
       ragId = data?.resultId
     }
 
+    const includeImages = messagesIncludeImages(messages)
+    let selectedModel = config.selectedModel
+    let shouldUncensorResponse = false
+
     const handleMessages = (shouldUncensor: boolean) => {
       if (includeImages) {
         selectedModel = "pixtral-large-2411"
@@ -152,18 +150,17 @@ export async function POST(request: Request) {
       }
 
       if (shouldUncensor) {
-        console.log("[Premium User] Uncensored mode activated")
+        config.isPentestGPTPro &&
+          console.log("[Premium User] Uncensored mode activated")
         return handleAssistantMessages(messages)
       }
 
       return filterEmptyAssistantMessages(messages)
     }
 
-    let shouldUncensorResponse = false
     if (
       !includeImages &&
       !isContinuation &&
-      !shouldUseRAG &&
       selectedPlugin !== PluginID.WEB_SEARCH
     ) {
       const { shouldUncensorResponse: moderationResult } =
@@ -174,31 +171,20 @@ export async function POST(request: Request) {
     handleMessages(shouldUncensorResponse)
 
     // Handle web search plugin
-    switch (selectedPlugin) {
-      case PluginID.WEB_SEARCH:
-        return createStreamResponse(async dataStream => {
-          await executeWebSearchTool({
-            config: { chatSettings, messages, profile, dataStream }
-          })
+    if (selectedPlugin === PluginID.WEB_SEARCH) {
+      return createStreamResponse(async dataStream => {
+        await executeWebSearchTool({
+          config: {
+            chatSettings,
+            messages,
+            profile,
+            dataStream
+          }
         })
-    }
-
-    let provider
-
-    if (
-      selectedModel.startsWith("mistral-") ||
-      selectedModel.startsWith("pixtral") ||
-      selectedModel.startsWith("codestral")
-    ) {
-      provider = createMistral()
-    } else if (selectedModel.startsWith("deepseek")) {
-      provider = createDeepSeek()
-    } else {
-      provider = createOpenRouterAI({
-        baseURL: providerBaseUrl,
-        headers: providerHeaders
       })
     }
+
+    const provider = createProvider(selectedModel, config)
 
     // Remove last message if it's a continuation to remove the continue prompt
     const cleanedMessages = isContinuation ? messages.slice(0, -1) : messages
@@ -210,28 +196,26 @@ export async function POST(request: Request) {
       return createStreamResponse(dataStream => {
         dataStream.writeData({ ragUsed, ragId })
 
-        let tools
-        if (isPentestGPTPro) {
-          const toolSchemas = createToolSchemas({
-            chatSettings,
-            messages: cleanedMessages,
-            profile,
-            dataStream
-          })
-          tools = toolSchemas.getSelectedSchemas(["webSearch", "browser"])
-        }
+        const tools = config.isPentestGPTPro
+          ? createToolSchemas({
+              chatSettings,
+              messages: cleanedMessages,
+              profile,
+              dataStream
+            }).getSelectedSchemas(["webSearch", "browser"])
+          : undefined
 
         const result = streamText({
           model: provider(
             selectedModel || "",
-            isPentestGPTPro ? { parallelToolCalls: false } : {}
+            config.isPentestGPTPro ? { parallelToolCalls: false } : {}
           ),
           system: systemPrompt,
           messages: toVercelChatMessages(validatedMessages, includeImages),
-          temperature: modelTemperature,
+          temperature: 0.5,
           maxTokens: 2048,
           abortSignal: request.signal,
-          ...(!shouldUseRAG && isPentestGPTPro ? { tools } : null),
+          ...(!shouldUseRAG && config.isPentestGPTPro ? { tools } : null),
           experimental_transform: smoothStream()
         })
 
@@ -266,7 +250,6 @@ async function getProviderConfig(chatSettings: any, profile: any) {
     "X-Title": chatSettings.model
   }
 
-  const modelTemperature = 0.5
   const similarityTopK = 3
   const selectedModel = isPentestGPTPro ? proModel : defaultModel
   const rateLimitCheckResult = await checkRatelimitOnApi(
@@ -281,7 +264,23 @@ async function getProviderConfig(chatSettings: any, profile: any) {
     selectedModel,
     rateLimitCheckResult,
     similarityTopK,
-    isPentestGPTPro,
-    modelTemperature
+    isPentestGPTPro
   }
+}
+
+function createProvider(selectedModel: string, config: any) {
+  if (
+    selectedModel.startsWith("mistral-") ||
+    selectedModel.startsWith("pixtral") ||
+    selectedModel.startsWith("codestral")
+  ) {
+    return createMistral()
+  }
+  if (selectedModel.startsWith("deepseek")) {
+    return createDeepSeek()
+  }
+  return createOpenRouterAI({
+    baseURL: config.providerBaseUrl,
+    headers: config.providerHeaders
+  })
 }
