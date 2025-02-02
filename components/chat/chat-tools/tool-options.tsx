@@ -159,59 +159,6 @@ export const ToolOptions = ({
         }
       />
 
-      {/* Reason LLM Toggle */}
-      {isPremiumSubscription && (
-        <WithTooltip
-          delayDuration={TOOLTIP_DELAY}
-          side="top"
-          display={
-            selectedPlugin !== PluginID.REASONING &&
-            selectedPlugin !== PluginID.REASONING_WEB_SEARCH && (
-              <div className="flex flex-col">
-                <p className="font-medium">Solve reasoning problems</p>
-              </div>
-            )
-          }
-          trigger={
-            <div
-              className={cn(
-                "relative flex flex-row items-center rounded-lg transition-colors duration-300",
-                selectedPlugin === PluginID.REASONING ||
-                  selectedPlugin === PluginID.REASONING_WEB_SEARCH
-                  ? "bg-primary/10"
-                  : "hover:bg-black/10 dark:hover:bg-white/10",
-                hasImageAttached && "pointer-events-none opacity-50"
-              )}
-              onClick={handleReasonLLMToggle}
-            >
-              <IconAtom
-                className={cn(
-                  "cursor-pointer rounded-lg rounded-bl-xl p-1 focus-visible:outline-black dark:focus-visible:outline-white",
-                  selectedPlugin === PluginID.REASONING ||
-                    selectedPlugin === PluginID.REASONING_WEB_SEARCH
-                    ? "text-primary"
-                    : "opacity-50"
-                )}
-                size={32}
-              />
-              <div
-                className={cn(
-                  "whitespace-nowrap text-xs font-medium",
-                  "transition-all duration-300",
-                  !isMobile && "max-w-[100px] pr-2",
-                  isMobile &&
-                    (selectedPlugin === PluginID.REASONING
-                      ? "max-w-[100px] pr-2 opacity-100"
-                      : "max-w-0 opacity-0")
-                )}
-              >
-                Think
-              </div>
-            </div>
-          }
-        />
-      )}
-
       {/* Web Search Toggle */}
       <WithTooltip
         delayDuration={TOOLTIP_DELAY}
@@ -220,7 +167,7 @@ export const ToolOptions = ({
           selectedPlugin !== PluginID.WEB_SEARCH &&
           selectedPlugin !== PluginID.REASONING_WEB_SEARCH && (
             <div className="flex flex-col">
-              <p className="font-medium">Search the Web</p>
+              <p className="font-medium">Search the web</p>
             </div>
           )
         }
@@ -262,6 +209,59 @@ export const ToolOptions = ({
           </div>
         }
       />
+
+      {/* Reason LLM Toggle */}
+      {isPremiumSubscription && (
+        <WithTooltip
+          delayDuration={TOOLTIP_DELAY}
+          side="top"
+          display={
+            selectedPlugin !== PluginID.REASONING &&
+            selectedPlugin !== PluginID.REASONING_WEB_SEARCH && (
+              <div className="flex flex-col">
+                <p className="font-medium">Think before responding</p>
+              </div>
+            )
+          }
+          trigger={
+            <div
+              className={cn(
+                "relative flex flex-row items-center rounded-lg transition-colors duration-300",
+                selectedPlugin === PluginID.REASONING ||
+                  selectedPlugin === PluginID.REASONING_WEB_SEARCH
+                  ? "bg-primary/10"
+                  : "hover:bg-black/10 dark:hover:bg-white/10",
+                hasImageAttached && "pointer-events-none opacity-50"
+              )}
+              onClick={handleReasonLLMToggle}
+            >
+              <IconAtom
+                className={cn(
+                  "cursor-pointer rounded-lg rounded-bl-xl p-1 focus-visible:outline-black dark:focus-visible:outline-white",
+                  selectedPlugin === PluginID.REASONING ||
+                    selectedPlugin === PluginID.REASONING_WEB_SEARCH
+                    ? "text-primary"
+                    : "opacity-50"
+                )}
+                size={32}
+              />
+              <div
+                className={cn(
+                  "whitespace-nowrap text-xs font-medium",
+                  "transition-all duration-300",
+                  !isMobile && "max-w-[100px] pr-2",
+                  isMobile &&
+                    (selectedPlugin === PluginID.REASONING
+                      ? "max-w-[100px] pr-2 opacity-100"
+                      : "max-w-0 opacity-0")
+                )}
+              >
+                Reason
+              </div>
+            </div>
+          }
+        />
+      )}
     </div>
   )
 }
