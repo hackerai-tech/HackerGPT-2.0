@@ -68,7 +68,7 @@ export async function commandGeneratorHandler({
         const { textStream, finishReason } = streamText({
           model: provider(model, { parallelToolCalls: false }),
           temperature: 0.5,
-          maxTokens: isPremium ? 2048 : 1024,
+          maxTokens: 2048,
           messages: toVercelChatMessages(messages, true),
           tools: {
             terminal: tool({

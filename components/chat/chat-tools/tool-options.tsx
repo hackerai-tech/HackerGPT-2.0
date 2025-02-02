@@ -167,7 +167,7 @@ export const ToolOptions = ({
           selectedPlugin !== PluginID.WEB_SEARCH &&
           selectedPlugin !== PluginID.REASONING_WEB_SEARCH && (
             <div className="flex flex-col">
-              <p className="font-medium">Search the Web</p>
+              <p className="font-medium">Search the web</p>
             </div>
           )
         }
@@ -219,7 +219,7 @@ export const ToolOptions = ({
             selectedPlugin !== PluginID.REASONING &&
             selectedPlugin !== PluginID.REASONING_WEB_SEARCH && (
               <div className="flex flex-col">
-                <p className="font-medium">Solve reasoning problems</p>
+                <p className="font-medium">Think before responding</p>
               </div>
             )
           }
