@@ -6,7 +6,7 @@ export function getStripe(): Stripe {
     throw new Error("Missing Stripe API key")
   }
   const stripe = new Stripe(apiKey, {
-    apiVersion: "2024-12-18.acacia"
+    apiVersion: "2025-01-27.acacia"
   })
   return stripe
 }
