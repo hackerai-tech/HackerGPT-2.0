@@ -11,7 +11,7 @@ export const TemporaryChatInfo: React.FC = () => {
       <p className="text-muted-foreground mt-2 text-sm">
         This chat won&apos;t appear in your history, and no data from these
         conversations will be stored or retained. To clear the chat, simply
-        reload the page or click the &quot;Clean Chat&quot; button.
+        reload the page or click the &quot;Clear chat&quot; button.
       </p>
     </div>
   )

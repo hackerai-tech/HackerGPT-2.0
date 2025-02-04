@@ -29,8 +29,6 @@ import { ToolOptions } from "./chat-tools/tool-options"
 import { useUIContext } from "@/context/ui-context"
 
 export const ChatInput: FC = () => {
-  const TOOLTIP_DELAY = 500
-
   useHotkey("l", () => {
     handleFocusChatInput()
   })
@@ -333,7 +331,6 @@ export const ChatInput: FC = () => {
                         />
                       ) : (
                         <WithTooltip
-                          delayDuration={TOOLTIP_DELAY}
                           side="top"
                           display={
                             <div className="flex flex-col">
