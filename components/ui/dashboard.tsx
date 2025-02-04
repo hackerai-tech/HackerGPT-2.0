@@ -33,6 +33,7 @@ import { availablePlugins } from "@/lib/tools/tool-store/available-tools"
 import { toast } from "sonner"
 import dynamic from "next/dynamic"
 import { useUIContext } from "@/context/ui-context"
+import { WithTooltip } from "./with-tooltip"
 
 const DynamicKeyboardShortcutsPopup = dynamic(
   () => import("../chat/keyboard-shortcuts-popup"),
@@ -216,21 +217,27 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
       )}
 
       {!showSidebar && (
-        <Button
-          ref={toggleButtonRef}
-          className={cn(
-            `absolute left-[16px] ${showSidebar && isMobile ? "top-1/2" : "top-3"} z-20 size-[32px] cursor-pointer`
-          )}
-          style={{
-            marginLeft: showSidebar ? `${SIDEBAR_WIDTH}px` : "0px",
-            transform: showSidebar ? "rotate(180deg)" : "rotate(0deg)"
-          }}
-          variant="ghost"
-          size="icon"
-          onClick={handleToggleSidebar}
-        >
-          <IconLayoutSidebarLeftExpand size={24} />
-        </Button>
+        <WithTooltip
+          display={"Open sidebar"}
+          trigger={
+            <Button
+              ref={toggleButtonRef}
+              className={cn(
+                `absolute left-[16px] ${showSidebar && isMobile ? "top-1/2" : "top-3"} z-20 size-[32px] cursor-pointer`
+              )}
+              style={{
+                marginLeft: showSidebar ? `${SIDEBAR_WIDTH}px` : "0px",
+                transform: showSidebar ? "rotate(180deg)" : "rotate(0deg)"
+              }}
+              variant="ghost"
+              size="icon"
+              onClick={handleToggleSidebar}
+            >
+              <IconLayoutSidebarLeftExpand size={24} />
+            </Button>
+          }
+          side="bottomRight"
+        />
       )}
 
       {isMobile && showSidebar && (

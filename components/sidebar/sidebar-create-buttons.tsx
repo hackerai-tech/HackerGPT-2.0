@@ -5,6 +5,7 @@ import { FC, useContext } from "react"
 import { Button } from "../ui/button"
 import { PentestGPTContext } from "@/context/context"
 import { SIDEBAR_ICON_SIZE } from "./sidebar-content"
+import { WithTooltip } from "../ui/with-tooltip"
 
 interface SidebarCreateButtonsProps {
   contentType: ContentType
@@ -41,17 +42,25 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
 
   return (
     <div className="flex">
-      <Button
-        variant="ghost"
-        className="size-10 p-0"
-        onClick={getCreateFunction()}
-      >
-        {isTemporaryChat && contentType === "chats" ? (
-          <IconRefresh size={SIDEBAR_ICON_SIZE} />
-        ) : (
-          <IconMessagePlus size={SIDEBAR_ICON_SIZE} />
-        )}
-      </Button>
+      <WithTooltip
+        display={
+          isTemporaryChat && contentType === "chats" ? "Clear chat" : "New chat"
+        }
+        trigger={
+          <Button
+            variant="ghost"
+            className="size-10 p-0"
+            onClick={getCreateFunction()}
+          >
+            {isTemporaryChat && contentType === "chats" ? (
+              <IconRefresh size={SIDEBAR_ICON_SIZE} />
+            ) : (
+              <IconMessagePlus size={SIDEBAR_ICON_SIZE} />
+            )}
+          </Button>
+        }
+        side="bottom"
+      />
     </div>
   )
 }

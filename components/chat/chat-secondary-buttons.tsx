@@ -9,7 +9,6 @@ export const ChatSecondaryButtons: FC = () => {
   return (
     <div className="flex items-center pl-3">
       <WithTooltip
-        delayDuration={200}
         display={"New chat"}
         trigger={
           <IconMessagePlus
@@ -18,7 +17,7 @@ export const ChatSecondaryButtons: FC = () => {
             onClick={handleNewChat}
           />
         }
-        side="bottomRight"
+        side="bottom"
       />
     </div>
   )

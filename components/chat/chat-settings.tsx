@@ -40,8 +40,7 @@ export const ChatSettings: FC<ChatSettingsProps> = ({ handleCleanChat }) => {
           ) : (
             <div className="pl-3">
               <WithTooltip
-                delayDuration={200}
-                display="Clean chat"
+                display="Clear chat"
                 trigger={
                   <IconRefresh
                     className="cursor-pointer hover:opacity-50"

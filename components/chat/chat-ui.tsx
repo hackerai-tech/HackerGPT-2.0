@@ -199,8 +199,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
         <div className="absolute right-[22px] top-1 flex h-[40px] items-center space-x-3">
           {isMobile ? (
             <WithTooltip
-              delayDuration={200}
-              display={isTemporaryChat ? "Clean chat" : "New chat"}
+              display={isTemporaryChat ? "Clear chat" : "New chat"}
               trigger={
                 isTemporaryChat && (
                   <IconRefresh
