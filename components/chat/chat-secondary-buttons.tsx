@@ -9,7 +9,7 @@ export const ChatSecondaryButtons: FC = () => {
   return (
     <div className="flex items-center pl-3">
       <WithTooltip
-        display={"New chat"}
+        display={<div className="font-normal">New chat</div>}
         trigger={
           <IconMessagePlus
             className="cursor-pointer hover:opacity-50"

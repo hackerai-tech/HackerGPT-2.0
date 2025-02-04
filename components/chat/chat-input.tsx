@@ -1,19 +1,11 @@
 import { PentestGPTContext } from "@/context/context"
 import useHotkey from "@/lib/hooks/use-hotkey"
-import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { cn } from "@/lib/utils"
 import { PluginID } from "@/types/plugins"
-import {
-  IconPlayerStopFilled,
-  IconArrowUp,
-  IconLoader2,
-  IconMicrophone
-} from "@tabler/icons-react"
 import { FC, RefObject, useContext, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { Input } from "../ui/input"
 import { TextareaAutosize } from "../ui/textarea-autosize"
-import { WithTooltip } from "../ui/with-tooltip"
 import { ChatCommandInput } from "./chat-command-input"
 import { ChatFilesDisplay } from "./chat-files-display"
 import { handleFileUpload } from "./chat-helpers/file-upload"
@@ -27,6 +19,10 @@ import VoiceRecordingBar from "@/components/ui/voice-recording-bar"
 import VoiceLoadingBar from "@/components/ui/voice-loading-bar"
 import { ToolOptions } from "./chat-tools/tool-options"
 import { useUIContext } from "@/context/ui-context"
+import { useKeyboardHandler } from "./chat-hooks/use-key-handler"
+import { ChatSendButton } from "./chat-send-button"
+import { useMessageHandler } from "./chat-hooks/use-message-handler"
+import { ChatMicButton } from "./chat-mic-button"
 
 export const ChatInput: FC = () => {
   useHotkey("l", () => {
@@ -37,11 +33,14 @@ export const ChatInput: FC = () => {
   const [showConfirmationDialog, setShowConfirmationDialog] =
     useState<boolean>(false)
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
+  const [bottomSpacingPx, setBottomSpacingPx] = useState(5)
+
+  const divRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const {
     userInput,
     chatMessages,
-    chatSettings,
     newMessageFiles,
     newMessageImages,
     isPremiumSubscription,
@@ -51,16 +50,10 @@ export const ChatInput: FC = () => {
 
   const {
     isGenerating,
-    focusFile,
-    isAtPickerOpen,
-    setFocusFile,
     isEnhancedMenuOpen,
     setIsEnhancedMenuOpen,
     selectedPlugin,
-    isMobile,
-    isToolPickerOpen,
-    focusTool,
-    setFocusTool
+    isMobile
   } = useUIContext()
 
   const {
@@ -70,39 +63,24 @@ export const ChatInput: FC = () => {
     handleFocusChatInput
   } = useChatHandler()
 
-  const handleToggleEnhancedMenu = () => {
-    setIsEnhancedMenuOpen(!isEnhancedMenuOpen)
-  }
-
-  const divRef = useRef<HTMLDivElement>(null)
-  const [bottomSpacingPx, setBottomSpacingPx] = useState(5)
-
-  useEffect(() => {
-    const observer = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        const { height } = entry.contentRect
-        setBottomSpacingPx(height + 10)
-      }
-    })
-
-    if (divRef.current) {
-      observer.observe(divRef.current)
-    }
-
-    return () => observer.disconnect()
-  }, [])
-
   const { handleInputChange } = usePromptAndCommand()
 
   const { handleSelectDeviceFile } = useSelectFileHandler()
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { sendMessage, stopMessage, canSend } = useMessageHandler({
+    isGenerating: isGenerating,
+    userInput: userInput,
+    chatMessages: chatMessages,
+    handleSendMessage: handleSendMessage,
+    handleStopMessage: handleStopMessage
+  })
 
-  useEffect(() => {
-    setTimeout(() => {
-      handleFocusChatInput()
-    }, 200) // FIX: hacky
-  }, [])
+  const { handleKeyDown, handlePaste } = useKeyboardHandler({
+    isTyping: isTyping,
+    isMobile: isMobile,
+    sendMessage: sendMessage,
+    handleSelectDeviceFile: handleSelectDeviceFile
+  })
 
   const handleTranscriptChange = (transcript: string) => {
     if (transcript !== userInput) {
@@ -123,68 +101,27 @@ export const ChatInput: FC = () => {
     micPermissionDenied
   } = useSpeechRecognition(handleTranscriptChange)
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (!isTyping && event.key === "Enter" && !event.shiftKey && !isMobile) {
-      event.preventDefault()
-      if (!isGenerating) {
-        handleSendMessage(userInput, chatMessages, false, false)
+  // Effect for bottom spacing
+  useEffect(() => {
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setBottomSpacingPx(entry.contentRect.height + 10)
       }
+    })
+
+    if (divRef.current) {
+      observer.observe(divRef.current)
     }
 
-    if (
-      isAtPickerOpen &&
-      (event.key === "Tab" ||
-        event.key === "ArrowUp" ||
-        event.key === "ArrowDown" ||
-        event.key === "Enter" ||
-        event.key === "Escape")
-    ) {
-      event.preventDefault()
-      if (!focusFile) setFocusFile(true)
-    }
+    return () => observer.disconnect()
+  }, [])
 
-    if (
-      isToolPickerOpen &&
-      (event.key === "Tab" ||
-        event.key === "ArrowUp" ||
-        event.key === "ArrowDown" ||
-        event.key === "Enter" ||
-        event.key === "Escape")
-    ) {
-      event.preventDefault()
-      if (!focusTool) setFocusTool(true)
-    }
-  }
-
-  const handlePaste = (event: React.ClipboardEvent) => {
-    const imagesAllowed = LLM_LIST.find(
-      llm => llm.modelId === chatSettings?.model
-    )?.imageInput
-
-    const items = event.clipboardData.items
-    for (const item of items) {
-      if (item.type.indexOf("image") === 0) {
-        if (!imagesAllowed) {
-          toast.error(`Images are not supported for this model.`)
-          return
-        }
-        const file = item.getAsFile()
-        if (!file) return
-        handleSelectDeviceFile(file)
-      }
-    }
-  }
-
-  const handleConversionConfirmation = () => {
-    pendingFiles.forEach(file => handleSelectDeviceFile(file))
-    setShowConfirmationDialog(false)
-    setPendingFiles([])
-  }
-
-  const handleCancel = () => {
-    setPendingFiles([])
-    setShowConfirmationDialog(false)
-  }
+  // Effect for initial focus
+  useEffect(() => {
+    setTimeout(() => {
+      handleFocusChatInput()
+    }, 200) // FIX: hacky
+  }, [])
 
   return (
     <>
@@ -193,8 +130,15 @@ export const ChatInput: FC = () => {
         <UnsupportedFilesDialog
           isOpen={showConfirmationDialog}
           pendingFiles={pendingFiles}
-          onCancel={handleCancel}
-          onConfirm={handleConversionConfirmation}
+          onCancel={() => {
+            setPendingFiles([])
+            setShowConfirmationDialog(false)
+          }}
+          onConfirm={() => {
+            pendingFiles.forEach(handleSelectDeviceFile)
+            setShowConfirmationDialog(false)
+            setPendingFiles([])
+          }}
         />
       )}
 
@@ -312,74 +256,33 @@ export const ChatInput: FC = () => {
               <div className="absolute bottom-[10px] left-2 flex flex-row">
                 <ToolOptions
                   fileInputRef={fileInputRef as RefObject<HTMLInputElement>}
-                  handleToggleEnhancedMenu={handleToggleEnhancedMenu}
+                  handleToggleEnhancedMenu={() =>
+                    setIsEnhancedMenuOpen(!isEnhancedMenuOpen)
+                  }
                 />
               </div>
 
               <div className="absolute bottom-[10px] right-3 flex cursor-pointer items-center space-x-3">
-                {isPremiumSubscription &&
-                  isMicSupported &&
-                  hasSupportedMimeType &&
-                  !userInput &&
-                  !isGenerating &&
-                  !micPermissionDenied && (
-                    <>
-                      {isRequestingMicAccess ? (
-                        <IconLoader2
-                          className="animate-spin cursor-pointer p-1 hover:opacity-50"
-                          size={30}
-                        />
-                      ) : (
-                        <WithTooltip
-                          side="top"
-                          display={
-                            <div className="flex flex-col">
-                              <p className="font-medium">
-                                {hasMicAccess
-                                  ? "Click to record"
-                                  : "Enable microphone"}
-                              </p>
-                            </div>
-                          }
-                          trigger={
-                            <IconMicrophone
-                              className="cursor-pointer rounded-lg rounded-bl-xl p-1 hover:bg-black/10 focus-visible:outline-black dark:hover:bg-white/10 dark:focus-visible:outline-white"
-                              onClick={async () => {
-                                if (hasMicAccess) {
-                                  startListening()
-                                } else {
-                                  await requestMicAccess()
-                                }
-                              }}
-                              size={30}
-                            />
-                          }
-                        />
-                      )}
-                    </>
-                  )}
-                {isGenerating ? (
-                  <IconPlayerStopFilled
-                    className={cn(
-                      "md:hover:bg-background animate-pulse rounded bg-transparent p-1 md:hover:opacity-50"
-                    )}
-                    onClick={handleStopMessage}
-                    size={30}
-                  />
-                ) : (
-                  <IconArrowUp
-                    className={cn(
-                      "bg-primary text-secondary rounded p-1 hover:opacity-50",
-                      !userInput && "cursor-not-allowed opacity-50"
-                    )}
-                    stroke={2.5}
-                    onClick={() => {
-                      if (!userInput) return
-                      handleSendMessage(userInput, chatMessages, false)
-                    }}
-                    size={30}
-                  />
-                )}
+                {/* Mic button */}
+                <ChatMicButton
+                  isPremiumSubscription={isPremiumSubscription}
+                  isMicSupported={isMicSupported}
+                  hasSupportedMimeType={hasSupportedMimeType}
+                  userInput={userInput}
+                  isGenerating={isGenerating}
+                  micPermissionDenied={micPermissionDenied}
+                  isRequestingMicAccess={isRequestingMicAccess}
+                  hasMicAccess={hasMicAccess}
+                  startListening={startListening}
+                  requestMicAccess={requestMicAccess}
+                />
+                {/* Send button */}
+                <ChatSendButton
+                  isGenerating={isGenerating}
+                  canSend={canSend}
+                  onSend={sendMessage}
+                  onStop={stopMessage}
+                />
               </div>
             </div>
           </div>
