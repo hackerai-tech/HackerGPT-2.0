@@ -13,7 +13,7 @@ export const UIState: FC<UIStateProps> = ({ children }) => {
   // ENHANCE MENU
   const [isEnhancedMenuOpen, setIsEnhancedMenuOpen] = useLocalStorageState(
     "isEnhancedMenuOpen",
-    true
+    false
   )
   const [selectedPluginType, setSelectedPluginType] = useState("")
   const [selectedPlugin, setSelectedPlugin] = useState(PluginID.NONE)

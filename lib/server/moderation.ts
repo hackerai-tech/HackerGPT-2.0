@@ -5,7 +5,8 @@ const MODERATION_CHAR_LIMIT = 1000
 export async function getModerationResult(
   messages: any[],
   openaiApiKey: string,
-  hackerRAGMinLength: number
+  hackerRAGMinLength: number,
+  isPGPTLarge: boolean
 ): Promise<{ shouldUncensorResponse: boolean }> {
   const openai = new OpenAI({ apiKey: openaiApiKey })
 
@@ -32,7 +33,8 @@ export async function getModerationResult(
 
     const shouldUncensorResponse = determineShouldUncensorResponse(
       moderationLevel,
-      hazardCategories
+      hazardCategories,
+      isPGPTLarge
     )
 
     // console.log(
@@ -107,7 +109,8 @@ function calculateModerationLevel(
 
 function determineShouldUncensorResponse(
   moderationLevel: number,
-  hazardCategories: string[]
+  hazardCategories: string[],
+  isPGPTLarge: boolean
 ): boolean {
   const forbiddenCategories = [
     "sexual",
@@ -126,7 +129,10 @@ function determineShouldUncensorResponse(
     forbiddenCategories.includes(category)
   )
 
+  const maxModerationLevel = isPGPTLarge ? 100 : 0.95
   return (
-    moderationLevel >= 0.4 && moderationLevel <= 0.98 && !hasForbiddenCategory
+    moderationLevel >= 0.4 &&
+    moderationLevel <= maxModerationLevel &&
+    !hasForbiddenCategory
   )
 }

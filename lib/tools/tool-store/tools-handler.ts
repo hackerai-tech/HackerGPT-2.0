@@ -77,6 +77,29 @@ export async function commandGeneratorHandler({
                 command: z.string().describe("The terminal command to execute")
               }),
               execute: async ({ command }) => {
+                const expectedCommands: Partial<Record<PluginID, string>> = {
+                  [PluginID.SQLI_EXPLOITER]: "sqlmap",
+                  [PluginID.SSL_SCANNER]: "testssl.sh",
+                  [PluginID.DNS_SCANNER]: "dnsrecon",
+                  [PluginID.PORT_SCANNER]: "naabu",
+                  [PluginID.WAF_DETECTOR]: "wafw00f",
+                  [PluginID.WHOIS_LOOKUP]: "whois",
+                  [PluginID.SUBDOMAIN_FINDER]: "subfinder",
+                  [PluginID.CVE_MAP]: "cvemap",
+                  [PluginID.URL_FUZZER]: "ffuf",
+                  [PluginID.WORDPRESS_SCANNER]: "wpscan",
+                  [PluginID.XSS_EXPLOITER]: "dalfox"
+                }
+
+                const expectedCommand = expectedCommands[pluginID]
+                if (
+                  expectedCommand &&
+                  !command.trim().startsWith(expectedCommand)
+                ) {
+                  const errorMessage = `Command must start with "${expectedCommand}" for this plugin`
+                  return errorMessage
+                }
+
                 if (!sandbox) {
                   sandbox = await createTerminal(
                     userID,
