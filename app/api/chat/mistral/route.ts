@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     }
 
     // Build system prompt
-    const baseSystemPrompt = config.isPentestGPTPro
+    const baseSystemPrompt = config.isPGPTLarge
       ? llmConfig.systemPrompts.pgptLarge
       : llmConfig.systemPrompts.pgptSmall
     let systemPrompt = buildSystemPrompt(
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
       }
 
       if (shouldUncensor) {
-        config.isPentestGPTPro &&
+        config.isPGPTLarge &&
           console.log("[Premium User] Uncensored mode activated")
         return handleAssistantMessages(messages)
       }
@@ -164,7 +164,12 @@ export async function POST(request: Request) {
       selectedPlugin !== PluginID.WEB_SEARCH
     ) {
       const { shouldUncensorResponse: moderationResult } =
-        await getModerationResult(messages, llmConfig.openai.apiKey || "", 10)
+        await getModerationResult(
+          messages,
+          llmConfig.openai.apiKey || "",
+          10,
+          config.isPGPTLarge
+        )
       shouldUncensorResponse = moderationResult
     }
 
@@ -208,7 +213,7 @@ export async function POST(request: Request) {
         const result = streamText({
           model: provider(
             selectedModel || "",
-            config.isPentestGPTPro ? { parallelToolCalls: false } : {}
+            config.isPGPTLarge ? { parallelToolCalls: false } : {}
           ),
           system: systemPrompt,
           messages: toVercelChatMessages(validatedMessages, includeImages),
@@ -235,7 +240,7 @@ export async function POST(request: Request) {
 }
 
 async function getProviderConfig(chatSettings: any, profile: any) {
-  const isPentestGPTPro = chatSettings.model === "mistral-large"
+  const isPGPTLarge = chatSettings.model === "mistral-large"
 
   const defaultModel = llmConfig.models.pentestgpt_default_openrouter
   const proModel = llmConfig.models.pentestgpt_pro_openrouter
@@ -251,10 +256,10 @@ async function getProviderConfig(chatSettings: any, profile: any) {
   }
 
   const similarityTopK = 3
-  const selectedModel = isPentestGPTPro ? proModel : defaultModel
+  const selectedModel = isPGPTLarge ? proModel : defaultModel
   const rateLimitCheckResult = await checkRatelimitOnApi(
     profile.user_id,
-    isPentestGPTPro ? "pentestgpt-pro" : "pentestgpt"
+    isPGPTLarge ? "pentestgpt-pro" : "pentestgpt"
   )
 
   return {
@@ -264,7 +269,7 @@ async function getProviderConfig(chatSettings: any, profile: any) {
     selectedModel,
     rateLimitCheckResult,
     similarityTopK,
-    isPentestGPTPro
+    isPGPTLarge
   }
 }
 
