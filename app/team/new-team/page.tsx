@@ -198,7 +198,7 @@ const NewTeamPage: FC = () => {
                   <span>Creating...</span>
                 </>
               ) : (
-                `Create Team - ${isYearly ? "$384" : "$40"} / user / ${isYearly ? "year" : "month"}`
+                `Create Team - ${isYearly ? "$300" : "$30"} / user / ${isYearly ? "year" : "month"}`
               )}
             </Button>
 
