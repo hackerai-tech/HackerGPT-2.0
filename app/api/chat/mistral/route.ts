@@ -17,7 +17,7 @@ import { createMistral } from "@ai-sdk/mistral"
 import { createDeepSeek } from "@ai-sdk/deepseek"
 import { smoothStream, streamText } from "ai"
 import { getModerationResult } from "@/lib/server/moderation"
-import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
+// import { createToolSchemas } from "@/lib/tools/llm/toolSchemas"
 import { PluginID } from "@/types/plugins"
 import { executeWebSearchTool } from "@/lib/tools/llm/web-search"
 import { createStreamResponse } from "@/lib/ai-helper"
@@ -196,14 +196,14 @@ export async function POST(request: Request) {
       return createStreamResponse(dataStream => {
         dataStream.writeData({ ragUsed, ragId })
 
-        const tools = config.isPentestGPTPro
-          ? createToolSchemas({
-              chatSettings,
-              messages: cleanedMessages,
-              profile,
-              dataStream
-            }).getSelectedSchemas(["webSearch", "browser"])
-          : undefined
+        // const tools = config.isPentestGPTPro
+        //   ? createToolSchemas({
+        //       chatSettings,
+        //       messages: cleanedMessages,
+        //       profile,
+        //       dataStream
+        //     }).getSelectedSchemas(["webSearch", "browser"])
+        //   : undefined
 
         const result = streamText({
           model: provider(
@@ -215,7 +215,7 @@ export async function POST(request: Request) {
           temperature: 0.5,
           maxTokens: 2048,
           abortSignal: request.signal,
-          ...(!shouldUseRAG && config.isPentestGPTPro ? { tools } : null),
+          // ...(!shouldUseRAG && !shouldUncensorResponse && config.isPentestGPTPro ? { tools } : null),
           experimental_transform: smoothStream()
         })
 
