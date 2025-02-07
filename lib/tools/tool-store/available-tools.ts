@@ -3,7 +3,7 @@ import { PluginID, pluginUrls, PluginSummary } from "@/types/plugins"
 export const availablePlugins: PluginSummary[] = [
   {
     id: 0,
-    name: "No plugin selected",
+    name: "Standard Chat",
     value: PluginID.NONE,
     categories: [],
     isInstalled: false,

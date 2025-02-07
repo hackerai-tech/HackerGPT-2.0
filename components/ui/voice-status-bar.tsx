@@ -1,19 +1,26 @@
 import React, { FC, useRef, useState, useEffect, useCallback } from "react"
-import { IconX, IconCheck, IconPlayerRecord } from "@tabler/icons-react"
+import {
+  IconX,
+  IconCheck,
+  IconPlayerRecord,
+  IconLoader
+} from "@tabler/icons-react"
 import { toast } from "sonner"
 
-interface VoiceRecordingBarProps {
+interface VoiceStatusBarProps {
   isListening: boolean
-  stopListening: () => void
-  cancelListening: () => void
+  isSpeechToTextLoading: boolean
   isEnhancedMenuOpen: boolean
+  onStop: () => void
+  onCancel: () => void
 }
 
-const VoiceRecordingBar: FC<VoiceRecordingBarProps> = ({
+const VoiceStatusBar: FC<VoiceStatusBarProps> = ({
   isListening,
-  stopListening,
-  cancelListening,
-  isEnhancedMenuOpen
+  isSpeechToTextLoading,
+  isEnhancedMenuOpen,
+  onStop,
+  onCancel
 }) => {
   const [recordingTime, setRecordingTime] = useState(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -44,9 +51,9 @@ const VoiceRecordingBar: FC<VoiceRecordingBarProps> = ({
         timerRef.current = null
       }
       setIsRecording(false)
-      stop ? stopListening() : cancelListening()
+      stop ? onStop() : onCancel()
     },
-    [stopListening, cancelListening]
+    [onStop, onCancel]
   )
 
   useEffect(() => {
@@ -56,12 +63,24 @@ const VoiceRecordingBar: FC<VoiceRecordingBarProps> = ({
     }
   }, [recordingTime, handleRecordingChange])
 
+  // Move the early return after all hooks
+  if (!isListening && !isSpeechToTextLoading) return null
+
+  const baseClasses = `bg-secondary ${
+    isEnhancedMenuOpen ? "mt-3" : "mt-0"
+  } flex min-h-[96px] items-center rounded-xl px-4 py-3`
+
+  if (isSpeechToTextLoading) {
+    return (
+      <div className={`${baseClasses} justify-center`}>
+        <IconLoader className="animate-spin text-gray-500" size={24} />
+        <span className="ml-2 text-sm text-gray-500">Transcribing...</span>
+      </div>
+    )
+  }
+
   return (
-    <div
-      className={`bg-secondary ${
-        isEnhancedMenuOpen ? "mt-3" : "mt-0"
-      } flex min-h-[96px] items-center justify-between rounded-xl px-4 py-3`}
-    >
+    <div className={`${baseClasses} justify-between`}>
       <IconX
         className="bg-primary text-secondary cursor-pointer rounded p-1 hover:opacity-50"
         onClick={() => handleRecordingChange(false)}
@@ -100,4 +119,4 @@ function formatTime(time: number): string {
   return `${minutes}:${seconds}`
 }
 
-export default VoiceRecordingBar
+export default VoiceStatusBar

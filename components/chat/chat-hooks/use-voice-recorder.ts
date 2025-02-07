@@ -128,7 +128,7 @@ const useSpeechRecognition = (
         `speech.${mimeType.split("/")[1].split(";")[0]}`
       )
 
-      const response = await fetch("/api/chat/speech-to-text", {
+      const response = await fetch("/api/chat/transcriptions", {
         method: "POST",
         body: formData
       })

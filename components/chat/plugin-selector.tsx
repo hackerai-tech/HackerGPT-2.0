@@ -6,9 +6,10 @@ import {
   DropdownMenuContent
 } from "../ui/dropdown-menu"
 import {
-  IconChevronDown,
+  IconChevronUp,
   IconLock,
-  IconBuildingStore
+  IconBuildingStore,
+  IconMessage
 } from "@tabler/icons-react"
 import { PluginID, PluginSummary } from "@/types/plugins"
 import { PentestGPTContext } from "@/context/context"
@@ -36,8 +37,9 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
 
   const { setSelectedPlugin, selectedPlugin } = useUIContext()
 
-  const [selectedPluginName, setSelectedPluginName] =
-    useState("No plugin selected")
+  const [selectedPluginName, setSelectedPluginName] = useState(
+    availablePlugins[0].name
+  )
   const [showLockedPluginDialog, setShowLockedPluginDialog] = useState(false)
   const [currentPlugin, setCurrentPlugin] = useState<PluginSummary | null>(null)
   const { state: pluginState } = usePluginContext()
@@ -66,7 +68,7 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
       selectedPlugin === PluginID.ENHANCED_SEARCH
     ) {
       setSelectedPlugin(PluginID.NONE)
-      setSelectedPluginName("No plugin selected")
+      setSelectedPluginName(availablePlugins[0].name)
       onPluginSelect(PluginID.NONE)
     }
   }, [selectedPlugin, chatSettings?.model])
@@ -117,6 +119,8 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
           <IconLock size={18} className="ml-2" />
         ) : plugin.value === PluginID.PLUGINS_STORE ? (
           <IconBuildingStore size={18} className="ml-2" />
+        ) : plugin.value === PluginID.NONE ? (
+          <IconMessage size={18} className="ml-2" />
         ) : null}
       </DropdownMenuItem>
     ))
@@ -130,7 +134,7 @@ const PluginSelector: React.FC<PluginSelectorProps> = ({ onPluginSelect }) => {
           <div className="flex items-center space-x-2 rounded border border-gray-300 p-2 hover:cursor-pointer">
             <span className="text-sm">{selectedPluginName}</span>
             <button className="flex items-center border-none bg-transparent p-0">
-              <IconChevronDown size={18} />
+              <IconChevronUp size={18} />
             </button>
           </div>
         </DropdownMenuTrigger>
