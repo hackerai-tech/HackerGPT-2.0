@@ -14,15 +14,14 @@ import { usePromptAndCommand } from "./chat-hooks/use-prompt-and-command"
 import { useSelectFileHandler } from "./chat-hooks/use-select-file-handler"
 import { EnhancedMenuPicker } from "./enhance-menu"
 import { UnsupportedFilesDialog } from "./unsupported-files-dialog"
-import useSpeechRecognition from "./chat-hooks/use-speech-recognition"
-import VoiceRecordingBar from "@/components/ui/voice-recording-bar"
-import VoiceLoadingBar from "@/components/ui/voice-loading-bar"
 import { ToolOptions } from "./chat-tools/tool-options"
 import { useUIContext } from "@/context/ui-context"
 import { useKeyboardHandler } from "./chat-hooks/use-key-handler"
 import { ChatSendButton } from "./chat-send-button"
 import { useMessageHandler } from "./chat-hooks/use-message-handler"
 import { ChatMicButton } from "./chat-mic-button"
+import useVoiceRecording from "./chat-hooks/use-voice-recorder"
+import VoiceStatusBar from "@/components/ui/voice-status-bar"
 
 export const ChatInput: FC = () => {
   useHotkey("l", () => {
@@ -99,7 +98,7 @@ export const ChatInput: FC = () => {
     isRequestingMicAccess,
     requestMicAccess,
     micPermissionDenied
-  } = useSpeechRecognition(handleTranscriptChange)
+  } = useVoiceRecording(handleTranscriptChange)
 
   // Effect for bottom spacing
   useEffect(() => {
@@ -161,22 +160,17 @@ export const ChatInput: FC = () => {
       </div>
 
       {/* Chat Input Area */}
-      {isListening ? (
-        <VoiceRecordingBar
-          isListening={isListening}
-          stopListening={() => setIsListening(false)}
-          cancelListening={() => {
-            setIsListening(false)
-            cancelListening()
-          }}
-          isEnhancedMenuOpen={isEnhancedMenuOpen}
-        />
-      ) : isSpeechToTextLoading ? (
-        <VoiceLoadingBar
-          isLoading={isSpeechToTextLoading}
-          isEnhancedMenuOpen={isEnhancedMenuOpen}
-        />
-      ) : (
+      <VoiceStatusBar
+        isListening={isListening}
+        isSpeechToTextLoading={isSpeechToTextLoading}
+        isEnhancedMenuOpen={isEnhancedMenuOpen}
+        onStop={() => setIsListening(false)}
+        onCancel={() => {
+          setIsListening(false)
+          cancelListening()
+        }}
+      />
+      {!isListening && !isSpeechToTextLoading && (
         <div className="relative flex flex-col">
           <div
             className={cn(
