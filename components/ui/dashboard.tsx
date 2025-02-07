@@ -45,7 +45,7 @@ const DynamicToolsStore = dynamic(
   { ssr: false }
 )
 
-export const SIDEBAR_WIDTH = 280
+export const SIDEBAR_WIDTH = 260
 
 interface DashboardProps {
   children: React.ReactNode
