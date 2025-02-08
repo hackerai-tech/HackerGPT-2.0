@@ -11,7 +11,7 @@ import { LLM_LIST } from "../../../lib/models/llm/llm-list"
 import { createMessageFeedback } from "@/db/message-feedback"
 import {
   createTempMessages,
-  generateChatName,
+  generateChatTitle,
   handleCreateChat,
   handleCreateMessages,
   handleHostedChat,
@@ -447,8 +447,7 @@ export const useChatHandler = () => {
             setChatFiles
           )
 
-          // Generate name only for new chats
-          generateChatName([
+          generateChatTitle([
             {
               message: {
                 content: messageContent || "",
@@ -462,9 +461,9 @@ export const useChatHandler = () => {
               }
             }
           ])
-            .then(chatName => {
-              if (chatName !== null && currentChat) {
-                updateChat(currentChat.id, { name: chatName })
+            .then(chatTitle => {
+              if (chatTitle !== null && currentChat) {
+                updateChat(currentChat.id, { name: chatTitle })
                   .then(updatedChat => {
                     setSelectedChat(updatedChat)
                     setChats(prevChats =>

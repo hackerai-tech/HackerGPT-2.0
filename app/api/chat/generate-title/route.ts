@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     const profile = await getAIProfile()
     const rateLimitCheckResult = await checkRatelimitOnApi(
       profile.user_id,
-      "chat-name"
+      "generate-title"
     )
     if (rateLimitCheckResult !== null) {
       return rateLimitCheckResult.response

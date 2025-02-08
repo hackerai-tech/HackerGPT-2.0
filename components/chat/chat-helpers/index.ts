@@ -272,11 +272,11 @@ export const handleCreateChat = async (
   return createdChat
 }
 
-export const generateChatName = async (
+export const generateChatTitle = async (
   messages: { message: { content: string; role: string } }[]
 ) => {
   try {
-    const response = await fetch("/api/chat/name", {
+    const response = await fetch("/api/chat/generate-title", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages })

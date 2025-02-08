@@ -104,9 +104,10 @@ function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
       return 100
     }
     return fragmentsLimit
-  } else if (model === "chat-name") {
+  } else if (model === "generateTitle") {
     if (subscriptionInfo.isPremium || subscriptionInfo.isTeam) {
-      const chatNameLimit = Number(process.env.CHAT_NAME_LIMIT_PREMIUM) || 100
+      const chatNameLimit =
+        Number(process.env.GENERATE_TITLE_LIMIT_PREMIUM) || 100
       if (isNaN(chatNameLimit) || chatNameLimit < 0) {
         return 100
       }
