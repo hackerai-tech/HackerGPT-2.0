@@ -446,6 +446,37 @@ export const useChatHandler = () => {
             setChats,
             setChatFiles
           )
+
+          // Generate name only for new chats
+          generateChatName([
+            {
+              message: {
+                content: messageContent || "",
+                role: "user"
+              }
+            },
+            {
+              message: {
+                content: generatedText,
+                role: "assistant"
+              }
+            }
+          ])
+            .then(chatName => {
+              if (chatName !== null && currentChat) {
+                updateChat(currentChat.id, { name: chatName })
+                  .then(updatedChat => {
+                    setSelectedChat(updatedChat)
+                    setChats(prevChats =>
+                      prevChats.map(chat =>
+                        chat.id === updatedChat.id ? updatedChat : chat
+                      )
+                    )
+                  })
+                  .catch(console.error)
+              }
+            })
+            .catch(console.error)
         } else {
           const updatedChat = await updateChat(currentChat.id, {
             updated_at: new Date().toISOString(),
@@ -495,39 +526,6 @@ export const useChatHandler = () => {
         setToolInUse("none")
         setIsGenerating(false)
         setFirstTokenReceived(false)
-
-        // Fire and forget chat name generation
-        if (!isRegeneration && !isContinuation && currentChat) {
-          generateChatName([
-            {
-              message: {
-                content: messageContent || "",
-                role: "user"
-              }
-            },
-            {
-              message: {
-                content: generatedText,
-                role: "assistant"
-              }
-            }
-          ])
-            .then(chatName => {
-              if (chatName !== null && currentChat) {
-                updateChat(currentChat.id, { name: chatName })
-                  .then(updatedChat => {
-                    setSelectedChat(updatedChat)
-                    setChats(prevChats =>
-                      prevChats.map(chat =>
-                        chat.id === updatedChat.id ? updatedChat : chat
-                      )
-                    )
-                  })
-                  .catch(console.error)
-              }
-            })
-            .catch(console.error)
-        }
       }
     } catch (error) {
       setToolInUse("none")
