@@ -163,9 +163,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
         )}
 
         {data.length > 0 && (
-          <div
-            className={`h-full w-full space-y-3 pt-4`}
-          >
+          <div className={`size-full space-y-3 pt-4`}>
             {contentType === "chats" || contentType === "tools" ? (
               <>
                 {[
