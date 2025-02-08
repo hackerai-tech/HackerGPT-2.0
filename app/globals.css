@@ -76,6 +76,7 @@
     --chart-5: 27 87% 67%;
 
     --error: 0.93, 94.17%, 59.61%;
+    --sidebar-mask: linear-gradient(90deg,#000 0%,#000 84%,transparent 89%,transparent 100%);
   }
 
   .dark {
@@ -123,6 +124,7 @@
     --chart-5: 340 75% 55%;
     
     --error: 0.93, 94.17%, 59.61%;
+    --sidebar-mask: linear-gradient(90deg,#000 0%,#000 84%,transparent 89%, transparent 100%);
   }
 }
 

@@ -11,6 +11,7 @@ import { LLM_LIST } from "../../../lib/models/llm/llm-list"
 import { createMessageFeedback } from "@/db/message-feedback"
 import {
   createTempMessages,
+  generateChatTitle,
   handleCreateChat,
   handleCreateMessages,
   handleHostedChat,
@@ -445,6 +446,36 @@ export const useChatHandler = () => {
             setChats,
             setChatFiles
           )
+
+          generateChatTitle([
+            {
+              message: {
+                content: messageContent || "",
+                role: "user"
+              }
+            },
+            {
+              message: {
+                content: generatedText,
+                role: "assistant"
+              }
+            }
+          ])
+            .then(chatTitle => {
+              if (chatTitle !== null && currentChat) {
+                updateChat(currentChat.id, { name: chatTitle })
+                  .then(updatedChat => {
+                    setSelectedChat(updatedChat)
+                    setChats(prevChats =>
+                      prevChats.map(chat =>
+                        chat.id === updatedChat.id ? updatedChat : chat
+                      )
+                    )
+                  })
+                  .catch(console.error)
+              }
+            })
+            .catch(console.error)
         } else {
           const updatedChat = await updateChat(currentChat.id, {
             updated_at: new Date().toISOString(),
@@ -490,11 +521,11 @@ export const useChatHandler = () => {
           thinkingText,
           thinkingElapsedSecs
         )
-      }
 
-      setToolInUse("none")
-      setIsGenerating(false)
-      setFirstTokenReceived(false)
+        setToolInUse("none")
+        setIsGenerating(false)
+        setFirstTokenReceived(false)
+      }
     } catch (error) {
       setToolInUse("none")
       setIsGenerating(false)

@@ -67,27 +67,33 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
     <div
       ref={itemRef}
       className={cn(
-        "hover:bg-accent focus:bg-accent group flex w-full cursor-pointer items-center rounded p-2 hover:opacity-50 focus:outline-none",
+        "hover:bg-accent focus:bg-accent group relative flex w-full cursor-pointer items-center rounded-lg p-2 hover:opacity-50 focus:outline-none",
         isActive && "bg-accent"
       )}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onClick={handleClick}
     >
-      <div className="flex-1 truncate text-sm">{chat.name}</div>
+      <div
+        className={cn(
+          "flex-1 truncate text-sm [-webkit-mask-image:var(--sidebar-mask)] [mask-image:var(--sidebar-mask)]"
+        )}
+      >
+        {chat.name}
+      </div>
 
       <div
         className={cn(
-          "w-0 shrink-0 overflow-hidden",
-          (isActive || isOpen) && "w-6",
-          "group-hover:w-6"
+          "absolute right-2 opacity-0",
+          (isActive || isOpen) && "opacity-100",
+          "group-hover:opacity-100"
         )}
       >
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
             <button
               onClick={handleDropdownTrigger}
-              className="flex size-6 items-center justify-center rounded"
+              className="flex size-6 items-center justify-center"
             >
               <IconDots size={16} />
             </button>
