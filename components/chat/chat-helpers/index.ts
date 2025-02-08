@@ -245,6 +245,7 @@ export const handleCreateChat = async (
   setChats: React.Dispatch<React.SetStateAction<Tables<"chats">[]>>,
   setChatFiles: React.Dispatch<React.SetStateAction<ChatFile[]>>
 ) => {
+  // Create chat first with a temporary chat name
   const createdChat = await createChat({
     user_id: profile.user_id,
     workspace_id: selectedWorkspace.id,
@@ -257,6 +258,7 @@ export const handleCreateChat = async (
   setSelectedChat(createdChat)
   setChats(chats => [createdChat, ...chats])
 
+  // Handle file creation
   await createChatFiles(
     newMessageFiles.map(file => ({
       user_id: profile.user_id,
@@ -268,4 +270,23 @@ export const handleCreateChat = async (
   setChatFiles(prev => [...prev, ...newMessageFiles])
 
   return createdChat
+}
+
+export const generateChatName = async (
+  messages: { message: { content: string; role: string } }[]
+) => {
+  try {
+    const response = await fetch("/api/chat/name", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages })
+    })
+
+    if (!response.ok) return null
+    const data = await response.json()
+    return data.name || null
+  } catch (error) {
+    console.error("Error generating chat name:", error)
+    return null
+  }
 }

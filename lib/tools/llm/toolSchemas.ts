@@ -64,26 +64,6 @@ export const createToolSchemas = ({
         })
       }
     }
-    // codingLLM: {
-    //   description:
-    //     "Use this tool for code-related questions, explanations, and assistance. This includes code generation, debugging, best practices, and architectural guidance.",
-    //   parameters: z.object({
-    //     use_coding_llm: z
-    //       .boolean()
-    //       .describe(
-    //         "Set to true when the user's question is specifically about coding, programming, or software development."
-    //       )
-    //   }),
-    //   execute: async () => {
-    //     return executeCodingLLM({
-    //       config: {
-    //         messages,
-    //         profile,
-    //         dataStream
-    //       }
-    //     })
-    //   }
-    // }
   }
 
   type SchemaKey = keyof typeof allSchemas

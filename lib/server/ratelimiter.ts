@@ -97,13 +97,22 @@ function getTimeWindow(): number {
 }
 
 function _getLimit(model: string, subscriptionInfo: SubscriptionInfo): number {
-  // Special case for fragments-reload
+  // Special case for fragments-reload and chat-name
   if (model === "fragments-reload") {
     const fragmentsLimit = Number(process.env.FRAGMENTS_RELOAD_LIMIT) || 100
     if (isNaN(fragmentsLimit) || fragmentsLimit < 0) {
       return 100
     }
     return fragmentsLimit
+  } else if (model === "chat-name") {
+    if (subscriptionInfo.isPremium || subscriptionInfo.isTeam) {
+      const chatNameLimit = Number(process.env.CHAT_NAME_LIMIT_PREMIUM) || 100
+      if (isNaN(chatNameLimit) || chatNameLimit < 0) {
+        return 100
+      }
+      return chatNameLimit
+    }
+    return Number(process.env.RATELIMITER_LIMIT_PENTESTGPT_FREE) || 3 // Free tier limit using env var
   }
 
   const fixedModelName = _getFixedModelName(model)

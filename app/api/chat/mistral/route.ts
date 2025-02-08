@@ -242,8 +242,8 @@ export async function POST(request: Request) {
 async function getProviderConfig(chatSettings: any, profile: any) {
   const isPGPTLarge = chatSettings.model === "mistral-large"
 
-  const defaultModel = llmConfig.models.pentestgpt_default_openrouter
-  const proModel = llmConfig.models.pentestgpt_pro_openrouter
+  const defaultModel = llmConfig.models.pentestgpt_small
+  const proModel = llmConfig.models.pentestgpt_large
 
   const providerUrl = llmConfig.openrouter.url
   const providerBaseUrl = llmConfig.openrouter.baseURL
