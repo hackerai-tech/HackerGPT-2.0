@@ -41,8 +41,9 @@ export async function POST(request: Request) {
       return rateLimitCheckResult.response
     }
 
-    // Simplified messages to reduce payload
-    const simplifiedMessages = messages.slice(-2) // Only use last 2 messages
+    console.log("Generating chat title for user", profile.user_id)
+
+    const simplifiedMessages = messages.slice(-2)
 
     const {
       object: { title }

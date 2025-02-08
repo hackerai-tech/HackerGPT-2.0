@@ -67,7 +67,7 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
     <div
       ref={itemRef}
       className={cn(
-        "hover:bg-accent focus:bg-accent group relative flex w-full cursor-pointer items-center rounded p-2 hover:opacity-50 focus:outline-none",
+        "hover:bg-accent focus:bg-accent group relative flex w-full cursor-pointer items-center rounded-lg p-2 hover:opacity-50 focus:outline-none",
         isActive && "bg-accent"
       )}
       tabIndex={0}
@@ -93,7 +93,7 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
           <DropdownMenuTrigger asChild>
             <button
               onClick={handleDropdownTrigger}
-              className="flex size-6 items-center justify-center rounded"
+              className="flex size-6 items-center justify-center"
             >
               <IconDots size={16} />
             </button>

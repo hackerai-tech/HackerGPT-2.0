@@ -22,7 +22,6 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
   const divRef = useRef<HTMLDivElement>(null)
   const loaderRef = useRef<HTMLDivElement>(null)
 
-  const [isOverflowing, setIsOverflowing] = useState(false)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [hasMoreChats, setHasMoreChats] = useState(true)
 
@@ -138,14 +137,6 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
       )
   }
 
-  useEffect(() => {
-    if (divRef.current) {
-      setIsOverflowing(
-        divRef.current.scrollHeight > divRef.current.clientHeight
-      )
-    }
-  }, [data])
-
   return (
     <div
       ref={divRef}
@@ -173,11 +164,7 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
 
         {data.length > 0 && (
           <div
-            className={`h-full ${
-              isOverflowing && !isTemporaryChat
-                ? "w-[calc(100%-8px)]"
-                : "w-full"
-            } space-y-3 pt-4 ${isOverflowing && !isTemporaryChat ? "mr-2" : ""}`}
+            className={`h-full w-full space-y-3 pt-4`}
           >
             {contentType === "chats" || contentType === "tools" ? (
               <>
