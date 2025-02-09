@@ -14,15 +14,17 @@ export async function uploadFileToSandbox(
   sandbox: Sandbox,
   dataStream: any
 ): Promise<FileUploadResult> {
+  let name = fileId
   try {
-    const { content, name } = await getFileContentFromSupabase(fileId)
+    const { content, name: fileName } = await getFileContentFromSupabase(fileId)
+    name = fileName
     const sandboxPath = `/home/user/${name}`
 
     await sandbox.files.write(sandboxPath, content)
 
     dataStream.writeData({
       type: "text-delta",
-      content: `📝 Uploaded ${name} to ${sandboxPath}\n`
+      content: `📝 Uploaded ${name} to /home/user/\n`
     })
 
     return {
@@ -34,7 +36,7 @@ export async function uploadFileToSandbox(
     console.error("❌ File upload failed:", error)
     dataStream.writeData({
       type: "text-delta",
-      content: `⚠️ Failed to upload file ${fileId}: ${error}\n`
+      content: `⚠️ Failed to upload ${name}: ${error}\n`
     })
 
     return {
