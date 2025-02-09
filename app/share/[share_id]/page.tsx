@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SharedMessage } from "@/components/chat/shared-message"
+import { Tables } from "@/supabase/types"
 
 const MAX_CHAT_NAME_LENGTH = 100
 
@@ -21,40 +22,26 @@ export default async function SharedChatPage({
   const { share_id, locale } = await params
   const supabase = await createClient()
 
-  const { data: chatData } = await supabase
-    .from("chats")
-    .select("*")
-    .eq("last_shared_message_id", share_id)
-    .single()
+  const result = await supabase.rpc("get_shared_chat", {
+    share_id_param: share_id
+  })
 
-  if (!chatData) {
+  if (!result.data || result.data.length === 0 || result.error) {
     return <ErrorUI error="Chat not found" />
   }
 
-  const { data: messagesData, error: messagesError } = await supabase
-    .from("messages")
-    .select("*")
-    .eq("chat_id", chatData.id)
-    .order("created_at", { ascending: true })
-    .order("sequence_number", { ascending: true })
+  const chatData = result.data[0]
+
+  const { data: messages, error: messagesError } = await supabase.rpc(
+    "get_shared_chat_messages",
+    {
+      chat_id_param: chatData.id
+    }
+  )
 
   if (messagesError) {
     console.error("messagesError", messagesError)
     return <ErrorUI error={messagesError.message} />
-  }
-
-  const lastSharedMessageIndex = messagesData.findIndex(
-    message => message.id === share_id
-  )
-
-  const messages = messagesData.slice(0, lastSharedMessageIndex + 1)
-
-  // Include all messages up to and including the next assistant message
-  for (let i = lastSharedMessageIndex + 1; i < messagesData.length; i++) {
-    messages.push(messagesData[i])
-    if (messagesData[i].role === "assistant") {
-      break
-    }
   }
 
   const formatDate = (dateString: string) => {
@@ -79,7 +66,7 @@ export default async function SharedChatPage({
             </div>
           </div>
           <div className="space-y-8">
-            {messages.map((message, index, array) => (
+            {(messages as Tables<"messages">[]).map((message, index, array) => (
               <SharedMessage
                 key={message.id}
                 message={message}
