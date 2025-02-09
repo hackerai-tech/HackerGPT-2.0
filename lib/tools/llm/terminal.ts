@@ -17,6 +17,7 @@ import {
   createOrConnectTemporaryTerminal,
   pauseSandbox
 } from "../e2b/sandbox"
+import { uploadFileToSandbox } from "@/lib/tools/e2b/file-handler"
 
 const BASH_SANDBOX_TIMEOUT = 15 * 60 * 1000
 const PERSISTENT_SANDBOX_TEMPLATE = "persistent-sandbox"
@@ -70,17 +71,38 @@ export async function executeTerminalTool({
       messages: toVercelChatMessages(cleanedMessages, true),
       tools: {
         terminal: tool({
-          description: "Execute a terminal command",
+          description:
+            "Execute commands in the sandbox environment. Can upload up to 3 files before execution if needed.",
           parameters: z.object({
             command: z.string().describe("Command to execute"),
             usePersistentSandbox: z
               .boolean()
               .describe(
                 "Use persistent sandbox (30-day storage) instead of temporary"
+              ),
+            files: z
+              .array(
+                z.object({
+                  fileId: z.string().describe("ID of the file to upload")
+                })
+              )
+              .max(3, "Maximum 3 files can be uploaded at once")
+              .optional()
+              .describe(
+                "Files to upload to sandbox before executing command (max 3 files)"
               )
           }),
-          execute: async ({ command, usePersistentSandbox }) => {
+          execute: async ({ command, usePersistentSandbox, files = [] }) => {
             persistentSandbox = usePersistentSandbox
+
+            if (files.length > 3) {
+              dataStream.writeData({
+                type: "text-delta",
+                content:
+                  "⚠️ Warning: Maximum 3 files can be uploaded at once. Only the first 3 files will be processed.\n"
+              })
+              files = files.slice(0, 3)
+            }
 
             dataStream.writeData({
               type: "sandbox-type",
@@ -89,7 +111,7 @@ export async function executeTerminalTool({
                 : "temporary-sandbox"
             })
 
-            // Reuse existing sandbox if available
+            // Create or connect to sandbox
             if (!sandbox) {
               sandbox = usePersistentSandbox
                 ? await createOrConnectPersistentTerminal(
@@ -104,6 +126,18 @@ export async function executeTerminalTool({
                   )
             }
 
+            // Upload requested files
+            if (files.length > 0) {
+              for (const fileRequest of files) {
+                await uploadFileToSandbox(
+                  fileRequest.fileId,
+                  sandbox,
+                  dataStream
+                )
+              }
+            }
+
+            // Execute command
             const terminalStream = await executeTerminalCommand({
               userID,
               command,
