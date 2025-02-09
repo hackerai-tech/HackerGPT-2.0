@@ -83,8 +83,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   >([])
   const [chatSettings, setChatSettings] = useState<ChatSettings>({
     model: "mistral-medium",
-    includeProfileContext: false,
-    embeddingsProvider: "openai"
+    includeProfileContext: false
   })
   const [selectedChat, setSelectedChat] = useState<Tables<"chats"> | null>(null)
 
@@ -362,8 +361,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
       setSelectedChat(chat)
       setChatSettings({
         model: chat.model as LLMID,
-        includeProfileContext: chat.include_profile_context,
-        embeddingsProvider: "openai"
+        includeProfileContext: chat.include_profile_context
       })
     } catch (error) {
       console.error("Error fetching chat:", error)

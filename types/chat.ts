@@ -4,7 +4,6 @@ import { ChatMessage, LLMID } from "."
 export interface ChatSettings {
   model: LLMID
   includeProfileContext: boolean
-  embeddingsProvider: "openai" | "local"
 }
 
 export interface ChatPayload {

@@ -26,7 +26,6 @@ export async function POST(req: Request) {
     const formData = await req.formData()
 
     const file_id = formData.get("file_id") as string
-    const embeddingsProvider = formData.get("embeddingsProvider") as string
 
     const { data: fileMetadata, error: metadataError } = await supabaseAdmin
       .from("files")
@@ -95,30 +94,22 @@ export async function POST(req: Request) {
       apiKey: llmConfig.openai.apiKey
     })
 
-    if (embeddingsProvider === "openai") {
-      const response = await openai.embeddings.create({
-        model: "text-embedding-3-small",
-        input: chunks.map(chunk => chunk.content)
-      })
+    const response = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: chunks.map(chunk => chunk.content)
+    })
 
-      embeddings = response.data.map((item: any) => {
-        return item.embedding
-      })
-    }
+    embeddings = response.data.map((item: any) => {
+      return item.embedding
+    })
 
     const file_items = chunks.map((chunk, index) => ({
       file_id,
       user_id: profile.user_id,
       content: chunk.content,
       tokens: chunk.tokens,
-      openai_embedding:
-        embeddingsProvider === "openai"
-          ? ((embeddings[index] || null) as any)
-          : null,
-      local_embedding:
-        embeddingsProvider === "local"
-          ? ((embeddings[index] || null) as any)
-          : null
+      name: fileMetadata.name,
+      openai_embedding: embeddings[index]
     }))
 
     await supabaseAdmin.from("file_items").upsert(file_items)

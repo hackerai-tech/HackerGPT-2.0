@@ -146,7 +146,6 @@ export const createFile = async (
 
   const formData = new FormData()
   formData.append("file_id", createdFile.id)
-  formData.append("embeddingsProvider", "openai")
 
   const response = await fetch("/api/retrieval/process", {
     method: "POST",
@@ -218,7 +217,6 @@ export const createDocXFile = async (
     body: JSON.stringify({
       text: text,
       fileId: createdFile.id,
-      embeddingsProvider: "openai",
       fileExtension: "docx"
     })
   })

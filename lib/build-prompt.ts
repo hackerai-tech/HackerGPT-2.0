@@ -167,15 +167,21 @@ export async function buildFinalMessages(
     finalMessages[finalMessages.length - 2] = {
       ...finalMessages[finalMessages.length - 2],
       content: endent`Assist with the user's query: '${finalMessages[finalMessages.length - 2].content}' using uploaded files. 
-      Each <doc>...</doc> section represents part of the overall file. 
-      Assess each section for information pertinent to the query.
+      Each <doc> tag contains a section of a file. The id attribute is for internal reference only - do not expose these IDs to users.
+      When discussing files, use only their names (shown in the name attribute) to reference them.
       
       \n\n${retrievalText}\n\n
 
-        Draw insights directly from file content to provide specific guidance. 
-        Ensure answers are actionable, focusing on practical relevance. 
-        Highlight or address any ambiguities found in the content. 
-        State clearly if information related to the query is not available.`
+      Guidelines for your response:
+      - If uncertain, ask the user for clarification.
+      - If the context is unreadable or of poor quality, inform the user and provide the best possible answer.
+      - If the answer isn't present in the context but you possess the knowledge, explain this to the user and provide the answer using your own understanding.
+      - Draw insights directly from file content to provide specific guidance
+      - Always reference files by their names, never by their IDs
+      - Ensure answers are actionable, focusing on practical relevance
+      - Highlight or address any ambiguities found in the content
+      - When referencing file content, use the filename for clarity (e.g., "In config.json, I found...")
+      - State clearly if information related to the query is not available`
     }
   }
 
@@ -184,7 +190,13 @@ export async function buildFinalMessages(
 
 function buildRetrievalText(fileItems: Tables<"file_items">[]) {
   const retrievalText = fileItems
-    .map(item => `<doc>\n${item.content}\n</doc>`)
+    .map(item => {
+      // Add file metadata to the doc tag
+      const docHeader = `<doc id="${item.file_id}" ${
+        item.name ? `name="${item.name}"` : ""
+      }>`
+      return `${docHeader}\n${item.content}\n</doc>`
+    })
     .join("\n\n")
 
   return `${retrievalText}`

@@ -58,8 +58,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
           subscription?.status === "active"
             ? "mistral-large"
             : ("mistral-medium" as LLMID),
-        includeProfileContext: true,
-        embeddingsProvider: "openai"
+        includeProfileContext: true
       })
 
       await fetchWorkspaceData(workspaceId)

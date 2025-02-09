@@ -21,7 +21,7 @@ export async function executeReasoningWebSearchTool({
     throw new Error("Perplexity API key is not set for reason LLM")
   }
 
-  console.log("[ReasoningWebSearch] Executing reasoning web search")
+  console.log("Executing ReasoningWebSearch for user", profile.user_id)
 
   await processStream({
     messages,
