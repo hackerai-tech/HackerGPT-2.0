@@ -279,7 +279,7 @@ export type Database = {
           created_at: string
           file_id: string
           id: string
-          local_embedding: string | null
+          name: string | null
           openai_embedding: string | null
           sharing: string
           tokens: number
@@ -291,7 +291,7 @@ export type Database = {
           created_at?: string
           file_id: string
           id?: string
-          local_embedding?: string | null
+          name?: string | null
           openai_embedding?: string | null
           sharing?: string
           tokens: number
@@ -303,7 +303,7 @@ export type Database = {
           created_at?: string
           file_id?: string
           id?: string
-          local_embedding?: string | null
+          name?: string | null
           openai_embedding?: string | null
           sharing?: string
           tokens?: number
@@ -913,20 +913,6 @@ export type Database = {
       log_old_private_chats: {
         Args: Record<PropertyKey, never>
         Returns: undefined
-      }
-      match_file_items_local: {
-        Args: {
-          query_embedding: string
-          match_count?: number
-          file_ids?: string[]
-        }
-        Returns: {
-          id: string
-          file_id: string
-          content: string
-          tokens: number
-          similarity: number
-        }[]
       }
       match_file_items_openai: {
         Args: {

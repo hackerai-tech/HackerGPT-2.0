@@ -6,10 +6,9 @@ import OpenAI from "openai"
 
 export async function POST(request: Request) {
   const json = await request.json()
-  const { userInput, fileIds, embeddingsProvider, sourceCount } = json as {
+  const { userInput, fileIds, sourceCount } = json as {
     userInput: string
     fileIds: string[]
-    embeddingsProvider: "openai" | "local"
     sourceCount: number
   }
 
@@ -25,7 +24,7 @@ export async function POST(request: Request) {
 
     const { data: userFiles, error: userFilesError } = await supabaseAdmin
       .from("files")
-      .select("id")
+      .select("id, name")
       .in("id", uniqueFileIds)
       .eq("user_id", profile.user_id)
 
@@ -45,27 +44,31 @@ export async function POST(request: Request) {
       apiKey: llmConfig.openai.apiKey
     })
 
-    if (embeddingsProvider === "openai") {
-      const response = await openai.embeddings.create({
-        model: "text-embedding-3-small",
-        input: userInput
+    const response = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: userInput
+    })
+
+    const openaiEmbedding = response.data.map(item => item.embedding)[0]
+
+    const { data: openaiFileItems, error: openaiError } =
+      await supabaseAdmin.rpc("match_file_items_openai", {
+        query_embedding: openaiEmbedding as any,
+        match_count: sourceCount,
+        file_ids: uniqueFileIds
       })
 
-      const openaiEmbedding = response.data.map(item => item.embedding)[0]
-
-      const { data: openaiFileItems, error: openaiError } =
-        await supabaseAdmin.rpc("match_file_items_openai", {
-          query_embedding: openaiEmbedding as any,
-          match_count: sourceCount,
-          file_ids: uniqueFileIds
-        })
-
-      if (openaiError) {
-        throw openaiError
-      }
-
-      chunks = openaiFileItems
+    if (openaiError) {
+      throw openaiError
     }
+
+    chunks = openaiFileItems.map(item => {
+      const file = userFiles.find(f => f.id === item.file_id)
+      return {
+        ...item,
+        name: file?.name || null
+      }
+    })
 
     const mostSimilarChunks = chunks?.sort(
       (a, b) => b.similarity - a.similarity
