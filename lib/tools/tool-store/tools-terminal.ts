@@ -1,7 +1,7 @@
 import { PluginID } from "@/types/plugins"
 import { OutputMessage, Sandbox } from "@e2b/code-interpreter"
 
-const MAX_EXECUTION_TIME = 5 * 60 * 1000
+const MAX_EXECUTION_TIME = 10 * 60 * 1000
 const ENCODER = new TextEncoder()
 
 interface TerminalExecutorOptions {

@@ -1,7 +1,7 @@
 import { OutputMessage, Sandbox } from "@e2b/code-interpreter"
 import { CustomExecutionError } from "../tool-store/tools-terminal"
 
-const MAX_EXECUTION_TIME = 5 * 60 * 1000
+const MAX_EXECUTION_TIME = 10 * 60 * 1000
 const ENCODER = new TextEncoder()
 
 export const executeTerminalCommand = async ({
