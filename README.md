@@ -256,7 +256,7 @@ to apply the latest migrations to your live database.
 
 ## Have a feature request, question, or comment?
 
-You can get in touch with us through email at [contact@hackerai.co](mailto:contact@hackerai.co) or connect with us on [X](https://x.com/PentestGPT).
+You can get in touch with us through the HackerAI Help Center at [https://help.hackerai.co](https://help.hackerai.co).
 
 ## Contributing
 
