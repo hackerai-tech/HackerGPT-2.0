@@ -153,7 +153,7 @@ export const processResponse = async (
                           ...chatMessage,
                           message: {
                             ...chatMessage.message,
-                            content: fullText
+                            content: chatMessage.message.content + firstValue.content,
                           }
                         }
                       : chatMessage
