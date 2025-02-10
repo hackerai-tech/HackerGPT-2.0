@@ -3,8 +3,12 @@ import { useCopyToClipboard } from "@/lib/hooks/use-copy-to-clipboard"
 import { IconCheck, IconCopy } from "@tabler/icons-react"
 import { FC, memo } from "react"
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import {
+  oneDark,
+  oneLight
+} from "react-syntax-highlighter/dist/cjs/styles/prism"
 import { cn } from "@/lib/utils"
+import { useTheme } from "next-themes"
 
 interface MessageCodeBlockProps {
   language: string
@@ -64,7 +68,7 @@ export const CopyButton: FC<{
       variant="ghost"
       size="sm"
       className={cn(
-        "text-xs text-white focus-visible:ring-1 focus-visible:ring-slate-700 focus-visible:ring-offset-0",
+        "text-xs focus-visible:ring-1 focus-visible:ring-slate-700 focus-visible:ring-offset-0",
         className
       )}
       onClick={() => !isCopied && copyToClipboard(value)}
@@ -84,9 +88,11 @@ CopyButton.displayName = "CopyButton"
 
 export const MessageCodeBlock: FC<MessageCodeBlockProps> = memo(
   ({ language, value }) => {
+    const { theme } = useTheme()
+
     return (
-      <div className="codeblock relative w-full bg-zinc-950 font-sans">
-        <div className="sticky top-0 flex w-full items-center justify-between bg-zinc-700 px-4 text-white">
+      <div className="relative border bg-[#f9f9f9] font-sans dark:bg-zinc-950">
+        <div className="text-primary flex items-center justify-between px-4 dark:bg-zinc-700">
           <span className="text-xs lowercase">{language}</span>
           <div className="flex items-center space-x-1">
             <CopyButton value={value} />
@@ -94,8 +100,11 @@ export const MessageCodeBlock: FC<MessageCodeBlockProps> = memo(
         </div>
         <SyntaxHighlighter
           language={language}
-          style={oneDark}
-          customStyle={{ margin: 0, background: "transparent" }}
+          style={theme === "light" ? oneLight : oneDark}
+          customStyle={{
+            margin: 0,
+            background: "transparent"
+          }}
           codeTagProps={{
             style: { fontSize: "14px", fontFamily: "var(--font-mono)" }
           }}
