@@ -65,7 +65,8 @@ export const Message: FC<MessageProps> = ({
     temporaryChatMessages,
     isTemporaryChat,
     chatImages,
-    files
+    files,
+    isPremiumSubscription
   } = useContext(PentestGPTContext)
 
   const {
@@ -232,7 +233,7 @@ export const Message: FC<MessageProps> = ({
       onKeyDown={handleKeyDown}
     >
       <div
-        className={`relative flex w-full flex-col px-8 py-6 sm:w-[550px] sm:px-0 md:w-[650px] lg:w-[700px] xl:w-[800px]
+        className={`relative flex w-full flex-col px-4 py-6 sm:max-w-[800px] sm:px-6 md:px-8
         ${isLast ? "mb-8" : ""}`}
       >
         <div className="flex space-x-3">
@@ -247,19 +248,21 @@ export const Message: FC<MessageProps> = ({
           <div
             className={`grow ${isMobile && "space-y-3"} min-w-0 ${message.role === "user" ? "flex justify-end" : ""}`}
           >
-            <div className="flex items-center">
-              {message.role === "assistant" && isMobile && (
-                <ModelIcon
-                  modelId={modelDetails?.modelId || "custom"}
-                  size={ICON_SIZE}
-                />
-              )}
-              {isMobile && (
-                <div className="ml-2 font-semibold">
-                  {message.role === "assistant" && MODEL_DATA?.shortModelName}
-                </div>
-              )}
-            </div>
+            {isPremiumSubscription && (
+              <div className="flex items-center">
+                {message.role === "assistant" && isMobile && (
+                  <ModelIcon
+                    modelId={modelDetails?.modelId || "custom"}
+                    size={ICON_SIZE}
+                  />
+                )}
+                {isMobile && (
+                  <div className="ml-2 font-semibold">
+                    {message.role === "assistant" && MODEL_DATA?.shortModelName}
+                  </div>
+                )}
+              </div>
+            )}
 
             {!firstTokenReceived &&
               isGenerating &&

@@ -25,7 +25,7 @@ export default function ChatPage() {
   const { chatMessages, temporaryChatMessages, isTemporaryChat } =
     useContext(PentestGPTContext)
 
-  const { selectedPlugin, isMobile, showSidebar } = useUIContext()
+  const { selectedPlugin, isMobile } = useUIContext()
 
   const { handleNewChat, handleFocusChatInput } = useChatHandler()
 
@@ -56,7 +56,7 @@ export default function ChatPage() {
                 </h1>
               </div>
             ) : (
-              <div className="mb-14">
+              <div className="-mx-24 mb-14">
                 <h1 className="text-3xl font-semibold">
                   What can I help with?
                 </h1>
@@ -73,38 +73,18 @@ export default function ChatPage() {
             )}
           </div>
 
-          <div
-            className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
-          >
-            <div className="mt-2 max-w-[230px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
-              <ChatSettings />
-            </div>
-          </div>
+          <ChatSettings />
 
           <div className="flex grow flex-col items-center justify-center" />
 
-          <div
-            className={`z-10 -mx-2 w-full min-w-[300px] items-end px-2 pb-1 sm:w-[600px] md:w-[650px] lg:w-[700px] xl:w-[800px]`}
-          >
-            <ChatStarters
-              selectedPlugin={selectedPlugin}
-              chatMessages={chatMessages}
-            />
-          </div>
+          <ChatStarters
+            selectedPlugin={selectedPlugin}
+            chatMessages={chatMessages}
+          />
 
-          {/* Chat input */}
-          <div className="flex w-full justify-center">
-            <div
-              className={`z-10 w-screen items-end px-2 pb-3 sm:w-[600px] sm:pb-5 md:w-[650px] md:min-w-[300px] lg:w-[700px] xl:w-[800px]`}
-            >
-              <ChatInput />
-            </div>
-          </div>
+          <ChatInput />
 
-          {/* Chat help */}
-          <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">
-            <ChatHelp />
-          </div>
+          <ChatHelp />
         </div>
       ) : (
         <ChatUI />

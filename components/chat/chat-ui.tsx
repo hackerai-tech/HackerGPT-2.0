@@ -60,8 +60,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
     allMessagesLoaded
   } = useContext(PentestGPTContext)
 
-  const { isMobile, isGenerating, showSidebar, setIsReadyToChat } =
-    useUIContext()
+  const { isMobile, isGenerating, setIsReadyToChat } = useUIContext()
 
   const {
     handleNewChat,
@@ -75,7 +74,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
   const [loading, setLoading] = useState(true)
   const previousHeightRef = useRef<number | null>(null)
 
-  const { resetFragment, isFragmentBarOpen } = useFragments()
+  const { resetFragment } = useFragments()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -239,14 +238,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
       )}
 
       <div className="flex size-full flex-col">
-        {/* Chat settings - Top Bar */}
-        <div
-          className={`flex max-h-[50px] min-h-[50px] w-full items-center justify-center font-bold sm:justify-start ${showSidebar ? "sm:pl-2" : "sm:pl-12"}`}
-        >
-          <div className="mt-2 max-w-[230px] truncate text-sm sm:max-w-[400px] sm:text-base md:max-w-[500px] lg:max-w-[600px] xl:w-[800px]">
-            <ChatSettings handleCleanChat={handleCleanChat} />
-          </div>
-        </div>
+        <ChatSettings handleCleanChat={handleCleanChat} />
 
         <div className="flex min-h-0 flex-1 flex-col gap-2 lg:flex-row-reverse">
           {/* Fragments */}
@@ -295,22 +287,10 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
             </div>
 
             {/* Chat input */}
-            <div className="flex w-full justify-center">
-              <div
-                className={`z-10 w-screen items-end px-2 pb-3 sm:w-[600px] sm:pb-5 md:w-[650px] md:min-w-[300px] lg:w-[700px] xl:w-[800px]`}
-              >
-                <ChatInput />
-              </div>
-            </div>
+            <ChatInput />
 
             {/* Chat help */}
-            <div
-              className={`absolute bottom-2 right-2 hidden md:block lg:bottom-4 ${
-                isFragmentBarOpen ? "lg:right-[calc(50%+0.5rem)]" : "lg:right-4"
-              }`}
-            >
-              <ChatHelp />
-            </div>
+            <ChatHelp />
           </div>
         </div>
       </div>
