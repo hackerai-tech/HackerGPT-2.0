@@ -123,165 +123,167 @@ export const ChatInput: FC = () => {
   }, [])
 
   return (
-    <>
-      {/* Unsupported files dialog */}
-      {showConfirmationDialog && pendingFiles.length > 0 && (
-        <UnsupportedFilesDialog
-          isOpen={showConfirmationDialog}
-          pendingFiles={pendingFiles}
+    <div className="flex w-full justify-center">
+      <div className="z-10 w-full max-w-[800px] items-end px-4 pb-3 sm:pb-5 md:px-8">
+        {/* Unsupported files dialog */}
+        {showConfirmationDialog && pendingFiles.length > 0 && (
+          <UnsupportedFilesDialog
+            isOpen={showConfirmationDialog}
+            pendingFiles={pendingFiles}
+            onCancel={() => {
+              setPendingFiles([])
+              setShowConfirmationDialog(false)
+            }}
+            onConfirm={() => {
+              pendingFiles.forEach(handleSelectDeviceFile)
+              setShowConfirmationDialog(false)
+              setPendingFiles([])
+            }}
+          />
+        )}
+
+        {/* Files and Enhanced Menu Container */}
+        <div
+          className={cn(
+            "flex flex-col flex-wrap justify-center gap-2",
+            isEnhancedMenuOpen &&
+              !newMessageFiles.length &&
+              !newMessageImages.length
+              ? "mb-2"
+              : "",
+            newMessageFiles.length > 0 || newMessageImages.length > 0
+              ? "my-2"
+              : ""
+          )}
+        >
+          <ChatFilesDisplay />
+          {isEnhancedMenuOpen && <EnhancedMenuPicker />}
+        </div>
+
+        {/* Chat Input Area */}
+        <VoiceStatusBar
+          isListening={isListening}
+          isSpeechToTextLoading={isSpeechToTextLoading}
+          isEnhancedMenuOpen={isEnhancedMenuOpen}
+          onStop={() => setIsListening(false)}
           onCancel={() => {
-            setPendingFiles([])
-            setShowConfirmationDialog(false)
-          }}
-          onConfirm={() => {
-            pendingFiles.forEach(handleSelectDeviceFile)
-            setShowConfirmationDialog(false)
-            setPendingFiles([])
+            setIsListening(false)
+            cancelListening()
           }}
         />
-      )}
-
-      {/* Files and Enhanced Menu Container */}
-      <div
-        className={cn(
-          "flex flex-col flex-wrap justify-center gap-2",
-          isEnhancedMenuOpen &&
-            !newMessageFiles.length &&
-            !newMessageImages.length
-            ? "mb-2"
-            : "",
-          newMessageFiles.length > 0 || newMessageImages.length > 0
-            ? "my-2"
-            : ""
-        )}
-      >
-        <ChatFilesDisplay />
-        {isEnhancedMenuOpen && <EnhancedMenuPicker />}
-      </div>
-
-      {/* Chat Input Area */}
-      <VoiceStatusBar
-        isListening={isListening}
-        isSpeechToTextLoading={isSpeechToTextLoading}
-        isEnhancedMenuOpen={isEnhancedMenuOpen}
-        onStop={() => setIsListening(false)}
-        onCancel={() => {
-          setIsListening(false)
-          cancelListening()
-        }}
-      />
-      {!isListening && !isSpeechToTextLoading && (
-        <div className="relative flex flex-col">
-          <div
-            className={cn(
-              "bg-secondary border-secondary relative w-full rounded-xl border-2",
-              isTemporaryChat && "bg-tertiary border-tertiary",
-              selectedPlugin &&
-                selectedPlugin !== PluginID.NONE &&
-                "border-primary"
-            )}
-            ref={divRef}
-          >
+        {!isListening && !isSpeechToTextLoading && (
+          <div className="relative flex flex-col">
             <div
-              className={`absolute left-0 w-full overflow-auto rounded-xl dark:border-none`}
-              style={{ bottom: `${bottomSpacingPx}px` }}
+              className={cn(
+                "bg-secondary border-secondary relative w-full rounded-xl border-2",
+                isTemporaryChat && "bg-tertiary border-tertiary",
+                selectedPlugin &&
+                  selectedPlugin !== PluginID.NONE &&
+                  "border-primary"
+              )}
+              ref={divRef}
             >
-              <ChatCommandInput />
-            </div>
+              <div
+                className={`absolute left-0 w-full overflow-auto rounded-xl dark:border-none`}
+                style={{ bottom: `${bottomSpacingPx}px` }}
+              >
+                <ChatCommandInput />
+              </div>
 
-            {/* Upload files */}
-            <Input
-              ref={fileInputRef}
-              className="hidden w-0"
-              type="file"
-              multiple
-              onChange={e => {
-                if (!e.target.files) return
+              {/* Upload files */}
+              <Input
+                ref={fileInputRef}
+                className="hidden w-0"
+                type="file"
+                multiple
+                onChange={e => {
+                  if (!e.target.files) return
 
-                const files = Array.from(e.target.files)
+                  const files = Array.from(e.target.files)
 
-                if (files.length > 4) {
-                  toast.error("Maximum of 4 files can be uploaded at once.")
-                  return
-                }
-
-                handleFileUpload(
-                  files,
-                  setShowConfirmationDialog,
-                  setPendingFiles,
-                  handleSelectDeviceFile
-                )
-              }}
-              accept="*"
-            />
-
-            <div className="w-full">
-              <TextareaAutosize
-                textareaRef={chatInputRef as RefObject<HTMLTextAreaElement>}
-                className={cn(
-                  "ring-offset-background placeholder:text-muted-foreground text-md",
-                  "flex w-full resize-none rounded-t-xl bg-transparent",
-                  "border-none focus-visible:outline-none",
-                  "disabled:cursor-not-allowed disabled:opacity-50",
-                  "py-3",
-                  "px-3"
-                )}
-                placeholder={
-                  isMobile
-                    ? `Message` +
-                      (!isPremiumSubscription
-                        ? " PentestGPT"
-                        : `. Type "#" for files.`)
-                    : `Message PentestGPT` +
-                      (!isPremiumSubscription ? "" : `. Type "#" for files.`)
-                }
-                onValueChange={handleInputChange} // This function updates the userInput state
-                value={userInput} // This state should display the transcribed text
-                minRows={1}
-                maxRows={isMobile ? 6 : 12}
-                onKeyDown={handleKeyDown}
-                onPaste={handlePaste}
-                onCompositionStart={() => setIsTyping(true)}
-                onCompositionEnd={() => setIsTyping(false)}
-              />
-            </div>
-
-            <div className="relative min-h-[44px] w-full px-2">
-              <div className="absolute bottom-[10px] left-2 flex flex-row">
-                <ToolOptions
-                  fileInputRef={fileInputRef as RefObject<HTMLInputElement>}
-                  handleToggleEnhancedMenu={() =>
-                    setIsEnhancedMenuOpen(!isEnhancedMenuOpen)
+                  if (files.length > 4) {
+                    toast.error("Maximum of 4 files can be uploaded at once.")
+                    return
                   }
+
+                  handleFileUpload(
+                    files,
+                    setShowConfirmationDialog,
+                    setPendingFiles,
+                    handleSelectDeviceFile
+                  )
+                }}
+                accept="*"
+              />
+
+              <div className="w-full">
+                <TextareaAutosize
+                  textareaRef={chatInputRef as RefObject<HTMLTextAreaElement>}
+                  className={cn(
+                    "ring-offset-background placeholder:text-muted-foreground text-md",
+                    "flex w-full resize-none rounded-t-xl bg-transparent",
+                    "border-none focus-visible:outline-none",
+                    "disabled:cursor-not-allowed disabled:opacity-50",
+                    "py-3",
+                    "px-3"
+                  )}
+                  placeholder={
+                    isMobile
+                      ? `Message` +
+                        (!isPremiumSubscription
+                          ? " PentestGPT"
+                          : `. Type "#" for files.`)
+                      : `Message PentestGPT` +
+                        (!isPremiumSubscription ? "" : `. Type "#" for files.`)
+                  }
+                  onValueChange={handleInputChange} // This function updates the userInput state
+                  value={userInput} // This state should display the transcribed text
+                  minRows={1}
+                  maxRows={isMobile ? 6 : 12}
+                  onKeyDown={handleKeyDown}
+                  onPaste={handlePaste}
+                  onCompositionStart={() => setIsTyping(true)}
+                  onCompositionEnd={() => setIsTyping(false)}
                 />
               </div>
 
-              <div className="absolute bottom-[10px] right-3 flex cursor-pointer items-center space-x-3">
-                {/* Mic button */}
-                <ChatMicButton
-                  isPremiumSubscription={isPremiumSubscription}
-                  isMicSupported={isMicSupported}
-                  hasSupportedMimeType={hasSupportedMimeType}
-                  userInput={userInput}
-                  isGenerating={isGenerating}
-                  micPermissionDenied={micPermissionDenied}
-                  isRequestingMicAccess={isRequestingMicAccess}
-                  hasMicAccess={hasMicAccess}
-                  startListening={startListening}
-                  requestMicAccess={requestMicAccess}
-                />
-                {/* Send button */}
-                <ChatSendButton
-                  isGenerating={isGenerating}
-                  canSend={canSend}
-                  onSend={sendMessage}
-                  onStop={stopMessage}
-                />
+              <div className="relative min-h-[44px] w-full px-2">
+                <div className="absolute bottom-[10px] left-2 flex flex-row">
+                  <ToolOptions
+                    fileInputRef={fileInputRef as RefObject<HTMLInputElement>}
+                    handleToggleEnhancedMenu={() =>
+                      setIsEnhancedMenuOpen(!isEnhancedMenuOpen)
+                    }
+                  />
+                </div>
+
+                <div className="absolute bottom-[10px] right-3 flex cursor-pointer items-center space-x-3">
+                  {/* Mic button */}
+                  <ChatMicButton
+                    isPremiumSubscription={isPremiumSubscription}
+                    isMicSupported={isMicSupported}
+                    hasSupportedMimeType={hasSupportedMimeType}
+                    userInput={userInput}
+                    isGenerating={isGenerating}
+                    micPermissionDenied={micPermissionDenied}
+                    isRequestingMicAccess={isRequestingMicAccess}
+                    hasMicAccess={hasMicAccess}
+                    startListening={startListening}
+                    requestMicAccess={requestMicAccess}
+                  />
+                  {/* Send button */}
+                  <ChatSendButton
+                    isGenerating={isGenerating}
+                    canSend={canSend}
+                    onSend={sendMessage}
+                    onStop={stopMessage}
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </div>
   )
 }

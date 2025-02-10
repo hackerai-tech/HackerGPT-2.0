@@ -93,166 +93,84 @@ export const ChatFilesDisplay: FC = () => {
         />
       )}
 
-      <div className="max-w-full space-y-2">
-        {!onlyImages && (
-          <div className="flex w-full items-center justify-center">
-            <div className="relative flex items-center">
-              <Button
-                className="flex h-[32px] w-[140px] items-center space-x-2 pr-10"
-                onClick={() => setShowFilesDisplay(false)}
-                variant="secondary"
-              >
-                <RetrievalToggle />
-                <span>Hide files</span>
-              </Button>
+      <div className="flex w-full justify-center">
+        <div className="w-full max-w-[800px]">
+          {!onlyImages && (
+            <div className="flex w-full items-center justify-center">
+              <div className="relative flex items-center">
+                <Button
+                  className="flex h-[32px] w-[140px] items-center space-x-2 pr-10"
+                  onClick={() => setShowFilesDisplay(false)}
+                  variant="secondary"
+                >
+                  <RetrievalToggle />
+                  <span>Hide files</span>
+                </Button>
 
-              <div className="absolute right-1">
-                <ChatRetrievalSettings />
+                <div className="absolute right-1">
+                  <ChatRetrievalSettings />
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="overflow-auto">
-          <div
-            className="scrollbar-hide sm:scrollbar-show flex gap-2 overflow-auto pt-2"
-            onMouseDown={dragHelper}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-          >
-            {messageImages.map((image, index) => (
-              <div
-                key={index}
-                className="relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl hover:opacity-50"
-              >
-                <Image
-                  className="rounded"
-                  // Force the image to be 56px by 56px
-                  style={{
-                    minWidth: "56px",
-                    minHeight: "56px",
-                    maxHeight: "56px",
-                    maxWidth: "56px"
-                  }}
-                  src={image.base64} // Preview images will always be base64
-                  alt="File image"
-                  width={56}
-                  height={56}
-                  onClick={() => {
-                    setSelectedImage(image)
-                    setShowPreview(true)
-                  }}
-                />
-
-                {(isMobile || isHovering) && (
-                  <WithTooltip
-                    delayDuration={0}
-                    side="top"
-                    display={<div>Remove image</div>}
-                    trigger={
-                      <IconX
-                        className="bg-secondary border-primary absolute right-[-6px] top-[-2px] flex size-5 cursor-pointer items-center justify-center rounded-full border text-[10px] hover:border-red-500 hover:bg-white hover:text-red-500"
-                        onClick={e => {
-                          e.stopPropagation()
-                          setNewMessageImages(
-                            newMessageImages.filter(
-                              f => f.messageId !== image.messageId
-                            )
-                          )
-                          setChatImages(
-                            chatImages.filter(
-                              f => f.messageId !== image.messageId
-                            )
-                          )
-
-                          // Check if this is the last file/image and reset showFilesDisplay
-                          const remainingImages =
-                            newMessageImages.length + chatImages.length - 1
-                          const remainingFiles = combinedChatFiles.length
-                          if (remainingImages + remainingFiles === 0) {
-                            setShowFilesDisplay(false)
-                          }
-                        }}
-                      />
-                    }
-                  />
-                )}
-              </div>
-            ))}
-
-            {combinedChatFiles.map((file, index) =>
-              file.id.startsWith("loading") ? (
+          <div className="overflow-auto">
+            <div
+              className="scrollbar-hide sm:scrollbar-show flex w-[calc(100vw-2rem)] gap-2 overflow-x-auto pt-2 sm:w-full sm:max-w-[800px]"
+              onMouseDown={dragHelper}
+              onMouseEnter={() => setIsHovering(true)}
+              onMouseLeave={() => setIsHovering(false)}
+            >
+              {messageImages.map((image, index) => (
                 <div
                   key={index}
-                  className="bg-secondary relative flex h-[64px] items-center space-x-4 rounded-xl px-4 py-3"
+                  className="relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl hover:opacity-50"
                 >
-                  <div className="rounded bg-blue-500 p-2">
-                    <IconLoader2 className="animate-spin" />
-                  </div>
-
-                  <div className="truncate text-sm">
-                    <div className="truncate">{file.name}</div>
-                    <div className="truncate opacity-50">{file.type}</div>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  key={file.id}
-                  className="bg-secondary relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl px-4 py-3 hover:opacity-50"
-                >
-                  <div className="rounded bg-blue-500 p-2">
-                    {(() => {
-                      const fileExtension = file.type?.includes("/")
-                        ? file.type.split("/")[1]
-                        : file.type
-
-                      switch (fileExtension) {
-                        case "pdf":
-                          return <IconFileTypePdf />
-                        case "markdown":
-                          return <IconMarkdown />
-                        case "txt":
-                          return <IconFileTypeTxt />
-                        case "json":
-                          return <IconJson />
-                        case "csv":
-                          return <IconFileTypeCsv />
-                        case "docx":
-                          return <IconFileTypeDocx />
-                        default:
-                          return <IconFileFilled />
-                      }
-                    })()}
-                  </div>
-
-                  <div className="truncate text-sm">
-                    <div className="truncate">{file.name}</div>
-                  </div>
+                  <Image
+                    className="rounded"
+                    // Force the image to be 56px by 56px
+                    style={{
+                      minWidth: "56px",
+                      minHeight: "56px",
+                      maxHeight: "56px",
+                      maxWidth: "56px"
+                    }}
+                    src={image.base64} // Preview images will always be base64
+                    alt="File image"
+                    width={56}
+                    height={56}
+                    onClick={() => {
+                      setSelectedImage(image)
+                      setShowPreview(true)
+                    }}
+                  />
 
                   {(isMobile || isHovering) && (
                     <WithTooltip
                       delayDuration={0}
                       side="top"
-                      display={<div>Remove file</div>}
+                      display={<div>Remove image</div>}
                       trigger={
                         <IconX
-                          className="bg-secondary border-primary absolute right-[-6px] top-[-6px] flex size-5 cursor-pointer items-center justify-center rounded-full border text-[10px] hover:border-red-500 hover:bg-white hover:text-red-500"
+                          className="bg-secondary border-primary absolute right-[-6px] top-[-2px] flex size-5 cursor-pointer items-center justify-center rounded-full border text-[10px] hover:border-red-500 hover:bg-white hover:text-red-500"
                           onClick={e => {
                             e.stopPropagation()
-                            if (combinedChatFiles.length === 1) {
-                              setUseRetrieval(false)
-                            }
-                            setNewMessageFiles(
-                              newMessageFiles.filter(f => f.id !== file.id)
+                            setNewMessageImages(
+                              newMessageImages.filter(
+                                f => f.messageId !== image.messageId
+                              )
                             )
-                            setChatFiles(
-                              chatFiles.filter(f => f.id !== file.id)
+                            setChatImages(
+                              chatImages.filter(
+                                f => f.messageId !== image.messageId
+                              )
                             )
 
                             // Check if this is the last file/image and reset showFilesDisplay
-                            const remainingFiles = combinedChatFiles.length - 1
-                            const remainingImages = messageImages.length
-                            if (remainingFiles + remainingImages === 0) {
+                            const remainingImages =
+                              newMessageImages.length + chatImages.length - 1
+                            const remainingFiles = combinedChatFiles.length
+                            if (remainingImages + remainingFiles === 0) {
                               setShowFilesDisplay(false)
                             }
                           }}
@@ -261,8 +179,93 @@ export const ChatFilesDisplay: FC = () => {
                     />
                   )}
                 </div>
-              )
-            )}
+              ))}
+
+              {combinedChatFiles.map((file, index) =>
+                file.id.startsWith("loading") ? (
+                  <div
+                    key={index}
+                    className="bg-secondary relative flex h-[64px] items-center space-x-4 rounded-xl px-4 py-3"
+                  >
+                    <div className="rounded bg-blue-500 p-2">
+                      <IconLoader2 className="animate-spin" />
+                    </div>
+
+                    <div className="truncate text-sm">
+                      <div className="truncate">{file.name}</div>
+                      <div className="truncate opacity-50">{file.type}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    key={file.id}
+                    className="bg-secondary relative flex h-[64px] cursor-pointer items-center space-x-4 rounded-xl px-4 py-3 hover:opacity-50"
+                  >
+                    <div className="rounded bg-blue-500 p-2">
+                      {(() => {
+                        const fileExtension = file.type?.includes("/")
+                          ? file.type.split("/")[1]
+                          : file.type
+
+                        switch (fileExtension) {
+                          case "pdf":
+                            return <IconFileTypePdf />
+                          case "markdown":
+                            return <IconMarkdown />
+                          case "txt":
+                            return <IconFileTypeTxt />
+                          case "json":
+                            return <IconJson />
+                          case "csv":
+                            return <IconFileTypeCsv />
+                          case "docx":
+                            return <IconFileTypeDocx />
+                          default:
+                            return <IconFileFilled />
+                        }
+                      })()}
+                    </div>
+
+                    <div className="truncate text-sm">
+                      <div className="truncate">{file.name}</div>
+                    </div>
+
+                    {(isMobile || isHovering) && (
+                      <WithTooltip
+                        delayDuration={0}
+                        side="top"
+                        display={<div>Remove file</div>}
+                        trigger={
+                          <IconX
+                            className="bg-secondary border-primary absolute right-[-6px] top-[-6px] flex size-5 cursor-pointer items-center justify-center rounded-full border text-[10px] hover:border-red-500 hover:bg-white hover:text-red-500"
+                            onClick={e => {
+                              e.stopPropagation()
+                              if (combinedChatFiles.length === 1) {
+                                setUseRetrieval(false)
+                              }
+                              setNewMessageFiles(
+                                newMessageFiles.filter(f => f.id !== file.id)
+                              )
+                              setChatFiles(
+                                chatFiles.filter(f => f.id !== file.id)
+                              )
+
+                              // Check if this is the last file/image and reset showFilesDisplay
+                              const remainingFiles =
+                                combinedChatFiles.length - 1
+                              const remainingImages = messageImages.length
+                              if (remainingFiles + remainingImages === 0) {
+                                setShowFilesDisplay(false)
+                              }
+                            }}
+                          />
+                        }
+                      />
+                    )}
+                  </div>
+                )
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -232,7 +232,7 @@ export const Message: FC<MessageProps> = ({
       onKeyDown={handleKeyDown}
     >
       <div
-        className={`relative flex w-full flex-col px-8 py-6 sm:w-[550px] sm:px-0 md:w-[650px] lg:w-[700px] xl:w-[800px]
+        className={`relative flex w-full flex-col px-4 py-6 sm:max-w-[800px] sm:px-6 md:px-8
         ${isLast ? "mb-8" : ""}`}
       >
         <div className="flex space-x-3">

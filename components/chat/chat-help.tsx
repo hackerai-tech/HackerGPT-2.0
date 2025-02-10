@@ -78,7 +78,7 @@ export const ChatHelp: FC<ChatHelpProps> = () => {
   ]
 
   return (
-    <>
+    <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <IconQuestionMark className="bg-primary text-secondary size-[20px] cursor-pointer rounded-full p-0.5 opacity-60 hover:opacity-50 lg:size-[20px]" />
@@ -146,6 +146,6 @@ export const ChatHelp: FC<ChatHelpProps> = () => {
           onClose={() => setIsKeyboardShortcutsOpen(false)}
         />
       )}
-    </>
+    </div>
   )
 }

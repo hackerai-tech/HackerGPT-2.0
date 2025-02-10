@@ -223,12 +223,9 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
             <Button
               ref={toggleButtonRef}
               className={cn(
-                `absolute left-[16px] ${showSidebar && isMobile ? "top-1/2" : "top-3"} z-20 size-[32px] cursor-pointer`
+                "fixed left-[16px] z-50 size-[32px] cursor-pointer",
+                showSidebar && isMobile ? "top-1/2" : "top-3"
               )}
-              style={{
-                marginLeft: showSidebar ? `${SIDEBAR_WIDTH}px` : "0px",
-                transform: showSidebar ? "rotate(180deg)" : "rotate(0deg)"
-              }}
               variant="ghost"
               size="icon"
               onClick={handleToggleSidebar}
@@ -248,7 +245,10 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
       )}
 
       <div
-        className={cn("bg-tertiary absolute z-50 h-full duration-200")}
+        className={cn(
+          "bg-tertiary h-full duration-200",
+          isMobile ? "fixed z-50" : "relative"
+        )}
         style={sidebarStyle}
       >
         {showSidebar && (
@@ -267,7 +267,7 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
 
       <div
         className={cn(
-          "bg-background flex grow flex-col",
+          "bg-background flex min-w-0 flex-1 flex-col",
           isDraggingEnabled && "drag-drop-zone"
         )}
         {...(isDraggingEnabled
