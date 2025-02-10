@@ -520,11 +520,11 @@ export const useChatHandler = () => {
           thinkingText,
           thinkingElapsedSecs
         )
-
-        setToolInUse("none")
-        setIsGenerating(false)
-        setFirstTokenReceived(false)
       }
+
+      setToolInUse("none")
+      setIsGenerating(false)
+      setFirstTokenReceived(false)
     } catch (error) {
       setToolInUse("none")
       setIsGenerating(false)
