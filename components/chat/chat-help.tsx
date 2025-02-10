@@ -78,7 +78,7 @@ export const ChatHelp: FC<ChatHelpProps> = () => {
   ]
 
   return (
-    <div className="absolute bottom-2 right-2 hidden md:block lg:bottom-4 lg:right-4">
+    <div className="absolute bottom-2 right-2 z-20 hidden md:block lg:bottom-4 lg:right-4">
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <IconQuestionMark className="bg-primary text-secondary size-[20px] cursor-pointer rounded-full p-0.5 opacity-60 hover:opacity-50 lg:size-[20px]" />
@@ -86,7 +86,7 @@ export const ChatHelp: FC<ChatHelpProps> = () => {
 
         <DropdownMenuContent
           align="end"
-          className="z-50 min-w-[280px] max-w-xs overflow-hidden rounded-2xl p-4 py-2"
+          className="min-w-[280px] max-w-xs overflow-hidden rounded-2xl p-4 py-2"
         >
           <DropdownMenuLabel className="mb-2 flex items-center justify-between">
             <div className="flex space-x-4">
