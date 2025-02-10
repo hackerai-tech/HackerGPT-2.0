@@ -65,7 +65,8 @@ export const Message: FC<MessageProps> = ({
     temporaryChatMessages,
     isTemporaryChat,
     chatImages,
-    files
+    files,
+    isPremiumSubscription
   } = useContext(PentestGPTContext)
 
   const {
@@ -247,19 +248,21 @@ export const Message: FC<MessageProps> = ({
           <div
             className={`grow ${isMobile && "space-y-3"} min-w-0 ${message.role === "user" ? "flex justify-end" : ""}`}
           >
-            <div className="flex items-center">
-              {message.role === "assistant" && isMobile && (
-                <ModelIcon
-                  modelId={modelDetails?.modelId || "custom"}
-                  size={ICON_SIZE}
-                />
-              )}
-              {isMobile && (
-                <div className="ml-2 font-semibold">
-                  {message.role === "assistant" && MODEL_DATA?.shortModelName}
-                </div>
-              )}
-            </div>
+            {isPremiumSubscription && (
+              <div className="flex items-center">
+                {message.role === "assistant" && isMobile && (
+                  <ModelIcon
+                    modelId={modelDetails?.modelId || "custom"}
+                    size={ICON_SIZE}
+                  />
+                )}
+                {isMobile && (
+                  <div className="ml-2 font-semibold">
+                    {message.role === "assistant" && MODEL_DATA?.shortModelName}
+                  </div>
+                )}
+              </div>
+            )}
 
             {!firstTokenReceived &&
               isGenerating &&
