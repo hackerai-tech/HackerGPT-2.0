@@ -13,7 +13,7 @@ import {
 import { Tables } from "@/supabase/types"
 import { countTokens } from "gpt-tokenizer"
 import { GPT4o } from "./models/llm/openai-llm-list"
-import { PGPT3_5, PGPT4 } from "./models/llm/hackerai-llm-list"
+import { SmallModel, LargeModel } from "./models/llm/hackerai-llm-list"
 import endent from "endent"
 import { toast } from "sonner"
 import { Fragment } from "./tools/e2b/fragments/types"
@@ -28,9 +28,9 @@ export async function buildFinalMessages(
   let CHUNK_SIZE = 12000
   if (chatSettings.model === GPT4o.modelId) {
     CHUNK_SIZE = 32000 - 4000 // -4000 for the system prompt, custom instructions, and more
-  } else if (chatSettings.model === PGPT4.modelId) {
+  } else if (chatSettings.model === LargeModel.modelId) {
     CHUNK_SIZE = 32000 - 4000 // -4000 for the system prompt, custom instructions, and more
-  } else if (chatSettings.model === PGPT3_5.modelId) {
+  } else if (chatSettings.model === SmallModel.modelId) {
     CHUNK_SIZE = 12000 - 4000 // -4000 for the system prompt, custom instructions, and more
   }
 

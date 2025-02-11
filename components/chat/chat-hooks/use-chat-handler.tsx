@@ -2,7 +2,7 @@ import { useAlertContext } from "@/context/alert-context"
 import { PentestGPTContext } from "@/context/context"
 import { updateChat } from "@/db/chats"
 import { Tables, TablesInsert } from "@/supabase/types"
-import { ChatMessage, ChatPayload, LLMID } from "@/types"
+import { ChatMessage, ChatPayload, LLMID, ModelWithWebSearch } from "@/types"
 import { PluginID } from "@/types/plugins"
 import { useRouter } from "next/navigation"
 import { useContext, useEffect, useRef } from "react"
@@ -214,11 +214,19 @@ export const useChatHandler = () => {
     isRegeneration: boolean,
     isContinuation: boolean = false,
     editSequenceNumber?: number,
-    model?: LLMID,
+    model?: ModelWithWebSearch,
     isTerminalContinuation: boolean = false
   ) => {
     const isEdit = editSequenceNumber !== undefined
     const isRagEnabled = selectedPlugin === PluginID.ENHANCED_SEARCH
+
+    // Simpler model handling
+    const baseModel = (model?.split(":")[0] as LLMID) || chatSettings?.model
+    const isWebSearch = model?.includes(":websearch")
+
+    if (isWebSearch) {
+      selectedPlugin = PluginID.WEB_SEARCH
+    }
 
     try {
       if (!isRegeneration) {
@@ -235,9 +243,7 @@ export const useChatHandler = () => {
       const newAbortController = new AbortController()
       setAbortController(newAbortController)
 
-      const modelData = [...LLM_LIST].find(
-        llm => llm.modelId === (model || chatSettings?.model)
-      )
+      const modelData = [...LLM_LIST].find(llm => llm.modelId === baseModel)
 
       validateChatSettings(
         chatSettings,
@@ -249,7 +255,10 @@ export const useChatHandler = () => {
       )
 
       if (chatSettings && !isRegeneration) {
-        chatSettings.model = model || chatSettings.model
+        setChatSettings(prevSettings => ({
+          ...prevSettings,
+          model: baseModel
+        }))
       }
 
       let currentChat = selectedChat ? { ...selectedChat } : null
@@ -263,7 +272,7 @@ export const useChatHandler = () => {
           b64Images,
           isContinuation,
           selectedPlugin,
-          model: model || chatSettings!.model
+          model: baseModel
         })
 
       let sentChatMessages = isTemporaryChat
@@ -315,7 +324,7 @@ export const useChatHandler = () => {
       const payload: ChatPayload = {
         chatSettings: {
           ...chatSettings!,
-          model: model || chatSettings!.model
+          model: baseModel
         },
         chatMessages: sentChatMessages,
         messageFileItems: retrievedFileItems

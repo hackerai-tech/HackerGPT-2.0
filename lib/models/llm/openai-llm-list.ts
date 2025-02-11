@@ -5,7 +5,6 @@ export const GPT4o: LLM = {
   modelName: "PentestGPT 4o",
   shortModelName: "GPT-4o",
   provider: "openai",
-  hostedId: "gpt-4o",
   imageInput: true
 }
 

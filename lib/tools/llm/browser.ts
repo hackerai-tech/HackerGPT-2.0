@@ -4,7 +4,7 @@ import llmConfig from "@/lib/models/llm/llm-config"
 import { createOpenAI } from "@ai-sdk/openai"
 import { smoothStream, streamText } from "ai"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
-import { PGPT4 } from "@/lib/models/llm/hackerai-llm-list"
+import { LargeModel } from "@/lib/models/llm/hackerai-llm-list"
 
 interface BrowserToolConfig {
   chatSettings: any
@@ -15,7 +15,8 @@ interface BrowserToolConfig {
 
 async function getProviderConfig(chatSettings: any) {
   const isProModel =
-    chatSettings.model === PGPT4.modelId || chatSettings.model === GPT4o.modelId
+    chatSettings.model === LargeModel.modelId ||
+    chatSettings.model === GPT4o.modelId
 
   const defaultModel = "gpt-4o-mini"
   const proModel = "gpt-4o"

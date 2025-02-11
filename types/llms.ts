@@ -1,26 +1,19 @@
-import { ModelProvider } from "."
+import { ModelProvider } from "./models"
 
-export type LLMID = OpenAILLMID | MistralLLMID
+export const VALID_MODEL_IDS = [
+  "gpt-4-turbo-preview",
+  "mistral-medium",
+  "mistral-large"
+] as const
 
-// OpenAI Models (UPDATED 1/29/24)
-export type OpenAILLMID =
-  | "gpt-4-turbo-preview" // GPT-4 Turbo
-  | "gpt-4o" // GPT-4o
-
-// Mistral Models
-export type MistralLLMID =
-  | "mistral-medium" // Mistral Medium
-  | "mistral-large" // Mistral Large
+export type LLMID = (typeof VALID_MODEL_IDS)[number]
 
 export interface LLM {
   modelId: LLMID
   modelName: string
   provider: ModelProvider
-  hostedId: string
   imageInput: boolean
   shortModelName?: string
 }
 
-export interface OpenRouterLLM extends LLM {
-  maxContext: number
-}
+export type ModelWithWebSearch = LLMID | `${LLMID}:websearch`
