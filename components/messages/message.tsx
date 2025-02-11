@@ -329,7 +329,7 @@ export const Message: FC<MessageProps> = ({
         )}
 
         {fileItems.length > 0 && (
-          <div className="my-2 ml-10 text-lg font-bold">
+          <div className="my-2 text-lg font-bold sm:ml-10">
             {!viewSources ? (
               <div
                 className="flex cursor-pointer items-center hover:opacity-50"
