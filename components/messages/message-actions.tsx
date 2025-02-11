@@ -120,9 +120,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
 
   return (isLast && isGenerating) || isEditing ? null : (
     <div
-      className={`text-muted-foreground flex items-center ${
-        !isMobile && "mx-8"
-      } space-x-4`}
+      className={`text-muted-foreground flex items-center space-x-4 sm:mx-8`}
     >
       {/* Temporary chat doesn't have edit functionality */}
       {(isHovering || isLast) &&
@@ -201,21 +199,6 @@ export const MessageActions: FC<MessageActionsProps> = ({
         />
       )}
 
-      {isLast && !messageHasImage && !isPremiumSubscription && (
-        <WithTooltip
-          delayDuration={0}
-          side="bottom"
-          display={<div>Regenerate</div>}
-          trigger={
-            <IconRepeat
-              className="cursor-pointer hover:opacity-50"
-              size={MESSAGE_ICON_SIZE}
-              onClick={onRegenerate}
-            />
-          }
-        />
-      )}
-
       {(isHovering || isLast) && isAssistant && !isTemporaryChat && (
         <WithTooltip
           delayDuration={0}
@@ -258,6 +241,21 @@ export const MessageActions: FC<MessageActionsProps> = ({
                 onClick={onBadResponse}
               />
             )
+          }
+        />
+      )}
+
+      {isLast && !messageHasImage && !isPremiumSubscription && (
+        <WithTooltip
+          delayDuration={0}
+          side="bottom"
+          display={<div>Regenerate</div>}
+          trigger={
+            <IconRepeat
+              className="cursor-pointer hover:opacity-50"
+              size={MESSAGE_ICON_SIZE}
+              onClick={onRegenerate}
+            />
           }
         />
       )}

@@ -1,6 +1,6 @@
 import { buildSystemPrompt } from "@/lib/ai/prompts"
 import { toVercelChatMessages, removeLastSureMessage } from "@/lib/build-prompt"
-import { PGPT4 } from "@/lib/models/llm/hackerai-llm-list"
+import { LargeModel } from "@/lib/models/llm/hackerai-llm-list"
 import llmConfig from "@/lib/models/llm/llm-config"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 
@@ -13,7 +13,8 @@ interface WebSearchConfig {
 
 async function getProviderConfig(chatSettings: any, profile: any) {
   const isProModel =
-    chatSettings.model === PGPT4.modelId || chatSettings.model === GPT4o.modelId
+    chatSettings.model === LargeModel.modelId ||
+    chatSettings.model === GPT4o.modelId
 
   const defaultModel = "sonar"
   const proModel = "sonar-pro"

@@ -15,7 +15,7 @@ export const loadingStates = {
   },
   retrieval: {
     icon: <IconFileText size={20} />,
-    text: "Reading files..."
+    text: "Reading documents..."
   },
   [PluginID.WEB_SEARCH]: {
     icon: <IconWorld size={20} />,

@@ -1,21 +1,19 @@
 import { LLM } from "@/types"
 
-export const PGPT3_5: LLM = {
+export const SmallModel: LLM = {
   modelId: "mistral-medium",
   modelName: "PentestGPT Small",
   shortModelName: "PGPT-Small",
-  provider: "mistral",
-  hostedId: "mistral-medium",
+  provider: "hackerai",
   imageInput: true
 }
 
-export const PGPT4: LLM = {
+export const LargeModel: LLM = {
   modelId: "mistral-large",
   modelName: "PentestGPT Large",
   shortModelName: "PGPT-Large",
-  provider: "mistral",
-  hostedId: "mistral-large",
+  provider: "hackerai",
   imageInput: true
 }
 
-export const HACKERAI_LLM_LIST: LLM[] = [PGPT3_5, PGPT4]
+export const HACKERAI_LLM_LIST: LLM[] = [SmallModel, LargeModel]

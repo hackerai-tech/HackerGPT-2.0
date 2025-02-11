@@ -1,8 +1,14 @@
-import { FC, useMemo, useState, Fragment, useEffect, useRef } from "react"
-import { IconChevronDown, IconRepeat } from "@tabler/icons-react"
+import React, {
+  FC,
+  useMemo,
+  useState,
+  Fragment,
+  useEffect,
+  useRef
+} from "react"
+import { IconChevronDown, IconRepeat, IconWorld } from "@tabler/icons-react"
 import { WithTooltip } from "./with-tooltip"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
-import React from "react"
 import { LLMID } from "@/types"
 import {
   Menu,
@@ -11,7 +17,6 @@ import {
   MenuButton,
   MenuItem
 } from "@headlessui/react"
-
 import { ModelIcon } from "../models/model-icon"
 
 interface SwitchModelProps {
@@ -200,6 +205,27 @@ export const SwitchModel: FC<SwitchModelProps> = ({
                     )}
                   </MenuItem>
                 ))}
+
+              <MenuItem>
+                {({ focus }) => (
+                  <button
+                    onClick={() => onChangeModel(`${currentModel}:websearch`)}
+                    className={`${
+                      focus
+                        ? "bg-accent text-accent-foregrounds"
+                        : "text-secondary-foreground"
+                    } group flex w-full items-center justify-between whitespace-nowrap rounded-sm px-3 py-2.5 text-base transition-colors`}
+                  >
+                    <div className="flex items-center">
+                      Search the web
+                      <IconWorld
+                        size={18}
+                        className={`text-muted-foreground ml-3`}
+                      />
+                    </div>
+                  </button>
+                )}
+              </MenuItem>
             </div>
           </MenuItems>
         </Transition>

@@ -76,7 +76,11 @@ export const ChatItem: FC<ChatItemProps> = ({ chat }) => {
     >
       <div
         className={cn(
-          "flex-1 truncate text-sm [-webkit-mask-image:var(--sidebar-mask)] [mask-image:var(--sidebar-mask)]"
+          "mr-2 flex-1 overflow-hidden text-clip whitespace-nowrap text-sm",
+          "[-webkit-mask-image:var(--sidebar-mask)] [mask-image:var(--sidebar-mask)]",
+          "group-hover:[-webkit-mask-image:var(--sidebar-mask-active)] group-hover:[mask-image:var(--sidebar-mask-active)]",
+          (isActive || isOpen) &&
+            "[-webkit-mask-image:var(--sidebar-mask-active)] [mask-image:var(--sidebar-mask-active)]"
         )}
       >
         {chat.name}
