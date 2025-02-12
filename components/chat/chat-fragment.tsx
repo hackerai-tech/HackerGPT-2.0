@@ -1,5 +1,5 @@
 /* eslint-disable tailwindcss/classnames-order */
-import { IconX, IconReload } from "@tabler/icons-react"
+import { IconX, IconReload, IconDownload } from "@tabler/icons-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Tooltip,
@@ -77,6 +77,18 @@ export function ChatFragment() {
     }
   }
 
+  const handleDownloadImage = (pngData: string, index: number) => {
+    const link = document.createElement("a")
+    link.href = `data:image/png;base64,${pngData}`
+    const sanitizedTitle = fragment?.title
+      ? fragment.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()
+      : "chart"
+    link.download = `${sanitizedTitle}_${index + 1}.png`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   useEffect(() => {
     handleReload()
   }, [fragment?.code])
@@ -86,7 +98,7 @@ export function ChatFragment() {
   }
 
   return (
-    <div className="border-border flex h-[45%] flex-col overflow-hidden border-b lg:h-auto lg:w-1/2 lg:border-b-0 lg:border-l">
+    <div className="border-border flex h-[45%] flex-col overflow-hidden border-b lg:h-auto lg:w-3/5 lg:border-b-0 lg:border-l">
       <Tabs
         value={activeTab}
         onValueChange={value => setActiveTab(value as "code" | "execution")}
@@ -158,6 +170,30 @@ export function ChatFragment() {
                       </TooltipProvider>
                     )}
                 </>
+              )}
+            {activeTab === "execution" &&
+              fragment.sandboxResult?.template === "code-interpreter-v1" &&
+              fragment.sandboxResult.cellResults?.map(
+                (result, index) =>
+                  result.png && (
+                    <TooltipProvider key={index}>
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-muted-foreground"
+                            onClick={() =>
+                              handleDownloadImage(result.png!, index)
+                            }
+                          >
+                            <IconDownload className="size-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Download chart</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )
               )}
             <TabsList className="grid h-8 w-[160px] grid-cols-2 border px-1 py-0">
               <TabsTrigger
