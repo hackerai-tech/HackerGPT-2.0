@@ -1,6 +1,1 @@
-export type ModelProvider =
-  | "openai"
-  | "hackerai"
-  | "mistral"
-  | "openrouter"
-  | "custom"
+export type ModelProvider = "openai" | "hackerai" | "custom"

@@ -51,7 +51,8 @@ export async function browsePage(url: string): Promise<string> {
         Authorization: `Bearer ${jinaToken}`,
         "X-With-Generated-Alt": "true",
         "X-No-Cache": "true",
-        "X-Return-Format": "markdown"
+        "X-With-Images-Summary": "true",
+        "X-With-Links-Summary": "true"
       }
     })
 

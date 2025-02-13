@@ -5,6 +5,7 @@ import { Sparkles, Sparkle } from "lucide-react"
 import { useTheme } from "next-themes"
 import { FC, HTMLAttributes } from "react"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
+import { SmallModel, LargeModel } from "@/lib/models/llm/hackerai-llm-list"
 
 interface ModelIconProps extends HTMLAttributes<HTMLDivElement> {
   modelId: LLMID | "custom"
@@ -13,8 +14,8 @@ interface ModelIconProps extends HTMLAttributes<HTMLDivElement> {
 
 export const iconMap = {
   [GPT4o.modelId]: Sparkles,
-  "mistral-medium": IconBolt,
-  "mistral-large": Sparkle,
+  [SmallModel.modelId]: IconBolt,
+  [LargeModel.modelId]: Sparkle,
   default: IconSparkles
 }
 

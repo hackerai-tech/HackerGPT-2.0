@@ -1,9 +1,7 @@
 import { executeWebSearchTool } from "./web-search"
 import { executeTerminalTool } from "./terminal"
 import { executeBrowserTool } from "./browser"
-// import { executeFragments } from "../e2b/fragments/fragment-tool"
 import { z } from "zod"
-// import { executeCodingLLM } from "./cooding-llm"
 
 export const createToolSchemas = ({
   chatSettings,

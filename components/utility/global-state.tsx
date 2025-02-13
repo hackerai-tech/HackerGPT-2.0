@@ -13,7 +13,6 @@ import {
 import { getTeamMembersByTeamId } from "@/db/teams"
 // import { getWorkspacesByUserId } from "@/db/workspaces"
 import { convertBlobToBase64 } from "@/lib/blob-to-b64"
-import { fetchHostedModels } from "@/lib/models/fetch-models"
 import { supabase } from "@/lib/supabase/browser-client"
 import { ProcessedTeamMember } from "@/lib/team-utils"
 import { Tables } from "@/supabase/types"
@@ -22,7 +21,6 @@ import {
   ChatMessage,
   ChatSettings,
   ContentType,
-  LLM,
   LLMID,
   MessageImage,
   SubscriptionStatus
@@ -66,10 +64,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
   const [chats, setChats] = useState<Tables<"chats">[]>([])
   const [files, setFiles] = useState<Tables<"files">[]>([])
   // const [workspaces, setWorkspaces] = useState<Tables<"workspaces">[]>([])
-
-  // MODELS STORE
-  const [envKeyMap, setEnvKeyMap] = useState<Record<string, boolean>>({})
-  const [availableHostedModels, setAvailableHostedModels] = useState<LLM[]>([])
 
   // WORKSPACE STORE
   const [selectedWorkspace, setSelectedWorkspace] =
@@ -190,13 +184,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
       ) {
         const subscription = await getSubscriptionByTeamId(members[0].team_id)
         updateSubscription(subscription)
-      }
-
-      const hostedModelRes = await fetchHostedModels()
-
-      if (hostedModelRes) {
-        setEnvKeyMap(hostedModelRes.envKeyMap)
-        setAvailableHostedModels(hostedModelRes.hostedModels)
       }
     }
   }
@@ -404,12 +391,6 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
         setFiles,
         // workspaces,
         // setWorkspaces,
-
-        // MODELS STORE
-        envKeyMap,
-        setEnvKeyMap,
-        availableHostedModels,
-        setAvailableHostedModels,
 
         // WORKSPACE STORE
         selectedWorkspace,

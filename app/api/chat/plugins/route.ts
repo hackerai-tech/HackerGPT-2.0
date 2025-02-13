@@ -10,6 +10,7 @@ import {
   isFreePlugin,
   isTerminalPlugin
 } from "@/lib/tools/tool-store/tools-helper"
+import { LargeModel, SmallModel} from "@/lib/models/llm/hackerai-llm-list"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -58,9 +59,9 @@ export async function POST(request: Request) {
     const chatSettings = payload.chatSettings
 
     let ratelimitmodel
-    if (chatSettings.model === "mistral-medium") {
+    if (chatSettings.model === SmallModel.modelId) {
       ratelimitmodel = "pentestgpt"
-    } else if (chatSettings.model === "mistral-large") {
+    } else if (chatSettings.model === LargeModel.modelId) {
       ratelimitmodel = "pentestgpt-pro"
     } else {
       ratelimitmodel = "gpt-4"

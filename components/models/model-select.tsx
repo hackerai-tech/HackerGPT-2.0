@@ -16,6 +16,9 @@ import { ModelIcon } from "./model-icon"
 import { Button } from "../ui/button"
 import { Switch } from "../ui/switch"
 import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
+import { LLM_LIST } from "@/lib/models/llm/llm-list"
+import { LargeModel, SmallModel } from "@/lib/models/llm/hackerai-llm-list"
+import { GPT4o } from "@/lib/models/llm/openai-llm-list"
 
 interface ModelSelectProps {
   selectedModelId: LLMID
@@ -32,12 +35,8 @@ export const ModelSelect: FC<ModelSelectProps> = ({
   const searchParams = useSearchParams()
   const params = useParams()
   const pathname = usePathname()
-  const {
-    isPremiumSubscription,
-    profile,
-    availableHostedModels,
-    isTemporaryChat
-  } = useContext(PentestGPTContext)
+  const { isPremiumSubscription, profile, isTemporaryChat } =
+    useContext(PentestGPTContext)
 
   const { handleNewChat } = useChatHandler()
 
@@ -80,17 +79,15 @@ export const ModelSelect: FC<ModelSelectProps> = ({
     setIsOpen(false)
   }
 
-  const allModels = [...availableHostedModels]
-
   // Define the specific order of models
   const modelOrder: LLMID[] = [
-    "gpt-4-turbo-preview",
-    "mistral-large",
-    "mistral-medium"
+    GPT4o.modelId,
+    LargeModel.modelId,
+    SmallModel.modelId
   ]
 
   // Sort the models based on the predefined order
-  const sortedModels = allModels.sort((a, b) => {
+  const sortedModels = LLM_LIST.sort((a, b) => {
     const indexA = modelOrder.indexOf(a.modelId as LLMID)
     const indexB = modelOrder.indexOf(b.modelId as LLMID)
     return indexA - indexB
@@ -117,23 +114,22 @@ export const ModelSelect: FC<ModelSelectProps> = ({
 
   const freeUserModels = [
     {
-      modelId: "gpt-4-turbo-preview" as LLMID,
+      modelId: GPT4o.modelId,
       modelName: "PentestGPT Pro",
       description: "Our smartest model & more",
       isUpgrade: true
     },
     {
-      modelId: "mistral-medium" as LLMID,
+      modelId: SmallModel.modelId,
       modelName: "PentestGPT",
-      description: "Great for everyday tasks",
-      provider: "mistral"
+      description: "Great for everyday tasks"
     }
   ]
 
   const modelDescriptions: Record<string, string> = {
-    "gpt-4-turbo-preview": "Advanced model with tools",
-    "mistral-large": "Uncensored, handles complex tasks",
-    "mistral-medium": "Great for everyday tasks"
+    [GPT4o.modelId]: "Advanced model with tools",
+    [LargeModel.modelId]: "Uncensored, handles complex tasks",
+    [SmallModel.modelId]: "Great for everyday tasks"
   }
 
   return (
