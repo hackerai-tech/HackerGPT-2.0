@@ -455,6 +455,11 @@ export const useChatHandler = () => {
             setChatFiles
           )
 
+          // Update URL without triggering a page reload or new history entry
+          // This replaces the current URL with the chat ID after chat creation
+          // Allows starting from home screen and seamlessly transitioning to chat URL
+          window.history.replaceState({}, '', `/${selectedWorkspace?.id}/c/${currentChat.id}`);
+
           generateChatTitle([
             {
               message: {
