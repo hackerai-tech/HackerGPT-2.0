@@ -44,12 +44,6 @@ interface PentestGPTContextType {
   // workspaces: Tables<"workspaces">[]
   // setWorkspaces: Dispatch<SetStateAction<Tables<"workspaces">[]>>
 
-  // MODELS STORE
-  envKeyMap: Record<string, boolean>
-  setEnvKeyMap: Dispatch<SetStateAction<Record<string, boolean>>>
-  availableHostedModels: LLM[]
-  setAvailableHostedModels: Dispatch<SetStateAction<LLM[]>>
-
   // WORKSPACE STORE
   selectedWorkspace: Tables<"workspaces"> | null
   setSelectedWorkspace: Dispatch<SetStateAction<Tables<"workspaces"> | null>>
@@ -141,12 +135,6 @@ export const PentestGPTContext = createContext<PentestGPTContextType>({
   setFiles: () => {},
   // workspaces: [],
   // setWorkspaces: () => {},
-
-  // MODELS STORE
-  envKeyMap: {},
-  setEnvKeyMap: () => {},
-  availableHostedModels: [],
-  setAvailableHostedModels: () => {},
 
   // WORKSPACE STORE
   selectedWorkspace: null,

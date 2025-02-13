@@ -2,7 +2,6 @@ import { PentestGPTContext } from "@/context/context"
 import { deleteAllChats } from "@/db/chats"
 import { PROFILE_CONTEXT_MAX } from "@/db/limits"
 import { updateProfile } from "@/db/profile"
-import { LLM_LIST_MAP } from "@/lib/models/llm/llm-list"
 import { supabase } from "@/lib/supabase/browser-client"
 import {
   DialogPanel,
@@ -43,16 +42,8 @@ import { useUIContext } from "@/context/ui-context"
 export const Settings: FC<{ showEmail?: boolean }> = ({
   showEmail = false
 }) => {
-  const {
-    user,
-    subscription,
-    profile,
-    setProfile,
-    envKeyMap,
-    setAvailableHostedModels,
-    membershipData,
-    userEmail
-  } = useContext(PentestGPTContext)
+  const { user, subscription, profile, setProfile, membershipData, userEmail } =
+    useContext(PentestGPTContext)
   const { isMobile } = useUIContext()
 
   const router = useRouter()
@@ -90,37 +81,7 @@ export const Settings: FC<{ showEmail?: boolean }> = ({
     })
 
     setProfile(updatedProfile)
-
     toast.success("Profile updated!", { duration: 2000 })
-
-    const providers = ["openai", "mistral", "openrouter"]
-
-    providers.forEach(async provider => {
-      const providerKey: keyof typeof profile =
-        `${provider}_api_key` as keyof typeof profile
-
-      const models = LLM_LIST_MAP[provider]
-      const envKeyActive = envKeyMap[provider]
-
-      if (!envKeyActive) {
-        const hasApiKey = !!updatedProfile[providerKey]
-
-        if (hasApiKey && Array.isArray(models)) {
-          setAvailableHostedModels(prev => {
-            const newModels = models.filter(
-              model =>
-                !prev.some(prevModel => prevModel.modelId === model.modelId)
-            )
-            return [...prev, ...newModels]
-          })
-        } else if (!hasApiKey && Array.isArray(models)) {
-          setAvailableHostedModels(prev =>
-            prev.filter(model => !models.includes(model))
-          )
-        }
-      }
-    })
-
     setIsOpen(false)
   }
 

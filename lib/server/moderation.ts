@@ -6,7 +6,7 @@ export async function getModerationResult(
   messages: any[],
   openaiApiKey: string,
   hackerRAGMinLength: number,
-  isPGPTLarge: boolean
+  isLargeModel: boolean
 ): Promise<{ shouldUncensorResponse: boolean }> {
   const openai = new OpenAI({ apiKey: openaiApiKey })
 
@@ -34,7 +34,7 @@ export async function getModerationResult(
     const shouldUncensorResponse = determineShouldUncensorResponse(
       moderationLevel,
       hazardCategories,
-      isPGPTLarge
+      isLargeModel
     )
 
     // console.log(
@@ -110,7 +110,7 @@ function calculateModerationLevel(
 function determineShouldUncensorResponse(
   moderationLevel: number,
   hazardCategories: string[],
-  isPGPTLarge: boolean
+  isLargeModel: boolean
 ): boolean {
   const forbiddenCategories = [
     "sexual",
@@ -129,7 +129,7 @@ function determineShouldUncensorResponse(
     forbiddenCategories.includes(category)
   )
 
-  const maxModerationLevel = isPGPTLarge ? 100 : 0.9
+  const maxModerationLevel = isLargeModel ? 100 : 0.9
   return (
     moderationLevel >= 0.4 &&
     moderationLevel <= maxModerationLevel &&
