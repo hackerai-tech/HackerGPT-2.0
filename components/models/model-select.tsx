@@ -44,8 +44,8 @@ export const ModelSelect: FC<ModelSelectProps> = ({
     (isTemporary: boolean) => {
       const newSearchParams = new URLSearchParams(searchParams)
       if (isTemporary) {
-        if (pathname.includes("/chat/")) {
-          const baseURL = `/${params.workspaceid}/chat`
+        if (pathname.includes("/c/")) {
+          const baseURL = `/${params.workspaceid}/c`
           newSearchParams.set("temporary-chat", "true")
           router.push(`${baseURL}?${newSearchParams.toString()}`)
         } else {

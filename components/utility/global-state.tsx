@@ -256,7 +256,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
       setTimeout(() => window.sessionStorage.removeItem(toastKey), 2000)
     }
 
-    router.push(`/${workspaceId}/chat`)
+    router.push(`/${workspaceId}/c`)
   }
 
   const fetchMessages = async (chatId: string, workspaceId: string) => {
@@ -341,7 +341,7 @@ export const GlobalState: FC<GlobalStateProps> = ({ children }) => {
       const chat = await getChatById(chatId)
       if (!chat) {
         // Chat not found, redirect to the workspace chat page
-        router.push(`/${workspaceId}/chat`)
+        router.push(`/${workspaceId}/c`)
         return
       }
 

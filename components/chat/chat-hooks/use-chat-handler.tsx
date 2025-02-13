@@ -109,7 +109,7 @@ export const useChatHandler = () => {
       }))
     }
 
-    return router.push(`/${selectedWorkspace.id}/chat/${chat.id}`)
+    return router.push(`/${selectedWorkspace.id}/c/${chat.id}`)
   }
 
   const handleNewChat = async () => {
@@ -138,7 +138,7 @@ export const useChatHandler = () => {
     setFragment(null)
 
     setIsReadyToChat(true)
-    return router.push(`/${selectedWorkspace.id}/chat`)
+    return router.push(`/${selectedWorkspace.id}/c`)
   }
 
   const handleFocusChatInput = () => {

@@ -99,7 +99,7 @@ export default async function Login({
         .single()
 
       if (homeWorkspace) {
-        return redirect(`/${homeWorkspace.id}/chat`)
+        return redirect(`/${homeWorkspace.id}/c`)
       }
     }
   }
@@ -168,7 +168,7 @@ export default async function Login({
       )
     }
 
-    return redirect(`/${homeWorkspace.id}/chat`)
+    return redirect(`/${homeWorkspace.id}/c`)
   }
 
   const signUp = async (formData: FormData) => {
