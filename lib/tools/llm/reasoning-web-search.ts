@@ -129,7 +129,7 @@ async function processStream({
     }
   }
   // Send citations from metadata when available
-  const metadata = await result.experimental_providerMetadata
+  const metadata = await result.providerMetadata
   const citations = metadata?.perplexity?.citations as string[] | undefined
   if (citations?.length) {
     dataStream.writeData({ citations })

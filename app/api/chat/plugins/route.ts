@@ -10,7 +10,7 @@ import {
   isFreePlugin,
   isTerminalPlugin
 } from "@/lib/tools/tool-store/tools-helper"
-import { LargeModel, SmallModel} from "@/lib/models/llm/hackerai-llm-list"
+import { LargeModel, SmallModel } from "@/lib/models/llm/hackerai-llm-list"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [

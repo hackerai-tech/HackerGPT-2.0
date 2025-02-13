@@ -222,7 +222,7 @@ export async function POST(request: Request) {
           maxTokens: 2048,
           abortSignal: request.signal,
           // ...(!shouldUseRAG && !shouldUncensorResponse && config.isPentestGPTPro ? { tools } : null),
-          experimental_transform: smoothStream()
+          experimental_transform: smoothStream({ chunking: "word" })
         })
 
         result.mergeIntoDataStream(dataStream)
