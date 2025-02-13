@@ -1,4 +1,4 @@
-import { getTerminalResultInstructions } from "@/lib/tools/tool-store/prompts/system-prompt"
+import { getTerminalResultInstructions } from "@/lib/backend-config"
 import {
   getPentestGPTInfo,
   systemPromptEnding,
