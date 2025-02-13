@@ -21,6 +21,7 @@ import { Button } from "../ui/button"
 import { toast } from "sonner"
 import { PentestGPTContext } from "@/context/context"
 import dynamic from "next/dynamic"
+import { useFragments } from "./chat-hooks/use-fragments"
 
 const DynamicKeyboardShortcutsPopup = dynamic(
   () => import("./keyboard-shortcuts-popup"),
@@ -31,6 +32,8 @@ interface ChatHelpProps {}
 
 export const ChatHelp: FC<ChatHelpProps> = () => {
   const { userEmail } = useContext(PentestGPTContext)
+  const { isFragmentBarOpen } = useFragments()
+
   const [isOpen, setIsOpen] = useState(false)
   const [isKeyboardShortcutsOpen, setIsKeyboardShortcutsOpen] = useState(false)
   const { copyToClipboard } = useCopyToClipboard({ timeout: 2000 })
@@ -78,10 +81,12 @@ export const ChatHelp: FC<ChatHelpProps> = () => {
   ]
 
   return (
-    <div className="absolute bottom-2 right-2 z-20 hidden sm:block lg:bottom-4 lg:right-4">
+    <div
+      className={`absolute bottom-2 end-2 z-20 hidden sm:block lg:bottom-3 lg:end-3 ${isFragmentBarOpen && "lg:end-1"}`}
+    >
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <IconQuestionMark className="bg-primary text-secondary size-[20px] cursor-pointer rounded-full p-0.5 opacity-60 hover:opacity-50 lg:size-[20px]" />
+          <IconQuestionMark className="bg-primary text-secondary size-[20px] cursor-pointer rounded-full p-0.5 opacity-60 hover:opacity-50" />
         </DropdownMenuTrigger>
 
         <DropdownMenuContent

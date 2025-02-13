@@ -245,7 +245,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
           <ChatFragment />
 
           {/* Chat messages container */}
-          <div className="flex h-[45%] flex-1 flex-col overflow-hidden lg:h-auto">
+          <div className="relative flex h-[45%] flex-1 flex-col overflow-hidden lg:h-auto lg:w-2/5">
             {/* Chat messages */}
             <div
               ref={scrollRef}
@@ -286,10 +286,7 @@ export const ChatUI: FC<ChatUIProps> = ({}) => {
                 )}
             </div>
 
-            {/* Chat input */}
             <ChatInput />
-
-            {/* Chat help */}
             <ChatHelp />
           </div>
         </div>

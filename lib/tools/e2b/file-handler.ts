@@ -9,6 +9,12 @@ interface FileUploadResult {
   error?: string
 }
 
+interface BatchFileUploadResult {
+  success: boolean
+  uploadedFiles: FileUploadResult[]
+  limitExceeded: boolean
+}
+
 export async function uploadFileToSandbox(
   fileId: string,
   sandbox: Sandbox,
@@ -33,17 +39,19 @@ export async function uploadFileToSandbox(
       path: sandboxPath
     }
   } catch (error) {
-    console.error("❌ File upload failed:", error)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error("❌ File upload failed:", errorMessage)
+
     dataStream.writeData({
       type: "text-delta",
-      content: `⚠️ Failed to upload ${name}: ${error}\n`
+      content: `⚠️ Failed to upload ${name}: ${errorMessage}\n`
     })
 
     return {
       success: false,
-      name: "",
+      name,
       path: "",
-      error: error instanceof Error ? error.message : String(error)
+      error: errorMessage
     }
   }
 }
@@ -81,5 +89,38 @@ async function getFileContentFromSupabase(fileId: string) {
   return {
     content,
     name: fileData.name
+  }
+}
+
+export async function uploadFilesToSandbox(
+  files: { fileId: string }[],
+  sandbox: Sandbox,
+  dataStream: any
+): Promise<BatchFileUploadResult> {
+  let filesToProcess = files
+
+  if (files.length > 1) {
+    dataStream.writeData({
+      type: "text-delta",
+      content:
+        "⚠️ Warning: Maximum 3 files can be uploaded at once. Only the first 3 files will be processed.\n"
+    })
+    filesToProcess = files.slice(0, 3)
+  }
+
+  const results = []
+  for (const fileRequest of filesToProcess) {
+    const result = await uploadFileToSandbox(
+      fileRequest.fileId,
+      sandbox,
+      dataStream
+    )
+    results.push(result)
+  }
+
+  return {
+    success: results.every(r => r.success),
+    uploadedFiles: results,
+    limitExceeded: files.length > 3
   }
 }

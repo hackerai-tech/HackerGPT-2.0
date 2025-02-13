@@ -21,6 +21,7 @@ import {
 } from "@/lib/ai/terminal-utils"
 import { Sandbox } from "@e2b/code-interpreter"
 import { createTerminal } from "@/lib/tools/tool-store/tools-terminal"
+import { uploadFilesToSandbox } from "@/lib/tools/e2b/file-handler"
 
 const DEFAULT_BASH_SANDBOX_TIMEOUT = 5 * 60 * 1000
 const DEFAULT_TEMPLATE = "pro-terminal-plugins-v1"
@@ -74,9 +75,21 @@ export async function commandGeneratorHandler({
             terminal: tool({
               description: "Generate and execute a terminal command",
               parameters: z.object({
-                command: z.string().describe("The terminal command to execute")
+                command: z.string().describe("The terminal command to execute"),
+                files: z
+                  .array(
+                    z.object({
+                      fileId: z.string().describe("ID of the file to upload")
+                    })
+                  )
+                  .max(3)
+                  .optional()
+                  .describe(
+                    "Files to upload to sandbox before executing command (max 3 files)"
+                  )
               }),
-              execute: async ({ command }) => {
+              execute: async ({ command, files = [] }) => {
+                console.log("files", files)
                 const expectedCommands: Partial<Record<PluginID, string>> = {
                   [PluginID.SQLI_EXPLOITER]: "sqlmap",
                   [PluginID.SSL_SCANNER]: "testssl.sh",
@@ -106,6 +119,17 @@ export async function commandGeneratorHandler({
                     getTerminalTemplate(pluginID) || DEFAULT_TEMPLATE,
                     DEFAULT_BASH_SANDBOX_TIMEOUT
                   )
+                }
+
+                // Upload requested files
+                if (files.length > 0) {
+                  await uploadFilesToSandbox(files, sandbox, {
+                    writeData: (data: any) => {
+                      if (data.type === "text-delta") {
+                        enqueueChunk(data.content)
+                      }
+                    }
+                  })
                 }
 
                 const terminalStream = await terminalExecutor({
