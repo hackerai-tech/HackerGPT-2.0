@@ -97,6 +97,7 @@ export async function POST(request: Request) {
       filterTargetMessage.role === "user" &&
       filterTargetMessage.content.length > llmConfig.hackerRAG.messageLength.min
     ) {
+      console.log("[EnhancedSearch] Executing enhanced search")
       const { standaloneQuestion, atomicQuestions } =
         await generateStandaloneQuestion(
           messages,
