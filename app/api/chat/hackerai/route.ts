@@ -21,6 +21,7 @@ import { getModerationResult } from "@/lib/server/moderation"
 import { PluginID } from "@/types/plugins"
 import { executeWebSearchTool } from "@/lib/tools/llm/web-search"
 import { createStreamResponse } from "@/lib/ai-helper"
+import { LargeModel } from "@/lib/models/llm/hackerai-llm-list"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -240,7 +241,7 @@ export async function POST(request: Request) {
 }
 
 async function getProviderConfig(chatSettings: any, profile: any) {
-  const isLargeModel = chatSettings.model === "mistral-large"
+  const isLargeModel = chatSettings.model === LargeModel.modelId
 
   const defaultModel = llmConfig.models.pentestgpt_small
   const proModel = llmConfig.models.pentestgpt_large

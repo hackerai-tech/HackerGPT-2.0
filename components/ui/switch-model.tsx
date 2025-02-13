@@ -9,6 +9,7 @@ import React, {
 import { IconChevronDown, IconRepeat, IconWorld } from "@tabler/icons-react"
 import { WithTooltip } from "./with-tooltip"
 import { GPT4o } from "@/lib/models/llm/openai-llm-list"
+import { SmallModel, LargeModel } from "@/lib/models/llm/hackerai-llm-list"
 import { LLMID } from "@/types"
 import {
   Menu,
@@ -29,9 +30,9 @@ const getModelDisplayName = (modelId: string): string => {
   switch (modelId) {
     case GPT4o.modelId:
       return "4o"
-    case "mistral-medium":
+    case SmallModel.modelId:
       return "small"
-    case "mistral-large":
+    case LargeModel.modelId:
       return "large"
     default:
       return modelId
@@ -144,8 +145,8 @@ export const SwitchModel: FC<SwitchModelProps> = ({
 
               {[
                 { id: GPT4o.modelId, name: "PGPT-4o" },
-                { id: "mistral-large", name: "PGPT-Large" },
-                { id: "mistral-medium", name: "PGPT-Small" }
+                { id: LargeModel.modelId, name: "PGPT-Large" },
+                { id: SmallModel.modelId, name: "PGPT-Small" }
               ]
                 .filter(model => model.id !== currentModel)
                 .map(({ id, name }) => (
@@ -174,8 +175,8 @@ export const SwitchModel: FC<SwitchModelProps> = ({
 
               {[
                 { id: GPT4o.modelId, name: "PGPT-4o" },
-                { id: "mistral-large", name: "PGPT-Large" },
-                { id: "mistral-medium", name: "PGPT-Small" }
+                { id: LargeModel.modelId, name: "PGPT-Large" },
+                { id: SmallModel.modelId, name: "PGPT-Small" }
               ]
                 .filter(model => model.id === currentModel)
                 .map(({ id, name }) => (

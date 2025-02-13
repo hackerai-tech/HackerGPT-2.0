@@ -6,12 +6,12 @@ import { getChatsByWorkspaceId } from "@/db/chats"
 import { getFileWorkspacesByWorkspaceId } from "@/db/files"
 import { getWorkspaceById } from "@/db/workspaces"
 import { supabase } from "@/lib/supabase/browser-client"
-import { LLMID } from "@/types"
 import { useParams, useRouter } from "next/navigation"
 import { ReactNode, useContext, useEffect, useState } from "react"
 import Loading from "../loading"
 import { getSubscriptionByUserId } from "@/db/subscriptions"
 import { useUIContext } from "@/context/ui-context"
+import { LargeModel, SmallModel } from "@/lib/models/llm/hackerai-llm-list"
 
 interface WorkspaceLayoutProps {
   children: ReactNode
@@ -56,8 +56,8 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
       setChatSettings({
         model:
           subscription?.status === "active"
-            ? "mistral-large"
-            : ("mistral-medium" as LLMID),
+            ? LargeModel.modelId
+            : SmallModel.modelId,
         includeProfileContext: true
       })
 
