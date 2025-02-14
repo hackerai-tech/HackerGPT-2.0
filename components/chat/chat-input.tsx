@@ -3,7 +3,6 @@ import useHotkey from "@/lib/hooks/use-hotkey"
 import { cn } from "@/lib/utils"
 import { PluginID } from "@/types/plugins"
 import { FC, RefObject, useContext, useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
 import { Input } from "../ui/input"
 import { TextareaAutosize } from "../ui/textarea-autosize"
 import { ChatCommandInput } from "./chat-command-input"
@@ -201,16 +200,12 @@ export const ChatInput: FC = () => {
 
                   const files = Array.from(e.target.files)
 
-                  if (files.length > 4) {
-                    toast.error("Maximum of 4 files can be uploaded at once.")
-                    return
-                  }
-
                   handleFileUpload(
                     files,
                     setShowConfirmationDialog,
                     setPendingFiles,
-                    handleSelectDeviceFile
+                    handleSelectDeviceFile,
+                    newMessageImages
                   )
                 }}
                 accept="*"

@@ -108,7 +108,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body className={inter.className + " h-full"}>
         <Providers attribute="class" defaultTheme="dark">
-        <Toaster richColors position="top-center" duration={3000} />
+          <Toaster richColors position="top-center" duration={3000} />
           <div className="bg-background text-foreground flex h-dvh flex-col items-center overflow-x-auto">
             {user ? (
               <PluginProvider>
