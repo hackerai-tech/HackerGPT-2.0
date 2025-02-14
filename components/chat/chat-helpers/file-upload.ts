@@ -1,12 +1,14 @@
+import { MessageImage } from "@/types/images/message-image"
 import { toast } from "sonner"
 
-const MAX_FILES = 4
+const MAX_FILES = 3
 
 export const handleFileUpload = (
   files: File[],
   setShowConfirmationDialog: (show: boolean) => void,
   setPendingFiles: (files: File[]) => void,
-  handleSelectDeviceFile: (file: File) => void
+  handleSelectDeviceFile: (file: File) => void,
+  newMessageImages: MessageImage[] = []
 ) => {
   const imageExtensions = ["jpg", "jpeg", "png", "gif", "webp"]
   const videoExtensions = ["mp4", "avi", "mov", "wmv", "flv"]
@@ -47,6 +49,11 @@ export const handleFileUpload = (
 
   if (files.length > MAX_FILES) {
     toast.error(`Maximum of ${MAX_FILES} files can be uploaded at once.`)
+    return
+  }
+
+  if (newMessageImages.length > 2) {
+    toast.error(`Maximum of 3 images allowed.`)
     return
   }
 

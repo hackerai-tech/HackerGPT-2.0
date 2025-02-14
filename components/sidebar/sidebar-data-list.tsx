@@ -5,7 +5,7 @@ import { ContentType, DataItemType, DataListType } from "@/types"
 import { FC, useCallback, useContext, useEffect, useRef, useState } from "react"
 import { ChatItem } from "./items/chat/chat-item"
 import { FileItem } from "./items/files/file-item"
-import { getMoreChatsByWorkspaceId } from "@/db/chats"
+import { getMoreChatsByUserId } from "@/db/chats"
 import { Loader2 } from "lucide-react"
 
 interface SidebarDataListProps {
@@ -34,8 +34,8 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     ) {
       setIsLoadingMore(true)
       const lastChat = data[data.length - 1] as Tables<"chats">
-      const moreChats = await getMoreChatsByWorkspaceId(
-        lastChat.workspace_id,
+      const moreChats = await getMoreChatsByUserId(
+        lastChat.user_id,
         lastChat.created_at
       )
       if (moreChats.length > 0) {

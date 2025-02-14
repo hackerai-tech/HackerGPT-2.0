@@ -16,7 +16,7 @@ if (process.env.E2E_TESTS === "true") {
       await page.getByTestId("login-button").click()
 
       // Check if redirected to chat
-      await expect(page).toHaveURL(/.*\/chat/)
+      await expect(page).toHaveURL(/.*\/c/)
     })
 
     test("should show email verification message after signup request", async ({

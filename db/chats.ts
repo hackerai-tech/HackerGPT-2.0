@@ -11,40 +11,6 @@ export const getChatById = async (chatId: string) => {
   return chat
 }
 
-export const getChatsByWorkspaceId = async (workspaceId: string) => {
-  const { data: chats, error } = await supabase
-    .from("chats")
-    .select("*")
-    .eq("workspace_id", workspaceId)
-    .order("created_at", { ascending: false })
-    .limit(25)
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return chats
-}
-
-export const getMoreChatsByWorkspaceId = async (
-  workspaceId: string,
-  lastChatCreatedAt: string
-) => {
-  const { data: chats, error } = await supabase
-    .from("chats")
-    .select("*")
-    .eq("workspace_id", workspaceId)
-    .lt("created_at", lastChatCreatedAt)
-    .order("created_at", { ascending: false })
-    .limit(25)
-
-  if (error) {
-    throw new Error(error.message)
-  }
-
-  return chats
-}
-
 export const createChat = async (chat: TablesInsert<"chats">) => {
   const { data: createdChat, error } = await supabase
     .from("chats")
@@ -107,4 +73,38 @@ export const deleteAllChats = async (userId: string) => {
   }
 
   return true
+}
+
+export const getChatsByUserId = async (userId: string) => {
+  const { data: chats, error } = await supabase
+    .from("chats")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(25)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return chats
+}
+
+export const getMoreChatsByUserId = async (
+  userId: string,
+  lastChatCreatedAt: string
+) => {
+  const { data: chats, error } = await supabase
+    .from("chats")
+    .select("*")
+    .eq("user_id", userId)
+    .lt("created_at", lastChatCreatedAt)
+    .order("created_at", { ascending: false })
+    .limit(25)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return chats
 }

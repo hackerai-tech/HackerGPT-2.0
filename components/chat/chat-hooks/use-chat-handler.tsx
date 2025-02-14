@@ -109,7 +109,7 @@ export const useChatHandler = () => {
       }))
     }
 
-    return router.push(`/${selectedWorkspace.id}/chat/${chat.id}`)
+    return router.push(`/${selectedWorkspace.id}/c/${chat.id}`)
   }
 
   const handleNewChat = async () => {
@@ -138,7 +138,7 @@ export const useChatHandler = () => {
     setFragment(null)
 
     setIsReadyToChat(true)
-    return router.push(`/${selectedWorkspace.id}/chat`)
+    return router.push(`/${selectedWorkspace.id}/c`)
   }
 
   const handleFocusChatInput = () => {
@@ -453,6 +453,15 @@ export const useChatHandler = () => {
             setSelectedChat,
             setChats,
             setChatFiles
+          )
+
+          // Update URL without triggering a page reload or new history entry
+          // This replaces the current URL with the chat ID after chat creation
+          // Allows starting from home screen and seamlessly transitioning to chat URL
+          window.history.replaceState(
+            {},
+            "",
+            `/${selectedWorkspace?.id}/c/${currentChat.id}`
           )
 
           generateChatTitle([

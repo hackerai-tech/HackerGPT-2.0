@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
         }
 
         return NextResponse.redirect(
-          new URL(`/${homeWorkspace.id}/chat`, request.url)
+          new URL(`/${homeWorkspace.id}/c`, request.url)
         )
       }
     }

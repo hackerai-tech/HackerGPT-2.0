@@ -44,7 +44,7 @@ export function MFAVerification({ onVerify }: MFAVerificationProps) {
       if (result?.success) {
         await fetchStartingData()
         const homeWorkspaceId = await getHomeWorkspaceByUserId(user.id)
-        router.push(`/${homeWorkspaceId}/chat`)
+        router.push(`/${homeWorkspaceId}/c`)
       } else {
         setError(result.error || "Verification failed")
         setVerifyCode("")

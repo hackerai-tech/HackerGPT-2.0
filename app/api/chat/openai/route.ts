@@ -112,7 +112,7 @@ export async function POST(request: Request) {
         maxTokens: 2048,
         abortSignal: request.signal,
         tools: getSelectedSchemas(["browser", "webSearch", "terminal"]),
-        experimental_transform: smoothStream()
+        experimental_transform: smoothStream({ chunking: "word" })
       })
 
       result.mergeIntoDataStream(dataStream)

@@ -119,9 +119,7 @@ export const MessageActions: FC<MessageActionsProps> = ({
   }, [])
 
   return (isLast && isGenerating) || isEditing ? null : (
-    <div
-      className={`text-muted-foreground flex items-center space-x-4 sm:mx-8`}
-    >
+    <div className={`text-muted-foreground flex items-center space-x-4`}>
       {/* Temporary chat doesn't have edit functionality */}
       {(isHovering || isLast) &&
         !isAssistant &&

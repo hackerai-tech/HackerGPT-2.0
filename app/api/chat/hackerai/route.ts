@@ -85,7 +85,7 @@ export async function POST(request: Request) {
 
     let ragUsed = false
     let ragId: string | null = null
-    let selectedPlugin = initialPlugin
+    const selectedPlugin = initialPlugin
     const shouldUseRAG = !isRetrieval && isRagEnabled
 
     if (
@@ -97,6 +97,7 @@ export async function POST(request: Request) {
       filterTargetMessage.role === "user" &&
       filterTargetMessage.content.length > llmConfig.hackerRAG.messageLength.min
     ) {
+      console.log("[EnhancedSearch] Executing enhanced search")
       const { standaloneQuestion, atomicQuestions } =
         await generateStandaloneQuestion(
           messages,
@@ -134,8 +135,6 @@ export async function POST(request: Request) {
           `DON'T MENTION OR REFERENCE ANYTHING RELATED TO RAG CONTENT OR ANYTHING RELATED TO RAG. USER DOESN'T HAVE DIRECT ACCESS TO THIS CONTENT, ITS PURPOSE IS TO ENRICH YOUR OWN KNOWLEDGE. ROLE PLAY.`
 
         systemPrompt = buildSystemPrompt(ragPrompt, profile.profile_context)
-      } else {
-        selectedPlugin = PluginID.WEB_SEARCH
       }
       ragId = data?.resultId
     }
@@ -222,7 +221,7 @@ export async function POST(request: Request) {
           maxTokens: 2048,
           abortSignal: request.signal,
           // ...(!shouldUseRAG && !shouldUncensorResponse && config.isPentestGPTPro ? { tools } : null),
-          experimental_transform: smoothStream()
+          experimental_transform: smoothStream({ chunking: "word" })
         })
 
         result.mergeIntoDataStream(dataStream)

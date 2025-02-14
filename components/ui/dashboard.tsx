@@ -52,8 +52,12 @@ interface DashboardProps {
 }
 
 export const Dashboard: FC<DashboardProps> = ({ children }) => {
-  const { isPremiumSubscription, contentType, setContentType } =
-    useContext(PentestGPTContext)
+  const {
+    isPremiumSubscription,
+    contentType,
+    setContentType,
+    newMessageImages
+  } = useContext(PentestGPTContext)
   const { isReadyToChat, isMobile, showSidebar, setShowSidebar } =
     useUIContext()
 
@@ -153,7 +157,8 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
         files,
         setShowConfirmationDialog,
         setPendingFiles,
-        handleSelectDeviceFile
+        handleSelectDeviceFile,
+        newMessageImages
       )
     }
 

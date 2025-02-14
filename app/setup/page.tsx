@@ -41,7 +41,7 @@ export default function SetupPage() {
       await fetchStartingData()
 
       const homeWorkspaceId = await getHomeWorkspaceByUserId(user.id)
-      router.push(`/${homeWorkspaceId}/chat`)
+      router.push(`/${homeWorkspaceId}/c`)
     })()
   }, [])
 

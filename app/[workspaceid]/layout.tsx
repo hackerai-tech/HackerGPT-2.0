@@ -2,7 +2,7 @@
 
 import { Dashboard } from "@/components/ui/dashboard"
 import { PentestGPTContext } from "@/context/context"
-import { getChatsByWorkspaceId } from "@/db/chats"
+import { getChatsByUserId } from "@/db/chats"
 import { getFileWorkspacesByWorkspaceId } from "@/db/files"
 import { getWorkspaceById } from "@/db/workspaces"
 import { supabase } from "@/lib/supabase/browser-client"
@@ -61,7 +61,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
         includeProfileContext: true
       })
 
-      await fetchWorkspaceData(workspaceId)
+      await fetchWorkspaceData(workspaceId, user.id)
 
       // Reset chat-specific states
       setUserInput("")
@@ -79,7 +79,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
     initializeWorkspace()
   }, [workspaceId])
 
-  const fetchWorkspaceData = async (workspaceId: string) => {
+  const fetchWorkspaceData = async (workspaceId: string, userId: string) => {
     setLoading(true)
 
     try {
@@ -92,7 +92,7 @@ export default function WorkspaceLayout({ children }: WorkspaceLayoutProps) {
       setSelectedWorkspace(workspace)
 
       const [chats, fileData] = await Promise.all([
-        getChatsByWorkspaceId(workspaceId),
+        getChatsByUserId(userId),
         getFileWorkspacesByWorkspaceId(workspaceId)
       ])
 
