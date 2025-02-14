@@ -17,7 +17,7 @@ export const MessageFragment: FC<MessageFragmentProps> = ({
 
   return (
     <div
-      className="ml-0 mt-4 w-full cursor-pointer rounded-xl border hover:bg-white sm:ml-10 md:w-max dark:hover:bg-white/5"
+      className="ml-0 mt-4 w-full cursor-pointer rounded-xl border hover:bg-white md:w-max dark:hover:bg-white/5"
       onClick={() => {
         openFragmentBar()
         setFragment(fragment, chatMessage)

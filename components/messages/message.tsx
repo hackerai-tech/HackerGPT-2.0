@@ -227,7 +227,7 @@ export const Message: FC<MessageProps> = ({
       >
         <div className="flex space-x-3">
           <div
-            className={`grow ${isMobile && "space-y-3"} min-w-0 ${message.role === "user" ? "flex justify-end" : ""}`}
+            className={`grow ${isMobile && "space-y-3"} min-w-0 ${message.role === "user" && "flex justify-end"}`}
           >
             {!firstTokenReceived &&
               isGenerating &&
@@ -246,9 +246,7 @@ export const Message: FC<MessageProps> = ({
               />
             ) : (
               <div>
-                <div
-                  className={`flex flex-wrap ${message.role === "user" ? "justify-end" : "justify-start"} gap-2`}
-                >
+                <div className={`flex-wrap gap-2`}>
                   {message.image_paths.map((path, index) => {
                     const item = chatImages.find(image => image.path === path)
                     const src = path.startsWith("data") ? path : item?.base64
