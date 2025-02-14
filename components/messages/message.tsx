@@ -1,9 +1,8 @@
 import { useChatHandler } from "@/components/chat/chat-hooks/use-chat-handler"
 import { PentestGPTContext } from "@/context/context"
-import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import { cn } from "@/lib/utils"
 import { Tables } from "@/supabase/types"
-import { ChatMessage, LLM, LLMID, MessageImage } from "@/types"
+import { ChatMessage, LLMID, MessageImage } from "@/types"
 import {
   IconCaretDownFilled,
   IconCaretRightFilled,
@@ -12,7 +11,6 @@ import {
 } from "@tabler/icons-react"
 import Image from "next/image"
 import { FC, RefObject, useContext, useEffect, useRef, useState } from "react"
-import { ModelIcon } from "../models/model-icon"
 import { Button } from "../ui/button"
 import { TextareaAutosize } from "../ui/textarea-autosize"
 import { MessageActions } from "./message-actions"
@@ -30,8 +28,6 @@ import { useUIContext } from "@/context/ui-context"
 const DynamicFilePreview = dynamic(() => import("../ui/file-preview"), {
   ssr: false
 })
-
-const ICON_SIZE = 28
 
 interface MessageProps {
   chatMessage: ChatMessage
@@ -65,8 +61,7 @@ export const Message: FC<MessageProps> = ({
     temporaryChatMessages,
     isTemporaryChat,
     chatImages,
-    files,
-    isPremiumSubscription
+    files
   } = useContext(PentestGPTContext)
 
   const {
@@ -219,12 +214,6 @@ export const Message: FC<MessageProps> = ({
     }
   }, [isEditing])
 
-  const MODEL_DATA = [...LLM_LIST].find(
-    llm => llm.modelId === message.model
-  ) as LLM
-
-  const modelDetails = LLM_LIST.find(model => model.modelId === message.model)
-
   return (
     <div
       className={cn("flex w-full justify-center")}
@@ -237,33 +226,9 @@ export const Message: FC<MessageProps> = ({
         ${isLast ? "mb-8" : ""}`}
       >
         <div className="flex space-x-3">
-          {message.role === "assistant" && !isMobile && (
-            <div className="shrink-0">
-              <ModelIcon
-                modelId={modelDetails?.modelId || "custom"}
-                size={ICON_SIZE}
-              />
-            </div>
-          )}
           <div
             className={`grow ${isMobile && "space-y-3"} min-w-0 ${message.role === "user" ? "flex justify-end" : ""}`}
           >
-            {isPremiumSubscription && (
-              <div className="flex items-center">
-                {message.role === "assistant" && isMobile && (
-                  <ModelIcon
-                    modelId={modelDetails?.modelId || "custom"}
-                    size={ICON_SIZE}
-                  />
-                )}
-                {isMobile && (
-                  <div className="ml-2 font-semibold">
-                    {message.role === "assistant" && MODEL_DATA?.shortModelName}
-                  </div>
-                )}
-              </div>
-            )}
-
             {!firstTokenReceived &&
               isGenerating &&
               isLast &&
@@ -329,7 +294,7 @@ export const Message: FC<MessageProps> = ({
         )}
 
         {fileItems.length > 0 && (
-          <div className="my-2 text-lg font-bold sm:ml-10">
+          <div className="my-2 text-lg font-bold">
             {!viewSources ? (
               <div
                 className="flex cursor-pointer items-center hover:opacity-50"
@@ -408,7 +373,7 @@ export const Message: FC<MessageProps> = ({
 
         {!quickFeedback && !sendReportQuery && !isEditing && (
           <div
-            className={`absolute bottom-1 ${message.role === "user" ? "right-10 sm:right-0" : "left-5 sm:left-10"}`}
+            className={`absolute bottom-1 ${message.role === "user" ? "right-5 sm:right-8" : "left-5 sm:left-8"}`}
           >
             <MessageActions
               onCopy={handleCopy}
