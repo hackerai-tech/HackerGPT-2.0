@@ -129,7 +129,7 @@ function determineShouldUncensorResponse(
     forbiddenCategories.includes(category)
   )
 
-  const maxModerationLevel = isLargeModel ? 100 : 0.9
+  const maxModerationLevel = isLargeModel ? 100 : 100
   return (
     moderationLevel >= 0.4 &&
     moderationLevel <= maxModerationLevel &&
