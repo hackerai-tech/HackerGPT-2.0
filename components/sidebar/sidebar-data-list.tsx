@@ -4,7 +4,6 @@ import { Tables } from "@/supabase/types"
 import { ContentType, DataItemType, DataListType } from "@/types"
 import { FC, useCallback, useContext, useEffect, useRef, useState } from "react"
 import { ChatItem } from "./items/chat/chat-item"
-import { FileItem } from "./items/files/file-item"
 import { getMoreChatsByUserId } from "@/db/chats"
 import { Loader2 } from "lucide-react"
 
@@ -79,8 +78,6 @@ export const SidebarDataList: FC<SidebarDataListProps> = ({
     switch (contentType) {
       case "chats":
         return <ChatItem key={item.id} chat={item as Tables<"chats">} />
-      case "files":
-        return <FileItem key={item.id} file={item as Tables<"files">} />
       case "tools":
         return <ChatItem key={item.id} chat={item as Tables<"chats">} />
       default:

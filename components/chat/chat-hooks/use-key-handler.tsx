@@ -13,29 +13,13 @@ export const useKeyboardHandler = ({
   sendMessage,
   handleSelectDeviceFile
 }: UseKeyboardHandlerProps) => {
-  const {
-    isAtPickerOpen,
-    setFocusFile,
-    isToolPickerOpen,
-    focusFile,
-    focusTool,
-    setFocusTool
-  } = useUIContext()
+  const { isToolPickerOpen, focusTool, setFocusTool } = useUIContext()
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     // Handle send message on Enter
     if (!isTyping && event.key === "Enter" && !event.shiftKey && !isMobile) {
       event.preventDefault()
       sendMessage()
-    }
-
-    // Handle file picker navigation
-    if (
-      isAtPickerOpen &&
-      ["Tab", "ArrowUp", "ArrowDown", "Enter", "Escape"].includes(event.key)
-    ) {
-      event.preventDefault()
-      if (!focusFile) setFocusFile(true)
     }
 
     // Handle tool picker navigation

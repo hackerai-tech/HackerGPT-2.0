@@ -20,9 +20,6 @@ export const UIState: FC<UIStateProps> = ({ children }) => {
 
   // CHAT INPUT COMMAND
   const [slashCommand, setSlashCommand] = useState("")
-  const [isAtPickerOpen, setIsAtPickerOpen] = useState(false)
-  const [atCommand, setAtCommand] = useState("")
-  const [focusFile, setFocusFile] = useState(false)
 
   // UI States
   const [isMobile, setIsMobile] = useState(false)
@@ -77,12 +74,6 @@ export const UIState: FC<UIStateProps> = ({ children }) => {
         // CHAT INPUT COMMAND
         slashCommand,
         setSlashCommand,
-        isAtPickerOpen,
-        setIsAtPickerOpen,
-        atCommand,
-        setAtCommand,
-        focusFile,
-        setFocusFile,
 
         // UI States
         isMobile,

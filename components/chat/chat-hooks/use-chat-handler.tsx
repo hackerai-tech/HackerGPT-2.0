@@ -62,8 +62,6 @@ export const useChatHandler = () => {
     setIsGenerating,
     setFirstTokenReceived,
     setToolInUse,
-    setIsAtPickerOpen,
-    isAtPickerOpen,
     isGenerating,
     setIsReadyToChat,
     setSelectedPlugin
@@ -80,12 +78,6 @@ export const useChatHandler = () => {
   }, [isGenerating])
 
   const chatInputRef = useRef<HTMLTextAreaElement>(null)
-
-  useEffect(() => {
-    if (!isAtPickerOpen) {
-      chatInputRef.current?.focus()
-    }
-  }, [isAtPickerOpen])
 
   // Initialize chat settings on component mount
   useEffect(() => {
@@ -129,7 +121,6 @@ export const useChatHandler = () => {
     setNewMessageFiles([])
     setNewMessageImages([])
     setShowFilesDisplay(false)
-    setIsAtPickerOpen(false)
     setUseRetrieval(false)
 
     setToolInUse("none")
@@ -237,7 +228,6 @@ export const useChatHandler = () => {
         setFirstTokenReceived(true)
       }
       setIsGenerating(true)
-      setIsAtPickerOpen(false)
       setNewMessageImages([])
 
       const newAbortController = new AbortController()

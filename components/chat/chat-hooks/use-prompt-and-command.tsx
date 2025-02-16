@@ -1,63 +1,25 @@
+import { useContext } from "react"
 import { PentestGPTContext } from "@/context/context"
 import { useUIContext } from "@/context/ui-context"
-import { Tables } from "@/supabase/types"
 import { PluginSummary } from "@/types/plugins"
-import { useContext } from "react"
 
 export const usePromptAndCommand = () => {
-  const {
-    setNewMessageFiles,
-    userInput,
-    setUserInput,
-    setShowFilesDisplay,
-    setUseRetrieval
-  } = useContext(PentestGPTContext)
-
-  const {
-    setIsAtPickerOpen,
-    setSlashCommand,
-    setAtCommand,
-    setIsToolPickerOpen,
-    setSelectedPlugin
-  } = useUIContext()
+  const { userInput, setUserInput } = useContext(PentestGPTContext)
+  const { setIsToolPickerOpen, setSlashCommand, setSelectedPlugin } =
+    useUIContext()
 
   const handleInputChange = (value: string) => {
     const slashMatch = value.match(/(?:^|\s)\/([^ ]*)$/)
-    const atMatch = value.match(/(?:^|\s)#([^ ]*)$/)
 
     if (slashMatch) {
       setSlashCommand(slashMatch[1] || "")
       setIsToolPickerOpen(true)
-    } else if (atMatch) {
-      setIsAtPickerOpen(true)
-      setAtCommand(atMatch[1])
     } else {
-      setIsAtPickerOpen(false)
       setIsToolPickerOpen(false)
       setSlashCommand("")
-      setAtCommand("")
     }
 
     setUserInput(value)
-  }
-
-  const handleSelectUserFile = async (file: Tables<"files">) => {
-    setShowFilesDisplay(true)
-    setIsAtPickerOpen(false)
-    setUseRetrieval(true)
-
-    setNewMessageFiles(prev => {
-      const fileExists = prev.some(prevFile => prevFile.id === file.id)
-      if (!fileExists) {
-        return [
-          ...prev,
-          { id: file.id, name: file.name, type: file.type, file: null }
-        ]
-      }
-      return prev
-    })
-
-    setUserInput(userInput.replace(/#[^ ]*$/, ""))
   }
 
   const handleSelectTool = (tool: PluginSummary) => {
@@ -68,7 +30,6 @@ export const usePromptAndCommand = () => {
 
   return {
     handleInputChange,
-    handleSelectUserFile,
     handleSelectTool
   }
 }

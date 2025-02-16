@@ -1,5 +1,5 @@
 import { ContentType } from "@/types"
-import { IconFile, IconMessage, IconPuzzle } from "@tabler/icons-react"
+import { IconMessage, IconPuzzle } from "@tabler/icons-react"
 import React, { FC, useContext } from "react"
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs"
 import { PentestGPTContext } from "@/context/context"
@@ -46,20 +46,15 @@ export const SidebarSwitcher: FC<SidebarSwitcherProps> = ({
       icon: <IconMessage size={22} />,
       value: "chats" as ContentType,
       label: "Chats",
-      alwaysShow: true
-    },
-    {
-      icon: <IconFile size={22} />,
-      value: "files" as ContentType,
-      label: "Files",
-      alwaysShow: false,
-      requiresPremium: true
+      alwaysShow: true,
+      requiresPremium: false
     },
     {
       icon: <IconPuzzle size={22} />,
       value: "tools" as ContentType,
       label: "Explore Plugins",
-      alwaysShow: true
+      alwaysShow: true,
+      requiresPremium: false
     }
   ]
 

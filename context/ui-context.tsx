@@ -13,12 +13,6 @@ interface UIContextType {
   // CHAT INPUT COMMAND
   slashCommand: string
   setSlashCommand: Dispatch<SetStateAction<string>>
-  isAtPickerOpen: boolean
-  setIsAtPickerOpen: Dispatch<SetStateAction<boolean>>
-  atCommand: string
-  setAtCommand: Dispatch<SetStateAction<string>>
-  focusFile: boolean
-  setFocusFile: Dispatch<SetStateAction<boolean>>
 
   // UI States
   isMobile: boolean
@@ -58,12 +52,6 @@ export const UIContext = createContext<UIContextType>({
   // CHAT INPUT COMMAND
   slashCommand: "",
   setSlashCommand: () => {},
-  isAtPickerOpen: false,
-  setIsAtPickerOpen: () => {},
-  atCommand: "",
-  setAtCommand: () => {},
-  focusFile: false,
-  setFocusFile: () => {},
 
   // UI States
   isMobile: false,

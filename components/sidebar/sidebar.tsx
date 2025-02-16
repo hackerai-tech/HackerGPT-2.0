@@ -11,7 +11,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: FC<SidebarProps> = ({ contentType, showSidebar }) => {
-  const { chats, files } = useContext(PentestGPTContext)
+  const { chats } = useContext(PentestGPTContext)
 
   const renderSidebarContent = (contentType: ContentType, data: any[]) => {
     return <SidebarContent contentType={contentType} data={data} />
@@ -33,9 +33,6 @@ export const Sidebar: FC<SidebarProps> = ({ contentType, showSidebar }) => {
           switch (contentType) {
             case "chats":
               return renderSidebarContent("chats", chats)
-
-            case "files":
-              return renderSidebarContent("files", files)
 
             case "tools":
               return renderSidebarContent("chats", chats)

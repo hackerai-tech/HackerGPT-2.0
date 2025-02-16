@@ -222,15 +222,7 @@ export const ChatInput: FC = () => {
                     "py-3",
                     "px-3"
                   )}
-                  placeholder={
-                    isMobile
-                      ? `Message` +
-                        (!isPremiumSubscription
-                          ? " PentestGPT"
-                          : `. Type "#" for files.`)
-                      : `Message PentestGPT` +
-                        (!isPremiumSubscription ? "" : `. Type "#" for files.`)
-                  }
+                  placeholder='Message PentestGPT. Type "/" for plugins.'
                   onValueChange={handleInputChange} // This function updates the userInput state
                   value={userInput} // This state should display the transcribed text
                   minRows={1}
