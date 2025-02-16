@@ -10,10 +10,6 @@ CREATE TABLE IF NOT EXISTS chats (
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
     
-    -- OPTIONAL RELATIONSHIPS
-    -- assistant_id UUID REFERENCES assistants(id) ON DELETE CASCADE,
-    folder_id UUID REFERENCES folders(id) ON DELETE SET NULL,
-
     -- METADATA
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ,
