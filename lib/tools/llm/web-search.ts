@@ -37,8 +37,8 @@ export async function executeWebSearchTool({
 }: {
   config: WebSearchConfig
 }) {
-  if (!process.env.OPENROUTER_API_KEY) {
-    throw new Error("OpenRouter API key is not set for web search")
+  if (!process.env.PERPLEXITY_API_KEY) {
+    throw new Error("Perplexity API key is not set for web search")
   }
 
   const { chatSettings, messages, profile, dataStream } = config

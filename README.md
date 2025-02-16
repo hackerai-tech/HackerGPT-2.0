@@ -229,8 +229,8 @@ In environment variables, add the following from the values you got above:
 
 You can also add API keys as environment variables.
 
+- `MISTRAL_API_KEY`
 - `OPENAI_API_KEY`
-- `OPENROUTER_API_KEY`
 
 For the full list of environment variables, refer to the '.env.local.example' file. If the environment variables are set for API keys, it will disable the input in the user settings.
 
