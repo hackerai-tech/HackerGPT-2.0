@@ -1,16 +1,5 @@
 DO $$
 BEGIN
-    -- Remove folder-related columns and objects
-    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'chats' AND column_name = 'folder_id') THEN
-        ALTER TABLE chats DROP COLUMN folder_id;
-    END IF;
-
-    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'files' AND column_name = 'folder_id') THEN
-        ALTER TABLE files DROP COLUMN folder_id;
-    END IF;
-
-    DROP TABLE IF EXISTS folders;
-
     -- Remove assistant_id, context_length, and embeddings_provider from chats table
     ALTER TABLE chats 
     DROP COLUMN IF EXISTS assistant_id,
@@ -33,9 +22,3 @@ BEGIN
 
     RAISE NOTICE 'Migration complete. Please review and manually remove any unused functions, triggers, or policies related to folders if necessary.';
 END $$;
-
--- Drop indexes, policies, and triggers related to folders
-DROP INDEX IF EXISTS folders_user_id_idx;
-DROP INDEX IF EXISTS folders_workspace_id_idx;
-
-DROP TRIGGER IF EXISTS update_folders_updated_at ON folders;

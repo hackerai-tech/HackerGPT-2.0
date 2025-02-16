@@ -879,6 +879,41 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_shared_chat: {
+        Args: {
+          share_id_param: string
+        }
+        Returns: {
+          id: string
+          name: string
+          shared_at: string
+        }[]
+      }
+      get_shared_chat_messages: {
+        Args: {
+          chat_id_param: string
+        }
+        Returns: {
+          id: string
+          chat_id: string
+          user_id: string
+          created_at: string
+          updated_at: string
+          content: string
+          image_paths: string[]
+          model: string
+          role: string
+          sequence_number: number
+          plugin: string
+          rag_used: boolean
+          rag_id: string
+          citations: string[]
+          fragment: Json
+          thinking_enabled: boolean
+          thinking_content: string
+          thinking_elapsed_secs: number
+        }[]
+      }
       get_team_members: {
         Args: {
           p_team_id: string
@@ -901,6 +936,12 @@ export type Database = {
         Args: {
           p_team_id: string
           p_invitee_email: string
+        }
+        Returns: boolean
+      }
+      is_message_shared: {
+        Args: {
+          message_id_param: string
         }
         Returns: boolean
       }
