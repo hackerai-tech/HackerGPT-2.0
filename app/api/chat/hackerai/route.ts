@@ -22,6 +22,8 @@ import { PluginID } from "@/types/plugins"
 import { executeWebSearchTool } from "@/lib/tools/llm/web-search"
 import { createStreamResponse } from "@/lib/ai-helper"
 import { LargeModel } from "@/lib/models/llm/hackerai-llm-list"
+import { executeReasonLLMTool } from "@/lib/tools/llm/reason-llm"
+import { executeReasoningWebSearchTool } from "@/lib/tools/llm/reasoning-web-search"
 
 export const runtime: ServerRuntime = "edge"
 export const preferredRegion = [
@@ -51,12 +53,16 @@ export async function POST(request: Request) {
     isRetrieval,
     isContinuation,
     isRagEnabled,
-    selectedPlugin: initialPlugin
+    selectedPlugin
   } = await request.json()
 
   try {
     const profile = await getAIProfile()
-    const config = await getProviderConfig(chatSettings, profile)
+    const config = await getProviderConfig(
+      chatSettings,
+      profile,
+      selectedPlugin
+    )
 
     // Early validation
     if (!config.selectedModel) {
@@ -85,7 +91,6 @@ export async function POST(request: Request) {
 
     let ragUsed = false
     let ragId: string | null = null
-    const selectedPlugin = initialPlugin
     const shouldUseRAG = !isRetrieval && isRagEnabled
 
     if (
@@ -161,7 +166,9 @@ export async function POST(request: Request) {
     if (
       !includeImages &&
       !isContinuation &&
-      selectedPlugin !== PluginID.WEB_SEARCH
+      selectedPlugin !== PluginID.WEB_SEARCH &&
+      selectedPlugin !== PluginID.REASONING &&
+      selectedPlugin !== PluginID.REASONING_WEB_SEARCH
     ) {
       const { shouldUncensorResponse: moderationResult } =
         await getModerationResult(
@@ -176,17 +183,27 @@ export async function POST(request: Request) {
     handleMessages(shouldUncensorResponse)
 
     // Handle web search plugin
-    if (selectedPlugin === PluginID.WEB_SEARCH) {
-      return createStreamResponse(async dataStream => {
-        await executeWebSearchTool({
-          config: {
-            chatSettings,
-            messages,
-            profile,
-            dataStream
-          }
+    switch (selectedPlugin) {
+      case PluginID.WEB_SEARCH:
+        return createStreamResponse(async dataStream => {
+          await executeWebSearchTool({
+            config: { chatSettings, messages, profile, dataStream }
+          })
         })
-      })
+
+      case PluginID.REASONING:
+        return createStreamResponse(async dataStream => {
+          await executeReasonLLMTool({
+            config: { messages, profile, dataStream }
+          })
+        })
+
+      case PluginID.REASONING_WEB_SEARCH:
+        return createStreamResponse(async dataStream => {
+          await executeReasoningWebSearchTool({
+            config: { messages, profile, dataStream }
+          })
+        })
     }
 
     const provider = createProvider(selectedModel, config)
@@ -239,7 +256,11 @@ export async function POST(request: Request) {
   }
 }
 
-async function getProviderConfig(chatSettings: any, profile: any) {
+async function getProviderConfig(
+  chatSettings: any,
+  profile: any,
+  selectedPlugin: PluginID
+) {
   const isLargeModel = chatSettings.model === LargeModel.modelId
 
   const defaultModel = llmConfig.models.pentestgpt_small
@@ -257,9 +278,22 @@ async function getProviderConfig(chatSettings: any, profile: any) {
 
   const similarityTopK = 3
   const selectedModel = isLargeModel ? proModel : defaultModel
+  const provider =
+    selectedPlugin === PluginID.REASONING ||
+    selectedPlugin === PluginID.REASONING_WEB_SEARCH
+      ? "reasoning"
+      : isLargeModel
+        ? "pentestgpt-pro"
+        : "pentestgpt"
+  console.log(provider)
   const rateLimitCheckResult = await checkRatelimitOnApi(
     profile.user_id,
-    isLargeModel ? "pentestgpt-pro" : "pentestgpt"
+    selectedPlugin === PluginID.REASONING ||
+      selectedPlugin === PluginID.REASONING_WEB_SEARCH
+      ? "reasoning"
+      : isLargeModel
+        ? "pentestgpt-pro"
+        : "pentestgpt"
   )
 
   return {
