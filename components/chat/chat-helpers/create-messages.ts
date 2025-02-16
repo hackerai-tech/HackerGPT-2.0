@@ -1,4 +1,4 @@
-import { ChatMessage, MessageImage, PluginID, LLM } from "@/types"
+import { ChatMessage, MessageImage, PluginID, LLM, ChatFile } from "@/types"
 import { Tables, TablesInsert } from "@/supabase/types"
 import { Fragment } from "@/lib/tools/e2b/fragments/types"
 import { v4 as uuidv4 } from "uuid"
@@ -12,6 +12,7 @@ import {
 import { fetchImageData } from "./image-handlers"
 import { uploadMessageImage } from "@/db/storage/message-images"
 import { createMessageFileItems } from "@/db/message-file-items"
+import { toast } from "sonner"
 
 export const handleCreateMessages = async (
   chatMessages: ChatMessage[],
@@ -37,7 +38,7 @@ export const handleCreateMessages = async (
   setFragment?: (fragment: Fragment | null, chatMessage?: ChatMessage) => void,
   thinkingText?: string,
   thinkingElapsedSecs?: number | null,
-  newChatFiles?: Tables<"files">[]
+  newChatFiles?: ChatFile[]
 ) => {
   const isEdit = editSequenceNumber !== undefined
 
@@ -137,11 +138,17 @@ export const handleCreateMessages = async (
 
   // If the user is editing a message, delete all messages after the edited message
   if (isEdit) {
-    await deleteMessagesIncludingAndAfter(
+    const { error } = await deleteMessagesIncludingAndAfter(
       profile.user_id,
       currentChat.id,
       editSequenceNumber
     )
+
+    if (error) {
+      toast.error("Error deleting messages:", {
+        description: error
+      })
+    }
   }
 
   if (isRegeneration) {
@@ -189,7 +196,7 @@ export const handleCreateMessages = async (
   } else {
     const createdMessages = await createMessages(
       [finalUserMessage, finalAssistantMessage],
-      newChatFiles
+      newChatFiles || []
     )
 
     // Upload each image (stored in newMessageImages) for the user message to message_images bucket
@@ -256,7 +263,7 @@ export const handleCreateMessages = async (
       ...(isEdit
         ? chatMessages.filter(
             chatMessage =>
-              chatMessage.message.sequence_number < editSequenceNumber
+              chatMessage.message.sequence_number <= editSequenceNumber
           )
         : chatMessages),
       {

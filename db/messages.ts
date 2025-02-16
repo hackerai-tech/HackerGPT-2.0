@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase/browser-client"
 import { TablesInsert, TablesUpdate } from "@/supabase/types"
+import { ChatFile } from "@/types"
 
 export const getMessageById = async (messageId: string) => {
   const { data: message } = await supabase
@@ -56,7 +57,7 @@ export const createMessage = async (message: TablesInsert<"messages">) => {
 
 export const createMessages = async (
   messages: TablesInsert<"messages">[],
-  newChatFiles: TablesInsert<"files">[]
+  newChatFiles: ChatFile[]
 ) => {
   const { data: createdMessages, error } = await supabase
     .from("messages")
@@ -76,6 +77,7 @@ export const createMessages = async (
       .from("files")
       .update({ message_id: createdMessages[0].id })
       .in("id", fileIds)
+      .is("message_id", null)
       .select("*")
 
     if (filesError) {
@@ -127,9 +129,13 @@ export async function deleteMessagesIncludingAndAfter(
 
   if (error) {
     return {
+      success: false,
       error: "Failed to delete messages."
     }
   }
 
-  return true
+  return {
+    success: true,
+    error: null
+  }
 }
