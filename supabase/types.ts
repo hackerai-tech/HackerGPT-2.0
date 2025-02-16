@@ -957,14 +957,6 @@ export interface Database {
         }
         Returns: undefined
       }
-      delete_message_including_and_after: {
-        Args: {
-          p_user_id: string
-          p_chat_id: string
-          p_sequence_number: number
-        }
-        Returns: undefined
-      }
       delete_messages_including_and_after: {
         Args: {
           p_user_id: string
