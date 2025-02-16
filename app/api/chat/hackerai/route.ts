@@ -278,14 +278,6 @@ async function getProviderConfig(
 
   const similarityTopK = 3
   const selectedModel = isLargeModel ? proModel : defaultModel
-  const provider =
-    selectedPlugin === PluginID.REASONING ||
-    selectedPlugin === PluginID.REASONING_WEB_SEARCH
-      ? "reasoning"
-      : isLargeModel
-        ? "pentestgpt-pro"
-        : "pentestgpt"
-  console.log(provider)
   const rateLimitCheckResult = await checkRatelimitOnApi(
     profile.user_id,
     selectedPlugin === PluginID.REASONING ||
