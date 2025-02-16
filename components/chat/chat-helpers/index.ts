@@ -51,12 +51,6 @@ export const handleHostedChat = async (
     apiEndpoint = "/api/chat/openai"
     setToolInUse(PluginID.TERMINAL)
     selectedPlugin = PluginID.TERMINAL
-  } else if (selectedPlugin === PluginID.REASONING) {
-    apiEndpoint = "/api/chat/openai"
-    setToolInUse(PluginID.REASONING)
-  } else if (selectedPlugin === PluginID.REASONING_WEB_SEARCH) {
-    apiEndpoint = "/api/chat/openai"
-    setToolInUse(PluginID.REASONING_WEB_SEARCH)
   } else if (selectedPlugin === PluginID.ARTIFACTS) {
     apiEndpoint = "/api/chat/tools/fragments"
     setToolInUse(PluginID.ARTIFACTS)

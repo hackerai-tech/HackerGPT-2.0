@@ -1,7 +1,5 @@
 -- Remove columns from profiles table
 ALTER TABLE profiles
-DROP COLUMN IF EXISTS openrouter_api_key,
-DROP COLUMN IF EXISTS azure_openai_embeddings_id,
 DROP COLUMN IF EXISTS bio;
 
 -- Remove columns from workspaces table
