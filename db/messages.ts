@@ -54,7 +54,10 @@ export const createMessage = async (message: TablesInsert<"messages">) => {
   return createdMessage
 }
 
-export const createMessages = async (messages: TablesInsert<"messages">[]) => {
+export const createMessages = async (
+  messages: TablesInsert<"messages">[],
+  newChatFiles: TablesInsert<"files">[]
+) => {
   const { data: createdMessages, error } = await supabase
     .from("messages")
     .insert(messages)
@@ -62,6 +65,22 @@ export const createMessages = async (messages: TablesInsert<"messages">[]) => {
 
   if (error) {
     throw new Error(error.message)
+  }
+
+  const fileIds = newChatFiles
+    .map(file => file.id)
+    .filter(id => id !== undefined)
+
+  if (fileIds.length > 0) {
+    const { error: filesError } = await supabase
+      .from("files")
+      .update({ message_id: createdMessages[0].id })
+      .in("id", fileIds)
+      .select("*")
+
+    if (filesError) {
+      throw new Error(filesError.message)
+    }
   }
 
   return createdMessages

@@ -84,6 +84,8 @@ export const createFileBasedOnExtension = async (
 ) => {
   const fileExtension = file.name.split(".").pop()
 
+  console.log("fileExtension", fileExtension)
+
   if (fileExtension === "docx") {
     const arrayBuffer = await file.arrayBuffer()
     const result = await mammoth.extractRawText({

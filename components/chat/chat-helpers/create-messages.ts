@@ -36,7 +36,8 @@ export const handleCreateMessages = async (
   fragment?: Fragment | null,
   setFragment?: (fragment: Fragment | null, chatMessage?: ChatMessage) => void,
   thinkingText?: string,
-  thinkingElapsedSecs?: number | null
+  thinkingElapsedSecs?: number | null,
+  newChatFiles?: Tables<"files">[]
 ) => {
   const isEdit = editSequenceNumber !== undefined
 
@@ -147,7 +148,7 @@ export const handleCreateMessages = async (
     const lastMessageId = chatMessages[chatMessages.length - 1].message.id
     await deleteMessage(lastMessageId)
 
-    const createdMessages = await createMessages([finalAssistantMessage])
+    const createdMessages = await createMessages([finalAssistantMessage], [])
 
     const chatImagesWithUrls = await Promise.all(
       assistantGeneratedImages.map(async url => {
@@ -186,10 +187,10 @@ export const handleCreateMessages = async (
 
     setMessages(finalChatMessages)
   } else {
-    const createdMessages = await createMessages([
-      finalUserMessage,
-      finalAssistantMessage
-    ])
+    const createdMessages = await createMessages(
+      [finalUserMessage, finalAssistantMessage],
+      newChatFiles
+    )
 
     // Upload each image (stored in newMessageImages) for the user message to message_images bucket
     const uploadPromises = newMessageImages

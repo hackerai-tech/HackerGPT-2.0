@@ -526,7 +526,8 @@ export const useChatHandler = () => {
           fragment,
           setFragment,
           thinkingText,
-          thinkingElapsedSecs
+          thinkingElapsedSecs,
+          newMessageFiles
         )
       }
 

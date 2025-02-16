@@ -178,6 +178,11 @@ export const useSelectFileHandler = () => {
         type: simplifiedType
       }
 
+      console.log("creating file", {
+        file,
+        fileData,
+        selectedWorkspaceId: selectedWorkspace.id
+      })
       const createdFile = await createFileBasedOnExtension(
         file,
         fileData,
