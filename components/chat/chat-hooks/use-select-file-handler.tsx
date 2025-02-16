@@ -1,5 +1,5 @@
 import { PentestGPTContext } from "@/context/context"
-import { createDocXFile, createFile } from "@/db/files"
+import { createFileBasedOnExtension } from "@/db/files"
 import { LLM_LIST } from "@/lib/models/llm/llm-list"
 import mammoth from "mammoth"
 import { useContext, useEffect, useState } from "react"
@@ -178,15 +178,11 @@ export const useSelectFileHandler = () => {
         type: simplifiedType
       }
 
-      const createdFile =
-        type === "docx"
-          ? await createDocXFile(
-              content as string,
-              file,
-              fileData,
-              selectedWorkspace.id
-            )
-          : await createFile(file, fileData, selectedWorkspace.id)
+      const createdFile = await createFileBasedOnExtension(
+        file,
+        fileData,
+        selectedWorkspace.id
+      )
 
       if (!createdFile) {
         toast.error(

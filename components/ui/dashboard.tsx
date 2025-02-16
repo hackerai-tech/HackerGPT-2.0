@@ -126,7 +126,6 @@ export const Dashboard: FC<DashboardProps> = ({ children }) => {
           />
         )
       case "chats":
-      case "files":
       default:
         return children
     }

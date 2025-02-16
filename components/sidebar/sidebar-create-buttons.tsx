@@ -23,7 +23,6 @@ export const SidebarCreateButtons: FC<SidebarCreateButtonsProps> = ({
   const getCreateFunction = () => {
     switch (contentType) {
       case "chats":
-      case "files":
         if (isTemporaryChat) {
           return () => {
             setTemporaryChatMessages([])

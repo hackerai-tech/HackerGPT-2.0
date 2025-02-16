@@ -281,18 +281,18 @@ export const createFileWorkspace = async (item: {
   return createdFileWorkspace
 }
 
-export const createFileWorkspaces = async (
-  items: { user_id: string; file_id: string; workspace_id: string }[]
-) => {
-  const { data: createdFileWorkspaces, error } = await supabase
-    .from("file_workspaces")
-    .insert(items)
-    .select("*")
+// export const createFileWorkspaces = async (
+//   items: { user_id: string; file_id: string; workspace_id: string }[]
+// ) => {
+//   const { data: createdFileWorkspaces, error } = await supabase
+//     .from("file_workspaces")
+//     .insert(items)
+//     .select("*")
 
-  if (error) throw new Error(error.message)
+//   if (error) throw new Error(error.message)
 
-  return createdFileWorkspaces
-}
+//   return createdFileWorkspaces
+// }
 
 export const updateFile = async (
   fileId: string,

@@ -75,7 +75,6 @@ export const SidebarUpdateItem: FC<SidebarUpdateItemProps> = ({
     ((id: string) => Promise<void>) | null
   > = {
     chats: null,
-    files: null,
     tools: null
   }
 

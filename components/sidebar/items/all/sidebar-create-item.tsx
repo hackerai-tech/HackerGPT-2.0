@@ -8,10 +8,8 @@ import {
 } from "@/components/ui/sheet"
 import { PentestGPTContext } from "@/context/context"
 import { createChat } from "@/db/chats"
-import { createFileBasedOnExtension } from "@/db/files"
-import { TablesInsert } from "@/supabase/types"
 import { ContentType } from "@/types"
-import { FC, useContext, useRef, useState, JSX } from "react"
+import { FC, JSX, useContext, useRef, useState } from "react"
 import { toast } from "sonner"
 
 interface SidebarCreateItemProps {
@@ -31,8 +29,7 @@ export const SidebarCreateItem: FC<SidebarCreateItemProps> = ({
   createState,
   isTyping
 }) => {
-  const { selectedWorkspace, setChats, setFiles } =
-    useContext(PentestGPTContext)
+  const { selectedWorkspace, setChats } = useContext(PentestGPTContext)
 
   const buttonRef = useRef<HTMLButtonElement>(null)
 
@@ -40,28 +37,11 @@ export const SidebarCreateItem: FC<SidebarCreateItemProps> = ({
 
   const createFunctions = {
     chats: createChat,
-    files: async (
-      createState: { file: File } & TablesInsert<"files">,
-      workspaceId: string
-    ) => {
-      if (!selectedWorkspace) return
-
-      const { file, ...rest } = createState
-
-      const createdFile = await createFileBasedOnExtension(
-        file,
-        rest,
-        workspaceId
-      )
-
-      return createdFile
-    },
     tools: createChat
   }
 
   const stateUpdateFunctions = {
     chats: setChats,
-    files: setFiles,
     tools: setChats
   }
 
@@ -77,7 +57,7 @@ export const SidebarCreateItem: FC<SidebarCreateItemProps> = ({
 
       setCreating(true)
 
-      const newItem = await createFunction(createState, selectedWorkspace.id)
+      const newItem = await createFunction(createState)
 
       setStateFunction((prevItems: any) => [...prevItems, newItem])
 
