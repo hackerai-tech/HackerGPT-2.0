@@ -422,6 +422,7 @@ export interface Database {
           description: string
           file_path: string
           id: string
+          message_id: string | null
           name: string
           sharing: string
           size: number
@@ -435,6 +436,7 @@ export interface Database {
           description: string
           file_path: string
           id?: string
+          message_id?: string | null
           name: string
           sharing?: string
           size: number
@@ -448,6 +450,7 @@ export interface Database {
           description?: string
           file_path?: string
           id?: string
+          message_id?: string | null
           name?: string
           sharing?: string
           size?: number
@@ -457,6 +460,13 @@ export interface Database {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "files_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "files_user_id_fkey"
             columns: ["user_id"]
