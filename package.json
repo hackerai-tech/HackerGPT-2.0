@@ -117,7 +117,7 @@
     "@types/node": "^22.13.1",
     "@types/pdf-parse": "^1.1.4",
     "@types/react": "^19.0.8",
-    "@types/react-dom": "^19.0.3",
+    "@types/react-dom": "^19.0.4",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/parser": "^8.24.0",
