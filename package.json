@@ -91,7 +91,7 @@
     "openai": "^4.83.0",
     "pdf-parse": "^1.1.1",
     "pentestgpt": "file:",
-    "postcss": "^8.5.1",
+    "postcss": "^8.5.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
